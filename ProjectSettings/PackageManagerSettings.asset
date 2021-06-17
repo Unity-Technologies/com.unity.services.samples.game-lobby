@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 13964, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EnablePreReleasePackages: 0
-  m_EnablePackageDependencies: 0
+  m_EnablePreReleasePackages: 1
+  m_EnablePackageDependencies: 1
   m_AdvancedSettingsExpanded: 1
   m_ScopedRegistriesSettingsExpanded: 1
   m_SeeAllPackageVersions: 0
-  oneTimeWarningShown: 0
+  oneTimeWarningShown: 1
   m_Registries:
   - m_Id: main
     m_Name: 
@@ -29,7 +29,14 @@ MonoBehaviour:
     m_Name: Internal Candidates Registry
     m_Url: https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates
     m_Scopes:
-    - com.unity.services
+    - com.unity.services.relay
+    - com.unity.services.core
+    - com.unity.toolchain.win-x86_64-linux-x86_64
+    - com.unity.sysroot
+    - com.unity.services.rooms
+    - com.unity.services.utility
+    - com.unity.sysroot.linux-x86_64
+    - com.unity.services.authentication
     m_IsDefault: 0
     m_Capabilities: 0
   m_UserSelectedRegistryName: Internal Candidates Registry
@@ -38,5 +45,5 @@ MonoBehaviour:
     m_Modified: 0
     m_ErrorMessage: 
     m_UserModificationsInstanceId: -812
-    m_OriginalInstanceId: -814
+    m_OriginalInstanceId: -816
   m_LoadAssets: 0
