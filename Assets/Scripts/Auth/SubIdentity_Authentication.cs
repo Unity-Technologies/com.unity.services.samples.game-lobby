@@ -16,8 +16,6 @@ namespace LobbyRooms.Auth
         /// </summary>
         public SubIdentity_Authentication(Action onSigninComplete = null)
         {
-            AuthenticationService.Instance.SignedIn += OnSignInChange;
-            AuthenticationService.Instance.SignedOut += OnSignInChange;
             DoSignIn(onSigninComplete);
         }
         ~SubIdentity_Authentication()
@@ -36,7 +34,12 @@ namespace LobbyRooms.Auth
 
         private async void DoSignIn(Action onSigninComplete)
         {
+            // TODO - this should probably be moved into general startup logic somewhere
             await UnityServices.Initialize();
+
+            AuthenticationService.Instance.SignedIn += OnSignInChange;
+            AuthenticationService.Instance.SignedOut += OnSignInChange;
+
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 //            Authentication.SignOut(); // TODO: I think we want to sign out at *some* point? But then the UAS anonymous token changes, so they can't access any outstanding rooms they've created.
             onSigninComplete?.Invoke();
