@@ -1,12 +1,12 @@
-# Lobby Rooms
 
-  
-**WIP -  6/17/2021 - This project is being shared for internal review, currently there are known issues are around how many requests we post, which is being worked on. We believe this can still serve as a good example of integrating Rooms+Relay together.**
+**Disclaimer - WIP 6/17/2021** - *This project is being shared for internal review, currently there are known issues are around how many requests we post, which is being worked on. We believe this can still serve as a good example of integrating Rooms+Relay together.
 
-**Currently running in the cloud-staging environment, more on how to switch to that below**
+*Currently running in the cloud-staging environment, more on how to switch to that below
+
+*If you use this for hackweek, please give us feedback @jacob.lorentzen or @nathaniel.buck
 
 
-**If you use this for hackweek, please give us feedback @jacob.lorentzen or @nathaniel.buck**
+# Lobby Rooms  
 
 A Unity Project Sample showing how to integrate Rooms and Relay into a typical Lobby experience use case.
 
@@ -26,15 +26,16 @@ Features Covered:
 # Staging Guide
 **For those who open the project with 177 Errors regarding packages.**
 
-1. Find your Unity Hub executable and run it with --cloudenvironment staging on the end.
-(I made a shortcut that does it for me, yes it needs the additional "--" at the end, I dont know why)
-From here all the UI is hooked to staging, if you do not have a unity account set up in the staging environment, create a new one with your regular @unity3d.com email.
+1. Find your Unity Hub executable and run it with --cloudenvironment staging on the end.  From here all the UI is hooked to staging, if you do not have a unity account set up in the staging environment, create a new one with your regular @unity3d.com email.
 
-![Set Staging 1](~Documentation/Images/unityStaging1.PNG?raw=false "Staging Shortcut" )
+
+![Set Staging 1](~Documentation/Images/unityStaging1.png?raw=false "Staging Shortcut" )
+
+(I made a shortcut that does it for me, yes it needs the additional "--" at the end, I dont know why)
 
 2. Click the options button on the right side of the cloned lobby-rooms project, select "Advanced Project Settings"
 
-![Set Staging 2](~Documentation/Images/unityStaging2.PNG?raw=false "Advanced Project Settings" )
+![Set Staging 2](~Documentation/Images/unityStaging2.png?raw=false "Advanced Project Settings" )
 
 3. Add "--cloudenvironment staging" to the box, exit and run again.
 
