@@ -1,5 +1,9 @@
 # Lobby Rooms
-  **com.unity.services.samples.lobby-rooms**
+
+  
+**WIP -  6/17/2021 -  This project is being shared for internal review, currently there are known issues are around how many requests we post, which is being worked on. We believe this can still serve as a good example of integrating Rooms+Relay together for**
+
+**If you use this for hackweek, please give us feedback @jacob.lorentzen or @nathaniel.buck**
 
 A Unity Project Sample showing how to integrate Rooms and Relay into a typical Lobby experience use case.
 
@@ -38,20 +42,33 @@ Features Covered:
 - Navigate to https://dashboard.unity3d.com/landing
 
 - Select Relay from the drop-down list
-	![Relay](~Documentation/Images/dashboard1.PNG?raw=true "Relay location.")
+
+![Relay](~Documentation/Images/dashboard1.PNG?raw=true "Relay location.")
+
+
 - Select your project
-	![Project Select](~Documentation/Images/dashboard2.PNG?raw=true "Project Select")
+
+![Project Select](~Documentation/Images/dashboard2.PNG?raw=true "Project Select")
+
+
 - In the bottom left, select "Get Started"
-	![Get Started Location is Bottom Right](~Documentation/Images/dashboard3.PNG?raw=true "Bottom right for Getting Started")
+
+![Get Started Location is Bottom Right](~Documentation/Images/dashboard3.PNG?raw=true "Bottom right for Getting Started")
+
+
 - Follow the steps until you hit "Relay On"
-	(For this project, you can skip downloading the Transport)
-	![Relay: On!](~Documentation/Images/dashboard4.PNG?raw=true "Hit Relay On")
+(For this project, you can skip downloading the Transport)
+
+![Relay: On!](~Documentation/Images/dashboard4.PNG?raw=true "Hit Relay On")
+
+
 
 # Solo Testing
 
-
 **1. Press Start to enter the Lobby Menu.**
+
 ![Lobby Menu](~Documentation/Images/mainMenu1.PNG?raw=true "Lobby Menu")
+
 
 **2. The Join menu Queries the rooms service for available Lobbies, there wont be any right now.**
 
