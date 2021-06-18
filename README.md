@@ -1,9 +1,9 @@
 
-**Disclaimer - WIP 6/17/2021** - *This project is being shared for internal review, currently there are known issues are around how many requests we post, which is being worked on. We believe this can still serve as a good example of integrating Rooms+Relay together.
+**Disclaimer - WIP 6/17/2021** - *This project is being shared for internal review, currently there are known issues are around how many requests we post, which is being worked on. We believe this can still serve as a good example of integrating Rooms+Relay together.*
 
-*Currently running in the cloud-staging environment, more on how to switch to that below
+*Currently running in the cloud-staging environment, more on how to switch to that below*
 
-*If you use this for hackweek, please give us feedback @jacob.lorentzen or @nathaniel.buck
+*If you use this for hackweek, please give us feedback @jacob.lorentzen or @nathaniel.buck*
 
 
 # Lobby Rooms  
