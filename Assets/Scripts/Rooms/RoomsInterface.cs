@@ -35,7 +35,7 @@ namespace LobbyRooms.Rooms
         /// </summary>
         public static void SetPath(string path = "https://rooms.cloud.unity3d.com/v1")
         {
-            Configuration.BasePath = path;
+            RoomsService.Configuration.BasePath = path;
         }
 
         private const int k_maxRoomsToShow = 64;
@@ -100,11 +100,13 @@ namespace LobbyRooms.Rooms
             new InProgressRequest<Response<Room>>(task, onComplete);
         }
 
-        public static void UpdatePlayerAsync(string roomId, string playerId, Dictionary<string, DataObject> data, Action<Response<Room>> onComplete)
+        public static void UpdatePlayerAsync(string roomId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Response<Room>> onComplete)
         {
-            UpdatePlayerRequest updateRequest = new UpdatePlayerRequest(roomId, playerId, new PlayerUpdateRequest(
-                data: data
-            ));
+            UpdatePlayerRequest updateRequest = new UpdatePlayerRequest(
+                roomId,
+                playerId,
+                new PlayerUpdateRequest(data: data));
+
             var task = RoomsService.RoomsApiClient.UpdatePlayerAsync(updateRequest);
             new InProgressRequest<Response<Room>>(task, onComplete);
         }

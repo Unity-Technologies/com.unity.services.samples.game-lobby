@@ -54,14 +54,14 @@ namespace LobbyRooms
                 RoomsQuery.Instance.RetrieveRoomAsync(m_lobbyData.RoomID, OnRetrieve);
             m_shouldPushData = false;
 
-
             void DoRoomDataPush(Unity.Services.Rooms.Models.Room room)
             {
                 RoomsQuery.Instance.UpdateRoomDataAsync(room, Rooms.ToLobbyData.RetrieveRoomData(m_lobbyData), () => { DoPlayerDataPush(room); }); // TODO: This needs not happen as often as player updates, right?
             }
+
             void DoPlayerDataPush(Unity.Services.Rooms.Models.Room room)
             {
-                RoomsQuery.Instance.UpdatePlayerDataAsync(room, Rooms.ToLobbyData.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
+                RoomsQuery.Instance.UpdatePlayerDataAsync(room, m_localUser.ID, Rooms.ToLobbyData.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
             }
 
             void OnRetrieve(Unity.Services.Rooms.Models.Room room)

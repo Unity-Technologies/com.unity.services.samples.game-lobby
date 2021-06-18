@@ -213,7 +213,7 @@ namespace LobbyRooms
             Dictionary<string, string> displayNameData = new Dictionary<string, string>();
             displayNameData.Add("DisplayName", m_localUser.DisplayName);
             RoomsQuery.Instance.RetrieveRoomAsync(m_lobbyData.RoomID, (r) => {
-                RoomsQuery.Instance.UpdatePlayerDataAsync(r, displayNameData, null);
+                RoomsQuery.Instance.UpdatePlayerDataAsync(r, m_localUser.ID, displayNameData, null);
             });
         }
 

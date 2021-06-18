@@ -1,6 +1,7 @@
 ﻿using LobbyRooms.Rooms;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Services.Authentication;
 using Unity.Services.Rooms;
 using Unity.Services.Rooms.Models;
@@ -36,7 +37,7 @@ namespace LobbyRooms
         /// </summary>
         public void CreateRoomAsync(string roomName, int maxPlayers, Action<Room> onSuccess, Action onFailure)
         {
-            string uasId = Authentication.PlayerId;
+            string uasId = AuthenticationService.Instance.PlayerId;
             RoomsInterface.CreateRoomAsync(uasId, roomName, maxPlayers, OnRoomCreated);
 
             void OnRoomCreated(Response<Room> response)
@@ -54,7 +55,7 @@ namespace LobbyRooms
         /// <summary>Attempt to join an existing room. ID xor code can be null.</summary>
         public void JoinRoomAsync(string roomId, string roomCode, Action<Room> onSuccess, Action onFailure)
         {
-            string uasId = Authentication.PlayerId;
+            string uasId = AuthenticationService.Instance.PlayerId;
             RoomsInterface.JoinRoomAsync(uasId, roomId, roomCode, OnRoomJoined);
 
             void OnRoomJoined(Response<Room> response)
@@ -69,7 +70,7 @@ namespace LobbyRooms
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a room code and a display string for that room.</param>
         public void RetrieveRoomListAsync(Action<QueryResponse> onListRetrieved)
         {
-            string uasId = Authentication.PlayerId;
+            string uasId = AuthenticationService.Instance.PlayerId;
             RoomsInterface.QueryAllRoomsAsync(OnRoomListRetrieved);
 
             void OnRoomListRetrieved(Response<QueryResponse> response)
@@ -95,7 +96,7 @@ namespace LobbyRooms
         /// <param name="onComplete">Called once the request completes, regardless of success or failure.</param>
         public void LeaveRoomAsync(string roomId, Action onComplete)
         {
-            string uasId = Authentication.PlayerId;
+            string uasId = AuthenticationService.Instance.PlayerId;
             RoomsInterface.LeaveRoomAsync(uasId, roomId, OnLeftRoom);
 
             void OnLeftRoom(Response response)
@@ -107,32 +108,50 @@ namespace LobbyRooms
 
         /// <param name="room">Pass in the room from a RetrieveRoomAsync. (This prevents a 429 Too Many Requests if updating both player and room data, by using one retrieval.)</param>
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all room members but not publicly.</param>
-        public void UpdatePlayerDataAsync(Room room, Dictionary<string, string> data, Action onComplete)
-        {   UpdateDataAsync(room, data, onComplete, false);
-        }
-
-        /// <param name="room">Pass in the room from a RetrieveRoomAsync. (This prevents a 429 Too Many Requests if updating both player and room data, by using one retrieval.)</param>
-        /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all room members but not publicly.</param>
-        public void UpdateRoomDataAsync(Room room, Dictionary<string, string> data, Action onComplete)
-        {   UpdateDataAsync(room, data, onComplete, true);
-        }
-
-        private void UpdateDataAsync(Room room, Dictionary<string, string> data, Action onComplete, bool isRoom)
+        public void UpdatePlayerDataAsync(Room room, string userId, Dictionary<string, string> data, Action onComplete)
         {
-            Dictionary<string, DataObject> dataCurr = room.Data ?? new Dictionary<string, DataObject>();
+            var existingPlayerData = room.Players.First(p => p.Id.Equals(userId)).Data;
+            var dataCurr = existingPlayerData ?? new Dictionary<string, PlayerDataObject>();
+
             foreach (var dataNew in data)
             {
-                DataObject dataObj = new DataObject(visibility: "Member", value: dataNew.Value);
+                var dataObj = new PlayerDataObject(
+                    visibility: PlayerDataObject.VisibilityOptions.Member,
+                    value: dataNew.Value);
+
                 if (dataCurr.ContainsKey(dataNew.Key))
                     dataCurr[dataNew.Key] = dataObj;
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
             }
 
-            if (isRoom)
-                RoomsInterface.UpdateRoomAsync(room.Id, dataCurr, (r) => { onComplete?.Invoke(); });
-            else
-                RoomsInterface.UpdatePlayerAsync(room.Id, Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id"), dataCurr, (r) => { onComplete?.Invoke(); });
+            RoomsInterface.UpdatePlayerAsync(
+                roomId: room.Id,
+                playerId: Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id"),
+                data: dataCurr,
+                onComplete: (r) => { onComplete?.Invoke(); });
+        }
+
+        /// <param name="room">Pass in the room from a RetrieveRoomAsync. (This prevents a 429 Too Many Requests if updating both player and room data, by using one retrieval.)</param>
+        /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all room members but not publicly.</param>
+        public void UpdateRoomDataAsync(Room room, Dictionary<string, string> data, Action onComplete)
+        {
+            Dictionary<string, DataObject> dataCurr = room.Data ?? new Dictionary<string, DataObject>();
+
+            foreach (var dataNew in data)
+            {
+                DataObject dataObj = new DataObject(visibility: DataObject.VisibilityOptions.Member, value: dataNew.Value);
+
+                if (dataCurr.ContainsKey(dataNew.Key))
+                    dataCurr[dataNew.Key] = dataObj;
+                else
+                    dataCurr.Add(dataNew.Key, dataObj);
+            }
+
+            RoomsInterface.UpdateRoomAsync(
+                roomId: room.Id,
+                data: dataCurr,
+                onComplete: (r) => { onComplete?.Invoke(); });
         }
     }
 }
