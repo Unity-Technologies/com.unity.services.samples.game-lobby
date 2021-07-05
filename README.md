@@ -68,31 +68,31 @@ Because the Authentication service creates a unique ID for builds, you will need
 
 ![Join Menu](~Documentation/Images/tutorial_1_lobbyList.png?raw=true "Join Menu")
 
-2 The Create Menu Lets you make a new Lobby.
+2. The Create Menu Lets you make a new Lobby.
 
 ![Create Menu](~Documentation/Images/tutorial_2_createMenu.png?raw=true)
 
-3 This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
+3. This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
 For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby.
 
 ![Lobby View](~Documentation/Images/tutorial_3_HostGame.png?raw=true)
 
 
-4 Open the second game instance in Editor or in Build, you should now see your Lobby in the list.
+4. Open the second game instance in Editor or in Build, you should now see your Lobby in the list.
 
 ![Populated Join View](~Documentation/Images/tutorial_4_newLobby.png?raw=true)
 
 
-5 The Lobby holds up to 4 players and will pass the Relay code once all the players are ready.
+5. The Lobby holds up to 4 players and will pass the Relay code once all the players are ready.
 
 ![Relay Ready!](~Documentation/Images/tutorial_5_editorCow.png?raw=true)
 
 
-6 The countdown will start after the rooms data synch has completed. (It is a little slow due to our refresh rate being low at the moment)
+6. The countdown will start after the rooms data synch has completed. (It is a little slow due to our refresh rate being low at the moment)
 
 ![Countdown!](~Documentation/Images/tutorial_6_countDown.png?raw=true)
 
 
-7 The relay service IP gets passed to all users in the lobby, and this is where you would connect to a server, if you had one.
+7. The relay service IP gets passed to all users in the lobby, and this is where you would connect to a server, if you had one.
 
 ![InGame!](~Documentation/Images/tutorial_7_ingame.png?raw=true)
