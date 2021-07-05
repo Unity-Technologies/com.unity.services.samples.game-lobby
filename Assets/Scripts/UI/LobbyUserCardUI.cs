@@ -1,8 +1,7 @@
-using Player;
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Shows the player info in-lobby and game

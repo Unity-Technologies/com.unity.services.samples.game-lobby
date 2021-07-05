@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using Utilities;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Handles the list of LobbyButtons and ensures it stays synchronous with the list from the service.

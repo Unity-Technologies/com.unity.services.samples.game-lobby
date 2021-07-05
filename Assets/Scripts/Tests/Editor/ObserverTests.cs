@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
 
-namespace LobbyRooms.Tests
+namespace LobbyRelaySample.Tests
 {
     public class ObserverTests
     {

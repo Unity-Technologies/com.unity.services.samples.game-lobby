@@ -1,12 +1,11 @@
-﻿using LobbyRooms.Rooms;
+﻿using LobbyRelaySample.Lobby;
 using System;
 using System.Collections.Generic;
 using Unity.Services.Authentication;
 using Unity.Services.Rooms;
 using Unity.Services.Rooms.Models;
-using Utilities;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// An abstraction layer between the direct calls into Rooms and the outcomes you actually want. E.g. you can request to get a readable list of 
@@ -38,9 +37,7 @@ namespace LobbyRooms
         }
 
         #region We want to cache the room object so we don't query for it every time we need to do a different room operation or view current data.
-        // TODO: Replace this with just doing the room query update loop here instead of with each other operation.
         // (This assumes that the player will be actively in just one room at a time, though they could passively be in more.)
-
         private Queue<Action> m_pendingOperations = new Queue<Action>();
         private string m_currentRoomId = null;
         private Room m_lastKnownRoom;
@@ -78,8 +75,6 @@ namespace LobbyRooms
         }
 
         #endregion
-
-        // TODO: Reify async calls so they can be enqueued if calls are made before outstanding async operations complete?
 
         /// <summary>
         /// Attempt to create a new room and then join it.

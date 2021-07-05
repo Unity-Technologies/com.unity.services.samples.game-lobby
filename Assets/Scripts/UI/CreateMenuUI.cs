@@ -1,11 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using LobbyRooms.UI;
-using TMPro;
 using UnityEngine;
-using Utilities;
 
-namespace LobbyRooms
+namespace LobbyRelaySample.UI
 {
     public class CreateMenuUI : UIPanelBase
     {

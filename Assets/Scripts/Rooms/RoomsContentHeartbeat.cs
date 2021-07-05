@@ -1,8 +1,7 @@
 ﻿using System;
-using Utilities;
 using Room = Unity.Services.Rooms.Models.Room;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Keep updated on changes to a joined room.
@@ -46,7 +45,7 @@ namespace LobbyRooms
             if (m_isAwaitingQuery || m_lobbyData == null)
                 return;
 
-            m_isAwaitingQuery = true; // TODO: Recover if we fail? Try-catch? (I.e. if we fail during the update, this might not be reset to false.)
+            m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
             if (m_shouldPushData)
                 PushDataToRoom();
             else
@@ -69,12 +68,12 @@ namespace LobbyRooms
 
             void DoRoomDataPush()
             {
-                RoomsQuery.Instance.UpdateRoomDataAsync(Rooms.ToLobbyData.RetrieveRoomData(m_lobbyData), () => { DoPlayerDataPush(); }); // TODO: This needs not happen as often as player updates, right?
+                RoomsQuery.Instance.UpdateRoomDataAsync(Lobby.ToLobbyData.RetrieveRoomData(m_lobbyData), () => { DoPlayerDataPush(); });
             }
 
             void DoPlayerDataPush()
             {
-                RoomsQuery.Instance.UpdatePlayerDataAsync(Rooms.ToLobbyData.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
+                RoomsQuery.Instance.UpdatePlayerDataAsync(Lobby.ToLobbyData.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
             }
 
             void OnRetrieve()
@@ -84,31 +83,26 @@ namespace LobbyRooms
                 if (room == null) return;
                 bool prevShouldPush = m_shouldPushData;
                 var prevState = m_lobbyData.State;
-                Rooms.ToLobbyData.Convert(room, m_lobbyData, m_localUser);
+                Lobby.ToLobbyData.Convert(room, m_lobbyData, m_localUser);
                 m_shouldPushData = prevShouldPush; // Copying the room data to the local lobby likely caused a change in its observed data, which would prompt updating room data, but that's not necessary here.
-                CheckForRoomReady(room);
+                CheckForRoomReady();
 
                 if (prevState != LobbyState.Lobby && m_lobbyData.State == LobbyState.Lobby)
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.ToLobby, null);
             }
 
 
-            void CheckForRoomReady(Room room)
+            void CheckForRoomReady()
             {
-                bool areAllPlayersReady = room?.Data?.ContainsKey("AllPlayersReady") == true && !string.IsNullOrWhiteSpace(room.Data["AllPlayersReady"].Value);
+                bool areAllPlayersReady = m_lobbyData.AllPlayersReadyTime != null;
                 if (areAllPlayersReady)
                 {
-                    long targetTimeTicks;
-                    if (long.TryParse(room.Data["AllPlayersReady"].Value, out targetTimeTicks))
-                    {
-                        DateTime targetTime = new DateTime(targetTimeTicks);
-                        if (targetTime.Subtract(DateTime.Now).Seconds < 0)
-                            return;
+                    long targetTimeTicks = m_lobbyData.AllPlayersReadyTime.Value;
+                    DateTime targetTime = new DateTime(targetTimeTicks);
+                    if (targetTime.Subtract(DateTime.Now).Seconds < 0)
+                        return;
 
-                        Locator.Get.Messenger.OnReceiveMessage(MessageType.Client_EndReadyCountdownAt, targetTime); // Note that this could be called multiple times.
-                        // TODO: Make sure to disable state changes at this point? I guess we'll still have to handle disconnects, at least.
-                    }
-                    // TODO: Report failure?
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.Client_EndReadyCountdownAt, targetTime); // Note that this could be called multiple times.
                 }
             }
         }

@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
-using Utilities;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class EmoteButtonUI : MonoBehaviour
     {

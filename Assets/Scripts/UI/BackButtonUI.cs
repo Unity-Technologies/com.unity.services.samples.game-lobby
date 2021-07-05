@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using LobbyRooms;
 using UnityEngine;
-using Utilities;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class BackButtonUI : MonoBehaviour
     {

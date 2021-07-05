@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Utilities;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// On the host, this will watch for all players to ready, and once they have, it will prepare for a synchronized countdown.
@@ -56,7 +55,7 @@ namespace LobbyRooms
                 DateTime targetTime = DateTime.Now.AddSeconds(m_ReadyTime);
                 data.Add("AllPlayersReady", targetTime.Ticks.ToString());
                 RoomsQuery.Instance.UpdateRoomDataAsync(data, null);
-                EndCheckingForReady(); // TODO: We'll need to restart checking once we end the relay sequence and return to the room.
+                EndCheckingForReady();
             }
         }
 

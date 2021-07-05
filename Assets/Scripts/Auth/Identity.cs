@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Utilities;
 
-namespace LobbyRooms.Auth
+namespace LobbyRelaySample.Auth
 {
     /// <summary>
     /// Each context will have its own identity needs, so we'll allow each to define whatever parameters it needs.
@@ -50,7 +49,6 @@ namespace LobbyRooms.Auth
     /// <summary>
     /// Our internal representation of a player, wrapping the data required for interfacing with the identities of that player in the services.
     /// One will be created for the local player, as well as for each other member of the room.
-    /// (TODO: If that's the case, reevaluate the usage as a Located service.)
     /// </summary>
     public class Identity : IIdentity, IDisposable
     {

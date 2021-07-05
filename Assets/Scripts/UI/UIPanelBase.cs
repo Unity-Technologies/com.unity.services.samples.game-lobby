@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     [RequireComponent(typeof(CanvasGroup))]
     public class UIPanelBase : MonoBehaviour
     {
         [SerializeField]
         private UnityEvent<bool> m_onVisibilityChange;
+        [SerializeField]
+        bool showing;
 
         CanvasGroup m_canvasGroup;
 
@@ -19,9 +21,6 @@ namespace LobbyRooms.UI
                 return m_canvasGroup = GetComponent<CanvasGroup>();
             }
         }
-
-        [SerializeField] // TODO: Why serialized? Just for testing?
-        bool showing;
 
         public void Toggle()
         {

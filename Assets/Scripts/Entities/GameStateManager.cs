@@ -1,14 +1,11 @@
-using System.Collections;
+using LobbyRelaySample.Relay;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using LobbyRooms.Relay;
-using Player;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement; // TODO: Definitely shouldn't need this just for logging?
-using Utilities;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     public class GameStateManager : MonoBehaviour, IReceiveMessages
     {
@@ -64,18 +61,18 @@ namespace LobbyRooms
                 var createRoomData = (LobbyData)msg;
                 RoomsQuery.Instance.CreateRoomAsync(createRoomData.LobbyName, createRoomData.MaxPlayerCount, createRoomData.Private, (r) =>
                 {
-                    Rooms.ToLobbyData.Convert(r, m_lobbyData, m_localUser);
+                    Lobby.ToLobbyData.Convert(r, m_lobbyData, m_localUser);
                     OnCreatedRoom();
-                }, OnFailedJoin); // TODO: Report failure?
+                }, OnFailedJoin);
             }
             else if (type == MessageType.JoinRoomRequest)
             {
                 LobbyInfo roomData = (LobbyInfo)msg;
                 RoomsQuery.Instance.JoinRoomAsync(roomData.RoomID, roomData.RoomCode, (r) =>
                 {
-                    Rooms.ToLobbyData.Convert(r, m_lobbyData, m_localUser);
+                    Lobby.ToLobbyData.Convert(r, m_lobbyData, m_localUser);
                     OnJoinedRoom();
-                }, OnFailedJoin); // TODO: Report failure?
+                }, OnFailedJoin);
             }
             else if (type == MessageType.QueryRooms)
             {
@@ -84,7 +81,7 @@ namespace LobbyRooms
                     qr =>
                     {
                         if (qr != null)
-                            OnRefreshed(Rooms.ToLobbyData.Convert(qr));
+                            OnRefreshed(Lobby.ToLobbyData.Convert(qr));
                     }, er =>
                     {
                         long errorLong = 0;
@@ -171,16 +168,16 @@ namespace LobbyRooms
             }
             
             if (m_GameStateObservers.Count < 4)
-                Debug.LogWarning($"Scene: {SceneManager.GetActiveScene().name} has less than the default expected Game State Observers, ensure all the observers in the scene that need to watch the gameState are registered in the LocalGameStateObservers List.");
+                Debug.LogWarning($"Scene has less than the default expected Game State Observers, ensure all the observers in the scene that need to watch the gameState are registered in the LocalGameStateObservers List.");
 
             if (m_LobbyDataObservers.Count < 8)
-                Debug.LogWarning($"Scene: {SceneManager.GetActiveScene().name} has less than the default expected Lobby Data Observers, ensure all the observers in the scene that need to watch the Local Lobby Data are registered in the LobbyDataObservers List.");
+                Debug.LogWarning($"Scene has less than the default expected Lobby Data Observers, ensure all the observers in the scene that need to watch the Local Lobby Data are registered in the LobbyDataObservers List.");
 
             if (m_LocalUserObservers.Count < 3)
-                Debug.LogWarning($"Scene: {SceneManager.GetActiveScene().name}  has less than the default expected Local User Observers, ensure all the observers in the scene that need to watch the gameState are registered in the LocalUserObservers List.");
+                Debug.LogWarning($"Scene has less than the default expected Local User Observers, ensure all the observers in the scene that need to watch the gameState are registered in the LocalUserObservers List.");
 
             if (m_LobbyServiceObservers.Count < 2)
-                Debug.LogWarning($"Scene: {SceneManager.GetActiveScene().name}  has less than the default expected Lobby Service Observers, ensure all the observers in the scene that need to watch the lobby service state  are registered in the LobbyServiceObservers List.");
+                Debug.LogWarning($"Scene has less than the default expected Lobby Service Observers, ensure all the observers in the scene that need to watch the lobby service state  are registered in the LobbyServiceObservers List.");
         }
 
         void InitObservers()

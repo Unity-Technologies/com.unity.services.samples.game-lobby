@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Observes an Observed class, intitializes with Observed State when beginning observation

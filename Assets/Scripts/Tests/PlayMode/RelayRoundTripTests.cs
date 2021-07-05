@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using LobbyRooms.Relay;
+using LobbyRelaySample.Relay;
 using NUnit.Framework;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
@@ -12,14 +11,13 @@ namespace Test
 {
     public class RelayRoundTripTests
     {
-        private string roomCode = "";
-        private LobbyRooms.Auth.SubIdentity_Authentication m_auth;
+        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
         private bool m_didSigninComplete = false;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRooms.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
         }
 
         [OneTimeTearDown]
@@ -33,10 +31,6 @@ namespace Test
         public IEnumerator DoBaseRoundTrip()
         {
             LogAssert.ignoreFailingMessages = true;
-            if (!m_didSigninComplete)
-                yield return new WaitForSeconds(1);
-            if (!m_didSigninComplete)
-                yield return new WaitForSeconds(2);
             if (!m_didSigninComplete)
                 yield return new WaitForSeconds(3);
             if (!m_didSigninComplete)
@@ -102,13 +96,10 @@ namespace Test
         {
             LogAssert.ignoreFailingMessages = true;
             if (!m_didSigninComplete)
-                yield return new WaitForSeconds(1);
-            if (!m_didSigninComplete)
-                yield return new WaitForSeconds(2);
-            if (!m_didSigninComplete)
                 yield return new WaitForSeconds(3);
             if (!m_didSigninComplete)
                 Assert.Fail("Did not sign in.");
+            yield return new WaitForSeconds(1); // To prevent a possible 429 after a previous test.
 
             //Allocation
             float timeout = 5;

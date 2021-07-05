@@ -1,8 +1,5 @@
-using System.Collections;
-using LobbyRooms;
+using LobbyRelaySample;
 using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace Test
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.Services.Rooms.Models;
 
-namespace LobbyRooms.Rooms
+namespace LobbyRelaySample.Lobby
 {
     /// <summary>
     /// Convert the Room resulting from a Rooms request into a LobbyData for use in the game logic.
@@ -14,22 +14,18 @@ namespace LobbyRooms.Rooms
         public static void Convert(Room room, LobbyData outputToHere, LobbyUser existingLocalUser = null)
         {
             LobbyInfo info = new LobbyInfo
-            {   RoomID         = room.Id,
-                RoomCode       = room.RoomCode,
-                Private        = room.IsPrivate,
-                LobbyName      = room.Name,
-                MaxPlayerCount = room.MaxPlayers,
-                RelayCode      = room.Data?.ContainsKey("RelayCode") == true ? room.Data["RelayCode"].Value : null,
-                State          = room.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(room.Data["State"].Value) : LobbyState.Lobby
-                // TODO: RelayServer?
+            {   RoomID              = room.Id,
+                RoomCode            = room.RoomCode,
+                Private             = room.IsPrivate,
+                LobbyName           = room.Name,
+                MaxPlayerCount      = room.MaxPlayers,
+                RelayCode           = room.Data?.ContainsKey("RelayCode") == true ? room.Data["RelayCode"].Value : null,
+                State               = room.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(room.Data["State"].Value) : LobbyState.Lobby,
+                AllPlayersReadyTime = room.Data?.ContainsKey("AllPlayersReady") == true ? long.Parse(room.Data["AllPlayersReady"].Value) : (long?)null
             };
             Dictionary<string, LobbyUser> roomUsers = new Dictionary<string, LobbyUser>();
             foreach (var player in room.Players)
             {
-                // TODO: no...we want to edit the underlying data without affecting the instance at all.
-                // So, perhaps we need to instead take in the LobbyData, which will have created the user instances, and then they will be populated as we go?
-                // Do consider committing first.
-
                 if (existingLocalUser != null && player.Id.Equals(existingLocalUser.ID))
                 {
                     existingLocalUser.IsHost = room.HostId.Equals(player.Id);
@@ -58,7 +54,7 @@ namespace LobbyRooms.Rooms
         /// </summary>
         public static List<LobbyData> Convert(QueryResponse response)
         {
-            List<LobbyData> retLst = new List<LobbyData>(); // TODO: This needs to not try to register for a bunch of events?
+            List<LobbyData> retLst = new List<LobbyData>();
             foreach (var room in response.Results)
                 retLst.Add(Convert(room));
             return retLst;
@@ -75,6 +71,7 @@ namespace LobbyRooms.Rooms
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add("RelayCode", room.RelayCode);
             data.Add("State", ((int)room.State).ToString());
+            // We only want the ArePlayersReadyTime to be set when we actually are ready for it, and it's null otherwise. So, don't set that here.
             return data;
         }
 

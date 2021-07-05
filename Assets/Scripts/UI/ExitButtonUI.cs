@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class ExitButtonUI : MonoBehaviour
     {

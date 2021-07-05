@@ -1,12 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using LobbyRooms;
 using UnityEngine.Events;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     [RequireComponent(typeof(LobbyDataObserver))]
     public class LobbyButtonUI : MonoBehaviour
@@ -37,7 +33,7 @@ namespace LobbyRooms.UI
 
         public void UpdateLobby(LobbyData lobby)
         {
-            m_DataObserver.observed.CopyObserved(lobby); // TODO: Seems very roundabout.
+            m_DataObserver.observed.CopyObserved(lobby);
         }
 
         public void OnRoomUpdated(LobbyData data)

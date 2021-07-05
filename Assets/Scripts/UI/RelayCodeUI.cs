@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Read Only input field (for copy/paste reasons) Watches for the changes in the lobby's Relay Code

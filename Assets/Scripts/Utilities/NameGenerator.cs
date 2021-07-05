@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utilities
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Just for fun, give a cute default name if no name is provided.

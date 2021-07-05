@@ -2,7 +2,7 @@
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 
-namespace LobbyRooms.Auth
+namespace LobbyRelaySample.Auth
 {
     /// <summary>
     /// The Authentication package will sign in asynchronously and anonymously. When complete, we will need to store the generated ID.
@@ -35,7 +35,6 @@ namespace LobbyRooms.Auth
         private async void DoSignIn(Action onSigninComplete)
         {
             await UnityServices.Initialize();
-            //Authentication.SetLogLevel(Unity.Services.Authentication.Utilities.LogLevel.Verbose); TODO: Is there a new API for this?
             AuthenticationService.Instance.SignedIn += OnSignInChange;
             AuthenticationService.Instance.SignedOut += OnSignInChange;
 

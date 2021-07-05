@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
+﻿using LobbyRelaySample;
+using NUnit.Framework;
 using System;
 using System.Text.RegularExpressions;
 using UnityEngine.TestTools;
-using Utilities;
 
 public class MessengerTests
 {

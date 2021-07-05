@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     [Flags]
     public enum LobbyState
@@ -22,6 +22,7 @@ namespace LobbyRooms
         public bool Private { get; set; }
         public int MaxPlayerCount { get; set; }
         public LobbyState State { get; set; }
+        public long? AllPlayersReadyTime { get; set; }
         
         public LobbyInfo(LobbyInfo existing)
         {
@@ -32,6 +33,7 @@ namespace LobbyRooms
             Private = existing.Private;
             MaxPlayerCount = existing.MaxPlayerCount;
             State = existing.State;
+            AllPlayersReadyTime = existing.AllPlayersReadyTime;
         }
 
         public LobbyInfo(string roomCode)
@@ -43,6 +45,7 @@ namespace LobbyRooms
             Private = false;
             MaxPlayerCount = -1;
             State = LobbyState.Lobby;
+            AllPlayersReadyTime = null;
         }
     }
 
@@ -212,6 +215,8 @@ namespace LobbyRooms
                 OnChanged(this);
             }
         }
+
+        public long? AllPlayersReadyTime => m_data.AllPlayersReadyTime;
 
         /// <summary>
         /// Checks if we have n players that have the Status.

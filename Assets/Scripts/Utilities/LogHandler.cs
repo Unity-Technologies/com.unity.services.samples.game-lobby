@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Utilities
+namespace LobbyRelaySample
 {
     public enum LogMode
     {

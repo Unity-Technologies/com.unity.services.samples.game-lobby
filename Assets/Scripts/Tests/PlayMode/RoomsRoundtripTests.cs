@@ -5,7 +5,7 @@ using Unity.Services.Rooms;
 using Unity.Services.Rooms.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
-using RoomsInterface = LobbyRooms.Rooms.RoomsInterface;
+using RoomsInterface = LobbyRelaySample.Lobby.RoomsInterface;
 
 namespace Test
 {
@@ -16,13 +16,13 @@ namespace Test
     public class RoomsRoundtripTests
     {
         private string m_workingRoomId;
-        private LobbyRooms.Auth.SubIdentity_Authentication m_auth;
+        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
         private bool m_didSigninComplete = false;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRooms.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
         }
 
         [UnityTearDown]
@@ -45,7 +45,7 @@ namespace Test
         [UnityTest]
         public IEnumerator DoRoundtrip()
         {
-            LogAssert.ignoreFailingMessages = true; // TODO: Not sure why, but when auth logs in, it sometimes generates an error: "A Native Collection has not been disposed[...]." We don't want this to cause test failures, since in practice it *seems* to not negatively impact behavior.
+            LogAssert.ignoreFailingMessages = true; // Not sure why, but when auth logs in, it sometimes generates an error: "A Native Collection has not been disposed[...]." We don't want this to cause test failures, since in practice it *seems* to not negatively impact behavior.
 
             // Wait a reasonable amount of time for sign-in to complete.
             if (!m_didSigninComplete)
@@ -54,6 +54,7 @@ namespace Test
                 Assert.Fail("Did not sign in.");
 
             // Since we're signed in through the same pathway as the actual game, the list of rooms will include any that have been made in the game itself, so we should account for those.
+            // If you want to get around this, consider having a secondary project using the same assets with its own credentials.
             yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request, in case a previous test had one; Query requests can only occur at a rate of 1 per second.
             Response<QueryResponse> queryResponse = null;
             float timeout = 5;
@@ -91,7 +92,7 @@ namespace Test
             }
             Assert.Greater(timeout, 0, "Timeout check (query #1)");
             Assert.IsTrue(queryResponse.Status >= 200 && queryResponse.Status < 300, "QueryAllRoomsAsync should return a success code. (#1)");
-            Assert.AreEqual(1 + numRoomsIni, queryResponse.Result.Results.Count, "Queried rooms list should contain just the test room. (Are there rooms you created and did not yet delete?)"); // TODO: Can we get a test account such that having actual rooms open doesn't impact this?
+            Assert.AreEqual(1 + numRoomsIni, queryResponse.Result.Results.Count, "Queried rooms list should contain the test room.");
             Assert.IsTrue(queryResponse.Result.Results.Where(r => r.Name == roomName).Count() == 1, "Checking queried room for name.");
             Assert.IsTrue(queryResponse.Result.Results.Where(r => r.Id == m_workingRoomId).Count() == 1, "Checking queried room for ID.");
 

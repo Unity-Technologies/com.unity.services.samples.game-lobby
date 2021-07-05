@@ -1,12 +1,7 @@
-using System;
-using LobbyRooms;
-using LobbyRooms.UI;
-using Player;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace LobbyRooms
+namespace LobbyRelaySample.UI
 {
     public class PlayerNameUI : ObserverPanel<LobbyUser>
     {

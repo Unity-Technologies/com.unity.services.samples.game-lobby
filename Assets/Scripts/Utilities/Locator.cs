@@ -1,8 +1,8 @@
-using LobbyRooms.Auth;
+using LobbyRelaySample.Auth;
 using System;
 using System.Collections.Generic;
 
-namespace Utilities
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Allows Located services to transfer data to their replacements if needed.

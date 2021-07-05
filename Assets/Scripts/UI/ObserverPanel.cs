@@ -1,10 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using LobbyRooms.UI;
-using UnityEngine;
-using LobbyRooms;
-
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Observer UI panel base class, for UI panels that need hiding, and hookup to observerBehaviours

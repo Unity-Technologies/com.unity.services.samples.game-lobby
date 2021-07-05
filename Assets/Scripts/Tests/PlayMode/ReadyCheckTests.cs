@@ -1,26 +1,25 @@
-using LobbyRooms;
+using LobbyRelaySample;
 using NUnit.Framework;
 using System.Collections;
 using Unity.Services.Rooms;
 using Unity.Services.Rooms.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Utilities;
-using RoomsInterface = LobbyRooms.Rooms.RoomsInterface;
+using RoomsInterface = LobbyRelaySample.Lobby.RoomsInterface;
 
 namespace Test
 {
     public class ReadyCheckTests
     {
         private string m_workingRoomId;
-        private LobbyRooms.Auth.Identity m_auth;
+        private LobbyRelaySample.Auth.Identity m_auth;
         private bool m_didSigninComplete = false;
         private GameObject m_updateSlowObj;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRooms.Auth.Identity(() => { m_didSigninComplete = true; });
+            m_auth = new LobbyRelaySample.Auth.Identity(() => { m_didSigninComplete = true; });
             Locator.Get.Provide(m_auth);
             m_updateSlowObj = new GameObject("UpdateSlowTest");
             m_updateSlowObj.AddComponent<UpdateSlow>();
@@ -39,7 +38,7 @@ namespace Test
         [OneTimeTearDown]
         public void Teardown()
         {
-            Locator.Get.Provide(new LobbyRooms.Auth.IdentityNoop());
+            Locator.Get.Provide(new LobbyRelaySample.Auth.IdentityNoop());
             m_auth.Dispose();
             LogAssert.ignoreFailingMessages = false;
             RoomsQuery.Instance.EndTracking();
@@ -72,7 +71,7 @@ namespace Test
         {
             bool hasPushedPlayerData = false;
             float timeout = 5;
-            RoomsQuery.Instance.UpdatePlayerDataAsync(LobbyRooms.Rooms.ToLobbyData.RetrieveUserData(player), () => { hasPushedPlayerData = true; }); // RoomsContentHeartbeat normally does this.
+            RoomsQuery.Instance.UpdatePlayerDataAsync(LobbyRelaySample.Lobby.ToLobbyData.RetrieveUserData(player), () => { hasPushedPlayerData = true; }); // RoomsContentHeartbeat normally does this.
             while (!hasPushedPlayerData && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -86,12 +85,12 @@ namespace Test
         [UnityTest]
         public IEnumerator SetCountdownTimeSinglePlayer()
         {
-            LogAssert.ignoreFailingMessages = true; // TODO: Not sure why, but when auth logs in, it sometimes generates an error: "A Native Collection has not been disposed[...]." We don't want this to cause test failures, since in practice it *seems* to not negatively impact behavior.
+            LogAssert.ignoreFailingMessages = true; // Not sure why, but when auth logs in, it sometimes generates an error: "A Native Collection has not been disposed[...]." We don't want this to cause test failures, since in practice it *seems* to not negatively impact behavior.
             bool? readyResult = null;
             LobbyReadyCheck readyCheck = new LobbyReadyCheck((b) => { readyResult = b; }, 5); // This ready time is used for the countdown target end, not for any of the timing of actually detecting readies.
             yield return WaitForSignin();
 
-            string userId = m_auth.GetSubIdentity(LobbyRooms.Auth.IIdentityType.Auth).GetContent("id");
+            string userId = m_auth.GetSubIdentity(LobbyRelaySample.Auth.IIdentityType.Auth).GetContent("id");
             yield return CreateRoom("TestReadyRoom1", userId);
 
             RoomsQuery.Instance.BeginTracking(m_workingRoomId);

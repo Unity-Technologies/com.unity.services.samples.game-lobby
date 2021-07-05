@@ -1,3 +1,4 @@
+using LobbyRelaySample;
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -5,7 +6,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Utilities;
 
 namespace Test
 { 

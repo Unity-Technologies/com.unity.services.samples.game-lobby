@@ -5,7 +5,7 @@ using Unity.Services.Relay.Allocations;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-namespace LobbyRooms.Relay
+namespace LobbyRelaySample.Relay
 {
     /// <summary>
     /// Does all the interaction with relay.
@@ -25,7 +25,6 @@ namespace LobbyRooms.Relay
                 onComplete?.Invoke(result);
             }
         }
-
 
         /// <summary>
         /// Creates a Relay Server, and returns the Allocation (Response.Result.Data.Allocation)

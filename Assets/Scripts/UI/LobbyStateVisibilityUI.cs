@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class LobbyStateVisibilityUI : ObserverPanel<LobbyData>
     {

@@ -1,7 +1,4 @@
-using UnityEngine;
-using Utilities;
-
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Sends a message that should change the displayName Data only.

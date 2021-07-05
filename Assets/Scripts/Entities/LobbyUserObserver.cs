@@ -1,9 +1,4 @@
-using System;
-using LobbyRooms;
-using UnityEngine;
-using UnityEngine.Serialization;
-
-namespace Player
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Holds an instance of a lobbyplayer, and implements hooks for the UI to interact with.

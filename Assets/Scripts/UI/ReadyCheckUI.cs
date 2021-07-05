@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Utilities;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class ReadyCheckUI : MonoBehaviour
     {

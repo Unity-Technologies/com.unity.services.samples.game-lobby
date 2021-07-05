@@ -11,7 +11,7 @@ public class TempDeleteAllRooms : MonoBehaviour
 
     public void OnButton()
     {
-        LobbyRooms.Rooms.RoomsInterface.QueryAllRoomsAsync((qr) => { DoDeletes(qr); });
+        LobbyRelaySample.Lobby.RoomsInterface.QueryAllRoomsAsync((qr) => { DoDeletes(qr); });
     }
 
     private void DoDeletes(Unity.Services.Rooms.Response<Unity.Services.Rooms.Models.QueryResponse> response)
@@ -26,7 +26,7 @@ public class TempDeleteAllRooms : MonoBehaviour
     {
         foreach (var room in rooms)
         {
-            LobbyRooms.Rooms.RoomsInterface.DeleteRoomAsync(room.Id, null); // The onComplete callback isn't called in some error cases, e.g. a 403 when we don't have permissions, so don't block on it.
+            LobbyRelaySample.Lobby.RoomsInterface.DeleteRoomAsync(room.Id, null); // The onComplete callback isn't called in some error cases, e.g. a 403 when we don't have permissions, so don't block on it.
             yield return new WaitForSeconds(1); // We need to wait a little to avoid 429's, but we might not run an onComplete depending on how the delete call fails.
         }
     }

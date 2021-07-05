@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Current state of the local Game.

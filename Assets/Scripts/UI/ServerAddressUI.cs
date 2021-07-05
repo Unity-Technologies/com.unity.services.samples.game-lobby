@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class ServerAddressUI : ObserverPanel<LobbyData>
     {

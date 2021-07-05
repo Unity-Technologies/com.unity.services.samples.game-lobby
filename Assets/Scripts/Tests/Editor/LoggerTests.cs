@@ -2,9 +2,8 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Utilities;
 
-namespace LobbyRooms.Tests
+namespace LobbyRelaySample.Tests
 {
     public class LoggerTest
     {

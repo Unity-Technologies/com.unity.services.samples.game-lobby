@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     [RequireComponent(typeof(LocalGameStateObserver))]
     public class GameStateVisibilityUI : ObserverPanel<LocalGameState>

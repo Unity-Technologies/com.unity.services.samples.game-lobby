@@ -5,7 +5,7 @@ using Unity.Services.Rooms;
 using Unity.Services.Rooms.Models;
 using Unity.Services.Rooms.Rooms;
 
-namespace LobbyRooms.Rooms
+namespace LobbyRelaySample.Lobby
 {
     /// <summary>
     /// Does all the interactions with Rooms.
@@ -58,7 +58,7 @@ namespace LobbyRooms.Rooms
         public static void JoinRoomAsync(string requesterUASId, string roomId, string roomCode, Action<Response<Room>> onComplete)
         {
             JoinRoomRequest joinRequest = new JoinRoomRequest(new JoinRequest(
-                player: new Unity.Services.Rooms.Models.Player(requesterUASId), // TODO: Oh, we can supply initial data here.
+                player: new Unity.Services.Rooms.Models.Player(requesterUASId),
                 id: roomId,
                 roomCode: roomCode
             ));

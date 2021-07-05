@@ -2,7 +2,7 @@
 using UnityEngine;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
-namespace Utilities
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Ensure that message contents are obvious but not dependent on spelling strings correctly.

@@ -11,7 +11,7 @@
         "com.unity.modules.animation": "1.0.0",
         "com.unity.modules.uielements": "1.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.2d.common": {
       "version": "6.0.0-pre.2",
@@ -23,21 +23,21 @@
         "com.unity.modules.uielements": "1.0.0",
         "com.unity.burst": "1.5.1"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.2d.path": {
       "version": "5.0.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.2d.pixel-perfect": {
       "version": "5.0.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.2d.psdimporter": {
       "version": "6.0.0-pre.2",
@@ -48,7 +48,7 @@
         "com.unity.2d.common": "6.0.0-pre.2",
         "com.unity.2d.sprite": "1.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -66,7 +66,7 @@
         "com.unity.2d.path": "5.0.0",
         "com.unity.modules.physics2d": "1.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.2d.tilemap": {
       "version": "1.0.0",
@@ -81,7 +81,7 @@
       "dependencies": {
         "com.unity.mathematics": "1.2.1"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
       "version": "1.5.7",
@@ -90,14 +90,14 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "2.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.ext.nunit": {
       "version": "1.0.6",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
       "version": "3.0.7",
@@ -106,7 +106,7 @@
       "dependencies": {
         "com.unity.ext.nunit": "1.0.6"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
       "version": "2.0.9",
@@ -115,28 +115,28 @@
       "dependencies": {
         "com.unity.test-framework": "1.1.9"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
       "version": "1.2.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.mathematics": {
       "version": "1.2.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.nuget.newtonsoft-json": {
       "version": "2.0.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.services.authentication": {
       "version": "0.5.0-preview",
@@ -160,7 +160,7 @@
       "url": "https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.services.relay": {
-      "version": "0.0.1-preview.5",
+      "version": "0.0.1-preview.7",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -175,7 +175,7 @@
       "url": "https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates"
     },
     "com.unity.services.rooms": {
-      "version": "0.1.5",
+      "version": "0.1.6",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -214,7 +214,7 @@
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.textmeshpro": {
       "version": "3.0.6",
@@ -223,7 +223,7 @@
       "dependencies": {
         "com.unity.ugui": "1.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
       "version": "1.6.0-pre.5",
@@ -235,7 +235,7 @@
         "com.unity.modules.audio": "1.0.0",
         "com.unity.modules.particlesystem": "1.0.0"
       },
-      "url": "https://packages-v2-staging.unity.com"
+      "url": "https://packages.unity.com"
     },
     "com.unity.toolchain.win-x86_64-linux-x86_64": {
       "version": "0.1.20-preview",

@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
-using Utilities;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Keeps the rooms list updated automatically.
-    /// TODO: This should only be active while the join menu is visible. Also remove the OnVisibilityChange event when a better solution is introduced.
     /// </summary>
     public class RoomsListHeartbeat : MonoBehaviour
     {

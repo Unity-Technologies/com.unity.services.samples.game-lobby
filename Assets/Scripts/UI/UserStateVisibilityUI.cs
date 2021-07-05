@@ -1,9 +1,7 @@
 using System;
-using Player;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Current user statea

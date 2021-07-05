@@ -994,6 +994,38 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 4928485776352161055}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: SetActive
+      objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: LobbyRooms.RoomsListHeartbeat, LobbyRooms
+      objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_BoolArgument
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1547097154637997990, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
 --- !u!224 &2637199315599437355 stripped
@@ -1346,7 +1378,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3335058099760921612, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_fontSize
-      value: 15.4
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3711939936493401148, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1490,7 +1522,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5713552561910003945, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_fontSize
-      value: 37.3
+      value: 31.3
       objectReference: {fileID: 0}
     - target: {fileID: 5749901921003950368, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1542,7 +1574,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6281383251298602143, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_fontSize
-      value: 53.7
+      value: 31.3
       objectReference: {fileID: 0}
     - target: {fileID: 6701676754128905643, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1857,7 +1889,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2828520451782533824, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_Size
-      value: 0.99999994
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2828520451782533824, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_Value
@@ -2009,7 +2041,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5836614391142406755, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_Name
-      value: JoinCreateRoomCanvas
+      value: JoinCreateCanvas
       objectReference: {fileID: 0}
     - target: {fileID: 5836614391142406755, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_IsActive
@@ -2269,7 +2301,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8314627591180998490, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_fontSize
-      value: 31.25
+      value: 26.6
       objectReference: {fileID: 0}
     - target: {fileID: 8437021287377131492, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2297,7 +2329,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8502326957445156609, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_fontSize
-      value: 31.25
+      value: 26.6
       objectReference: {fileID: 0}
     - target: {fileID: 8636295960037856115, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2338,6 +2370,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5836614391142406767, guid: 404728f5cffe43940b290121bd31f601, type: 3}
   m_PrefabInstance: {fileID: 8387645425390731067}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4928485776352161055 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3459776754637410852, guid: 404728f5cffe43940b290121bd31f601, type: 3}
+  m_PrefabInstance: {fileID: 8387645425390731067}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ec34a3875818e4690f1bf0be69ccd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8690587081894129692
 PrefabInstance:
   m_ObjectHideFlags: 0

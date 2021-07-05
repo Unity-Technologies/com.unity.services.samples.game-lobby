@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Services.Relay;
 using UnityEngine;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// This is where your netcode would go, if you had it.

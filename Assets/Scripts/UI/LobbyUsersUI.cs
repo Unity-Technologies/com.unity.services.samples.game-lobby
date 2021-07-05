@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     /// <summary>
     /// Watches for changes in the Lobby's player List
@@ -20,9 +18,6 @@ namespace LobbyRooms.UI
         /// </summary>
         public override void ObservedUpdated(LobbyData observed)
         {
-            //  if (observed.PlayerCount == m_CurrentUsers.Count) // TODO: Not a 100% accurate shorthand.
-            //    return;
-
             for (int id = m_CurrentUsers.Count - 1; id >= 0; id--) // We might remove users if they aren't in the new data, so iterate backwards.
             {
                 string userId = m_CurrentUsers[id];

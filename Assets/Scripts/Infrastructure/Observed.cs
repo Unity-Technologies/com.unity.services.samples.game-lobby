@@ -1,6 +1,6 @@
 using System;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// In your Observed children, be sure to call OnChanged when setting the value of any property.

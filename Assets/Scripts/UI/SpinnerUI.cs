@@ -1,9 +1,7 @@
 using System.Text;
 using TMPro;
-using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace LobbyRooms.UI
+namespace LobbyRelaySample.UI
 {
     public class SpinnerUI : ObserverPanel<LobbyServiceData>
     {

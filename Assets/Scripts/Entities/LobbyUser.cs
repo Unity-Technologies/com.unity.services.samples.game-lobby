@@ -1,10 +1,6 @@
 using System;
-using System.ComponentModel;
-using UnityEngine;
-using LobbyRooms;
-using UnityEngine.Serialization;
 
-namespace LobbyRooms
+namespace LobbyRelaySample
 {
     /// <summary>
     /// Current state of the user in the lobby.

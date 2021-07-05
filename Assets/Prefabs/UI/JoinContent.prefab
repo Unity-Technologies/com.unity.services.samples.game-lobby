@@ -246,7 +246,7 @@ GameObject:
   - component: {fileID: 3612080823527636284}
   - component: {fileID: 1964366387764421678}
   m_Layer: 5
-  m_Name: RoomList
+  m_Name: LobbyList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -269,7 +269,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000030517578}
+  m_AnchoredPosition: {x: -3800.4392, y: 1594.6573}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3612080823527636284
@@ -567,7 +567,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7573825319354851387}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.4877345
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1221,7 +1221,7 @@ GameObject:
   - component: {fileID: 7053976434221716963}
   - component: {fileID: 2605713290592748245}
   m_Layer: 5
-  m_Name: RoomScrollView
+  m_Name: LobbyScrollView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1730,8 +1730,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6537579147320774990}
   m_HandleRect: {fileID: 7315760059761538639}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.36052978
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
