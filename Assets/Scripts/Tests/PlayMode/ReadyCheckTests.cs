@@ -22,8 +22,6 @@ namespace Test
         {
             m_auth = new LobbyRooms.Auth.Identity(() => { m_didSigninComplete = true; });
             Locator.Get.Provide(m_auth);
-            var stagingpath = "https://rooms-stg.cloud.unity3d.com/v1";
-            RoomsInterface.SetPath(stagingpath); //Defaults to Test Path
             m_updateSlowObj = new GameObject("UpdateSlowTest");
             m_updateSlowObj.AddComponent<UpdateSlow>();
         }

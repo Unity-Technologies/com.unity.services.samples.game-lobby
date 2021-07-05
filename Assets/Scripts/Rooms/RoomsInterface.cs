@@ -34,15 +34,6 @@ namespace LobbyRooms.Rooms
             }
         }
 
-        /// <summary>
-        /// Overwrite the base Path on Awake to point the service somewhere else.
-        /// </summary>
-        public static void SetPath(string path = "https://rooms.cloud.unity3d.com/v1")
-        {
-            // TODO: Necessary?
-            //Configuration.BasePath = path;
-        }
-
         private const int k_maxRoomsToShow = 64;
 
         public static void CreateRoomAsync(string requesterUASId, string roomName, int maxPlayers, bool isPrivate, Action<Response<Room>> onComplete)

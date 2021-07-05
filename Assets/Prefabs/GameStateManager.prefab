@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7716713811812636911}
   - component: {fileID: 7716713811812636910}
   - component: {fileID: 5193415626965589893}
-  - component: {fileID: 13498602845527961}
   m_Layer: 0
   m_Name: GameStateManager
   m_TagString: Untagged
@@ -69,17 +68,3 @@ MonoBehaviour:
   m_updatePeriod: 2
   m_durationToleranceMs: 50
   m_doNotRemoveIfTooLong: 1
---- !u!114 &13498602845527961
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7716713811812636896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8cdd678782ee4443933f72d35474c2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  relayConfig: {fileID: 11400000, guid: 4b6a84fac6db22d42aac9069c4ec2cdd, type: 2}
-  roomsConfig: {fileID: 11400000, guid: 9d9ecd6b4361c104e88ac0767f2c58ae, type: 2}

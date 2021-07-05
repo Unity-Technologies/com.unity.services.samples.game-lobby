@@ -23,8 +23,6 @@ namespace Test
         public void Setup()
         {
             m_auth = new LobbyRooms.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
-            var stagingpath = "https://rooms-stg.cloud.unity3d.com/v1";
-            RoomsInterface.SetPath(stagingpath); //Defaults to Test Path
         }
 
         [UnityTearDown]
