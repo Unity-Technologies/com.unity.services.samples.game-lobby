@@ -36,10 +36,10 @@ namespace LobbyRooms.UI
             m_lobbyDataSelected = lobby.Data;
         }
 
-        public void OnJoinCodeInputFieldChanged(string newCode) // TODO: Needs some new UI to show that an existing room is selected without being able to show its room code.
+        public void OnJoinCodeInputFieldChanged(string newCode)
         {
             if (!string.IsNullOrEmpty(newCode))
-                m_lobbyDataSelected = new LobbyInfo(newCode);
+                m_lobbyDataSelected = new LobbyInfo(newCode.ToUpper());
         }
 
         public void OnJoinButtonPressed()
@@ -62,16 +62,31 @@ namespace LobbyRooms.UI
                 var lobbyData = codeLobby.Value;
                 if (!m_LobbyButtons.ContainsKey(roomCodeKey))
                 {
-                    AddNewLobbyButton(roomCodeKey, lobbyData);
+                    if (CanDisplay(lobbyData))
+                        AddNewLobbyButton(roomCodeKey, lobbyData);
                 }
+                else
+                {
+                    if (CanDisplay(lobbyData))
+                        UpdateLobbyButton(roomCodeKey, lobbyData);
+                    else
+                        RemoveLobbyButton(lobbyData);
+                }
+
                 previousKeys.Remove(roomCodeKey);
             }
+
             foreach (string key in previousKeys) // Need to remove any lobbies from the list that no longer exist.
                 RemoveLobbyButton(m_LobbyData[key]);
         }
 
+        bool CanDisplay(LobbyData lobby)
+        {
+            return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
+        }
+
         /// <summary>
-        /// Instaniates UI element and initializes the observer with the Data
+        /// Instantiates UI element and initializes the observer with the LobbyData
         /// </summary>
         void AddNewLobbyButton(string roomCode, LobbyData lobby)
         {
@@ -83,10 +98,16 @@ namespace LobbyRooms.UI
             m_LobbyData.Add(roomCode, lobby);
         }
 
+        void UpdateLobbyButton(string roomCode, LobbyData lobby)
+        {
+            m_LobbyButtons[roomCode].UpdateLobby(lobby);
+        }
+
         void RemoveLobbyButton(LobbyData lobby)
         {
             var lobbyID = lobby.RoomID;
             var lobbyButton = m_LobbyButtons[lobbyID];
+            lobbyButton.GetComponent<LobbyDataObserver>().EndObserving();
             m_LobbyButtons.Remove(lobbyID);
             m_LobbyData.Remove(lobbyID);
             Destroy(lobbyButton.gameObject);

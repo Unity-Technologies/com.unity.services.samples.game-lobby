@@ -531,10 +531,8 @@ GameObject:
   - component: {fileID: 4102997489641105917}
   - component: {fileID: 4102997489641105913}
   - component: {fileID: 7676491730539518990}
-  - component: {fileID: 7948229591525432809}
   - component: {fileID: 2381432589029884226}
   - component: {fileID: 4523467532116611583}
-  - component: {fileID: 8640852021294056703}
   m_Layer: 5
   m_Name: RelayCodeCanvas
   m_TagString: Untagged
@@ -584,20 +582,6 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
---- !u!114 &7948229591525432809
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4102997489641105918}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 166d8ab6b922da04f851733dcb0e37e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showing: 0
-  ShowThisWhen: 6
 --- !u!114 &2381432589029884226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,6 +594,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a70bc1b6f999ee43974bbbf991a0b6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
   showing: 1
   relayCodeText: {fileID: 8798075752901962210}
 --- !u!114 &4523467532116611583
@@ -639,33 +626,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &8640852021294056703
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4102997489641105918}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51373dc3c6ac79b4f8e36ac7c4419205, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7948229591525432809}
-        m_TargetAssemblyTypeName: LobbyRooms.GameStatePanelUI, Assembly-CSharp
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  observeOnStart: 1
 --- !u!1 &4142193733183565639
 GameObject:
   m_ObjectHideFlags: 0

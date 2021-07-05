@@ -22,7 +22,9 @@ namespace Utilities
         ChangeLobbyUserState = 8,
         HostInitReadyCheck = 9,
         LocalUserReadyCheckResponse = 10,
-        UserSetEmote = 11
+        UserSetEmote = 11,
+        ToLobby = 12,
+        Client_EndReadyCountdownAt = 13,
     }
 
     /// <summary>

@@ -19,7 +19,8 @@ namespace LobbyRooms.Rooms
                 Private        = room.IsPrivate,
                 LobbyName      = room.Name,
                 MaxPlayerCount = room.MaxPlayers,
-                RelayCode      = room.Data?.ContainsKey("RelayCode") == true ? room.Data["RelayCode"].Value : null
+                RelayCode      = room.Data?.ContainsKey("RelayCode") == true ? room.Data["RelayCode"].Value : null,
+                State          = room.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(room.Data["State"].Value) : LobbyState.Lobby
                 // TODO: RelayServer?
             };
             Dictionary<string, LobbyUser> roomUsers = new Dictionary<string, LobbyUser>();
@@ -42,7 +43,8 @@ namespace LobbyRooms.Rooms
                         displayName: player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : "NewPlayer",
                         isHost: room.HostId.Equals(player.Id),
                         id: player.Id,
-                        emote: player.Data?.ContainsKey("Emote") == true ? player.Data["Emote"].Value : null
+                        emote: player.Data?.ContainsKey("Emote") == true ? player.Data["Emote"].Value : null,
+                        userStatus: player.Data?.ContainsKey("UserStatus") == true ? player.Data["UserStatus"].Value : UserStatus.Lobby.ToString()
                     );
                     roomUsers.Add(user.ID, user);
                 }
@@ -72,16 +74,18 @@ namespace LobbyRooms.Rooms
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add("RelayCode", room.RelayCode);
+            data.Add("State", ((int)room.State).ToString());
             return data;
         }
 
         public static Dictionary<string, string> RetrieveUserData(LobbyUser user)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
-            if (string.IsNullOrEmpty(user.ID))
+            if (user == null || string.IsNullOrEmpty(user.ID))
                 return data;
             data.Add("DisplayName", user.DisplayName);
             data.Add("Emote", user.Emote); // Emote could be null, which is fine.
+            data.Add("UserStatus", user.UserStatus.ToString());
             return data;
         }
     }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace LobbyRooms
 {
@@ -12,6 +13,11 @@ namespace LobbyRooms
         public T observed { get; set; }
         
         public UnityEvent<T> OnObservedUpdated;
+
+        /// <summary>
+        /// Option to allow certain observers to not be registered by the GameStateManager automatically.
+        /// </summary>
+        public bool observeOnStart = true;
 
         protected virtual void UpdateObserver(T obs)
         {

@@ -28,12 +28,12 @@ Features Covered:
 	- Select your organization from the drop-down, and push **Create Project ID**
 		![Services Editor Complete](Documentation/Images/services2.PNG?raw=true "Service in Editor set up.")
 
-# Rooms:
-	**[url=roomsAPIURL]Rooms API[/url] **
+# Lobby:
+	**[url=http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service]Lobby Overview[/url] **
 
 
 # Relay Setup:
-	**[url=relayAPIUrl]Relay API[/url] **
+	**[url=http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview]Relay Overview[/url] **
 	
 	- Navigate to https://dashboard.unity3d.com/landing
 

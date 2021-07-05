@@ -1,72 +1,68 @@
 using System;
-using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 using Utilities;
 
 namespace LobbyRooms
 {
+    /// <summary>
+    /// On the host, this will watch for all players to ready, and once they have, it will prepare for a synchronized countdown.
+    /// </summary>
     public class LobbyReadyCheck : IDisposable
     {
-        public bool ReadyCheckFinished { get; private set; }
-        public bool ReadyCheckSuccess { get; private set; }
         Action<bool> m_OnReadyCheckComplete;
 
-        const float k_Checkinterval = 0.5f;
-        LobbyData m_LobbyData;
-        float m_ReadyTime = 10;
+        float m_ReadyTime = 5;
 
-        public LobbyReadyCheck(LobbyData lobbyData, Action<bool> onReadyCheckComplete, float readyTime = 10)
+        public LobbyReadyCheck(Action<bool> onReadyCheckComplete = null, float readyTime = 5)
         {
             m_OnReadyCheckComplete = onReadyCheckComplete;
-
-            m_LobbyData = lobbyData;
-            m_LobbyData.SetAllPlayersToState(UserStatus.ReadyCheck);
             m_ReadyTime = readyTime;
-            Locator.Get.UpdateSlow.Subscribe(CheckIfReady);
         }
 
-        float m_CheckCount;
-        float m_TimeElapsed = 0;
+        public void BeginCheckingForReady()
+        {
+            Locator.Get.UpdateSlow.Subscribe(OnUpdate);
+        }
+
+        public void EndCheckingForReady()
+        {
+            Locator.Get.UpdateSlow.Unsubscribe(OnUpdate);
+        }
 
         /// <summary>
-        /// Checks the lobby to see if we have all Readied up, or any one has cancelled.
-        /// NOTE: The countdown will be happening at different times with this setup, possibility of a desynched game start.
-        /// Or a player cancellign the last milliseconds resulting in players starting without him
+        /// Checks the lobby to see if we have all Readied up. If so, send out a message with the target time at which to end a countdown.
         /// </summary>
-        void CheckIfReady(float dt)
+        void OnUpdate(float dt)
         {
-            m_TimeElapsed += dt;
-
-            if (m_CheckCount < k_Checkinterval)
-            {
-                m_CheckCount += dt;
+            var room = RoomsQuery.Instance.CurrentRoom;
+            if (room == null || room.Players.Count == 0)
                 return;
-            }
+            
 
-            m_CheckCount = 0;
-            if (m_TimeElapsed + 1 < m_ReadyTime && m_LobbyData.PlayersOfState(UserStatus.Cancelled, 1)) //Dont allow cancels near the end of the ready check
+            int readyCount = room.Players.Count((p) =>
             {
-                FinishedReadyCheck(false);
-            }
-            else if (m_LobbyData.PlayersOfState(UserStatus.Ready))
-            {
-                FinishedReadyCheck(true);
-            }
-            else if (m_TimeElapsed > m_ReadyTime)
-            {
-                FinishedReadyCheck(false);
-            }
-        }
+                if (p.Data?.ContainsKey("UserStatus") != true) // Needs to be "!= true" to handle null properly.
+                    return false;
+                UserStatus status;
+                if (Enum.TryParse(p.Data["UserStatus"].Value, out status))
+                    return status == UserStatus.Ready;
+                return false;
+            });
 
-        void FinishedReadyCheck(bool success)
-        {
-            ReadyCheckSuccess = success;
-            ReadyCheckFinished = true;
-            m_OnReadyCheckComplete?.Invoke(success);
+            if (readyCount == room.Players.Count)
+            {
+                Dictionary<string, string> data = new Dictionary<string, string>();
+                DateTime targetTime = DateTime.Now.AddSeconds(m_ReadyTime);
+                data.Add("AllPlayersReady", targetTime.Ticks.ToString());
+                RoomsQuery.Instance.UpdateRoomDataAsync(data, null);
+                EndCheckingForReady(); // TODO: We'll need to restart checking once we end the relay sequence and return to the room.
+            }
         }
 
         public void Dispose()
         {
-            Locator.Get.UpdateSlow.Unsubscribe(CheckIfReady);
+            EndCheckingForReady();
         }
     }
 }

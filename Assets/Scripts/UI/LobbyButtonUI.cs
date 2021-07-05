@@ -35,6 +35,11 @@ namespace LobbyRooms.UI
             onLobbyPressed?.Invoke(m_DataObserver.observed);
         }
 
+        public void UpdateLobby(LobbyData lobby)
+        {
+            m_DataObserver.observed.CopyObserved(lobby); // TODO: Seems very roundabout.
+        }
+
         public void OnRoomUpdated(LobbyData data)
         {
             lobbyNameText.SetText(data.LobbyName);

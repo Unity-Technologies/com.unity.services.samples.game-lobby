@@ -13,13 +13,11 @@ namespace LobbyRooms
     [Flags]
     public enum UserStatus
     {
-        Lobby = 1, //Connected to lobby
-        ReadyCheck = 2, //User is readying up.
+        Lobby = 1, // Connected to lobby, not ready yet
         Ready = 4, // User clicked ready
         Connecting = 8, // User sent join request through relay
-        Connected = 16, // User Connected through relay
-        Menu = 32,
-        Cancelled = 64 // User Cancelled their Ready Check
+        Connected = 16, // User connected through relay
+        Menu = 32, // User is in a menu, external to the lobby
     }
 
     /// <summary>
@@ -28,12 +26,15 @@ namespace LobbyRooms
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, string emote = null)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, string emote = null, string userStatus = null)
         {
             m_isHost = isHost;
             m_DisplayName = displayName;
-            m_ID = id;
+            m_ID = id;  
             m_Emote = emote;
+            UserStatus status;
+            if (!string.IsNullOrEmpty(userStatus) && Enum.TryParse(userStatus, out status))
+                m_UserStatus = status;
         }
 
         bool m_isHost;
@@ -111,16 +112,11 @@ namespace LobbyRooms
         public override void CopyObserved(LobbyUser oldObserved)
         {
             m_DisplayName = oldObserved.m_DisplayName;
-            m_Emote       = oldObserved.m_Emote;
-            m_ID          = oldObserved.m_ID;
-            m_isHost      = oldObserved.m_isHost;
-            m_UserStatus  = oldObserved.m_UserStatus;
+            m_Emote = oldObserved.m_Emote;
+            m_ID = oldObserved.m_ID;
+            m_isHost = oldObserved.m_isHost;
+            m_UserStatus = oldObserved.m_UserStatus;
             OnChanged(this);
-        }
-
-        ~LobbyUser()
-        {
-            OnDestroy(this);
         }
     }
 }

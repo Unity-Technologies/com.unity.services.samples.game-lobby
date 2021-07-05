@@ -26,13 +26,6 @@ namespace LobbyRooms.Relay
             }
         }
 
-        /// <summary>
-        /// Overwrite the base Path on Awake to point the service somewhere else.
-        /// </summary>
-        public static void SetPath(string path = "https://relay-allocations.cloud.unity3d.com")
-        {
-            Configuration.BasePath = path;
-        }
 
         /// <summary>
         /// Creates a Relay Server, and returns the Allocation (Response.Result.Data.Allocation)

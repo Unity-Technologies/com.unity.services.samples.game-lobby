@@ -31,12 +31,17 @@ namespace Utilities
     public class UpdateSlow : MonoBehaviour, IUpdateSlow
     {
         [SerializeField]
-        private float m_updatePeriod = 1;
+        [Tooltip("Update interval. Note that room Get requests must occur at least 1 second apart, so this period should likely be greater than that.")]
+        private float m_updatePeriod = 1.5f;
         [SerializeField]
-        [Tooltip("If a subscriber to slow update takes longer than this to execute, it will be unsubscribed.")]
+        [Tooltip("If a subscriber to slow update takes longer than this to execute, it can be automatically unsubscribed.")]
         private float m_durationToleranceMs = 10;
+        [SerializeField]
+        [Tooltip("We ordinarily automatically remove a subscriber that takes too long. Otherwise, we'll simply log.")]
+        private bool m_doNotRemoveIfTooLong = false;
         private List<UpdateMethod> m_subscribers = new List<UpdateMethod>();
         private float m_updateTimer = 0;
+        private int m_nextActiveSubIndex = 0; // For staggering subscribers, to prevent spikes of lots of things triggering at once.
 
         public void Awake()
         {
@@ -57,47 +62,70 @@ namespace Utilities
         /// <summary>Safe to call even if onUpdate was not previously Subscribed.</summary>
         public void Unsubscribe(UpdateMethod onUpdate)
         {
-            m_subscribers.Remove(onUpdate);
+            int index = m_subscribers.IndexOf(onUpdate);
+            if (index >= 0)
+            {
+                m_subscribers.Remove(onUpdate);
+                if (index < m_nextActiveSubIndex)
+                    m_nextActiveSubIndex--;
+            }
         }
 
         private void Update()
         {
+            if (m_subscribers.Count == 0)
+                return;
             m_updateTimer += Time.deltaTime;
-            if (m_updateTimer > m_updatePeriod)
+            float effectivePeriod = m_updatePeriod / m_subscribers.Count;
+            while (m_updateTimer > effectivePeriod)
             {
-                float actualUpdate = ((int)(m_updateTimer / m_updatePeriod)) * m_updatePeriod; // If periods would overlap, aggregate them together.
-                m_updateTimer -= actualUpdate;
-                OnUpdate(actualUpdate);
+                m_updateTimer -= effectivePeriod;
+                OnUpdate(effectivePeriod);
             }
         }
 
         public void OnUpdate(float dt)
         {
             Stopwatch stopwatch = new Stopwatch();
-            for (int sub = 0; sub < m_subscribers.Count; sub++)
-            {
-                UpdateMethod onUpdate = m_subscribers[sub];
-                if (onUpdate == null || onUpdate.Target == null) // In case something forgets to Unsubscribe when it dies.
-                {   Remove($"Did not Unsubscribe from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
-                    continue;
-                }
-                if (onUpdate.Method.ToString().Contains("<")) // Detect an anonymous or lambda or local method that cannot be Unsubscribed, by checking for a character that can't exist in a declared method name.
-                {   Remove($"Removed anonymous from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
-                    continue;
-                }
+            m_nextActiveSubIndex = System.Math.Max(0, System.Math.Min(m_subscribers.Count - 1, m_nextActiveSubIndex)); // Just a backup.
+            UpdateMethod onUpdate = m_subscribers[m_nextActiveSubIndex];
+            if (onUpdate == null || onUpdate.Target == null) // In case something forgets to Unsubscribe when it dies.
+            {   Remove(m_nextActiveSubIndex, $"Did not Unsubscribe from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
+                return;
+            }
+            if (onUpdate.Method.ToString().Contains("<")) // Detect an anonymous or lambda or local method that cannot be Unsubscribed, by checking for a character that can't exist in a declared method name.
+            {   Remove(m_nextActiveSubIndex, $"Removed anonymous from UpdateSlow: {onUpdate.Target} : {onUpdate.Method}");
+                return;
+            }
 
-                stopwatch.Restart();
-                onUpdate?.Invoke(dt);
-                stopwatch.Stop();
-                if (stopwatch.ElapsedMilliseconds > m_durationToleranceMs)
-                    Remove($"UpdateSlow subscriber took too long, removing: {onUpdate.Target} : {onUpdate.Method}");
-                
-                void Remove(string msg)
+            stopwatch.Restart();
+            onUpdate?.Invoke(dt);
+            stopwatch.Stop();
+            if (stopwatch.ElapsedMilliseconds > m_durationToleranceMs)
+            {
+                if (!m_doNotRemoveIfTooLong)
+                    Remove(m_nextActiveSubIndex, $"UpdateSlow subscriber took too long, removing: {onUpdate.Target} : {onUpdate.Method}");
+                else
                 {
-                    m_subscribers.RemoveAt(sub);
-                    sub--;
-                    Debug.LogError(msg);
+                    Debug.LogWarning($"UpdateSlow subscriber took too long: {onUpdate.Target} : {onUpdate.Method}");
+                    Increment();
                 }
+            }
+            else
+                Increment();
+
+            void Remove(int index, string msg)
+            {
+                m_subscribers.RemoveAt(index);
+                m_nextActiveSubIndex--;
+                Debug.LogError(msg);
+                Increment();
+            }
+            void Increment()
+            {
+                m_nextActiveSubIndex++;
+                if (m_nextActiveSubIndex >= m_subscribers.Count)
+                    m_nextActiveSubIndex = 0;
             }
         }
 

@@ -2,12 +2,33 @@ using System.Collections.Generic;
 
 namespace LobbyRooms
 {
+    public enum LobbyServiceState
+    {
+        Empty,
+        Fetching,
+        Error,
+        Fetched
+    }
+
     /// <summary>
     /// Holds the latest service data, such as the list of rooms
     /// </summary>
     [System.Serializable]
     public class LobbyServiceData : Observed<LobbyServiceData>
     {
+        LobbyServiceState m_CurrentState = LobbyServiceState.Empty;
+
+        public long lastErrorCode;
+        public LobbyServiceState State
+        {
+            get { return m_CurrentState; }
+            set
+            {
+                m_CurrentState = value;
+                OnChanged(this);
+            }
+        }
+
         Dictionary<string, LobbyData> m_currentLobbies = new Dictionary<string, LobbyData>();
 
         /// <summary>

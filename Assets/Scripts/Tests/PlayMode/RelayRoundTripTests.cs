@@ -20,9 +20,6 @@ namespace Test
         public void Setup()
         {
             m_auth = new LobbyRooms.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
-
-            //TODO remove staging path when moving to production
-            RelayInterface.SetPath("https://relay-allocations-stg.cloud.unity3d.com"); //Defaults to Production Path
         }
 
         [OneTimeTearDown]

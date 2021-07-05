@@ -16,9 +16,6 @@ namespace LobbyRooms.Auth
         /// </summary>
         public SubIdentity_Authentication(Action onSigninComplete = null)
         {
-            Authentication.SetLogLevel(Unity.Services.Authentication.Utilities.LogLevel.Verbose);
-            Authentication.SignedIn += OnSignInChange;
-            Authentication.SignedOut += OnSignInChange;
             DoSignIn(onSigninComplete);
         }
         ~SubIdentity_Authentication()
@@ -29,8 +26,8 @@ namespace LobbyRooms.Auth
         {
             if (!m_hasDisposed)
             {
-                Authentication.SignedIn -= OnSignInChange;
-                Authentication.SignedOut -= OnSignInChange;
+                AuthenticationService.Instance.SignedIn -= OnSignInChange;
+                AuthenticationService.Instance.SignedOut -= OnSignInChange;
                 m_hasDisposed = true;
             }
         }
@@ -38,14 +35,18 @@ namespace LobbyRooms.Auth
         private async void DoSignIn(Action onSigninComplete)
         {
             await UnityServices.Initialize();
-            await Authentication.SignInAnonymously();
-//            Authentication.SignOut(); // TODO: I think we want to sign out at *some* point? But then the UAS anonymous token changes, so they can't access any outstanding rooms they've created.
+            //Authentication.SetLogLevel(Unity.Services.Authentication.Utilities.LogLevel.Verbose); TODO: Is there a new API for this?
+            AuthenticationService.Instance.SignedIn += OnSignInChange;
+            AuthenticationService.Instance.SignedOut += OnSignInChange;
+
+            if (!AuthenticationService.Instance.IsSignedIn)
+                await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Note: We don't want to sign out later, since that changes the UAS anonymous token, which would prevent the player from exiting rooms they're already in.
             onSigninComplete?.Invoke();
         }
 
         private void OnSignInChange()
         {
-            SetContent("id", Authentication.PlayerId);
+            SetContent("id", AuthenticationService.Instance.PlayerId);
         }
     }
 }

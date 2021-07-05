@@ -289,7 +289,7 @@ GameObject:
   - component: {fileID: 788426075660952210}
   - component: {fileID: 7885056472121154813}
   m_Layer: 5
-  m_Name: PlayerCardPanel
+  m_Name: UserCardPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -350,11 +350,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9557a5d232068a149987bc0753800f26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
   showing: 0
   m_DisplayNameText: {fileID: 3540056819003737500}
   m_StatusText: {fileID: 3667934756810823183}
   m_EmoteText: {fileID: 7097926522474954833}
-  assigned: 0
 --- !u!114 &788426075660952210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -382,6 +384,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  observeOnStart: 0
 --- !u!114 &7885056472121154813
 MonoBehaviour:
   m_ObjectHideFlags: 0

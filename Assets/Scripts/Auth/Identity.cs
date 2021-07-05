@@ -52,7 +52,7 @@ namespace LobbyRooms.Auth
     /// One will be created for the local player, as well as for each other member of the room.
     /// (TODO: If that's the case, reevaluate the usage as a Located service.)
     /// </summary>
-    public class Identity : IIdentity
+    public class Identity : IIdentity, IDisposable
     {
         private Dictionary<IIdentityType, SubIdentity> m_subIdentities = new Dictionary<IIdentityType, SubIdentity>();
 
@@ -67,9 +67,6 @@ namespace LobbyRooms.Auth
             m_subIdentities.Add(IIdentityType.Auth, new SubIdentity_Authentication(callbackOnAuthLogin));
         }
 
-        // Need: Query for the current ID for this player with whatever service, to then be able to get info from that service.
-        // e.g. What is this player's Vivox SIP so that we can join a channel?
-
         public SubIdentity GetSubIdentity(IIdentityType identityType)
         {
             return m_subIdentities[identityType];
@@ -83,6 +80,13 @@ namespace LobbyRooms.Auth
                 foreach (var entry in prevIdentity.m_subIdentities)
                     m_subIdentities.Add(entry.Key, entry.Value);
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var sub in m_subIdentities)
+                if (sub.Value is IDisposable)
+                    (sub.Value as IDisposable).Dispose();
         }
     }
 }
