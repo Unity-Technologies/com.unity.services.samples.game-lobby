@@ -10,10 +10,10 @@ Features Covered:
   - Emotes
   - Player Names
   - Player Ready Check State  
-- Lobby Joining
-- Relay Service Creation
+- Lobby Join
+- Relay Server Creation
 - Relay Code Generation
-- Relay Service Joining
+- Relay Server Join
 
 # Service Setup
 ** Create an organization.
@@ -38,43 +38,50 @@ Features Covered:
 	- Navigate to https://dashboard.unity3d.com/landing
 
 	- Select Relay from the drop-down list
-		![Relay](Documentation/Images/dashboard1.PNG?raw=true "Relay location.")
+		![Relay](Documentation/Images/dashboard1_beta.PNG?raw=true "Relay location.")
+
 	- Select your project
-		![Project Select](Documentation/Images/dashboard2.PNG?raw=true "Project Select")
+	
 	- In the bottom left, select "Get Started"
-		![Get Started Location is Bottom Right](Documentation/Images/dashboard3.PNG?raw=true "Bottom right for Getting Started")
+	
 	- Follow the steps until you hit "Relay On"
 		(For this project, you can skip downloading the Transport)
-		![Relay: On!](Documentation/Images/dashboard4.PNG?raw=true "Hit Relay On")
+		
 
 # Solo Testing
 
+Create a new Unity Build of the project in the OS of your choice.
+Because the Authentication service creates a unique ID for builds, you will need to host a lobby in Build and join in Editor or vice versa.
 
-**1. Press Start to enter the Lobby Menu.**
-[img=Documentation/Images/mainMenu1.PNG]
-![Lobby Menu](Documentation/Images/mainMenu1.PNG?raw=true "Lobby Menu")
+**1. Start the game, and hit start to enter the Room List, It Queries the rooms service for available Lobbies, there wont be any right now.
 
-**2. The Join menu Queries the rooms service for available Lobbies, there wont be any right now.
+![Join Menu](Documentation/Images/tutorial_1_lobbyList.PNG?raw=true "Join Menu")
 
-![Join Menu](Documentation/Images/joinMenu2.PNG?raw=true "Join Menu")
+**2 The Create Menu Lets you make a new Lobby**
 
+![Create Menu](Documentation/Images/tutorial_2_createMenu.PNG?raw=true "Create Menu")
 
-**3 The Create Menu Lets you make a new Lobby**
+**3 This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
+For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby**
 
-![Create Menu](Documentation/Images/createMenu3.PNG?raw=true "Create Menu")
-
-
-**4 Enter a Lobby Name of your preference and go!**
-
-![Create Menu Name](Documentation/Images/createMenuName4.PNG?raw=true "Create Menu Name")
+![Lobby View](Documentation/Images/tutorial_3_HostGame.PNG?raw=true "Lobby View")
 
 
-**5 This is the Lobby, It has a room code for you to share with your friends to allow them to join.
-For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby
+**4 Open the second game instance in Editor or in Build, you should now see your Lobby in the list.
 
-![Lobby View](Documentation/Images/lobbyView5.PNG?raw=true "Lobby View")
+![Populated Join View](Documentation/Images/tutorial_4_newLobby.PNG?raw=true "Populated Join View")
 
 
-**6 TheLobby holds up to 4 players and will pass the Relay code once all the players are ready.**
+**5 The Lobby holds up to 4 players and will pass the Relay code once all the players are ready.**
 
-![Relay Ready!](Documentation/Images/lobbyViewIP6.PNG?raw=true "Create Menu Name")
+![Relay Ready!](Documentation/Images/tutorial_5_editorCow.PNG?raw=true "Create Menu Name")
+
+
+**6 The countdown will start after the rooms data synch has completed. (It is a little slow due to our refresh rate being low at the moment)**
+
+![Countdown!](Documentation/Images/tutorial_6_countDown.PNG?raw=true "Countdown")
+
+
+**7 The relay service IP gets passed to all users in the lobby, and this is where you would connect to a server, if you had one.**
+
+![InGame!](Documentation/Images/tutorial_7_ingame.PNG?raw=true "InGame")
