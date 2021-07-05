@@ -3,17 +3,17 @@
 
 A Unity Project Sample showing how to integrate Rooms and Relay into a typical Lobby experience use case.
 
-Features Covered:
-- Lobby Creation
-- Lobby Query
-- Lobby Data Sync
-  - Emotes
-  - Player Names
-  - Player Ready Check State  
-- Lobby Join
-- Relay Server Creation
-- Relay Code Generation
-- Relay Server Join
+	Features Covered:
+	- Lobby Creation
+	- Lobby Query
+	- Lobby Data Sync
+	  - Emotes
+	  - Player Names
+	  - Player Ready Check State  
+	- Lobby Join
+	- Relay Server Creation
+	- Relay Code Generation
+	- Relay Server Join
 
 # Service Setup
 ** Create an organization.
@@ -27,9 +27,12 @@ In the project, navigate to **Edit => Project Settings => Services**
 ![Services Editor](~Documentation/Images/services1.PNG?raw=true)
 	
 	
-Select your organization from the drop-down, and push **Create Project ID**
-	
+Select your organization from the drop-down, and push **Create Project ID**.
+
+In the end your Service window should look like this!
 ![Services Editor Complete](~Documentation/Images/services2.PNG?raw=true)
+
+
 
 # Lobby:
 We use the lobby service to create a space that our users can join and share data through.
@@ -61,16 +64,16 @@ Follow the steps until you hit "Relay On"
 Create a new Unity Build of the project in the OS of your choice.
 Because the Authentication service creates a unique ID for builds, you will need to host a lobby in Build and join in Editor or vice versa.
 
-1. Start the game, and hit start to enter the Room List, It Queries the rooms service for available Lobbies, there wont be any right now.
+1. Start the game, and hit start to enter the Room List. This Queries the rooms service for available Lobbies, there wont be any right now.
 
 ![Join Menu](~Documentation/Images/tutorial_1_lobbyList.png?raw=true "Join Menu")
 
-2 The Create Menu Lets you make a new Lobby
+2 The Create Menu Lets you make a new Lobby.
 
 ![Create Menu](~Documentation/Images/tutorial_2_createMenu.png?raw=true)
 
 3 This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
-For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby
+For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby.
 
 ![Lobby View](~Documentation/Images/tutorial_3_HostGame.png?raw=true)
 
