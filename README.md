@@ -18,34 +18,42 @@ Features Covered:
 # Service Setup
 ** Create an organization.
 
-	- Follow the attached guide to set up your cloud organization:
-	[url=https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-]Organization Tutorial[/url]
+Follow the attached guide to set up your cloud organization:
+
+[Organization Tutorial](https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-)
 	
-	- In the project, navigate to **Edit => Project Settings => Services**
-		![Services Editor](Documentation/Images/services1.PNG?raw=true "Service in Editor")
+In the project, navigate to **Edit => Project Settings => Services**
+	
+![Services Editor](~Documentation/Images/services1.PNG?raw=true)
 	
 	
-	- Select your organization from the drop-down, and push **Create Project ID**
-		![Services Editor Complete](Documentation/Images/services2.PNG?raw=true "Service in Editor set up.")
+Select your organization from the drop-down, and push **Create Project ID**
+	
+![Services Editor Complete](~Documentation/Images/services2.PNG?raw=true)
 
 # Lobby:
-	**[url=http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service]Lobby Overview[/url] **
+We use the lobby service to create a space that our users can join and share data through.
+
+[Lobby Overview](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
 
 
-# Relay Setup:
-	**[url=http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview]Relay Overview[/url] **
-	
-	- Navigate to https://dashboard.unity3d.com/landing
+# Relay:
+We use the Relay service to obfuscate the Hosts' IP, while still allowing them to locally host strangers.
 
-	- Select Relay from the drop-down list
-		![Relay](Documentation/Images/dashboard1_beta.PNG?raw=true "Relay location.")
+[Relay Overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
 
-	- Select your project
-	
-	- In the bottom left, select "Get Started"
-	
-	- Follow the steps until you hit "Relay On"
-		(For this project, you can skip downloading the Transport)
+Navigate to https://dashboard.unity3d.com/landing
+
+Select Relay from the drop-down list
+
+![Relay](~Documentation/Images/dashboard1_beta.png?raw=true "Relay location.")
+
+Select your project
+
+In the bottom left, select "Get Started"
+
+Follow the steps until you hit "Relay On"
+(For this project, you can skip downloading the Transport)
 		
 
 # Solo Testing
@@ -53,35 +61,35 @@ Features Covered:
 Create a new Unity Build of the project in the OS of your choice.
 Because the Authentication service creates a unique ID for builds, you will need to host a lobby in Build and join in Editor or vice versa.
 
-**1. Start the game, and hit start to enter the Room List, It Queries the rooms service for available Lobbies, there wont be any right now.
+1. Start the game, and hit start to enter the Room List, It Queries the rooms service for available Lobbies, there wont be any right now.
 
-![Join Menu](Documentation/Images/tutorial_1_lobbyList.PNG?raw=true "Join Menu")
+![Join Menu](~Documentation/Images/tutorial_1_lobbyList.png?raw=true "Join Menu")
 
-**2 The Create Menu Lets you make a new Lobby**
+2 The Create Menu Lets you make a new Lobby
 
-![Create Menu](Documentation/Images/tutorial_2_createMenu.PNG?raw=true "Create Menu")
+![Create Menu](~Documentation/Images/tutorial_2_createMenu.png?raw=true)
 
-**3 This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
-For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby**
+3 This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
+For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby
 
-![Lobby View](Documentation/Images/tutorial_3_HostGame.PNG?raw=true "Lobby View")
-
-
-**4 Open the second game instance in Editor or in Build, you should now see your Lobby in the list.
-
-![Populated Join View](Documentation/Images/tutorial_4_newLobby.PNG?raw=true "Populated Join View")
+![Lobby View](~Documentation/Images/tutorial_3_HostGame.png?raw=true)
 
 
-**5 The Lobby holds up to 4 players and will pass the Relay code once all the players are ready.**
+4 Open the second game instance in Editor or in Build, you should now see your Lobby in the list.
 
-![Relay Ready!](Documentation/Images/tutorial_5_editorCow.PNG?raw=true "Create Menu Name")
-
-
-**6 The countdown will start after the rooms data synch has completed. (It is a little slow due to our refresh rate being low at the moment)**
-
-![Countdown!](Documentation/Images/tutorial_6_countDown.PNG?raw=true "Countdown")
+![Populated Join View](~Documentation/Images/tutorial_4_newLobby.png?raw=true)
 
 
-**7 The relay service IP gets passed to all users in the lobby, and this is where you would connect to a server, if you had one.**
+5 The Lobby holds up to 4 players and will pass the Relay code once all the players are ready.
 
-![InGame!](Documentation/Images/tutorial_7_ingame.PNG?raw=true "InGame")
+![Relay Ready!](~Documentation/Images/tutorial_5_editorCow.png?raw=true)
+
+
+6 The countdown will start after the rooms data synch has completed. (It is a little slow due to our refresh rate being low at the moment)
+
+![Countdown!](~Documentation/Images/tutorial_6_countDown.png?raw=true)
+
+
+7 The relay service IP gets passed to all users in the lobby, and this is where you would connect to a server, if you had one.
+
+![InGame!](~Documentation/Images/tutorial_7_ingame.png?raw=true)
