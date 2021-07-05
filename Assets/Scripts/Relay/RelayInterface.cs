@@ -31,7 +31,8 @@ namespace LobbyRooms.Relay
         /// </summary>
         public static void SetPath(string path = "https://relay-allocations.cloud.unity3d.com")
         {
-            Configuration.BasePath = path;
+            // TODO: Necessary?
+            //Configuration.BasePath = path;
         }
 
         /// <summary>

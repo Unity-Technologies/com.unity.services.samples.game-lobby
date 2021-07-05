@@ -554,8 +554,7 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
-  scriptingDefineSymbols:
-    1: AUTHENTICATION_TESTING_STAGING_UAS
+  scriptingDefineSymbols: {}
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
@@ -629,7 +628,7 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
-    Analytics: 0
+    Analytics: 1
     Build: 0
     Collab: 0
     Game Performance: 0
@@ -649,11 +648,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: d8db80a5-219b-481e-9d1a-d0537563ead1
+  cloudProjectId: 0bf0426b-e1fd-4251-82d0-3eea033ef1ad
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: com.unity.services.samples.lobby-rooms-staging
-  organizationId: natebuckunity
+  projectName: com.unity.services.samples.lobby-rooms
+  organizationId: operate-samples
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   virtualTexturingSupportEnabled: 0

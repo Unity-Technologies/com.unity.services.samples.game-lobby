@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections;
+using System.Linq;
 using Unity.Services.Rooms;
 using Unity.Services.Rooms.Models;
 using UnityEngine;
@@ -26,11 +27,19 @@ namespace Test
             RoomsInterface.SetPath(stagingpath); //Defaults to Test Path
         }
 
+        [UnityTearDown]
+        public IEnumerator PerTestTeardown()
+        {
+            if (m_workingRoomId != null)
+            {   RoomsInterface.DeleteRoomAsync(m_workingRoomId, null);
+                m_workingRoomId = null;
+            }
+            yield return new WaitForSeconds(0.5f); // We need a yield anyway, so wait long enough to probably delete the room. There currently (6/22/2021) aren't other tests that would have issues if this took longer.
+        }
+
         [OneTimeTearDown]
         public void Teardown()
         {
-            if (m_workingRoomId != null)
-                RoomsInterface.DeleteRoomAsync(m_workingRoomId, null);
             m_auth?.Dispose();
             LogAssert.ignoreFailingMessages = false;
         }
@@ -46,11 +55,24 @@ namespace Test
             if (!m_didSigninComplete)
                 Assert.Fail("Did not sign in.");
 
+            // Since we're signed in through the same pathway as the actual game, the list of rooms will include any that have been made in the game itself, so we should account for those.
+            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request, in case a previous test had one; Query requests can only occur at a rate of 1 per second.
+            Response<QueryResponse> queryResponse = null;
+            float timeout = 5;
+            RoomsInterface.QueryAllRoomsAsync((qr) => { queryResponse = qr; });
+            while (queryResponse == null && timeout > 0)
+            {   yield return new WaitForSeconds(0.25f);
+                timeout -= 0.25f;
+            }
+            Assert.Greater(timeout, 0, "Timeout check (query #0)");
+            Assert.IsTrue(queryResponse.Status >= 200 && queryResponse.Status < 300, "QueryAllRoomsAsync should return a success code. (#0)");
+            int numRoomsIni = queryResponse.Result.Results?.Count ?? 0;
+
             // Create a test room.
             Response<Room> createResponse = null;
-            float timeout = 5;
+            timeout = 5;
             string roomName = "TestRoom-JustATestRoom-123";
-            RoomsInterface.CreateRoomAsync(m_auth.GetContent("id"), roomName, 123, (r) => { createResponse = r; });
+            RoomsInterface.CreateRoomAsync(m_auth.GetContent("id"), roomName, 100, false, (r) => { createResponse = r; });
             while (createResponse == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -61,7 +83,8 @@ namespace Test
             Assert.AreEqual(roomName, createResponse.Result.Name, "Created room should match the provided name.");
 
             // Query for the test room via QueryAllRooms.
-            Response<QueryResponse> queryResponse = null;
+            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
+            queryResponse = null;
             timeout = 5;
             RoomsInterface.QueryAllRoomsAsync((qr) => { queryResponse = qr; });
             while (queryResponse == null && timeout > 0)
@@ -70,9 +93,9 @@ namespace Test
             }
             Assert.Greater(timeout, 0, "Timeout check (query #1)");
             Assert.IsTrue(queryResponse.Status >= 200 && queryResponse.Status < 300, "QueryAllRoomsAsync should return a success code. (#1)");
-            Assert.AreEqual(1, queryResponse.Result.Results.Count, "Queried rooms list should contain just the test room. (Are there rooms you created and did not yet delete?)"); // TODO: Can we get a test account such that having actual rooms open doesn't impact this?
-            Assert.AreEqual(roomName, queryResponse.Result.Results[0].Name, "Checking queried room for name.");
-            Assert.AreEqual(m_workingRoomId, queryResponse.Result.Results[0].Id, "Checking queried room for ID.");
+            Assert.AreEqual(1 + numRoomsIni, queryResponse.Result.Results.Count, "Queried rooms list should contain just the test room. (Are there rooms you created and did not yet delete?)"); // TODO: Can we get a test account such that having actual rooms open doesn't impact this?
+            Assert.IsTrue(queryResponse.Result.Results.Where(r => r.Name == roomName).Count() == 1, "Checking queried room for name.");
+            Assert.IsTrue(queryResponse.Result.Results.Where(r => r.Id == m_workingRoomId).Count() == 1, "Checking queried room for ID.");
 
             // Query for solely the test room via GetRoom.
             Response<Room> getResponse = null;
@@ -100,6 +123,7 @@ namespace Test
             m_workingRoomId = null;
 
             // Query to ensure the room is gone.
+            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
             Response<QueryResponse> queryResponseTwo = null;
             timeout = 5;
             RoomsInterface.QueryAllRoomsAsync((qr) => { queryResponseTwo = qr; });
@@ -109,7 +133,7 @@ namespace Test
             }
             Assert.Greater(timeout, 0, "Timeout check (query #2)");
             Assert.IsTrue(queryResponseTwo.Status >= 200 && queryResponseTwo.Status < 300, "QueryAllRoomsAsync should return a success code. (#2)");
-            Assert.AreEqual(0, queryResponseTwo.Result.Results.Count, "Queried rooms list should be empty.");
+            Assert.AreEqual(numRoomsIni, queryResponseTwo.Result.Results.Count, "Queried rooms list should be empty.");
 
             // Some error messages might be asynchronous, so to reduce spillover into other tests, just wait here for a bit before proceeding.
             yield return new WaitForSeconds(3);
@@ -126,7 +150,7 @@ namespace Test
                 Assert.Fail("Did not sign in.");
 
             bool? didComplete = null;
-            RoomsInterface.CreateRoomAsync("ThisStringIsInvalidHere", "room name", 123, (r) => { didComplete = (r == null); });
+            RoomsInterface.CreateRoomAsync("ThisStringIsInvalidHere", "room name", 123, false, (r) => { didComplete = (r == null); });
             float timeout = 5;
             while (didComplete == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);

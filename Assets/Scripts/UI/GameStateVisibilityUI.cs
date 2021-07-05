@@ -5,7 +5,8 @@ namespace LobbyRooms.UI
     [RequireComponent(typeof(LocalGameStateObserver))]
     public class GameStateVisibilityUI : ObserverPanel<LocalGameState>
     {
-        public GameState ShowThisWhen;
+        [SerializeField]
+        GameState ShowThisWhen;
 
         public override void ObservedUpdated(LocalGameState observed)
         {

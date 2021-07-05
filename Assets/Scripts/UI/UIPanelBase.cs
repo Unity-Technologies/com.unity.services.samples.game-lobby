@@ -23,8 +23,6 @@ namespace LobbyRooms.UI
         [SerializeField] // TODO: Why serialized? Just for testing?
         bool showing;
 
-        // TODO: Initial state isn't captured. Consider reworking the UI so that visibility state is captured in data/code somewhere and the UI merely observes it.
-
         public void Toggle()
         {
             if (showing)
@@ -50,7 +48,5 @@ namespace LobbyRooms.UI
             showing = false;
             m_onVisibilityChange?.Invoke(false);
         }
-
-   
     }
 }

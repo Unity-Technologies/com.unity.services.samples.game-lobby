@@ -1,28 +1,37 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace LobbyRooms
 {
+    [Flags]
+    public enum LobbyState
+    {
+        Lobby = 1,
+        CountDown = 2,
+        InGame = 4
+    }
+    
     public struct LobbyInfo
     {
         public string RoomID { get; set; }
         public string RoomCode { get; set; }
         public string RelayCode { get; set; }
-        public ServerAddress RelayServer { get; set; }
         public string LobbyName { get; set; }
         public bool Private { get; set; }
         public int MaxPlayerCount { get; set; }
-
+        public LobbyState State { get; set; }
+        
         public LobbyInfo(LobbyInfo existing)
         {
             RoomID = existing.RoomID;
             RoomCode = existing.RoomCode;
             RelayCode = existing.RelayCode;
-            RelayServer = existing.RelayServer;
             LobbyName = existing.LobbyName;
             Private = existing.Private;
             MaxPlayerCount = existing.MaxPlayerCount;
+            State = existing.State;
         }
 
         public LobbyInfo(string roomCode)
@@ -30,10 +39,10 @@ namespace LobbyRooms
             RoomID = null;
             RoomCode = roomCode;
             RelayCode = null;
-            RelayServer = null;
             LobbyName = null;
             Private = false;
             MaxPlayerCount = -1;
+            State = LobbyState.Lobby;
         }
     }
 
@@ -46,12 +55,50 @@ namespace LobbyRooms
         Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
         public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
 
+        #region LocalLobbyData
         private LobbyInfo m_data;
-
         public LobbyInfo Data
         {
             get { return new LobbyInfo(m_data); }
         }
+
+        float m_CountDownTime;
+
+        public float CountDownTime
+        {
+            get { return m_CountDownTime; }
+            set
+            {
+                m_CountDownTime = value;
+                OnChanged(this);
+            }
+        }
+
+        DateTime m_TargetEndTime;
+
+        public DateTime TargetEndTime
+        {
+            get => m_TargetEndTime;
+            set
+            {
+                m_TargetEndTime = value;
+                OnChanged(this);
+            }
+        }
+
+        ServerAddress m_relayServer;
+
+        public ServerAddress RelayServer
+        {
+            get => m_relayServer;
+            set
+            {
+                m_relayServer = value;
+                OnChanged(this);
+            }
+        }
+
+        #endregion
 
         public void AddPlayer(LobbyUser user)
         {
@@ -64,6 +111,7 @@ namespace LobbyRooms
             DoAddPlayer(user);
             OnChanged(this);
         }
+
         private void DoAddPlayer(LobbyUser user)
         {
             m_LobbyUsers.Add(user.ID, user);
@@ -71,6 +119,12 @@ namespace LobbyRooms
         }
 
         public void RemovePlayer(LobbyUser user)
+        {
+            DoRemoveUser(user);
+            OnChanged(this);
+        }
+
+        private void DoRemoveUser(LobbyUser user)
         {
             if (!m_LobbyUsers.ContainsKey(user.ID))
             {
@@ -80,7 +134,6 @@ namespace LobbyRooms
 
             m_LobbyUsers.Remove(user.ID);
             user.onChanged -= OnChangedUser;
-            OnChanged(this);
         }
 
         private void OnChangedUser(LobbyUser user)
@@ -118,16 +171,6 @@ namespace LobbyRooms
             }
         }
 
-        public ServerAddress RelayServer
-        {
-            get => m_data.RelayServer;
-            set
-            {
-                m_data.RelayServer = value;
-                OnChanged(this);
-            }
-        }
-
         public string LobbyName
         {
             get => m_data.LobbyName;
@@ -138,6 +181,16 @@ namespace LobbyRooms
             }
         }
 
+        public LobbyState State
+        {
+            get => m_data.State;
+            set
+            {
+                m_data.State = value;
+                OnChanged(this);
+            }
+        }
+        
         public bool Private
         {
             get => m_data.Private;
@@ -181,41 +234,33 @@ namespace LobbyRooms
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();
             else
             {
-                List<string> toRemove = new List<string>();
-                foreach (var m_user in m_LobbyUsers)
+                List<LobbyUser> toRemove = new List<LobbyUser>();
+                foreach (var user in m_LobbyUsers)
                 {
-                    if (oldUsers.ContainsKey(m_user.Key))
-                        m_user.Value.CopyObserved(oldUsers[m_user.Key]);
+                    if (oldUsers.ContainsKey(user.Key))
+                        user.Value.CopyObserved(oldUsers[user.Key]);
                     else
-                        toRemove.Add(m_user.Key);
+                        toRemove.Add(user.Value);
                 }
-                foreach (string remove in toRemove)
-                    m_LobbyUsers.Remove(remove);
+
+                foreach (var remove in toRemove)
+                {
+                    DoRemoveUser(remove);
+                }
+
                 foreach (var oldUser in oldUsers)
                 {
                     if (!m_LobbyUsers.ContainsKey(oldUser.Key))
                         DoAddPlayer(oldUser.Value);
                 }
             }
+
             OnChanged(this);
         }
 
         public override void CopyObserved(LobbyData oldObserved)
         {
             CopyObserved(oldObserved.Data, oldObserved.m_LobbyUsers);
-        }
-
-        public void SetAllPlayersToState(UserStatus status)
-        {
-            foreach (var user in LobbyUsers.Values)
-            {
-                user.UserStatus = status;
-            }
-        }
-
-        ~LobbyData()
-        {
-            OnDestroy(this);
         }
     }
 }

@@ -22,8 +22,12 @@ namespace LobbyRooms.Rooms
             private async void DoRequest(Task<T> task, Action<T> onComplete)
             {
                 T result = default;
+                string currentTrace = System.Environment.StackTrace;
                 try {
-                    result = await task; // TODO: We lose call stacks here. Can that be prevented?
+                    result = await task;
+                } catch (Exception e) {
+                    Exception eFull = new Exception($"Call stack before async call:\n{currentTrace}\n", e);
+                    throw eFull;
                 } finally {
                     onComplete?.Invoke(result);
                 }
@@ -35,18 +39,19 @@ namespace LobbyRooms.Rooms
         /// </summary>
         public static void SetPath(string path = "https://rooms.cloud.unity3d.com/v1")
         {
-            Configuration.BasePath = path;
+            // TODO: Necessary?
+            //Configuration.BasePath = path;
         }
 
         private const int k_maxRoomsToShow = 64;
 
-        public static void CreateRoomAsync(string requesterUASId, string roomName, int maxPlayers, Action<Response<Room>> onComplete)
+        public static void CreateRoomAsync(string requesterUASId, string roomName, int maxPlayers, bool isPrivate, Action<Response<Room>> onComplete)
         {
             CreateRoomRequest createRequest = new CreateRoomRequest(new CreateRequest(
                 name: roomName,
                 player: new Unity.Services.Rooms.Models.Player(requesterUASId),
                 maxPlayers: maxPlayers,
-                isPrivate: false
+                isPrivate: isPrivate
             ));
             var task = RoomsService.RoomsApiClient.CreateRoomAsync(createRequest);
             new InProgressRequest<Response<Room>>(task, onComplete);
@@ -100,7 +105,7 @@ namespace LobbyRooms.Rooms
             new InProgressRequest<Response<Room>>(task, onComplete);
         }
 
-        public static void UpdatePlayerAsync(string roomId, string playerId, Dictionary<string, DataObject> data, Action<Response<Room>> onComplete)
+        public static void UpdatePlayerAsync(string roomId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Response<Room>> onComplete)
         {
             UpdatePlayerRequest updateRequest = new UpdatePlayerRequest(roomId, playerId, new PlayerUpdateRequest(
                 data: data

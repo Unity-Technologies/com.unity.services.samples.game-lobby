@@ -14,8 +14,7 @@ namespace LobbyRooms
     {
         Menu = 1,
         Lobby = 2,
-        InGame = 4,
-        Joining = 8
+        JoinMenu = 4,
     }
 
     /// <summary>

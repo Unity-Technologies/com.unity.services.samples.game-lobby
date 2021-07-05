@@ -46,9 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4f7225f73bfe6a4d9133ee45ac9cd73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LocalGameStateObservers:
-  - {fileID: 0}
-  - {fileID: 0}
+  m_logMode: 0
+  m_GameStateObservers: []
   m_LobbyDataObservers:
   - {fileID: 0}
   - {fileID: 0}
@@ -69,6 +68,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_updatePeriod: 2
   m_durationToleranceMs: 50
+  m_doNotRemoveIfTooLong: 1
 --- !u!114 &13498602845527961
 MonoBehaviour:
   m_ObjectHideFlags: 0
