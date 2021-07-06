@@ -17,19 +17,19 @@ namespace LobbyRelaySample
         [SerializeField]
         List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
         [SerializeField]
-        List<LobbyDataObserver> m_LobbyDataObservers = new List<LobbyDataObserver>();
+        List<LocalLobbyObserver> m_LocalLobbyObservers = new List<LocalLobbyObserver>();
         [SerializeField]
         List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
         [SerializeField]
         List<LobbyServiceDataObserver> m_LobbyServiceObservers = new List<LobbyServiceDataObserver>();
 
-        private RoomsContentHeartbeat m_roomsContentHeartbeat = new RoomsContentHeartbeat();
+        private LobbyContentHeartbeat m_roomsContentHeartbeat = new LobbyContentHeartbeat();
 
         LobbyUser m_localUser;
-        LobbyData m_lobbyData;
+        LocalLobby m_localLobby;
         LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         LocalGameState m_localGameState = new LocalGameState();
-        LobbyReadyCheck m_LobbyReadyCheck;
+        ReadyCheck m_ReadyCheck;
 
         public void Awake()
         {
@@ -39,7 +39,7 @@ namespace LobbyRelaySample
             var unused = Locator.Get;
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
             Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
-            m_LobbyReadyCheck = new LobbyReadyCheck(null, 7);
+            m_ReadyCheck = new ReadyCheck(7);
             Application.wantsToQuit += OnWantToQuit;
         }
 
@@ -56,32 +56,32 @@ namespace LobbyRelaySample
             {
                 m_localUser.DisplayName = (string)msg;
             }
-            else if (type == MessageType.CreateRoomRequest)
+            else if (type == MessageType.CreateLobbyRequest)
             {
-                var createRoomData = (LobbyData)msg;
-                RoomsQuery.Instance.CreateRoomAsync(createRoomData.LobbyName, createRoomData.MaxPlayerCount, createRoomData.Private, (r) =>
+                var createRoomData = (LocalLobby)msg;
+                LobbyAsyncRequests.Instance.CreateLobbyAsync(createRoomData.LobbyName, createRoomData.MaxPlayerCount, createRoomData.Private, (r) =>
                 {
-                    Lobby.ToLobbyData.Convert(r, m_lobbyData, m_localUser);
+                    Lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
                     OnCreatedRoom();
                 }, OnFailedJoin);
             }
-            else if (type == MessageType.JoinRoomRequest)
+            else if (type == MessageType.JoinLobbyRequest)
             {
                 LobbyInfo roomData = (LobbyInfo)msg;
-                RoomsQuery.Instance.JoinRoomAsync(roomData.RoomID, roomData.RoomCode, (r) =>
+                LobbyAsyncRequests.Instance.JoinLobbyAsync(roomData.LobbyID, roomData.LobbyCode, (r) =>
                 {
-                    Lobby.ToLobbyData.Convert(r, m_lobbyData, m_localUser);
+                    Lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
                     OnJoinedRoom();
                 }, OnFailedJoin);
             }
-            else if (type == MessageType.QueryRooms)
+            else if (type == MessageType.QueryLobbies)
             {
                 m_lobbyServiceData.State = LobbyServiceState.Fetching;
-                RoomsQuery.Instance.RetrieveRoomListAsync(
+                LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
                     qr =>
                     {
                         if (qr != null)
-                            OnRefreshed(Lobby.ToLobbyData.Convert(qr));
+                            OnRefreshed(Lobby.ToLocalLobby.Convert(qr));
                     }, er =>
                     {
                         long errorLong = 0;
@@ -105,7 +105,7 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.Client_EndReadyCountdownAt)
             {
-                m_lobbyData.TargetEndTime = (DateTime)msg;
+                m_localLobby.TargetEndTime = (DateTime)msg;
                 BeginCountDown();
             }
             else if (type == MessageType.ToLobby)
@@ -116,10 +116,9 @@ namespace LobbyRelaySample
 
         void Start()
         {
-            m_lobbyData = new LobbyData
+            m_localLobby = new LocalLobby
             {
                 State = LobbyState.Lobby
-                    
             };
             m_localUser = new LobbyUser();
             m_localUser.DisplayName = "New Player";
@@ -142,12 +141,12 @@ namespace LobbyRelaySample
                     m_GameStateObservers.Add(gameStateObs);
             }
 
-            foreach (var lobbyData in FindObjectsOfType<LobbyDataObserver>())
+            foreach (var localLobby in FindObjectsOfType<LocalLobbyObserver>())
             {
-                if (!lobbyData.observeOnStart)
+                if (!localLobby.observeOnStart)
                     continue;
-                if (!m_LobbyDataObservers.Contains(lobbyData))
-                    m_LobbyDataObservers.Add(lobbyData);
+                if (!m_LocalLobbyObservers.Contains(localLobby))
+                    m_LocalLobbyObservers.Add(localLobby);
             }
 
             foreach (var lobbyUserObs in FindObjectsOfType<LobbyUserObserver>())
@@ -166,12 +165,12 @@ namespace LobbyRelaySample
                 if (!m_LobbyServiceObservers.Contains(lobbyServiceObs))
                     m_LobbyServiceObservers.Add(lobbyServiceObs);
             }
-            
+
             if (m_GameStateObservers.Count < 4)
                 Debug.LogWarning($"Scene has less than the default expected Game State Observers, ensure all the observers in the scene that need to watch the gameState are registered in the LocalGameStateObservers List.");
 
-            if (m_LobbyDataObservers.Count < 8)
-                Debug.LogWarning($"Scene has less than the default expected Lobby Data Observers, ensure all the observers in the scene that need to watch the Local Lobby Data are registered in the LobbyDataObservers List.");
+            if (m_LocalLobbyObservers.Count < 8)
+                Debug.LogWarning($"Scene has less than the default expected Local Lobby Observers, ensure all the observers in the scene that need to watch the Local Lobby are registered in the LocalLobbyObservers List.");
 
             if (m_LocalUserObservers.Count < 3)
                 Debug.LogWarning($"Scene has less than the default expected Local User Observers, ensure all the observers in the scene that need to watch the gameState are registered in the LocalUserObservers List.");
@@ -193,7 +192,7 @@ namespace LobbyRelaySample
                 gameStateObs.BeginObserving(m_localGameState);
             }
 
-            foreach (var lobbyObs in m_LobbyDataObservers)
+            foreach (var lobbyObs in m_LocalLobbyObservers)
             {
                 if (lobbyObs == null)
                 {
@@ -201,7 +200,7 @@ namespace LobbyRelaySample
                     continue;
                 }
 
-                lobbyObs.BeginObserving(m_lobbyData);
+                lobbyObs.BeginObserving(m_localLobby);
             }
 
             foreach (var userObs in m_LocalUserObservers)
@@ -234,13 +233,13 @@ namespace LobbyRelaySample
             if (isLeavingRoom)
                 OnLeftRoom();
         }
-        
-        void OnRefreshed(IEnumerable<LobbyData> lobbies)
+
+        void OnRefreshed(IEnumerable<LocalLobby> lobbies)
         {
-            var newLobbyDict = new Dictionary<string, LobbyData>();
+            var newLobbyDict = new Dictionary<string, LocalLobby>();
             foreach (var lobby in lobbies)
             {
-                newLobbyDict.Add(lobby.RoomID, lobby);
+                newLobbyDict.Add(lobby.LobbyID, lobby);
             }
 
             m_lobbyServiceData.State = LobbyServiceState.Fetched;
@@ -256,7 +255,6 @@ namespace LobbyRelaySample
         void OnCreatedRoom()
         {
             OnJoinedRoom();
-            RelayInterface.AllocateAsync(m_lobbyData.MaxPlayerCount, OnGotRelayAllocation);
         }
 
         void OnGotRelayAllocation(Allocation allocationID)
@@ -266,25 +264,25 @@ namespace LobbyRelaySample
 
         void OnGotRelayCode(string relayCode)
         {
-            m_lobbyData.RelayCode = relayCode;
+            m_localLobby.RelayCode = relayCode;
         }
 
         void OnJoinedRoom()
         {
-            RoomsQuery.Instance.BeginTracking(m_lobbyData.RoomID);
-            m_roomsContentHeartbeat.BeginTracking(m_lobbyData, m_localUser);
+            LobbyAsyncRequests.Instance.BeginTracking(m_localLobby.LobbyID);
+            m_roomsContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
             Dictionary<string, string> displayNameData = new Dictionary<string, string>();
             displayNameData.Add("DisplayName", m_localUser.DisplayName);
-            RoomsQuery.Instance.UpdatePlayerDataAsync(displayNameData, null);
+            LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(displayNameData, null);
         }
 
         void OnLeftRoom()
         {
             m_localUser.Emote = null;
-            RoomsQuery.Instance.LeaveRoomAsync(m_lobbyData.RoomID, ResetLobbyData);
+            LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
             m_roomsContentHeartbeat.EndTracking();
-            RoomsQuery.Instance.EndTracking();
+            LobbyAsyncRequests.Instance.EndTracking();
         }
 
         /// <summary>
@@ -294,47 +292,53 @@ namespace LobbyRelaySample
         {
             SetGameState(GameState.JoinMenu);
         }
-        
+
+        /// <summary>
+        /// We do the Relay server Allocations right before we do the relay join allocations, as waiting too long will
+        /// cause the relay server to get cleand up by the service
+        /// </summary>
         void BeginCountDown()
         {
             // Only start the countdown once.
-            if (m_lobbyData.State == LobbyState.CountDown)
+            if (m_localLobby.State == LobbyState.CountDown)
                 return;
-            m_lobbyData.CountDownTime = m_lobbyData.TargetEndTime.Subtract(DateTime.Now).Seconds;
-            m_lobbyData.State = LobbyState.CountDown;
+            RelayInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnGotRelayAllocation);
+            m_localLobby.CountDownTime = m_localLobby.TargetEndTime.Subtract(DateTime.Now).Seconds;
+            m_localLobby.State = LobbyState.CountDown;
             StartCoroutine(CountDown());
         }
-        
+
         IEnumerator CountDown()
         {
-            m_LobbyReadyCheck.EndCheckingForReady();
-            while (m_lobbyData.CountDownTime > 0)
+            m_ReadyCheck.EndCheckingForReady();
+            while (m_localLobby.CountDownTime > 0)
             {
                 yield return new WaitForSeconds(0.2f);
-                if (m_lobbyData.State != LobbyState.CountDown)
+                if (m_localLobby.State != LobbyState.CountDown)
                     yield break;
-                m_lobbyData.CountDownTime = m_lobbyData.TargetEndTime.Subtract(DateTime.Now).Seconds;
+                m_localLobby.CountDownTime = m_localLobby.TargetEndTime.Subtract(DateTime.Now).Seconds;
             }
 
             m_localUser.UserStatus = UserStatus.Connecting;
-            m_lobbyData.State = LobbyState.InGame;
-            
-            RelayInterface.JoinAsync(m_lobbyData.RelayCode, OnJoinedGame);
+            m_localLobby.State = LobbyState.InGame;
+
+            RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoinedGame);
         }
-        
+
         void OnJoinedGame(JoinAllocation joinData)
         {
             m_localUser.UserStatus = UserStatus.Connected;
             var ip = joinData.RelayServer.IpV4;
             var port = joinData.RelayServer.Port;
-            m_lobbyData.RelayServer = new ServerAddress(ip, port);
+            m_localLobby.RelayServer = new ServerAddress(ip, port);
         }
 
         void ToLobby()
         {
-            m_lobbyData.State = LobbyState.Lobby;
-            m_lobbyData.CountDownTime = 0;
-            m_lobbyData.RelayServer = null;
+            m_localLobby.State = LobbyState.Lobby;
+            m_localLobby.CountDownTime = 0;
+            m_localLobby.RelayServer = null;
+            m_localLobby.RelayCode = null;
             SetUserLobbyState();
         }
 
@@ -343,15 +347,15 @@ namespace LobbyRelaySample
             SetGameState(GameState.Lobby);
             m_localUser.UserStatus = UserStatus.Lobby;
             if (m_localUser.IsHost)
-                m_LobbyReadyCheck.BeginCheckingForReady();
+                m_ReadyCheck.BeginCheckingForReady();
         }
 
-        void ResetLobbyData()
+        void ResetLocalLobby()
         {
-            m_lobbyData.CopyObserved(new LobbyInfo(), new Dictionary<string, LobbyUser>());
-            m_lobbyData.CountDownTime = 0;
-            m_lobbyData.RelayServer = null;
-            m_LobbyReadyCheck.EndCheckingForReady();
+            m_localLobby.CopyObserved(new LobbyInfo(), new Dictionary<string, LobbyUser>());
+            m_localLobby.CountDownTime = 0;
+            m_localLobby.RelayServer = null;
+            m_ReadyCheck.EndCheckingForReady();
         }
 
         void OnDestroy()
@@ -361,7 +365,7 @@ namespace LobbyRelaySample
 
         bool OnWantToQuit()
         {
-            bool canQuit = string.IsNullOrEmpty(m_lobbyData?.RoomID);
+            bool canQuit = string.IsNullOrEmpty(m_localLobby?.LobbyID);
             StartCoroutine(LeaveBeforeQuit());
             return canQuit;
         }
@@ -369,10 +373,10 @@ namespace LobbyRelaySample
         void ForceLeaveAttempt()
         {
             Locator.Get.Messenger.Unsubscribe(this);
-            if (!string.IsNullOrEmpty(m_lobbyData?.RoomID))
+            if (!string.IsNullOrEmpty(m_localLobby?.LobbyID))
             {
-                RoomsQuery.Instance.LeaveRoomAsync(m_lobbyData?.RoomID, null);
-                m_lobbyData = null;
+                LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby?.LobbyID, null);
+                m_localLobby = null;
             }
         }
 
@@ -383,6 +387,7 @@ namespace LobbyRelaySample
         IEnumerator LeaveBeforeQuit()
         {
             ForceLeaveAttempt();
+
             // TEMP: Since we're temporarily (as of 6/31/21) deleting empty rooms when we leave them manually, we'll delay a bit to ensure that happens.
             //yield return null;
             yield return new WaitForSeconds(0.5f);

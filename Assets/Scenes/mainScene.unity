@@ -438,7 +438,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Delete all my rooms
+  m_Text: Delete all my lobbies
 --- !u!222 &1790515946
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3106,6 +3106,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51373dc3c6ac79b4f8e36ac7c4419205, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2637199315837045697 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3903006825828350709, guid: f1d618bdc6f1813449d428126e640aa5, type: 3}
+  m_PrefabInstance: {fileID: 2637199315837045693}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &2637199315837045698 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 618971913928185130, guid: f1d618bdc6f1813449d428126e640aa5, type: 3}
@@ -3143,6 +3154,10 @@ PrefabInstance:
     - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
       propertyPath: m_LocalUserObservers.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.size
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
       propertyPath: m_GameStateObservers.Array.data[0]
@@ -3220,6 +3235,42 @@ PrefabInstance:
       propertyPath: m_LocalUserObservers.Array.data[3]
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[0]
+      value: 
+      objectReference: {fileID: 1886099429}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[1]
+      value: 
+      objectReference: {fileID: 648562208}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[2]
+      value: 
+      objectReference: {fileID: 1412109061}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[3]
+      value: 
+      objectReference: {fileID: 297599733}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[4]
+      value: 
+      objectReference: {fileID: 2637199315837045697}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[5]
+      value: 
+      objectReference: {fileID: 2130620598}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[6]
+      value: 
+      objectReference: {fileID: 2074106027}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[7]
+      value: 
+      objectReference: {fileID: 309485569}
+    - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
+      propertyPath: m_LocalLobbyObservers.Array.data[8]
+      value: 
+      objectReference: {fileID: 2126854580}
     - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
       propertyPath: m_LobbyServerObservers.Array.data[0]
       value: 

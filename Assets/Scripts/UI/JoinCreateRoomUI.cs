@@ -10,7 +10,7 @@ namespace LobbyRelaySample.UI
             if (observed.State == GameState.JoinMenu)
             {
                 Show();
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.QueryRooms, null);
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.QueryLobbies, null);
             }
             else
             {

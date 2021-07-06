@@ -6,8 +6,8 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Watches for changes in the Lobby's player List
     /// </summary>
-    [RequireComponent(typeof(LobbyDataObserver))]
-    public class LobbyUsersUI : ObserverPanel<LobbyData>
+    [RequireComponent(typeof(LocalLobbyObserver))]
+    public class LobbyUsersUI : ObserverPanel<LocalLobby>
     {
         [SerializeField]
         List<LobbyUserCardUI> m_PlayerCardSlots = new List<LobbyUserCardUI>();
@@ -16,7 +16,7 @@ namespace LobbyRelaySample.UI
         /// <summary>
         /// When the observed data updates, we need to detect changes to the list of players.
         /// </summary>
-        public override void ObservedUpdated(LobbyData observed)
+        public override void ObservedUpdated(LocalLobby observed)
         {
             for (int id = m_CurrentUsers.Count - 1; id >= 0; id--) // We might remove users if they aren't in the new data, so iterate backwards.
             {
