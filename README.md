@@ -1,7 +1,12 @@
-# Lobby Rooms
-  **com.unity.services.samples.lobby-rooms**
 
-A Unity Project Sample showing how to integrate Rooms and Relay into a typical Lobby experience use case.
+### Closed Beta - 7/14/21
+Lobby and Relay are **only** available in closed beta at the moment, to use these services you will need to have signed up here for the services to show in your Organization:
+https://create.unity3d.com/relay-lobby-beta-signup
+
+# Game Lobby Sample
+## *Unity 2021.0b1*
+
+This is a Unity Project Sample showing how to integrate Lobby and Relay into a typical Game Lobby experience.
 
 	Features Covered:
 	- Lobby Creation
@@ -15,17 +20,44 @@ A Unity Project Sample showing how to integrate Rooms and Relay into a typical L
 	- Relay Code Generation
 	- Relay Server Join
 
-# Service Setup
-** Create an organization.
+## Service Organization Setup
+** Create an organization.**
 
 Follow the attached guide to set up your cloud organization:
 
 [Organization Tutorial](https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-)
-	
+
+## Lobby
+
+We use the lobby service to create a space that our users can join and share data through.
+
+[Lobby Overview](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
+
+
+## Relay
+
+We use the Relay service to obfuscate the Hosts' IP, while still allowing them to locally host strangers.
+[Relay Overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
+
+Navigate to https://dashboard.unity3d.com/relay
+
+*(This will only be visibile if you are in the closed beta)*
+
+![Relay](~Documentation/Images/dashboard1_beta.png?raw=true "Relay location.")
+
+In the bottom left, select "Get Started"
+
+Follow the steps until you hit "Relay On"
+*(For the moment, you can skip downloading the Transport)*
+		
+
+
+
+
+## Unity  Editor Setup
 In the project, navigate to **Edit => Project Settings => Services**
 	
 ![Services Editor](~Documentation/Images/services1.PNG?raw=true)
-	
 	
 Select your organization from the drop-down, and push **Create Project ID**.
 
@@ -33,33 +65,7 @@ In the end your Service window should look like this!
 ![Services Editor Complete](~Documentation/Images/services2.PNG?raw=true)
 
 
-
-# Lobby:
-We use the lobby service to create a space that our users can join and share data through.
-
-[Lobby Overview](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
-
-
-# Relay:
-We use the Relay service to obfuscate the Hosts' IP, while still allowing them to locally host strangers.
-
-[Relay Overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
-
-Navigate to https://dashboard.unity3d.com/landing
-
-Select Relay from the drop-down list
-
-![Relay](~Documentation/Images/dashboard1_beta.png?raw=true "Relay location.")
-
-Select your project
-
-In the bottom left, select "Get Started"
-
-Follow the steps until you hit "Relay On"
-(For this project, you can skip downloading the Transport)
-		
-
-# Solo Testing
+## Solo Testing
 
 Create a new Unity Build of the project in the OS of your choice.
 Because the Authentication service creates a unique ID for builds, you will need to host a lobby in Build and join in Editor or vice versa.
