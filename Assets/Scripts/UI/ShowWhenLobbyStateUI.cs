@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
-    public class LobbyStateVisibilityUI : ObserverPanel<LocalLobby>
+    /// <summary>
+    /// UI element that is displayed when the lobby is in a particular state (e.g. counting down, in-game).
+    /// </summary>
+    public class ShowWhenLobbyStateUI : ObserverPanel<LocalLobby>
     {
         [SerializeField]
         private LobbyState m_ShowThisWhen;

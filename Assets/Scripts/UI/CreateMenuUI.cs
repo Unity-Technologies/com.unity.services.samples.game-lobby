@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
+    /// <summary>
+    /// Handles the menu for a player creating a new lobby.
+    /// </summary>
     public class CreateMenuUI : UIPanelBase
     {
         [SerializeField]

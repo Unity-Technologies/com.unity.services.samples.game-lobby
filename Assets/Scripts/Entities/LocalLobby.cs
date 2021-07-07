@@ -50,7 +50,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// The local lobby data that the game can observe
+    /// A local wrapper around a lobby's remote data, with additional functionality for providing that data to UI elements and tracking local player objects.
     /// </summary>
     [System.Serializable]
     public class LocalLobby : Observed<LocalLobby>

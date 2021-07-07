@@ -31,7 +31,7 @@ namespace LobbyRelaySample
     public class UpdateSlow : MonoBehaviour, IUpdateSlow
     {
         [SerializeField]
-        [Tooltip("Update interval. Note that room Get requests must occur at least 1 second apart, so this period should likely be greater than that.")]
+        [Tooltip("Update interval. Note that lobby Get requests must occur at least 1 second apart, so this period should likely be greater than that.")]
         private float m_updatePeriod = 1.5f;
         [SerializeField]
         [Tooltip("If a subscriber to slow update takes longer than this to execute, it can be automatically unsubscribed.")]

@@ -11,7 +11,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// Holds the latest service data, such as the list of rooms
+    /// Holds data related to the Lobby service itself - The latest retrieved lobby list, the state of retrieval.
     /// </summary>
     [System.Serializable]
     public class LobbyServiceData : Observed<LobbyServiceData>

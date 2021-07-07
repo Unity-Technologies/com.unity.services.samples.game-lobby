@@ -46,11 +46,11 @@ namespace LobbyRelaySample
 
             m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
             if (m_shouldPushData)
-                PushDataToRoom();
+                PushDataToLobby();
             else
                 OnRetrieve();
 
-            void PushDataToRoom()
+            void PushDataToLobby()
             {
                 if (m_localUser == null)
                 {

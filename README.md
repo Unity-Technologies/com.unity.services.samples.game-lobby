@@ -1,7 +1,6 @@
 
 ### Closed Beta - 7/14/21
-Lobby and Relay are **only** available in closed beta at the moment, to use these services you will need to have signed up here for the services to show in your Organization:
-https://create.unity3d.com/relay-lobby-beta-signup
+Lobby and Relay are **only** available in closed beta at the moment, to use these services you will need to have signed up here for the services to show in your Organization: https://create.unity3d.com/relay-lobby-beta-signup
 
 # Game Lobby Sample
 ## *Unity 2021.0b1*
@@ -33,6 +32,14 @@ We use the lobby service to create a space that our users can join and share dat
 
 [Lobby Overview](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
 
+Navigate to https://dashboard.unity3d.com/lobby
+
+*(This will only be visibile if you are in the closed beta)*
+
+In the bottom left, select "Get Started"
+
+Follow the steps until you hit "Lobby On"
+
 
 ## Relay
 
@@ -43,15 +50,11 @@ Navigate to https://dashboard.unity3d.com/relay
 
 *(This will only be visibile if you are in the closed beta)*
 
-![Relay](~Documentation/Images/dashboard1_beta.png?raw=true "Relay location.")
-
 In the bottom left, select "Get Started"
 
 Follow the steps until you hit "Relay On"
-*(For the moment, you can skip downloading the Transport)*
+*(Current version of the sample does not use transport, so you may skip it.)*
 		
-
-
 
 
 ## Unity  Editor Setup

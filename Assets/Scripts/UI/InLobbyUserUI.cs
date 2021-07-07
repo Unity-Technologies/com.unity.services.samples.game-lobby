@@ -4,10 +4,10 @@ using UnityEngine;
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Shows the player info in-lobby and game
+    /// When inside a lobby, this will show information about a player, whether local or remote.
     /// </summary>
     [RequireComponent(typeof(LobbyUserObserver))]
-    public class LobbyUserCardUI : ObserverPanel<LobbyUser>
+    public class InLobbyUserUI : ObserverPanel<LobbyUser>
     {
         [SerializeField]
         TMP_Text m_DisplayNameText;

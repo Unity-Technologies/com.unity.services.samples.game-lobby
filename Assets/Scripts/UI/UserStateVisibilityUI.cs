@@ -4,8 +4,7 @@ using UnityEngine;
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Current user statea
-    /// Set as a flag to allow for the unity inspector to select multiples for various UI features.
+    /// User permission type. It's a flag enum to allow for the Inspector to select multiples for various UI features.
     /// </summary>
     [Flags]
     public enum UserPermission
@@ -15,7 +14,7 @@ namespace LobbyRelaySample.UI
     }
 
     /// <summary>
-    /// Shows the UI when the lobbyuser is set to the matching conditions.
+    /// Shows the UI when the LobbyUser matches some conditions, including having the target permissions.
     /// </summary>
     [RequireComponent(typeof(LobbyUserObserver))]
     public class UserStateVisibilityUI : ObserverPanel<LobbyUser>

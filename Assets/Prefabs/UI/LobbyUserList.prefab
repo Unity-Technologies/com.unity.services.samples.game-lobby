@@ -283,7 +283,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &4463750083940306577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,7 +329,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   showing: 0
-  m_PlayerCardSlots:
+  m_UserUIObjects:
   - {fileID: 8208727230702623701}
   - {fileID: 4503217775887893542}
   - {fileID: 1646035575854440888}
@@ -856,7 +856,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1767503274657767312, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_Name
-      value: UserCardPanel_4
+      value: UserUI_4
       objectReference: {fileID: 0}
     - target: {fileID: 2889154384621986752, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_AnchorMax.y
@@ -968,11 +968,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3540056819003737500, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_fontSize
-      value: 26.15
+      value: 58
       objectReference: {fileID: 0}
     - target: {fileID: 3667934756810823183, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_fontSize
-      value: 26.15
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5235189765028238254, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: showing
@@ -1032,11 +1032,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
---- !u!224 &3685075291402800769 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 3229036008637484624, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
-  m_PrefabInstance: {fileID: 2300164376451760337}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &6290668908104815487 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5235189765028238254, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
@@ -1048,6 +1043,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9557a5d232068a149987bc0753800f26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &3685075291402800769 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3229036008637484624, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
+  m_PrefabInstance: {fileID: 2300164376451760337}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4128781293466929275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1057,7 +1057,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1767503274657767312, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_Name
-      value: UserCardPanel_1
+      value: UserUI_1
       objectReference: {fileID: 0}
     - target: {fileID: 2889154384621986752, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1166,6 +1166,14 @@ PrefabInstance:
     - target: {fileID: 3229036008637484624, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3540056819003737500, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
+      propertyPath: m_fontSize
+      value: 58
+      objectReference: {fileID: 0}
+    - target: {fileID: 3667934756810823183, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
+      propertyPath: m_fontSize
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5804120253616419419, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1242,7 +1250,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1767503274657767312, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_Name
-      value: UserCardPanel_3
+      value: UserUI_3
       objectReference: {fileID: 0}
     - target: {fileID: 2889154384621986752, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1354,11 +1362,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3540056819003737500, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_fontSize
-      value: 26.15
+      value: 58
       objectReference: {fileID: 0}
     - target: {fileID: 3667934756810823183, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_fontSize
-      value: 26.15
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5235189765028238254, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: showing
@@ -1443,7 +1451,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1767503274657767312, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_Name
-      value: UserCardPanel_2
+      value: UserUI_2
       objectReference: {fileID: 0}
     - target: {fileID: 2889154384621986752, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1555,11 +1563,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3540056819003737500, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_fontSize
-      value: 26.15
+      value: 58
       objectReference: {fileID: 0}
     - target: {fileID: 3667934756810823183, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: m_fontSize
-      value: 26.15
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5235189765028238254, guid: 9c09208dc6d58f54aabb57c12071b660, type: 3}
       propertyPath: showing

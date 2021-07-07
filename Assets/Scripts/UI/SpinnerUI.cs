@@ -3,6 +3,9 @@ using TMPro;
 
 namespace LobbyRelaySample.UI
 {
+    /// <summary>
+    /// Controls a simple throbber that is displayed when the lobby list is being refreshed.
+    /// </summary>
     public class SpinnerUI : ObserverPanel<LobbyServiceData>
     {
         public TMP_Text errorText;

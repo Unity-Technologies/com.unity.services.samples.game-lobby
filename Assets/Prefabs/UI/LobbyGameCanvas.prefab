@@ -330,7 +330,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   showing: 0
-  m_ServerNameText: {fileID: 7322885418547999459}
+  m_lobbyNameText: {fileID: 7322885418547999459}
 --- !u!225 &6749879306276389991
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 2725000139462485941}
   - component: {fileID: 7322885418547999459}
   m_Layer: 5
-  m_Name: ServerText
+  m_Name: LobbyNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -494,7 +494,7 @@ GameObject:
   - component: {fileID: 279783410280127446}
   - component: {fileID: 8630015524497407890}
   m_Layer: 5
-  m_Name: ServerIPPanel
+  m_Name: RelayIPPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1108,6 +1108,10 @@ PrefabInstance:
       propertyPath: m_fontSize
       value: 26.15
       objectReference: {fileID: 0}
+    - target: {fileID: 840905996306701940, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
+      propertyPath: m_fontSize
+      value: 26.15
+      objectReference: {fileID: 0}
     - target: {fileID: 1079919869245620301, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1227,6 +1231,10 @@ PrefabInstance:
     - target: {fileID: 2762366222576510419, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3246194187207366366, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
+      propertyPath: m_fontSize
+      value: 26.15
       objectReference: {fileID: 0}
     - target: {fileID: 3253464371495375142, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1416,6 +1424,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4917538085660885383, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
+      propertyPath: m_fontSize
+      value: 26.15
+      objectReference: {fileID: 0}
     - target: {fileID: 5186258928042496532, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_fontSize
       value: 26.15
@@ -1539,6 +1551,10 @@ PrefabInstance:
     - target: {fileID: 7620090743157897760, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7824963406237393945, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
+      propertyPath: m_fontSize
+      value: 26.15
       objectReference: {fileID: 0}
     - target: {fileID: 8020923114782963594, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_fontSize

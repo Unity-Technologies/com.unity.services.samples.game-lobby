@@ -4,13 +4,13 @@ using UnityEngine;
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Watches for changes in the Lobby's player List
+    /// Contains the InLobbyUserUI instances while showing the UI for a lobby.
     /// </summary>
     [RequireComponent(typeof(LocalLobbyObserver))]
-    public class LobbyUsersUI : ObserverPanel<LocalLobby>
+    public class InLobbyUserList : ObserverPanel<LocalLobby>
     {
         [SerializeField]
-        List<LobbyUserCardUI> m_PlayerCardSlots = new List<LobbyUserCardUI>();
+        List<InLobbyUserUI> m_UserUIObjects = new List<InLobbyUserUI>();
         List<string> m_CurrentUsers = new List<string>(); // Just for keeping track more easily of which users are already displayed.
 
         /// <summary>
@@ -23,11 +23,11 @@ namespace LobbyRelaySample.UI
                 string userId = m_CurrentUsers[id];
                 if (!observed.LobbyUsers.ContainsKey(userId))
                 {
-                    foreach (var card in m_PlayerCardSlots)
+                    foreach (var ui in m_UserUIObjects)
                     {
-                        if (card.UserId == userId)
+                        if (ui.UserId == userId)
                         {
-                            card.OnUserLeft();
+                            ui.OnUserLeft();
                             OnUserLeft(userId);
                         }
                     }
@@ -40,7 +40,7 @@ namespace LobbyRelaySample.UI
                     continue;
                 m_CurrentUsers.Add(lobbyUserKvp.Key);
 
-                foreach (var pcu in m_PlayerCardSlots)
+                foreach (var pcu in m_UserUIObjects)
                 {
                     if (pcu.IsAssigned)
                         continue;

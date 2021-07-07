@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
+    /// <summary>
+    /// After all players ready up for the game, this will show the countdown that occurs.
+    /// </summary>
     public class CountdownUI : ObserverPanel<LocalLobby>
     {
         [SerializeField]
