@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace LobbyRelaySample
 {
-    public class StartLobbyButton : MonoBehaviour
+    /// <summary>
+    /// Main menu start button.
+    /// </summary>
+    public class StartLobbyButtonUI : MonoBehaviour
     {
         public void ToJoinMenu()
         {

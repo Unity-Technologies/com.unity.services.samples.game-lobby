@@ -39,7 +39,7 @@ namespace LobbyRelaySample.Auth
             AuthenticationService.Instance.SignedOut += OnSignInChange;
 
             if (!AuthenticationService.Instance.IsSignedIn)
-                await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Note: We don't want to sign out later, since that changes the UAS anonymous token, which would prevent the player from exiting rooms they're already in.
+                await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Note: We don't want to sign out later, since that changes the UAS anonymous token, which would prevent the player from exiting lobbies they're already in.
             onSigninComplete?.Invoke();
         }
 

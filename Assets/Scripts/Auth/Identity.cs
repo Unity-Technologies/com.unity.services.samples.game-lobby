@@ -48,7 +48,7 @@ namespace LobbyRelaySample.Auth
 
     /// <summary>
     /// Our internal representation of a player, wrapping the data required for interfacing with the identities of that player in the services.
-    /// One will be created for the local player, as well as for each other member of the room.
+    /// One will be created for the local player, as well as for each other member of the lobby.
     /// </summary>
     public class Identity : IIdentity, IDisposable
     {

@@ -11,7 +11,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// Holds the latest service data, such as the list of rooms
+    /// Holds data related to the Lobby service itself - The latest retrieved lobby list, the state of retrieval.
     /// </summary>
     [System.Serializable]
     public class LobbyServiceData : Observed<LobbyServiceData>
@@ -29,13 +29,13 @@ namespace LobbyRelaySample
             }
         }
 
-        Dictionary<string, LobbyData> m_currentLobbies = new Dictionary<string, LobbyData>();
+        Dictionary<string, LocalLobby> m_currentLobbies = new Dictionary<string, LocalLobby>();
 
         /// <summary>
         /// Will only trigger if the dictionary is set wholesale. Changes in the size, or contents will not trigger OnChanged
         /// string is lobby ID, Key is the Lobby data representation of it
         /// </summary>
-        public Dictionary<string, LobbyData> CurrentLobbies
+        public Dictionary<string, LocalLobby> CurrentLobbies
         {
             get { return m_currentLobbies; }
             set

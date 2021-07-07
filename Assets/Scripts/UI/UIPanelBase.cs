@@ -3,6 +3,9 @@ using UnityEngine.Events;
 
 namespace LobbyRelaySample.UI
 {
+    /// <summary>
+    /// Basic UI element that can be shown or hidden.
+    /// </summary>
     [RequireComponent(typeof(CanvasGroup))]
     public class UIPanelBase : MonoBehaviour
     {

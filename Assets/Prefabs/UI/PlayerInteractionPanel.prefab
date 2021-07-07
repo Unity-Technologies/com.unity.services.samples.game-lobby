@@ -1108,8 +1108,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 900710893788416922}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.GameStateButtonUI, Assembly-CSharp
-        m_MethodName: EndServer
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.EndGameButtonUI, LobbyRelaySample
+        m_MethodName: EndGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

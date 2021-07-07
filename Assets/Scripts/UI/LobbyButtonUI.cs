@@ -4,7 +4,10 @@ using UnityEngine.Events;
 
 namespace LobbyRelaySample.UI
 {
-    [RequireComponent(typeof(LobbyDataObserver))]
+    /// <summary>
+    /// Controls an entry in the join menu's list of lobbies, acting as a clickable button as well as displaying info about the lobby.
+    /// </summary>
+    [RequireComponent(typeof(LocalLobbyObserver))]
     public class LobbyButtonUI : MonoBehaviour
     {
         [SerializeField]
@@ -15,12 +18,12 @@ namespace LobbyRelaySample.UI
         /// <summary>
         /// Subscribed to on instantiation to pass our lobby data back
         /// </summary>
-        public UnityEvent<LobbyData> onLobbyPressed;
-        LobbyDataObserver m_DataObserver;
+        public UnityEvent<LocalLobby> onLobbyPressed;
+        LocalLobbyObserver m_DataObserver;
 
         void Awake()
         {
-            m_DataObserver = GetComponent<LobbyDataObserver>();
+            m_DataObserver = GetComponent<LocalLobbyObserver>();
         }
 
         /// <summary>
@@ -31,12 +34,12 @@ namespace LobbyRelaySample.UI
             onLobbyPressed?.Invoke(m_DataObserver.observed);
         }
 
-        public void UpdateLobby(LobbyData lobby)
+        public void UpdateLobby(LocalLobby lobby)
         {
             m_DataObserver.observed.CopyObserved(lobby);
         }
 
-        public void OnRoomUpdated(LobbyData data)
+        public void OnLobbyUpdated(LocalLobby data)
         {
             lobbyNameText.SetText(data.LobbyName);
             lobbyCountText.SetText($"{data.PlayerCount}/{data.MaxPlayerCount}");

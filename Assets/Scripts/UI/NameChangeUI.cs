@@ -1,7 +1,7 @@
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Sends a message that should change the displayName Data only.
+    /// When the player changes their name with the UI, this triggers the actual rename.
     /// </summary>
     public class NameChangeUI : UIPanelBase
     {

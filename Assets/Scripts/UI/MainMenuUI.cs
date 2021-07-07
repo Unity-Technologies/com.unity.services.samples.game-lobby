@@ -3,7 +3,7 @@ using UnityEngine;
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Watches for Changes in the Game State to/from Menu
+    /// Watches for changes in the game state to/from the main menu.
     /// </summary>
     [RequireComponent(typeof(LocalGameStateObserver))]
     public class MainMenuUI : ObserverPanel<LocalGameState>

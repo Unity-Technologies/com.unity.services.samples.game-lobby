@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// Just for fun, give a cute default name if no name is provided.
+    /// Just for fun, give a cute default player name if no name is provided.
     /// </summary>
     public static class NameGenerator
     {

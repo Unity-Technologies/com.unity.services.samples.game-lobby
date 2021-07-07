@@ -4,30 +4,30 @@ using UnityEngine;
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Watches for changes in the Lobby's player List
+    /// Contains the InLobbyUserUI instances while showing the UI for a lobby.
     /// </summary>
-    [RequireComponent(typeof(LobbyDataObserver))]
-    public class LobbyUsersUI : ObserverPanel<LobbyData>
+    [RequireComponent(typeof(LocalLobbyObserver))]
+    public class InLobbyUserList : ObserverPanel<LocalLobby>
     {
         [SerializeField]
-        List<LobbyUserCardUI> m_PlayerCardSlots = new List<LobbyUserCardUI>();
+        List<InLobbyUserUI> m_UserUIObjects = new List<InLobbyUserUI>();
         List<string> m_CurrentUsers = new List<string>(); // Just for keeping track more easily of which users are already displayed.
 
         /// <summary>
         /// When the observed data updates, we need to detect changes to the list of players.
         /// </summary>
-        public override void ObservedUpdated(LobbyData observed)
+        public override void ObservedUpdated(LocalLobby observed)
         {
             for (int id = m_CurrentUsers.Count - 1; id >= 0; id--) // We might remove users if they aren't in the new data, so iterate backwards.
             {
                 string userId = m_CurrentUsers[id];
                 if (!observed.LobbyUsers.ContainsKey(userId))
                 {
-                    foreach (var card in m_PlayerCardSlots)
+                    foreach (var ui in m_UserUIObjects)
                     {
-                        if (card.UserId == userId)
+                        if (ui.UserId == userId)
                         {
-                            card.OnUserLeft();
+                            ui.OnUserLeft();
                             OnUserLeft(userId);
                         }
                     }
@@ -40,7 +40,7 @@ namespace LobbyRelaySample.UI
                     continue;
                 m_CurrentUsers.Add(lobbyUserKvp.Key);
 
-                foreach (var pcu in m_PlayerCardSlots)
+                foreach (var pcu in m_UserUIObjects)
                 {
                     if (pcu.IsAssigned)
                         continue;
