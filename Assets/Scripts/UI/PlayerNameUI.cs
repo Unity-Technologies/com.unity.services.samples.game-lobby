@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
+    /// <summary>
+    /// Displays the player's name.
+    /// </summary>
     public class PlayerNameUI : ObserverPanel<LobbyUser>
     {
         [SerializeField]

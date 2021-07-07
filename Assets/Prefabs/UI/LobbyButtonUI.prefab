@@ -308,9 +308,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 7018369548608736188}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.LobbyButtonUI, LobbyRooms
-        m_MethodName: OnRoomUpdated
-        m_Mode: 0
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.LobbyButtonUI, LobbyRooms
+        m_MethodName: OnLobbyClicked
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -319,6 +319,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  observeOnStart: 1
 --- !u!114 &1059336587790472163
 MonoBehaviour:
   m_ObjectHideFlags: 0

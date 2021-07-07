@@ -11,7 +11,7 @@ namespace LobbyRelaySample.Tests
         public IEnumerator ObserverChangeWhenObservedChanged() // Test if Observer changes when StringField gets set
         {
             var observed = new TestObserved();
-            var observer = new GameObject("PlayerObserver").AddComponent<TestObservereBehaviour>();
+            var observer = new GameObject("PlayerObserver").AddComponent<TestObserverBehaviour>();
 
             observer.BeginObserving(observed);
             Assert.AreNotEqual("NewName", observed.StringField);
@@ -29,7 +29,7 @@ namespace LobbyRelaySample.Tests
             var observed = new TestObserved();
             observed.StringField = "NewName"; // Set the field before we begin observing
 
-            var observer = new GameObject("PlayerObserver").AddComponent<TestObservereBehaviour>();
+            var observer = new GameObject("PlayerObserver").AddComponent<TestObserverBehaviour>();
             Assert.AreNotEqual(observed.StringField, observer.displayStringField);
 
             observer.BeginObserving(observed);
@@ -60,7 +60,7 @@ namespace LobbyRelaySample.Tests
         }
 
         //Mock UI Observer
-        class TestObservereBehaviour : ObserverBehaviour<TestObserved>
+        class TestObserverBehaviour : ObserverBehaviour<TestObserved>
         {
             public string displayStringField;
 

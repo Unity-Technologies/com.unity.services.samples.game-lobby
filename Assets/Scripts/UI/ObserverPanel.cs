@@ -1,13 +1,10 @@
 namespace LobbyRelaySample.UI
 {
     /// <summary>
-    /// Observer UI panel base class, for UI panels that need hiding, and hookup to observerBehaviours
+    /// Observer UI panel base class. This allows UI elements to be shown or hidden based on an Observed element.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public abstract class ObserverPanel<T> : UIPanelBase where T : Observed<T>
     {
         public abstract void ObservedUpdated(T observed);
-       
     }
-
 }

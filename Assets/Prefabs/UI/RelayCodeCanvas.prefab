@@ -94,7 +94,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20.55
+  m_fontSize: 72
   m_fontSizeBase: 45
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -478,7 +478,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18.2
+  m_fontSize: 68.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -531,7 +531,7 @@ GameObject:
   - component: {fileID: 4102997489641105917}
   - component: {fileID: 4102997489641105913}
   - component: {fileID: 7676491730539518990}
-  - component: {fileID: 2381432589029884226}
+  - component: {fileID: 3340928240658051873}
   - component: {fileID: 4523467532116611583}
   m_Layer: 5
   m_Name: RelayCodeCanvas
@@ -582,7 +582,7 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
---- !u!114 &2381432589029884226
+--- !u!114 &3340928240658051873
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -591,14 +591,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 4102997489641105918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a70bc1b6f999ee43974bbbf991a0b6a, type: 3}
+  m_Script: {fileID: 11500000, guid: a6e005db2e7b3d94d9409975660cf97c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
   showing: 1
-  relayCodeText: {fileID: 8798075752901962210}
+  m_outputText: {fileID: 8798075752901962210}
+  m_codeType: 1
 --- !u!114 &4523467532116611583
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -614,8 +615,8 @@ MonoBehaviour:
   OnObservedUpdated:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2381432589029884226}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.RelayCodeUI, LobbyRooms
+      - m_Target: {fileID: 3340928240658051873}
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.DisplayCodeUI, LobbyRelaySample
         m_MethodName: ObservedUpdated
         m_Mode: 0
         m_Arguments:

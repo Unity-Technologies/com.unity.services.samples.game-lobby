@@ -4,20 +4,20 @@ namespace LobbyRelaySample
 {
     /// <summary>
     /// Current state of the user in the lobby.
-    /// Set as a flag to allow for the unity inspector to select multiples for various UI features.
+    /// This is a Flags enum to allow for the Inspector to select multiples for various UI features.
     /// </summary>
     [Flags]
     public enum UserStatus
     {
-        Lobby = 1, // Connected to lobby, not ready yet
-        Ready = 4, // User clicked ready
-        Connecting = 8, // User sent join request through relay
-        Connected = 16, // User connected through relay
-        Menu = 32, // User is in a menu, external to the lobby
+        Lobby = 1,      // Connected to lobby, not ready yet
+        Ready = 4,      // User clicked ready (Note that 2 is missing; some flags have been removed over time, but we want any serialized values to be unaffected.)
+        Connecting = 8, // User sent join request through Relay
+        Connected = 16, // User connected through Relay
+        Menu = 32,      // User is in a menu, external to the lobby
     }
 
     /// <summary>
-    /// Lobby Room Data for a player
+    /// Data for a local player instance. This will update data and is observed to know when to push local player changes to the entire lobby.
     /// </summary>
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
