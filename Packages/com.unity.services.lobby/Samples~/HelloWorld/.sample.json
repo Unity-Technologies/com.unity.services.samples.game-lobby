@@ -1,0 +1,5 @@
+{
+	"displayName":"Hello World Sample",
+	"description": "This sample walks through using most of the Lobby APIs in a simple, linear way.",
+	"createSeparatePackage": false
+}
