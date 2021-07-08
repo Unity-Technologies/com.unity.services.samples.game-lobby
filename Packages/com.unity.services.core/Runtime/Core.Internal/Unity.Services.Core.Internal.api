@@ -1,0 +1,76 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.Services.Authentication
+{
+    public interface IAccessToken : Unity.Services.Core.IServiceComponent
+    {
+        public abstract string AccessToken { get; }
+    }
+
+    public interface IPlayerId : Unity.Services.Core.IServiceComponent
+    {
+        public event System.Action<string> PlayerIdChanged;
+        public abstract string PlayerId { get; }
+    }
+}
+
+namespace Unity.Services.Core
+{
+    public class CircularDependencyException : Unity.Services.Core.ServicesInitializationException
+    {
+        public CircularDependencyException() {}
+        public CircularDependencyException(string message) {}
+    }
+
+    [System.Runtime.CompilerServices.IsReadOnly] public struct CoreRegistration
+    {
+        public Unity.Services.Core.CoreRegistration DependsOn<T>() where T : Unity.Services.Core.IServiceComponent;
+        public Unity.Services.Core.CoreRegistration OptionallyDependsOn<T>() where T : Unity.Services.Core.IServiceComponent;
+        public Unity.Services.Core.CoreRegistration ProvidesComponent<T>() where T : Unity.Services.Core.IServiceComponent;
+    }
+
+    public sealed class CoreRegistry
+    {
+        public static Unity.Services.Core.CoreRegistry Instance { get; }
+        public T GetServiceComponent<T>() where T : Unity.Services.Core.IServiceComponent;
+        public Unity.Services.Core.CoreRegistration RegisterPackage<T>(T package) where T : Unity.Services.Core.IInitializablePackage;
+        public void RegisterServiceComponent<T>(T component) where T : Unity.Services.Core.IServiceComponent;
+    }
+
+    public interface IInitializablePackage
+    {
+        public abstract System.Threading.Tasks.Task Initialize(Unity.Services.Core.CoreRegistry registry);
+    }
+
+    public interface IServiceComponent
+    {
+    }
+}
+
+namespace Unity.Services.Core.Configuration
+{
+    public interface IProjectConfiguration : Unity.Services.Core.IServiceComponent
+    {
+        public abstract bool GetBool(string key, bool defaultValue = False);
+        public abstract float GetFloat(string key, float defaultValue = 0);
+        public abstract int GetInt(string key, int defaultValue = 0);
+        public abstract string GetString(string key, string defaultValue = default(string));
+    }
+}
+
+namespace Unity.Services.Core.Device
+{
+    public interface IInstallationId : Unity.Services.Core.IServiceComponent
+    {
+        public abstract string GetOrCreateIdentifier();
+    }
+}
+
+namespace Unity.Services.Core.Environments
+{
+    public interface IEnvironments : Unity.Services.Core.IServiceComponent
+    {
+        public abstract string Current { get; }
+    }
+}

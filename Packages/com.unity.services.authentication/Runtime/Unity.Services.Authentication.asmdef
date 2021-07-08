@@ -1,0 +1,16 @@
+{
+    "name": "Unity.Services.Authentication",
+    "references": [
+        "Unity.Services.Core",
+        "Unity.Services.Core.Internal"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

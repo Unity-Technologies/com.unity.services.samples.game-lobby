@@ -656,11 +656,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: 
+  cloudProjectId: 35a50d42-c591-451d-968c-b59d5f3c317b
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: Game-Lobby-Sample
+  organizationId: operate-samples
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
