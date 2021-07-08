@@ -213,7 +213,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   showing: 0
-  roomCodeText: {fileID: 5578852939709204548}
+  m_outputText: {fileID: 5578852939709204548}
+  m_codeType: 0
 --- !u!114 &699060394989383769
 MonoBehaviour:
   m_ObjectHideFlags: 0

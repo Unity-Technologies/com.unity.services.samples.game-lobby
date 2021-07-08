@@ -1,5 +1,5 @@
 ﻿using System;
-using LobbyRemote = Unity.Services.Rooms.Models.Room;
+using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
 namespace LobbyRelaySample
 {
@@ -67,22 +67,22 @@ namespace LobbyRelaySample
 
             void DoLobbyDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(Lobby.ToLocalLobby.RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
+                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(lobby.ToLocalLobby.RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
             }
 
             void DoPlayerDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(Lobby.ToLocalLobby.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
+                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(lobby.ToLocalLobby.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
             }
 
             void OnRetrieve()
             {
                 m_isAwaitingQuery = false;
-                LobbyRemote lobby = LobbyAsyncRequests.Instance.CurrentLobby;
-                if (lobby == null) return;
+                LobbyRemote lobbyRemote = LobbyAsyncRequests.Instance.CurrentLobby;
+                if (lobbyRemote == null) return;
                 bool prevShouldPush = m_shouldPushData;
                 var prevState = m_localLobby.State;
-                Lobby.ToLocalLobby.Convert(lobby, m_localLobby, m_localUser);
+                lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby, m_localUser);
                 m_shouldPushData = prevShouldPush;
                 CheckForAllPlayersReady();
 
