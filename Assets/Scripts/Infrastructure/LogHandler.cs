@@ -12,7 +12,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// Overrides the Default Unity Logging with our own
+    /// Overrides the default Unity logging with our own, so that verbose logs (both from the services and from any of our Debug.Log* calls) don't clutter the Console.
     /// </summary>
     public class LogHandler : ILogHandler
     {

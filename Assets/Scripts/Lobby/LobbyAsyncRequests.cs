@@ -1,9 +1,9 @@
-﻿using LobbyRelaySample.Lobby;
+﻿using LobbyRelaySample.lobby;
 using System;
 using System.Collections.Generic;
 using Unity.Services.Authentication;
-using Unity.Services.Rooms;
-using Unity.Services.Rooms.Models;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample
 {
@@ -40,9 +40,9 @@ namespace LobbyRelaySample
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         private Queue<Action> m_pendingOperations = new Queue<Action>();
         private string m_currentLobbyId = null;
-        private Room m_lastKnownLobby;
+        private Lobby m_lastKnownLobby;
         private bool m_isMidRetrieve = false;
-        public Room CurrentLobby => m_lastKnownLobby;
+        public Lobby CurrentLobby => m_lastKnownLobby;
 
         public void BeginTracking(string lobbyId)
         {
@@ -59,7 +59,7 @@ namespace LobbyRelaySample
             if (!string.IsNullOrEmpty(m_currentLobbyId))
                 RetrieveLobbyAsync(m_currentLobbyId, OnComplete);
 
-            void OnComplete(Room lobby)
+            void OnComplete(Lobby lobby)
             {
                 if (lobby != null)
                     m_lastKnownLobby = lobby;
@@ -79,12 +79,12 @@ namespace LobbyRelaySample
         /// <summary>
         /// Attempt to create a new lobby and then join it.
         /// </summary>
-        public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, Action<Room> onSuccess, Action onFailure)
+        public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, OnLobbyCreated);
 
-            void OnLobbyCreated(Response<Room> response)
+            void OnLobbyCreated(Response<Lobby> response)
             {
                 if (!IsSuccessful(response))
                     onFailure?.Invoke();
@@ -97,12 +97,15 @@ namespace LobbyRelaySample
         }
 
         /// <summary>Attempt to join an existing lobby. Either ID xor code can be null.</summary>
-        public void JoinLobbyAsync(string lobbyId, string lobbyCode, Action<Room> onSuccess, Action onFailure)
+        public void JoinLobbyAsync(string lobbyId, string lobbyCode, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
-            LobbyAPIInterface.JoinLobbyAsync(uasId, lobbyId, lobbyCode, OnLobbyJoined);
+            if (!string.IsNullOrEmpty(lobbyId))
+                LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, OnLobbyJoined);
+            else
+                LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, OnLobbyJoined);
 
-            void OnLobbyJoined(Response<Room> response)
+            void OnLobbyJoined(Response<Lobby> response)
             {
                 if (!IsSuccessful(response))
                     onFailure?.Invoke();
@@ -126,14 +129,14 @@ namespace LobbyRelaySample
             }
         }
         /// <param name="onComplete">If no lobby is retrieved, this is given null.</param>
-        private void RetrieveLobbyAsync(string lobbyId, Action<Room> onComplete)
+        private void RetrieveLobbyAsync(string lobbyId, Action<Lobby> onComplete)
         {
             if (m_isMidRetrieve)
                 return; // Not calling onComplete since there's just the one point at which this is called.
             m_isMidRetrieve = true;
             LobbyAPIInterface.GetLobbyAsync(lobbyId, OnGet);
 
-            void OnGet(Response<Room> response)
+            void OnGet(Response<Lobby> response)
             {
                 m_isMidRetrieve = false;
                 onComplete?.Invoke(response?.Result);
@@ -167,7 +170,7 @@ namespace LobbyRelaySample
             if (!ShouldUpdateData(() => { UpdatePlayerDataAsync(data, onComplete); }, onComplete))
                 return;
 
-            Room lobby = m_lastKnownLobby;
+            Lobby lobby = m_lastKnownLobby;
             Dictionary<string, PlayerDataObject> dataCurr = new Dictionary<string, PlayerDataObject>();
             foreach (var dataNew in data)
             {
@@ -187,7 +190,7 @@ namespace LobbyRelaySample
             if (!ShouldUpdateData(() => { UpdateLobbyDataAsync(data, onComplete); }, onComplete))
                 return;
 
-            Room lobby = m_lastKnownLobby;
+            Lobby lobby = m_lastKnownLobby;
             Dictionary<string, DataObject> dataCurr = lobby.Data ?? new Dictionary<string, DataObject>();
             foreach (var dataNew in data)
             {
@@ -207,7 +210,7 @@ namespace LobbyRelaySample
             {   m_pendingOperations.Enqueue(caller);
                 return false;
             }
-            Room lobby = m_lastKnownLobby;
+            Lobby lobby = m_lastKnownLobby;
             if (lobby == null)
             {   onComplete?.Invoke();
                 return false;

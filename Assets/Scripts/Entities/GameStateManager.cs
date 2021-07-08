@@ -61,7 +61,7 @@ namespace LobbyRelaySample
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, (r) =>
                 {
-                    Lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
+                    lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
                     OnCreatedLobby();
                 }, OnFailedJoin);
             }
@@ -70,7 +70,7 @@ namespace LobbyRelaySample
                 LobbyInfo lobbyInfo = (LobbyInfo)msg;
                 LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, (r) =>
                 {
-                    Lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
+                    lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
                     OnJoinedLobby();
                 }, OnFailedJoin);
             }
@@ -81,7 +81,7 @@ namespace LobbyRelaySample
                     qr =>
                     {
                         if (qr != null)
-                            OnRefreshed(Lobby.ToLocalLobby.Convert(qr));
+                            OnRefreshed(lobby.ToLocalLobby.Convert(qr));
                     }, er =>
                     {
                         long errorLong = 0;

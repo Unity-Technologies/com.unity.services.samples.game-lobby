@@ -1,11 +1,11 @@
 ﻿using NUnit.Framework;
 using System.Collections;
 using System.Linq;
-using Unity.Services.Rooms;
-using Unity.Services.Rooms.Models;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
-using LobbyAPIInterface = LobbyRelaySample.Lobby.LobbyAPIInterface;
+using LobbyAPIInterface = LobbyRelaySample.lobby.LobbyAPIInterface;
 
 namespace Test
 {
@@ -68,7 +68,7 @@ namespace Test
             int numLobbiesIni = queryResponse.Result.Results?.Count ?? 0;
 
             // Create a test lobby.
-            Response<Room> createResponse = null;
+            Response<Lobby> createResponse = null;
             timeout = 5;
             string lobbyName = "TestLobby-JustATest-123";
             LobbyAPIInterface.CreateLobbyAsync(m_auth.GetContent("id"), lobbyName, 100, false, (r) => { createResponse = r; });
@@ -97,7 +97,7 @@ namespace Test
             Assert.IsTrue(queryResponse.Result.Results.Where(r => r.Id == m_workingLobbyId).Count() == 1, "Checking queried lobby for ID.");
 
             // Query for solely the test lobby via GetLobby.
-            Response<Room> getResponse = null;
+            Response<Lobby> getResponse = null;
             timeout = 5;
             LobbyAPIInterface.GetLobbyAsync(createResponse.Result.Id, (r) => { getResponse = r; });
             while (getResponse == null && timeout > 0)

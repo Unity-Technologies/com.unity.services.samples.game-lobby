@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Unity.Services.Rooms.Models;
+using Unity.Services.Lobbies.Models;
 
-namespace LobbyRelaySample.Lobby
+namespace LobbyRelaySample.lobby
 {
     /// <summary>
     /// Convert the lobby resulting from a request into a LocalLobby for use in the game logic.
@@ -11,11 +11,11 @@ namespace LobbyRelaySample.Lobby
         /// <summary>
         /// Create a new LocalLobby from the content of a retrieved lobby. Its data can be copied into an existing LocalLobby for use.
         /// </summary>
-        public static void Convert(Room lobby, LocalLobby outputToHere, LobbyUser existingLocalUser = null)
+        public static void Convert(Lobby lobby, LocalLobby outputToHere, LobbyUser existingLocalUser = null)
         {
             LobbyInfo info = new LobbyInfo
             {   LobbyID             = lobby.Id,
-                LobbyCode           = lobby.RoomCode,
+                LobbyCode           = lobby.LobbyCode,
                 Private             = lobby.IsPrivate,
                 LobbyName           = lobby.Name,
                 MaxPlayerCount      = lobby.MaxPlayers,
@@ -59,7 +59,7 @@ namespace LobbyRelaySample.Lobby
                 retLst.Add(Convert(lobby));
             return retLst;
         }
-        private static LocalLobby Convert(Room lobby)
+        private static LocalLobby Convert(Lobby lobby)
         {
             LocalLobby data = new LocalLobby();
             Convert(lobby, data, null);

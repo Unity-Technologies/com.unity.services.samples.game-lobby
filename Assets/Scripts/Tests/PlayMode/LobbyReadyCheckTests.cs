@@ -1,11 +1,11 @@
 using LobbyRelaySample;
 using NUnit.Framework;
 using System.Collections;
-using Unity.Services.Rooms;
-using Unity.Services.Rooms.Models;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
-using LobbyAPIInterface = LobbyRelaySample.Lobby.LobbyAPIInterface;
+using LobbyAPIInterface = LobbyRelaySample.lobby.LobbyAPIInterface;
 
 namespace Test
 {
@@ -56,7 +56,7 @@ namespace Test
 
         private IEnumerator CreateLobby(string lobbyName, string userId)
         {
-            Response<Room> createResponse = null;
+            Response<Lobby> createResponse = null;
             float timeout = 5;
             LobbyAPIInterface.CreateLobbyAsync(userId, lobbyName, 4, false, (r) => { createResponse = r; });
             while (createResponse == null && timeout > 0)
@@ -71,7 +71,7 @@ namespace Test
         {
             bool hasPushedPlayerData = false;
             float timeout = 5;
-            LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyRelaySample.Lobby.ToLocalLobby.RetrieveUserData(player), () => { hasPushedPlayerData = true; }); // LobbyContentHeartbeat normally does this.
+            LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyRelaySample.lobby.ToLocalLobby.RetrieveUserData(player), () => { hasPushedPlayerData = true; }); // LobbyContentHeartbeat normally does this.
             while (!hasPushedPlayerData && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -108,7 +108,7 @@ namespace Test
             LobbyAsyncRequests.Instance.EndTracking();
 
             yield return new WaitForSeconds(2); // Buffer to prevent a 429 on the upcoming Get, since there's a Get request on the slow upate loop when that's active.
-            Response<Room> getResponse = null;
+            Response<Lobby> getResponse = null;
             timeout = 5;
             LobbyAPIInterface.GetLobbyAsync(m_workingLobbyId, (r) => { getResponse = r; });
             while (getResponse == null && timeout > 0)
