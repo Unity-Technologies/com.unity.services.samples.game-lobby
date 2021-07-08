@@ -22,10 +22,9 @@ This is a Unity Project Sample showing how to integrate Lobby and Relay into a t
 ## Service Organization Setup
 ** Create an organization**
 
-Follow the attached guide to set up your cloud organization:
+Follow the guide to set up your cloud organization:
 
 [Organization Tutorial](https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-)
-
 
 
 ## Lobby & Relay
@@ -34,21 +33,26 @@ We use the lobby service to create a space that our users can join and share dat
 
 [Lobby Overview](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
 
-Lobby Dashboard: https://dashboard.unity3d.com/lobby
+[Lobby Dashboard](https://dashboard.unity3d.com/lobby)
+
 
 We use the Relay service to obfuscate the Hosts' IP, while still allowing them to locally host strangers.
 
 [Relay Overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
 
-Relay Dashboard: https://dashboard.unity3d.com/relay
+[Relay Dashboard]( https://dashboard.unity3d.com/relay)
 
 
 ### Setup 
-For either one, select "Get Started"
+For either one, select "About & Support => Get Started"
 
 ** Closed Beta Only **
 
-Follow the steps, downloading your packaged folders to the Sample Project Pac.
+	Follow the steps, downloading your packaged folders to the Sample Project Package\Packages
+
+	*If you open the project and you get the "Enter Safe Mode" dialogue, it means you are missing your packages.*
+
+	*If you still cannot find the package namespaces, ensure the Assets/Scripts/LobbyRelaySample.asmdef is referencing the packages.*
 
 Follow the steps until you hit "Lobby/Relay On"
 
