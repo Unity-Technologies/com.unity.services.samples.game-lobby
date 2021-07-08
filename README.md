@@ -20,7 +20,7 @@ This is a Unity Project Sample showing how to integrate Lobby and Relay into a t
 	- Relay Server Join
 
 ## Service Organization Setup
-** Create an organization**
+**Create an organization**
 
 Follow the guide to set up your cloud organization:
 
@@ -36,6 +36,7 @@ We use the lobby service to create a space that our users can join and share dat
 [Lobby Dashboard](https://dashboard.unity3d.com/lobby)
 
 
+
 We use the Relay service to obfuscate the Hosts' IP, while still allowing them to locally host strangers.
 
 [Relay Overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
@@ -46,7 +47,7 @@ We use the Relay service to obfuscate the Hosts' IP, while still allowing them t
 ### Setup 
 For either one, select "About & Support => Get Started"
 
-** Closed Beta Only **
+**Closed Beta Only**
 
 	Follow the steps, downloading your packaged folders to the Sample Project Package\Packages
 
