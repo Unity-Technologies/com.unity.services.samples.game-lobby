@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Foldout class="auth-id-provider-details" value="false">
+        <ui:Toggle label="Enabled" name="id-provider-enabled" value="true"/>
+        <ui:TextField picking-mode="Ignore" label="Client ID" name="id-provider-client-id" max-length="128"/>
+        <ui:TextField picking-mode="Ignore" label="Client Secret" password="true" max-length="128" name="id-provider-client-secret"/>
+        <ui:VisualElement class="auth-button-container">
+            <ui:Button name="id-provider-save" text="Save" display-tooltip-when-elided="true" />
+            <ui:Button name="id-provider-cancel" text="Cancel" display-tooltip-when-elided="true" />
+            <ui:Button name="id-provider-delete" text="Delete" display-tooltip-when-elided="true" class="auth-danger-button" />
+        </ui:VisualElement>
+    </ui:Foldout>
+</ui:UXML>
