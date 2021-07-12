@@ -5,7 +5,7 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "LobbyRelaySample",
-        "Unity.Services.Rooms",
+        "Unity.Services.Lobbies",
         "Unity.Services.Relay"
     ],
     "includePlatforms": [],

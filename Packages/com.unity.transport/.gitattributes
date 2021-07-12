@@ -1,0 +1,90 @@
+* text=auto eol=lf
+**/HavokNative.framework/HavokNative filter=lfs diff=lfs merge=lfs -text
+**/cwebp filter=lfs diff=lfs merge=lfs -text
+**/moz-cjpeg filter=lfs diff=lfs merge=lfs -text
+**/pngcrush filter=lfs diff=lfs merge=lfs -text
+*.3[dS][sS] filter=lfs diff=lfs merge=lfs -text
+*.DOC  diff=astextplain
+*.DOCX diff=astextplain
+*.DOT  diff=astextplain
+*.RTF  diff=astextplain
+*.[aA] filter=lfs diff=lfs merge=lfs -text
+*.[aA][iI][fF][cC] filter=lfs diff=lfs merge=lfs -text
+*.[aA][iI][fF][fF]? filter=lfs diff=lfs merge=lfs -text
+*.[aA][pP][kK] filter=lfs diff=lfs merge=lfs -text
+*.[aA][vV][iI] filter=lfs diff=lfs merge=lfs -text
+*.[bB][lL][eE][nN][dD] filter=lfs diff=lfs merge=lfs -text
+*.[cC][oO][lL][lL][aA][dD][dD][aA] filter=lfs diff=lfs merge=lfs -text
+*.[dD][lL][lL] filter=lfs diff=lfs merge=lfs -text
+*.[dD][yY][lL][iI][bB] filter=lfs diff=lfs merge=lfs -text
+*.[eE][xX][eE] filter=lfs diff=lfs merge=lfs -text
+*.[fF][bB][xX] filter=lfs diff=lfs merge=lfs -text
+*.[fF][lL][aA] filter=lfs diff=lfs merge=lfs -text
+*.[fF][lL][aA][cC] filter=lfs diff=lfs merge=lfs -text
+*.[fF][lL][vV] filter=lfs diff=lfs merge=lfs -text
+*.[gG][iI][fF] filter=lfs diff=lfs merge=lfs -text
+*.[gG][zZ][iI][pP] filter=lfs diff=lfs merge=lfs -text
+*.[iI][pP][aA] filter=lfs diff=lfs merge=lfs -text
+*.[jJ][aA][rR] filter=lfs diff=lfs merge=lfs -text
+*.[jJ][pP][gG] filter=lfs diff=lfs merge=lfs -text
+*.[mM]4[vV] filter=lfs diff=lfs merge=lfs -text
+*.[mM][kK][vV] filter=lfs diff=lfs merge=lfs -text
+*.[mM][oO][vV] filter=lfs diff=lfs merge=lfs -text
+*.[mM][pP]3 filter=lfs diff=lfs merge=lfs -text
+*.[mM][pP][2-4]? filter=lfs diff=lfs merge=lfs -text
+*.[mM][pP][eE]?[gG] filter=lfs diff=lfs merge=lfs -text
+*.[oO][bB][jJ] filter=lfs diff=lfs merge=lfs -text
+*.[oO][gG][gG] filter=lfs diff=lfs merge=lfs -text
+*.[oO][gG][vV] filter=lfs diff=lfs merge=lfs -text
+*.[oO][tT][fF] filter=lfs diff=lfs merge=lfs -text
+*.[pP][dD][fF] filter=lfs diff=lfs merge=lfs -text
+*.[pP][nN][gG] filter=lfs diff=lfs merge=lfs -text
+*.[pP][sS][dD] filter=lfs diff=lfs merge=lfs -text
+*.[rR][aA][rR] filter=lfs diff=lfs merge=lfs -text
+*.[sS][oO] filter=lfs diff=lfs merge=lfs -text
+*.[sS][tT][lL] filter=lfs diff=lfs merge=lfs -text
+*.[sS][wW][fF] filter=lfs diff=lfs merge=lfs -text
+*.[tT][aA][rR] filter=lfs diff=lfs merge=lfs -text
+*.[tT][gG][zZ] filter=lfs diff=lfs merge=lfs -text
+*.[tT][tT][fF] filter=lfs diff=lfs merge=lfs -text
+*.[wW][aA][vV] filter=lfs diff=lfs merge=lfs -text
+*.[wW][eE][bB][mM] filter=lfs diff=lfs merge=lfs -text
+*.[zZ][iI][pP] filter=lfs diff=lfs merge=lfs -text
+*.aif filter=lfs diff=lfs merge=lfs -text
+*.anim filter=lfs diff=lfs merge=lfs -text
+*.api eol=lf text
+*.asset text
+*.bundle filter=lfs diff=lfs merge=lfs -text
+*.cginc text
+*.compute text
+*.compute text
+*.cs diff=csharp text
+*.dat filter=lfs diff=lfs merge=lfs -text
+*.doc  diff=astextplain
+*.docx diff=astextplain
+*.dot  diff=astextplain
+*.entities filter=lfs diff=lfs merge=lfs -text
+*.entityheader filter=lfs diff=lfs merge=lfs -text
+*.exr filter=lfs diff=lfs merge=lfs -text
+*.gradle text eol=lf
+*.mat text
+*.md text
+*.md5 text
+*.meta text
+*.pdb filter=lfs diff=lfs merge=lfs -text
+*.prefab text
+*.psb filter=lfs diff=lfs merge=lfs -text
+*.raw filter=lfs diff=lfs merge=lfs -text
+*.rtf diff=astextplain
+*.shader text
+*.tga filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tt eol=crlf text
+*.txt text
+*.unitypackage filter=lfs diff=lfs merge=lfs -text
+*.yaml eol=lf
+*.yml eol=lf
+*/ProjectSettings/*.asset text
+Havok.Vdb.dll filter=lfs diff=lfs merge=lfs -text
+HavokNative.dll filter=lfs diff=lfs merge=lfs -text
+HavokVisualDebugger.exe filter=lfs diff=lfs merge=lfs -text

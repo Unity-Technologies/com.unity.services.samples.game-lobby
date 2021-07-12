@@ -1,0 +1,41 @@
+.auth-progress {
+    -unity-text-align: middle-center;
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.auth-error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: red;
+    display: none;
+}
+
+.auth-id-providers-text {
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+.auth-id-provider-container {
+    flex-direction: column;
+    margin: 10px;
+}
+
+.auth-id-provider-details {
+    margin-top: 10px;
+}
+
+.auth-id-providers-title {
+    flex-direction: row;
+}
+
+.auth-button-container {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.auth-danger-button {
+    color: red;
+}
