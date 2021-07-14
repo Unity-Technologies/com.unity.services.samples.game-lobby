@@ -134,6 +134,15 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.jobs": {
+      "version": "file:com.unity.jobs",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.collections": "0.17.0-preview.18",
+        "com.unity.mathematics": "1.2.1"
+      }
+    },
     "com.unity.mathematics": {
       "version": "1.2.1",
       "depth": 1,

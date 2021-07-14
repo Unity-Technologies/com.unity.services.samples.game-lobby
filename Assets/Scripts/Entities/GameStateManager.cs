@@ -30,11 +30,12 @@ namespace LobbyRelaySample
         LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         LocalGameState m_localGameState = new LocalGameState();
         ReadyCheck m_ReadyCheck;
+        RelayUTPSetup m_RelaySetup;
 
         public void Awake()
         {
-            // Do some arbitrary operations to instantiate singletons.
             LogHandler.Get().mode = m_logMode;
+            // Do some arbitrary operations to instantiate singletons.
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
             var unused = Locator.Get;
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
@@ -257,17 +258,6 @@ namespace LobbyRelaySample
             OnJoinedLobby();
         }
 
-        void OnGotRelayAllocation(Allocation allocationID)
-        {
-            RelayInterface.GetJoinCodeAsync(allocationID.AllocationId, OnGotRelayCode);
-        }
-
-        void OnGotRelayCode(string relayCode)
-        {
-            m_localLobby.RelayCode = relayCode;
-            
-        }
-
         void OnJoinedLobby()
         {
             LobbyAsyncRequests.Instance.BeginTracking(m_localLobby.LobbyID);
@@ -276,6 +266,17 @@ namespace LobbyRelaySample
             Dictionary<string, string> displayNameData = new Dictionary<string, string>();
             displayNameData.Add("DisplayName", m_localUser.DisplayName);
             LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(displayNameData, null);
+
+            if (m_localUser.IsHost)
+            {
+                m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Host>();
+                (m_RelaySetup as RelayUtpSetup_Host).DoRelaySetup(m_localLobby);
+            }
+            else
+            {
+                m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Client>();
+                (m_RelaySetup as RelayUtpSetup_Client).JoinRelay(m_localLobby);
+            }
         }
 
         void OnLeftLobby()
@@ -284,6 +285,12 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
             m_lobbyContentHeartbeat.EndTracking();
             LobbyAsyncRequests.Instance.EndTracking();
+
+            if (m_RelaySetup != null)
+            {
+                Component.Destroy(m_RelaySetup);
+                m_RelaySetup = null;
+            }
         }
 
         /// <summary>
@@ -303,7 +310,6 @@ namespace LobbyRelaySample
             // We want to do all the Relay Allocation calls in quick succession, as waiting too long
             // (10s) will cause the Relay server to get cleaned up by the service
 
-            RelayInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnGotRelayAllocation);
             m_localLobby.CountDownTime = m_localLobby.TargetEndTime.Subtract(DateTime.Now).Seconds;
             m_localLobby.State = LobbyState.CountDown;
             StartCoroutine(CountDown());
@@ -327,7 +333,7 @@ namespace LobbyRelaySample
             m_localLobby.State = LobbyState.InGame;
             
             // TODO TRANSPORT: Move Relay Join to Pre-Countdown, and do connection and health checks before counting down for the game start.
-            RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoinedRelay); 
+            //RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoinedRelay); 
         }
         
         /// <summary>
