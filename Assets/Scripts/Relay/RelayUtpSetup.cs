@@ -241,6 +241,9 @@ namespace LobbyRelaySample.Relay
             {
                 // For ping requests we reply with a pong message
                 int id = strm.ReadInt();
+
+                Debug.LogWarning("Received int: " + id);
+
                 // Create a temporary DataStreamWriter to keep our serialized pong message
                 if (driver.BeginSend(connection, out var pongData) == 0)
                 {
@@ -325,7 +328,11 @@ namespace LobbyRelaySample.Relay
 
     public class RelayUtpSetup_Client : RelayUTPSetup
     {
-        LocalLobby m_localLobby;
+        private LocalLobby m_localLobby;
+        private NetworkDriver m_ClientDriver;
+        private NativeArray<NetworkConnection> m_clientToServerConnection;
+        private bool m_isRelayConnected = false;
+        private JobHandle m_activeUpdateJobHandle;
 
         public void JoinRelay(LocalLobby localLobby)
         {
@@ -367,35 +374,135 @@ namespace LobbyRelaySample.Relay
 
         private IEnumerator ServerBindAndListen(RelayNetworkParameter relayNetworkParameter, NetworkEndPoint serverEndpoint)
         {
-            var driver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
+            m_ClientDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
+            m_clientToServerConnection = new NativeArray<NetworkConnection>(1, Allocator.Persistent);
 
             // Bind the NetworkDriver to the available local endpoint.
             // This will send the bind request to the Relay server
-            if (driver.Bind(NetworkEndPoint.AnyIpv4) != 0)
+            if (m_ClientDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)
             {
                 Debug.LogError("Client failed to bind");
             }
             else
             {
-                while (!driver.Bound)
+                while (!m_ClientDriver.Bound)
                 {
-                    driver.ScheduleUpdate().Complete();
+                    m_ClientDriver.ScheduleUpdate().Complete();
                     yield return null;
                 }
 
                 // Once the client is bound to the Relay server, you can send a connection request
-                var serverConnection = driver.Connect(serverEndpoint);
+                m_clientToServerConnection[0] = m_ClientDriver.Connect(serverEndpoint);
 
-                while (driver.GetConnectionState(serverConnection) == NetworkConnection.State.Connecting)
+                while (m_ClientDriver.GetConnectionState(m_clientToServerConnection[0]) == NetworkConnection.State.Connecting)
                 {
-                    driver.ScheduleUpdate().Complete();
+                    m_ClientDriver.ScheduleUpdate().Complete();
                     yield return null;
                 }
 
-                if (driver.GetConnectionState(serverConnection) != NetworkConnection.State.Connected)
+                if (m_ClientDriver.GetConnectionState(m_clientToServerConnection[0]) != NetworkConnection.State.Connected)
                 {
                     Debug.LogError("Client failed to connect to server");
                 }
+
+
+                //while (true)
+                //{
+                //    yield return new WaitForSeconds(1);
+                //    DataStreamWriter writer = default;
+                //    if (m_ClientDriver.BeginSend(serverConnection, out writer) == 0)
+                //    {
+                //        writer.WriteByte(123);
+                //        m_ClientDriver.EndSend(writer);
+                //        Debug.LogError("Sent a byte");
+                //    }
+                //}
+            }
+        }
+
+        struct PingJob : IJob
+        {
+            public NetworkDriver driver;
+            public NativeArray<NetworkConnection> connection;
+            public float fixedTime;
+
+            public void Execute()
+            {
+                DataStreamReader strm;
+                NetworkEvent.Type cmd;
+                // Process all events on the connection. If the connection is invalid it will return Empty immediately
+                while ((cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
+                {
+                    if (cmd == NetworkEvent.Type.Connect)
+                    {
+                        // Create a 4 byte data stream which we can store our ping sequence number in
+
+                        if (driver.BeginSend(connection[0], out var pingData) == 0)
+                        {
+                            pingData.WriteInt(123);
+                            driver.EndSend(pingData);
+                        }
+                    }
+                    else if (cmd == NetworkEvent.Type.Data)
+                    {
+                        //// When the pong message is received we calculate the ping time and disconnect
+                        //pingStats[1] = (int)((fixedTime - pendingPings[0].time) * 1000);
+                        //connection[0].Disconnect(driver);
+                        //connection[0] = default(NetworkConnection);
+                    }
+                    else if (cmd == NetworkEvent.Type.Disconnect)
+                    {
+                        // If the server disconnected us we clear out connection
+                        connection[0] = default(NetworkConnection);
+                    }
+                }
+            }
+        }
+
+        private void Update()
+        {
+            // When connecting to the relay we need to this? 
+            if (m_ClientDriver.IsCreated && !m_isRelayConnected)
+            {
+                m_ClientDriver.ScheduleUpdate().Complete();
+
+                var pingJob = new PingJob
+                {
+                    driver = m_ClientDriver,
+                    connection = m_clientToServerConnection,
+                    fixedTime = Time.fixedTime
+                };
+
+                pingJob.Schedule().Complete();
+            }
+        }
+
+        void LateUpdate()
+        {
+            // On fast clients we can get more than 4 frames per fixed update, this call prevents warnings about TempJob
+            // allocation longer than 4 frames in those cases
+            if (m_ClientDriver.IsCreated && m_isRelayConnected)
+                m_activeUpdateJobHandle.Complete();
+        }
+
+        void FixedUpdate()
+        {
+            if (m_ClientDriver.IsCreated && m_isRelayConnected)
+            {
+
+                // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
+                // enough since we can get multiple FixedUpdate per frame on slow clients
+                m_activeUpdateJobHandle.Complete();
+
+                var pingJob = new PingJob
+                {
+                    driver = m_ClientDriver,
+                    connection = m_clientToServerConnection,
+                    fixedTime = Time.fixedTime
+                };
+                // Schedule a chain with the driver update followed by the ping job
+                m_activeUpdateJobHandle = m_ClientDriver.ScheduleUpdate();
+                m_activeUpdateJobHandle = pingJob.Schedule(m_activeUpdateJobHandle);
             }
         }
     }
