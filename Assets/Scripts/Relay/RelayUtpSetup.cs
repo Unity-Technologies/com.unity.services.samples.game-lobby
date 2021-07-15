@@ -1,4 +1,5 @@
 ﻿using LobbyRelaySample;
+using System;
 using System.Collections;
 using Unity.Collections;
 using Unity.Jobs;
@@ -17,8 +18,48 @@ namespace LobbyRelaySample.Relay
     /// </summary>
     public abstract class RelayUTPSetup : MonoBehaviour
     {
-        // TODO: Eh, don't need to live here.
-        unsafe protected static RelayAllocationId ConvertFromAllocationIdBytes(byte[] allocationIdBytes)
+        protected bool m_isRelayConnected = false;
+        protected NetworkDriver m_networkDriver;
+        protected NativeList<NetworkConnection> m_connections;
+        protected NetworkEndPoint m_endpointForServer;
+        protected JobHandle m_currentUpdateHandle;
+
+        protected void BindToAllocation(string ip, int port, byte[] allocationIdBytes, byte[] connectionDataBytes, byte[] hostConnectionDataBytes, byte[] hmacKeyBytes, int connectionCapacity)
+        {
+            NetworkEndPoint     serverEndpoint     = NetworkEndPoint.Parse(ip, (ushort)port);
+            RelayAllocationId   allocationId       = ConvertAllocationIdBytes(allocationIdBytes);
+            RelayConnectionData connectionData     = ConvertConnectionDataBytes(connectionDataBytes);
+            RelayConnectionData hostConnectionData = ConvertConnectionDataBytes(hostConnectionDataBytes);
+            RelayHMACKey        key                = ConvertHMACKeyBytes(hmacKeyBytes);
+
+            m_endpointForServer = serverEndpoint;
+            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref hostConnectionData, ref key);
+            relayServerData.ComputeNewNonce();
+            var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
+
+            m_networkDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
+            m_connections = new NativeList<NetworkConnection>(connectionCapacity, Allocator.Persistent);
+
+            if (m_networkDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)
+                Debug.LogError("Failed to bind to Relay allocation.");
+            else
+                StartCoroutine(WaitForBindComplete()); // TODO: This is the only reason for being a MonoBehaviour?
+        }
+
+        private IEnumerator WaitForBindComplete()
+        {
+            while (!m_networkDriver.Bound)
+            {
+                m_networkDriver.ScheduleUpdate().Complete();
+                yield return null; // TODO: Does this not proceed until a client connects as well?
+            }
+            OnBindingComplete();
+        }
+
+        protected abstract void OnBindingComplete();
+
+        #region UTP uses pointers instead of managed arrays for performance reasons, so we use these helper functions to convert them.
+        unsafe private static RelayAllocationId ConvertAllocationIdBytes(byte[] allocationIdBytes)
         {
             fixed (byte* ptr = allocationIdBytes)
             {
@@ -26,7 +67,7 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        unsafe protected static RelayConnectionData ConvertConnectionData(byte[] connectionData)
+        unsafe private static RelayConnectionData ConvertConnectionDataBytes(byte[] connectionData)
         {
             fixed (byte* ptr = connectionData)
             {
@@ -34,23 +75,26 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        unsafe protected static RelayHMACKey ConvertFromHMAC(byte[] hmac)
+        unsafe private static RelayHMACKey ConvertHMACKeyBytes(byte[] hmac)
         {
             fixed (byte* ptr = hmac)
             {
                 return RelayHMACKey.FromBytePointer(ptr, RelayHMACKey.k_Length);
             }
         }
+        #endregion
+
+
+        private void LateUpdate()
+        {
+            if (m_networkDriver.IsCreated && m_isRelayConnected)
+                m_currentUpdateHandle.Complete(); // This prevents warnings about a job allocation longer than 4 frames if FixedUpdate is very fast.
+        }
     }
 
     public class RelayUtpSetup_Host : RelayUTPSetup
     {
         private LocalLobby m_localLobby;
-        private Allocation m_allocation;
-        private bool m_isRelayConnected = false;
-        public NetworkDriver m_ServerDriver;
-        private NativeList<NetworkConnection> m_connections;
-        private JobHandle m_updateHandle;
 
         public void DoRelaySetup(LocalLobby localLobby)
         {
@@ -60,278 +104,149 @@ namespace LobbyRelaySample.Relay
 
         public void OnAllocation(Allocation allocation)
         {
-            m_allocation = allocation;
-            //    RelayInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
-            //}
-
-            //public void OnRelayCode(string relayCode)
-            //{
-            //    m_localLobby.RelayCode = relayCode;
-            //    RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
-            //}
-
-            //private void OnJoin(JoinAllocation allocation)
-            //{
-
-            //    // TODO: Use the ServerAddress?
-            //    m_localLobby.RelayServer = new ServerAddress(m_allocation.RelayServer.IpV4, m_allocation.RelayServer.Port);
-
-            NetworkEndPoint serverEndpoint = NetworkEndPoint.Parse(m_allocation.RelayServer.IpV4, (ushort)m_allocation.RelayServer.Port);
-            // UTP uses pointers instead of managed arrays for performance reasons, so we use these helper functions to convert them
-            RelayAllocationId allocationId = ConvertFromAllocationIdBytes(m_allocation.AllocationIdBytes);
-            RelayConnectionData connectionData = ConvertConnectionData(m_allocation.ConnectionData);
-            RelayHMACKey key = ConvertFromHMAC(m_allocation.Key);
-
-            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref connectionData, ref key);
-            relayServerData.ComputeNewNonce();
-            var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
-
-            StartCoroutine(ServerBindAndListen(relayNetworkParameter, serverEndpoint));
-        }
-
-        private IEnumerator ServerBindAndListen(RelayNetworkParameter relayNetworkParameter, NetworkEndPoint serverEndpoint)
-        {
-            // Create the NetworkDriver using the Relay parameters
-            m_ServerDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
-            m_connections = new NativeList<NetworkConnection>(16, Allocator.Persistent);
-
-            // Bind the NetworkDriver to the local endpoint
-            if (m_ServerDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)
-            {
-                Debug.LogError("Server failed to bind");
-            }
-            else
-            {
-                // The binding process is an async operation; wait until bound
-                while (!m_ServerDriver.Bound)
-                {
-                    m_ServerDriver.ScheduleUpdate().Complete();
-                    yield return null; // TODO: Does this not proceed until a client connects as well?
-                }
-
-                // Once the driver is bound you can start listening for connection requests
-                if (m_ServerDriver.Listen() != 0)
-                {
-                    Debug.LogError("Server failed to listen");
-                    yield break;
-                }
-                else
-                {
-                    Debug.LogWarning("Server is now listening!");
-                    m_isRelayConnected = true;
-                }
-
-                //var serverConnection = driver.Connect(serverEndpoint);
-
-                //while (driver.GetConnectionState(serverConnection) == NetworkConnection.State.Connecting)
-                //{
-                //    driver.ScheduleUpdate().Complete();
-                //    yield return null;
-                //}
-                //Debug.LogWarning("Should be good now?");
-
-
-
-                //// This successfully sends data, it seems, though it's just to other clients and not actually to the Relay service.
-                //while (true)
-                //{
-                //    yield return new WaitForSeconds(1);
-                //    DataStreamWriter writer = default;
-                //    if (driver.BeginSend(serverConnection, out writer) == 0)
-                //    {
-                //        writer.WriteByte(0);
-                //        driver.EndSend(writer);
-                //        Debug.LogWarning("Sent a byte");
-                //    }
-                //}
-
-                RelayInterface.GetJoinCodeAsync(m_allocation.AllocationId, OnRelayCode);
-            }
+            RelayInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
+            BindToAllocation(allocation);
         }
 
         public void OnRelayCode(string relayCode)
         {
             m_localLobby.RelayCode = relayCode;
-            //RelayInterface.JoinAsync(m_localLobby.RelayCode, OnRelayJoined);
+            RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
         }
 
-        private void OnRelayJoined(JoinAllocation allocation)
+        private void OnJoin(JoinAllocation joinAllocation)
         {
-            StartCoroutine(DoRelayConnect(allocation));
+            m_localLobby.RelayServer = new ServerAddress(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port);
         }
-        private IEnumerator DoRelayConnect(JoinAllocation allocation)
+
+        private void BindToAllocation(Allocation allocation)
         {
-            NetworkEndPoint serverEndpoint = NetworkEndPoint.Parse(allocation.RelayServer.IpV4, (ushort)allocation.RelayServer.Port);
-            // UTP uses pointers instead of managed arrays for performance reasons, so we use these helper functions to convert them
-            RelayAllocationId allocationId = ConvertFromAllocationIdBytes(allocation.AllocationIdBytes);
-            RelayConnectionData connectionData = ConvertConnectionData(allocation.ConnectionData);
-            RelayHMACKey key = ConvertFromHMAC(allocation.Key);
-            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref connectionData, ref key);
-            relayServerData.ComputeNewNonce();
-            var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
-            var driver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
+            BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16);
+        }
 
-            var serverConnection = driver.Connect(serverEndpoint);
-
-            Debug.LogWarning("Trying the relay connection now.");
-
-            while (driver.GetConnectionState(serverConnection) == NetworkConnection.State.Connecting)
+        protected override void OnBindingComplete()
+        {
+            if (m_networkDriver.Listen() != 0)
             {
-                driver.ScheduleUpdate().Complete();
-                yield return null;
+                Debug.LogError("Server failed to listen");
             }
-            Debug.LogWarning("Should be good now?");
-
-
-
-            // This successfully sends data, it seems, though it's just to other clients and not actually to the Relay service.
-            while (true)
+            else
             {
-                yield return new WaitForSeconds(1);
-                DataStreamWriter writer = default;
-                if (driver.BeginSend(serverConnection, out writer) == 0)
+                Debug.LogWarning("Server is now listening!");
+                m_isRelayConnected = true;
+            }
+        }
+
+        struct DriverUpdateJob : IJob
+        {
+            public NetworkDriver driver;
+            public NativeList<NetworkConnection> connections;
+
+            public void Execute()
+            {
+                // Remove connections which have been destroyed from the list of active connections
+                for (int i = 0; i < connections.Length; ++i)
                 {
-                    writer.WriteByte(0);
-                    driver.EndSend(writer);
-                    Debug.LogWarning("Sent a byte");
+                    if (!connections[i].IsCreated)
+                    {
+                        connections.RemoveAtSwapBack(i);
+                        // Index i is a new connection since we did a swap back, check it again
+                        --i;
+                    }
+                }
+
+                // Accept all new connections
+                while (true)
+                {
+                    var con = driver.Accept();
+                    // "Nothing more to accept" is signaled by returning an invalid connection from accept
+                    if (!con.IsCreated)
+                        break;
+                    connections.Add(con);
                 }
             }
         }
 
-        
-
-    struct DriverUpdateJob : IJob
-    {
-        public NetworkDriver driver;
-        public NativeList<NetworkConnection> connections;
-
-        public void Execute()
+        private struct PongJob : Unity.Jobs.IJobParallelForDefer
         {
-            // Remove connections which have been destroyed from the list of active connections
-            for (int i = 0; i < connections.Length; ++i)
+            public NetworkDriver.Concurrent driver;
+            public NativeArray<NetworkConnection> connections;
+
+            public void Execute(int i)
             {
-                if (!connections[i].IsCreated)
+                DataStreamReader strm;
+                NetworkEvent.Type cmd;
+                // Pop all events for the connection
+                while ((cmd = driver.PopEventForConnection(connections[i], out strm)) != NetworkEvent.Type.Empty)
                 {
-                    connections.RemoveAtSwapBack(i);
-                    // Index i is a new connection since we did a swap back, check it again
-                    --i;
+                    if (cmd == NetworkEvent.Type.Data)
+                    {
+                        // For ping requests we reply with a pong message
+                        int id = strm.ReadInt();
+
+                        Debug.LogWarning("Received int: " + id);
+
+                        // Create a temporary DataStreamWriter to keep our serialized pong message
+                        if (driver.BeginSend(connections[i], out var pongData) == 0)
+                        {
+                            pongData.WriteInt(id);
+                            // Send the pong message with the same id as the ping
+                            driver.EndSend(pongData);
+                        }
+                    }
+                    else if (cmd == NetworkEvent.Type.Disconnect)
+                    {
+                        // When disconnected we make sure the connection return false to IsCreated so the next frames
+                        // DriverUpdateJob will remove it
+                        connections[i] = default(NetworkConnection);
+                    }
                 }
             }
-
-            // Accept all new connections
-            while (true)
-            {
-                var con = driver.Accept();
-                // "Nothing more to accept" is signaled by returning an invalid connection from accept
-                if (!con.IsCreated)
-                    break;
-                connections.Add(con);
-            }
-        }
-    }
-
-    static NetworkConnection ProcessSingleConnection(NetworkDriver.Concurrent driver, NetworkConnection connection)
-    {
-        DataStreamReader strm;
-        NetworkEvent.Type cmd;
-        // Pop all events for the connection
-        while ((cmd = driver.PopEventForConnection(connection, out strm)) != NetworkEvent.Type.Empty)
-        {
-            if (cmd == NetworkEvent.Type.Data)
-            {
-                // For ping requests we reply with a pong message
-                int id = strm.ReadInt();
-
-                Debug.LogWarning("Received int: " + id);
-
-                // Create a temporary DataStreamWriter to keep our serialized pong message
-                if (driver.BeginSend(connection, out var pongData) == 0)
-                {
-                    pongData.WriteInt(id);
-                    // Send the pong message with the same id as the ping
-                    driver.EndSend(pongData);
-                }
-            }
-            else if (cmd == NetworkEvent.Type.Disconnect)
-            {
-                // When disconnected we make sure the connection return false to IsCreated so the next frames
-                // DriverUpdateJob will remove it
-                return default(NetworkConnection);
-            }
         }
 
-        return connection;
-    }
-
-    struct PongJob : Unity.Jobs.IJobParallelForDefer
-    {
-        public NetworkDriver.Concurrent driver;
-        public NativeArray<NetworkConnection> connections;
-
-        public void Execute(int i)
+        private void Update()
         {
-            connections[i] = ProcessSingleConnection(driver, connections[i]);
-        }
-    }
-
-    private void Update()
-    {
-        // When connecting to the relay we need to this? 
-        if (m_ServerDriver.IsCreated && !m_isRelayConnected)
-        {
-            m_ServerDriver.ScheduleUpdate().Complete();
+            // When connecting to the relay we need to this? 
+            if (m_networkDriver.IsCreated && !m_isRelayConnected)
+            {
+                m_networkDriver.ScheduleUpdate().Complete();
             
-            var updateJob = new DriverUpdateJob {driver = m_ServerDriver, connections = m_connections};
-            updateJob.Schedule().Complete();
+                var updateJob = new DriverUpdateJob {driver = m_networkDriver, connections = m_connections};
+                updateJob.Schedule().Complete();
+            }
         }
-    }
 
-    void LateUpdate()
-    {
-        // On fast clients we can get more than 4 frames per fixed update, this call prevents warnings about TempJob
-        // allocation longer than 4 frames in those cases
-        if (m_ServerDriver.IsCreated && m_isRelayConnected)
-            m_updateHandle.Complete();
-    }
-
-    void FixedUpdate()
-    {
-        if (m_ServerDriver.IsCreated && m_isRelayConnected) {
-            // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
-            // enough since we can get multiple FixedUpdate per frame on slow clients
-            m_updateHandle.Complete();
-            var updateJob = new DriverUpdateJob {driver = m_ServerDriver, connections = m_connections};
-            var pongJob = new PongJob
-            {
-                // PongJob is a ParallelFor job, it must use the concurrent NetworkDriver
-                driver = m_ServerDriver.ToConcurrent(),
-                // PongJob uses IJobParallelForDeferExtensions, we *must* use AsDeferredJobArray in order to access the
-                // list from the job
-                connections = m_connections.AsDeferredJobArray()
-            };
-            // Update the driver should be the first job in the chain
-            m_updateHandle = m_ServerDriver.ScheduleUpdate();
-            // The DriverUpdateJob which accepts new connections should be the second job in the chain, it needs to depend
-            // on the driver update job
-            m_updateHandle = updateJob.Schedule(m_updateHandle);
-            // PongJob uses IJobParallelForDeferExtensions, we *must* schedule with a list as first parameter rather than
-            // an int since the job needs to pick up new connections from DriverUpdateJob
-            // The PongJob is the last job in the chain and it must depends on the DriverUpdateJob
-            m_updateHandle = pongJob.Schedule(m_connections, 1, m_updateHandle);
+        void FixedUpdate()
+        {
+            if (m_networkDriver.IsCreated && m_isRelayConnected) {
+                // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
+                // enough since we can get multiple FixedUpdate per frame on slow clients
+                m_currentUpdateHandle.Complete();
+                var updateJob = new DriverUpdateJob {driver = m_networkDriver, connections = m_connections};
+                var pongJob = new PongJob
+                {
+                    // PongJob is a ParallelFor job, it must use the concurrent NetworkDriver
+                    driver = m_networkDriver.ToConcurrent(),
+                    // PongJob uses IJobParallelForDeferExtensions, we *must* use AsDeferredJobArray in order to access the
+                    // list from the job
+                    connections = m_connections.AsDeferredJobArray()
+                };
+                // Update the driver should be the first job in the chain
+                m_currentUpdateHandle = m_networkDriver.ScheduleUpdate();
+                // The DriverUpdateJob which accepts new connections should be the second job in the chain, it needs to depend
+                // on the driver update job
+                m_currentUpdateHandle = updateJob.Schedule(m_currentUpdateHandle);
+                // PongJob uses IJobParallelForDeferExtensions, we *must* schedule with a list as first parameter rather than
+                // an int since the job needs to pick up new connections from DriverUpdateJob
+                // The PongJob is the last job in the chain and it must depends on the DriverUpdateJob
+                m_currentUpdateHandle = pongJob.Schedule(m_connections, 1, m_currentUpdateHandle);
+            }
         }
-        
-    }
-
-
-
     }
 
     public class RelayUtpSetup_Client : RelayUTPSetup
     {
         private LocalLobby m_localLobby;
-        private NetworkDriver m_ClientDriver;
-        private NativeArray<NetworkConnection> m_clientToServerConnection;
-        private bool m_isRelayConnected = false;
         private JobHandle m_activeUpdateJobHandle;
 
         public void JoinRelay(LocalLobby localLobby)
@@ -352,78 +267,33 @@ namespace LobbyRelaySample.Relay
         private void OnJoin(JoinAllocation allocation)
         {
             if (allocation == null)
-            {
-                // TODO: Error messaging.
-                return;
-            }
+                return; // TODO: Error messaging.
 
-            // Collect and convert the Relay data from the join response
-            var serverEndpoint = NetworkEndPoint.Parse(allocation.RelayServer.IpV4, (ushort)allocation.RelayServer.Port);
-            var allocationId = ConvertFromAllocationIdBytes(allocation.AllocationIdBytes);
-            var connectionData = ConvertConnectionData(allocation.ConnectionData);
-            var hostConnectionData = ConvertConnectionData(allocation.HostConnectionData);
-            var key = ConvertFromHMAC(allocation.Key);
-
-            // Prepare the RelayNetworkParameter
-            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref hostConnectionData, ref key);
-            relayServerData.ComputeNewNonce();
-
-            var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
-            StartCoroutine(ServerBindAndListen(relayNetworkParameter, serverEndpoint));
+            BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key, 1);
         }
 
-        private IEnumerator ServerBindAndListen(RelayNetworkParameter relayNetworkParameter, NetworkEndPoint serverEndpoint)
+        protected override void OnBindingComplete()
         {
-            m_ClientDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
-            m_clientToServerConnection = new NativeArray<NetworkConnection>(1, Allocator.Persistent);
-
-            // Bind the NetworkDriver to the available local endpoint.
-            // This will send the bind request to the Relay server
-            if (m_ClientDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)
-            {
-                Debug.LogError("Client failed to bind");
-            }
-            else
-            {
-                while (!m_ClientDriver.Bound)
-                {
-                    m_ClientDriver.ScheduleUpdate().Complete();
-                    yield return null;
-                }
-
-                // Once the client is bound to the Relay server, you can send a connection request
-                m_clientToServerConnection[0] = m_ClientDriver.Connect(serverEndpoint);
-
-                while (m_ClientDriver.GetConnectionState(m_clientToServerConnection[0]) == NetworkConnection.State.Connecting)
-                {
-                    m_ClientDriver.ScheduleUpdate().Complete();
-                    yield return null;
-                }
-
-                if (m_ClientDriver.GetConnectionState(m_clientToServerConnection[0]) != NetworkConnection.State.Connected)
-                {
-                    Debug.LogError("Client failed to connect to server");
-                }
-
-
-                //while (true)
-                //{
-                //    yield return new WaitForSeconds(1);
-                //    DataStreamWriter writer = default;
-                //    if (m_ClientDriver.BeginSend(serverConnection, out writer) == 0)
-                //    {
-                //        writer.WriteByte(123);
-                //        m_ClientDriver.EndSend(writer);
-                //        Debug.LogError("Sent a byte");
-                //    }
-                //}
-            }
+            StartCoroutine(ConnectToServer());
         }
 
-        struct PingJob : IJob
+        private IEnumerator ConnectToServer()
+        {
+            // Once the client is bound to the Relay server, you can send a connection request
+            m_connections.Add(m_networkDriver.Connect(m_endpointForServer));
+            while (m_networkDriver.GetConnectionState(m_connections[0]) == NetworkConnection.State.Connecting)
+            {
+                m_networkDriver.ScheduleUpdate().Complete();
+                yield return null;
+            }
+            if (m_networkDriver.GetConnectionState(m_connections[0]) != NetworkConnection.State.Connected)
+                Debug.LogError("Client failed to connect to server");
+        }
+
+        private struct PingJob : IJob
         {
             public NetworkDriver driver;
-            public NativeArray<NetworkConnection> connection;
+            public NativeArray<NetworkConnection> connection; // TODO: I think we were using NativeArray to merely contain one entry, since we'd be unable to pass just that via jobs?
             public float fixedTime;
 
             public void Execute()
@@ -431,7 +301,7 @@ namespace LobbyRelaySample.Relay
                 DataStreamReader strm;
                 NetworkEvent.Type cmd;
                 // Process all events on the connection. If the connection is invalid it will return Empty immediately
-                while ((cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
+                while (connection.Length > 0 && (cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
                 {
                     if (cmd == NetworkEvent.Type.Connect)
                     {
@@ -449,6 +319,11 @@ namespace LobbyRelaySample.Relay
                         //pingStats[1] = (int)((fixedTime - pendingPings[0].time) * 1000);
                         //connection[0].Disconnect(driver);
                         //connection[0] = default(NetworkConnection);
+                        if (driver.BeginSend(connection[0], out var pingData) == 0)
+                        {
+                            pingData.WriteInt(1234);
+                            driver.EndSend(pingData);
+                        }
                     }
                     else if (cmd == NetworkEvent.Type.Disconnect)
                     {
@@ -462,14 +337,14 @@ namespace LobbyRelaySample.Relay
         private void Update()
         {
             // When connecting to the relay we need to this? 
-            if (m_ClientDriver.IsCreated && !m_isRelayConnected)
+            if (m_networkDriver.IsCreated && !m_isRelayConnected)
             {
-                m_ClientDriver.ScheduleUpdate().Complete();
+                m_networkDriver.ScheduleUpdate().Complete();
 
                 var pingJob = new PingJob
                 {
-                    driver = m_ClientDriver,
-                    connection = m_clientToServerConnection,
+                    driver = m_networkDriver,
+                    connection = m_connections.AsArray(),
                     fixedTime = Time.fixedTime
                 };
 
@@ -477,17 +352,9 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        void LateUpdate()
-        {
-            // On fast clients we can get more than 4 frames per fixed update, this call prevents warnings about TempJob
-            // allocation longer than 4 frames in those cases
-            if (m_ClientDriver.IsCreated && m_isRelayConnected)
-                m_activeUpdateJobHandle.Complete();
-        }
-
         void FixedUpdate()
         {
-            if (m_ClientDriver.IsCreated && m_isRelayConnected)
+            if (m_networkDriver.IsCreated && m_isRelayConnected)
             {
 
                 // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
@@ -496,12 +363,12 @@ namespace LobbyRelaySample.Relay
 
                 var pingJob = new PingJob
                 {
-                    driver = m_ClientDriver,
-                    connection = m_clientToServerConnection,
+                    driver = m_networkDriver,
+                    connection = m_connections,
                     fixedTime = Time.fixedTime
                 };
                 // Schedule a chain with the driver update followed by the ping job
-                m_activeUpdateJobHandle = m_ClientDriver.ScheduleUpdate();
+                m_activeUpdateJobHandle = m_networkDriver.ScheduleUpdate();
                 m_activeUpdateJobHandle = pingJob.Schedule(m_activeUpdateJobHandle);
             }
         }
