@@ -270,12 +270,13 @@ namespace LobbyRelaySample
             if (m_localUser.IsHost)
             {
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Host>();
-                (m_RelaySetup as RelayUtpSetup_Host).DoRelaySetup(m_localLobby);
+                (m_RelaySetup as RelayUtpSetup_Host).BeginRelayJoin(m_localLobby);
             }
             else
             {
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Client>();
-                (m_RelaySetup as RelayUtpSetup_Client).JoinRelay(m_localLobby);
+                (m_RelaySetup as RelayUtpSetup_Client).myName = m_localUser.DisplayName; // TODO: Also for the server player.
+                (m_RelaySetup as RelayUtpSetup_Client).BeginRelayJoin(m_localLobby);
             }
         }
 

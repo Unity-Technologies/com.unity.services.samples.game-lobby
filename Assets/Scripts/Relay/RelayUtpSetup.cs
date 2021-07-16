@@ -1,12 +1,11 @@
 ﻿using LobbyRelaySample;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
-using Unity.Services.Relay;
-using Unity.Services.Relay.Allocations;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
@@ -23,6 +22,18 @@ namespace LobbyRelaySample.Relay
         protected NativeList<NetworkConnection> m_connections;
         protected NetworkEndPoint m_endpointForServer;
         protected JobHandle m_currentUpdateHandle;
+        protected LocalLobby m_localLobby;
+        protected Action<bool, string> m_onJoinComplete;
+
+        protected enum MsgType { NewPlayer = 0, PingPong = 1, ReadyState = 2, PlayerName = 3, Emote = 4 } // We only use 3 bits for this.
+
+        public void BeginRelayJoin(LocalLobby localLobby)//, Action<bool, string> onJoinComplete)
+        {
+            m_localLobby = localLobby;
+//            m_onJoinComplete = onJoinComplete;
+            JoinRelay();
+        }
+        protected abstract void JoinRelay();
 
         protected void BindToAllocation(string ip, int port, byte[] allocationIdBytes, byte[] connectionDataBytes, byte[] hostConnectionDataBytes, byte[] hmacKeyBytes, int connectionCapacity)
         {
@@ -94,21 +105,18 @@ namespace LobbyRelaySample.Relay
 
     public class RelayUtpSetup_Host : RelayUTPSetup
     {
-        private LocalLobby m_localLobby;
-
-        public void DoRelaySetup(LocalLobby localLobby)
+        protected override void JoinRelay()
         {
-            m_localLobby = localLobby;
             RelayInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnAllocation);
         }
 
-        public void OnAllocation(Allocation allocation)
+        private void OnAllocation(Allocation allocation)
         {
             RelayInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
-            BindToAllocation(allocation);
+            BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16);
         }
 
-        public void OnRelayCode(string relayCode)
+        private void OnRelayCode(string relayCode)
         {
             m_localLobby.RelayCode = relayCode;
             RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
@@ -117,11 +125,6 @@ namespace LobbyRelaySample.Relay
         private void OnJoin(JoinAllocation joinAllocation)
         {
             m_localLobby.RelayServer = new ServerAddress(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port);
-        }
-
-        private void BindToAllocation(Allocation allocation)
-        {
-            BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16);
         }
 
         protected override void OnBindingComplete()
@@ -167,7 +170,7 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        private struct PongJob : Unity.Jobs.IJobParallelForDefer
+        private struct PongJob : IJobParallelForDefer
         {
             public NetworkDriver.Concurrent driver;
             public NativeArray<NetworkConnection> connections;
@@ -179,19 +182,37 @@ namespace LobbyRelaySample.Relay
                 // Pop all events for the connection
                 while ((cmd = driver.PopEventForConnection(connections[i], out strm)) != NetworkEvent.Type.Empty)
                 {
-                    if (cmd == NetworkEvent.Type.Data)
+                    if (cmd == NetworkEvent.Type.Connect)
                     {
-                        // For ping requests we reply with a pong message
-                        int id = strm.ReadInt();
+                        // TODO: Assuming that i is the index in connections, which will be the order in which they are received and also will not shift downward if disconnects happen? Need to test with multiple clients.
+                        SendPong(driver, connections);
+                    }
+                    else if (cmd == NetworkEvent.Type.Data)
+                    {
+                        byte header = strm.ReadByte();
+                        int contents = header % 32;
+                        header = (byte)(header >> 5);
+                        MsgType msgType = (MsgType)header;
 
-                        Debug.LogWarning("Received int: " + id);
-
-                        // Create a temporary DataStreamWriter to keep our serialized pong message
-                        if (driver.BeginSend(connections[i], out var pongData) == 0)
+                        if (msgType == MsgType.PingPong)
                         {
-                            pongData.WriteInt(id);
-                            // Send the pong message with the same id as the ping
-                            driver.EndSend(pongData);
+                            SendPong(driver, connections);
+                        }
+                        else if (msgType == MsgType.PlayerName)
+                        {
+                            byte[] nameBytes = new byte[contents];
+                            unsafe
+                            {
+                                fixed(byte* namePtr = nameBytes)
+                                {
+                                    strm.ReadBytes(namePtr, contents);
+                                }
+                            }
+                            string name = System.Text.Encoding.UTF8.GetString(nameBytes);
+                            Debug.LogWarning("Received name for connection " + i + ": " + name);
+
+
+                            SendPong(driver, connections);
                         }
                     }
                     else if (cmd == NetworkEvent.Type.Disconnect)
@@ -199,6 +220,17 @@ namespace LobbyRelaySample.Relay
                         // When disconnected we make sure the connection return false to IsCreated so the next frames
                         // DriverUpdateJob will remove it
                         connections[i] = default(NetworkConnection);
+                    }
+                }
+
+                void SendPong(NetworkDriver.Concurrent driver, NativeArray<NetworkConnection> connections)
+                {
+                    byte reply = (byte)(((int)MsgType.PingPong) << 5);
+                    if (driver.BeginSend(connections[i], out var writeData) == 0)
+                    {
+                        writeData.WriteByte(reply);
+                        driver.EndSend(writeData);
+                        Debug.LogWarning("Sent pong for connection " + i);
                     }
                 }
             }
@@ -246,13 +278,13 @@ namespace LobbyRelaySample.Relay
 
     public class RelayUtpSetup_Client : RelayUTPSetup
     {
-        private LocalLobby m_localLobby;
-        private JobHandle m_activeUpdateJobHandle;
+        // TEMP
+        public string myName { private get; set; }
 
-        public void JoinRelay(LocalLobby localLobby)
+
+        protected override void JoinRelay()
         {
-            m_localLobby = localLobby;
-            localLobby.onChanged += OnLobbyChange;
+            m_localLobby.onChanged += OnLobbyChange;
         }
 
         private void OnLobbyChange(LocalLobby lobby)
@@ -268,7 +300,6 @@ namespace LobbyRelaySample.Relay
         {
             if (allocation == null)
                 return; // TODO: Error messaging.
-
             BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key, 1);
         }
 
@@ -295,6 +326,7 @@ namespace LobbyRelaySample.Relay
             public NetworkDriver driver;
             public NativeArray<NetworkConnection> connection; // TODO: I think we were using NativeArray to merely contain one entry, since we'd be unable to pass just that via jobs?
             public float fixedTime;
+            public NativeArray<byte> myName;
 
             public void Execute()
             {
@@ -305,12 +337,25 @@ namespace LobbyRelaySample.Relay
                 {
                     if (cmd == NetworkEvent.Type.Connect)
                     {
-                        // Create a 4 byte data stream which we can store our ping sequence number in
+                        // Same as name sending.
+                        if (myName == null || myName.Length == 0)
+                            return;
+                        List<byte> message = new List<byte>(myName.Length + 1);
+                        message.AddRange(myName);
+                        byte header = (byte) ((((int)MsgType.PlayerName) << 5) + myName.Length); // TODO: Truncate length;
+                        message.Insert(0, header);
 
-                        if (driver.BeginSend(connection[0], out var pingData) == 0)
+                        if (driver.BeginSend(connection[0], out var connectData) == 0) // Oh, should check this first?
                         {
-                            pingData.WriteInt(123);
-                            driver.EndSend(pingData);
+                            byte[] bytes = message.ToArray();
+                            unsafe
+                            {
+                                fixed (byte* bytesPtr = bytes)
+                                {
+                                    connectData.WriteBytes(bytesPtr, message.Count);
+                                    driver.EndSend(connectData);
+                                }
+                            }
                         }
                     }
                     else if (cmd == NetworkEvent.Type.Data)
@@ -345,7 +390,8 @@ namespace LobbyRelaySample.Relay
                 {
                     driver = m_networkDriver,
                     connection = m_connections.AsArray(),
-                    fixedTime = Time.fixedTime
+                    fixedTime = Time.fixedTime,
+                    myName = new NativeArray<byte>(System.Text.Encoding.UTF8.GetBytes(myName), Allocator.TempJob)
                 };
 
                 pingJob.Schedule().Complete();
@@ -359,17 +405,18 @@ namespace LobbyRelaySample.Relay
 
                 // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
                 // enough since we can get multiple FixedUpdate per frame on slow clients
-                m_activeUpdateJobHandle.Complete();
+                m_currentUpdateHandle.Complete();
 
                 var pingJob = new PingJob
                 {
                     driver = m_networkDriver,
                     connection = m_connections,
-                    fixedTime = Time.fixedTime
+                    fixedTime = Time.fixedTime,
+                    myName = new NativeArray<byte>(System.Text.Encoding.UTF8.GetBytes(myName), Allocator.TempJob)
                 };
                 // Schedule a chain with the driver update followed by the ping job
-                m_activeUpdateJobHandle = m_networkDriver.ScheduleUpdate();
-                m_activeUpdateJobHandle = pingJob.Schedule(m_activeUpdateJobHandle);
+                m_currentUpdateHandle = m_networkDriver.ScheduleUpdate();
+                m_currentUpdateHandle = pingJob.Schedule(m_currentUpdateHandle);
             }
         }
     }
