@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample.lobby
@@ -30,7 +31,7 @@ namespace LobbyRelaySample.lobby
                 {
                     existingLocalUser.IsHost = lobby.HostId.Equals(player.Id);
                     existingLocalUser.DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : existingLocalUser.DisplayName;
-                    existingLocalUser.Emote = player.Data?.ContainsKey("Emote") == true ? player.Data["Emote"].Value : existingLocalUser.Emote;
+                    existingLocalUser.Emote = player.Data?.ContainsKey("Emote") == true ? (EmoteType) int.Parse(player.Data["Emote"].Value) : existingLocalUser.Emote;
                     lobbyUsers.Add(existingLocalUser.ID, existingLocalUser);
                 }
                 else
@@ -39,7 +40,7 @@ namespace LobbyRelaySample.lobby
                         displayName: player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : "NewPlayer",
                         isHost: lobby.HostId.Equals(player.Id),
                         id: player.Id,
-                        emote: player.Data?.ContainsKey("Emote") == true ? player.Data["Emote"].Value : null,
+                        emote: player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : EmoteType.None,
                         userStatus: player.Data?.ContainsKey("UserStatus") == true ? player.Data["UserStatus"].Value : UserStatus.Lobby.ToString()
                     );
                     lobbyUsers.Add(user.ID, user);
@@ -81,7 +82,7 @@ namespace LobbyRelaySample.lobby
             if (user == null || string.IsNullOrEmpty(user.ID))
                 return data;
             data.Add("DisplayName", user.DisplayName);
-            data.Add("Emote", user.Emote); // Emote could be null, which is fine.
+            data.Add("Emote", ((int)user.Emote).ToString());
             data.Add("UserStatus", user.UserStatus.ToString());
             return data;
         }

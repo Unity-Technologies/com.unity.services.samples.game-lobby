@@ -46,7 +46,7 @@ namespace LobbyRelaySample.UI
         {
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
-            m_EmoteText.SetText(observed.Emote);
+            m_EmoteText.SetText(observed.Emote.GetString());
         }
 
         string SetStatusFancy(UserStatus status)

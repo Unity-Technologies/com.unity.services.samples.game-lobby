@@ -97,7 +97,7 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.UserSetEmote)
             {
-                var emote = (string)msg;
+                EmoteType emote = (EmoteType)msg;
                 m_localUser.Emote = emote;
             }
             else if (type == MessageType.ChangeLobbyUserState)
@@ -270,19 +270,19 @@ namespace LobbyRelaySample
             if (m_localUser.IsHost)
             {
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Host>();
-                (m_RelaySetup as RelayUtpSetup_Host).BeginRelayJoin(m_localLobby);
+                m_RelaySetup.BeginRelayJoin(m_localLobby, m_localUser);
             }
             else
             {
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Client>();
                 (m_RelaySetup as RelayUtpSetup_Client).myName = m_localUser.DisplayName; // TODO: Also for the server player.
-                (m_RelaySetup as RelayUtpSetup_Client).BeginRelayJoin(m_localLobby);
+                m_RelaySetup.BeginRelayJoin(m_localLobby, m_localUser);
             }
         }
 
         void OnLeftLobby()
         {
-            m_localUser.Emote = null;
+            m_localUser.Emote = EmoteType.None;
             LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
             m_lobbyContentHeartbeat.EndTracking();
             LobbyAsyncRequests.Instance.EndTracking();

@@ -52,12 +52,12 @@ namespace LobbyRelaySample.Relay
         {
             AllocateAsync(maxConnections, a =>
             {
-                if (a.Status >= 200 && a.Status < 300)
+                if (a == null)
+                    Debug.LogError("Relay returned a null Allocation. It's possible the Relay service is currently down.");
+                else if (a.Status >= 200 && a.Status < 300)
                     onComplete?.Invoke(a.Result.Data.Allocation);
                 else
-                {
                     Debug.LogError($"Allocation returned a non Success code: {a.Status}");
-                }
             });
         }
 

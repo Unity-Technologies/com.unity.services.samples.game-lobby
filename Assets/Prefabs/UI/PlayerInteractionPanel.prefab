@@ -1286,7 +1286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EmoteTextElement: {fileID: 1691307862614502844}
+  m_emoteType: 3
 --- !u!1 &2988716332856923472
 GameObject:
   m_ObjectHideFlags: 0
@@ -1704,7 +1704,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EmoteTextElement: {fileID: 5779364087768960612}
+  m_emoteType: 1
 --- !u!1 &4786508190616014760
 GameObject:
   m_ObjectHideFlags: 0
@@ -2146,7 +2146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EmoteTextElement: {fileID: 7328874090116149001}
+  m_emoteType: 4
 --- !u!1 &6153877740728873503
 GameObject:
   m_ObjectHideFlags: 0
@@ -2868,7 +2868,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EmoteTextElement: {fileID: 4633941056946047683}
+  m_emoteType: 2
 --- !u!1 &7505011296878837543
 GameObject:
   m_ObjectHideFlags: 0

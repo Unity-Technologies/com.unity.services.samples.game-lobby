@@ -22,7 +22,7 @@ namespace LobbyRelaySample
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, string emote = null, string userStatus = null)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, string userStatus = null)
         {
             m_isHost = isHost;
             m_DisplayName = displayName;
@@ -63,9 +63,9 @@ namespace LobbyRelaySample
             }
         }
 
-        string m_Emote = "";
+        EmoteType m_Emote = EmoteType.None;
 
-        public string Emote
+        public EmoteType Emote
         {
             get => m_Emote;
             set
