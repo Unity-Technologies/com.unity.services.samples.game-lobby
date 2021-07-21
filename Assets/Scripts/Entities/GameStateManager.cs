@@ -275,7 +275,6 @@ namespace LobbyRelaySample
             else
             {
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Client>();
-                (m_RelaySetup as RelayUtpSetup_Client).myName = m_localUser.DisplayName; // TODO: Also for the server player.
                 m_RelaySetup.BeginRelayJoin(m_localLobby, m_localUser);
             }
         }

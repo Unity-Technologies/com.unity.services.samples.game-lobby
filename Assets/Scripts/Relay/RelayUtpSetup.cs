@@ -19,14 +19,14 @@ namespace LobbyRelaySample.Relay
     {
         protected bool m_isRelayConnected = false;
         protected NetworkDriver m_networkDriver;
-        protected NativeList<NetworkConnection> m_connections;
+        protected List<NetworkConnection> m_connections;
         protected NetworkEndPoint m_endpointForServer;
         protected JobHandle m_currentUpdateHandle;
         protected LocalLobby m_localLobby;
         protected LobbyUser m_localUser;
         protected Action<bool, string> m_onJoinComplete;
 
-        public enum MsgType { NewPlayer = 0, ProvidePlayerId = 1, ReadyState = 2, PlayerName = 3, Emote = 4 } // We only use 3 bits for this.
+        public enum MsgType { NewPlayer = 0, ReadyState = 2, PlayerName = 3, Emote = 4 }
 
         public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser)//, Action<bool, string> onJoinComplete)
         {
@@ -51,7 +51,7 @@ namespace LobbyRelaySample.Relay
             var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
 
             m_networkDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
-            m_connections = new NativeList<NetworkConnection>(connectionCapacity, Allocator.Persistent);
+            m_connections = new List<NetworkConnection>(connectionCapacity);
 
             if (m_networkDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)
                 Debug.LogError("Failed to bind to Relay allocation.");
@@ -96,13 +96,6 @@ namespace LobbyRelaySample.Relay
             }
         }
         #endregion
-
-
-        //private void LateUpdate()
-        //{
-        //    if (m_networkDriver.IsCreated && m_isRelayConnected)
-        //        m_currentUpdateHandle.Complete(); // This prevents warnings about a job allocation longer than 4 frames if FixedUpdate is very fast.
-        //}
     }
 
     public class RelayUtpSetup_Host : RelayUTPSetup
@@ -141,143 +134,13 @@ namespace LobbyRelaySample.Relay
                 m_isRelayConnected = true;
                 // TODO: Be able to dispose.
                 RelayHost host = gameObject.AddComponent<RelayHost>();
-                host.Initialize(m_networkDriver, m_connections, m_localLobby);
+                host.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
             }
         }
-
-        struct DriverUpdateJob : IJob
-        {
-            public NetworkDriver driver;
-            public NativeList<NetworkConnection> connections;
-
-            public void Execute()
-            {
-                // Remove connections which have been destroyed from the list of active connections
-                for (int i = 0; i < connections.Length; ++i)
-                {
-                    if (!connections[i].IsCreated)
-                    {
-                        connections.RemoveAtSwapBack(i);
-                        // Index i is a new connection since we did a swap back, check it again
-                        --i;
-                    }
-                }
-
-                // Accept all new connections
-                while (true)
-                {
-                    var con = driver.Accept();
-                    // "Nothing more to accept" is signaled by returning an invalid connection from accept
-                    if (!con.IsCreated)
-                        break;
-                    connections.Add(con);
-                }
-            }
-        }
-
-        private struct PongJob : IJobParallelForDefer
-        {
-            public NetworkDriver.Concurrent driver;
-            public NativeArray<NetworkConnection> connections;
-
-            public void Execute(int i)
-            {
-                DataStreamReader strm;
-                NetworkEvent.Type cmd;
-                // Pop all events for the connection
-                while ((cmd = driver.PopEventForConnection(connections[i], out strm)) != NetworkEvent.Type.Empty)
-                {
-                    if (cmd == NetworkEvent.Type.Connect)
-                    {
-//                        also, the next step is setting up this behavior in a separate class to happen with manual calls instead of every update
-                        // TODO: Assuming that i is the index in connections, which will be the order in which they are received and also will not shift downward if disconnects happen? Need to test with multiple clients.
-//                        SendPong(driver, connections);
-                    }
-                    else if (cmd == NetworkEvent.Type.Data)
-                    {
-                        byte header = strm.ReadByte();
-                        MsgType msgType = (MsgType)(header % 8);
-                        header = (byte)(header >> 3);
-                        int playerId = header;
-
-                        if (msgType == MsgType.PlayerName)
-                        {
-                            byte length = strm.ReadByte();
-                            byte[] nameBytes = new byte[length];
-                            unsafe
-                            {
-                                fixed(byte* namePtr = nameBytes)
-                                {
-                                    strm.ReadBytes(namePtr, length);
-                                }
-                            }
-                            string name = System.Text.Encoding.UTF8.GetString(nameBytes);
-                            Debug.LogAssertion("Received name for connection " + i + ": " + name);
-
-
-//                            SendPong(driver, connections);
-                        }
-                    }
-                    else if (cmd == NetworkEvent.Type.Disconnect)
-                    {
-                        // When disconnected we make sure the connection return false to IsCreated so the next frames
-                        // DriverUpdateJob will remove it
-                        connections[i] = default(NetworkConnection);
-                    }
-                }
-
-                //void SendPong(NetworkDriver.Concurrent driver, NativeArray<NetworkConnection> connections)
-                //{
-                //    byte reply = (byte)(((int)MsgType.PingPong) << 5);
-                //    if (driver.BeginSend(connections[i], out var writeData) == 0)
-                //    {
-                //        writeData.WriteByte(reply);
-                //        driver.EndSend(writeData);
-                //        Debug.LogWarning("Sent pong for connection " + i);
-                //    }
-                //}
-            }
-        }
-
-        //private void Update()
-        //{
-        //    // When connecting to the relay we need to this? 
-        //    if (m_networkDriver.IsCreated && !m_isRelayConnected)
-        //    {
-        //        m_networkDriver.ScheduleUpdate().Complete();
-
-        //        var updateJob = new DriverUpdateJob { driver = m_networkDriver, connections = m_connections };
-        //        updateJob.Schedule().Complete();
-        //    }
-        //}
-
-//        void Update()
-//        {
-//            if (m_networkDriver.IsCreated && m_isRelayConnected)
-//            {
-//                // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
-//                // enough since we can get multiple FixedUpdate per frame on slow clients
-//                m_currentUpdateHandle.Complete();
-//                var updateJob = new DriverUpdateJob { driver = m_networkDriver, connections = m_connections };
-//                // Update the driver should be the first job in the chain
-//                m_currentUpdateHandle = m_networkDriver.ScheduleUpdate();
-//                // The DriverUpdateJob which accepts new connections should be the second job in the chain, it needs to depend
-//                // on the driver update job
-//                m_currentUpdateHandle = updateJob.Schedule(m_currentUpdateHandle);
-//                // PongJob uses IJobParallelForDeferExtensions, we *must* schedule with a list as first parameter rather than
-//                // an int since the job needs to pick up new connections from DriverUpdateJob
-//                // The PongJob is the last job in the chain and it must depends on the DriverUpdateJob
-////                m_currentUpdateHandle = pongJob.Schedule(m_connections, 1, m_currentUpdateHandle);
-//            }
-//        }
     }
 
     public class RelayUtpSetup_Client : RelayUTPSetup
     {
-        // TEMP
-        public string myName { private get; set; }
-
-
         protected override void JoinRelay()
         {
             m_localLobby.onChanged += OnLobbyChange;
@@ -297,6 +160,7 @@ namespace LobbyRelaySample.Relay
             if (allocation == null)
                 return; // TODO: Error messaging.
             BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key, 1);
+            m_localLobby.RelayServer = new ServerAddress(allocation.RelayServer.IpV4, allocation.RelayServer.Port);
         }
 
         protected override void OnBindingComplete()
@@ -319,107 +183,8 @@ namespace LobbyRelaySample.Relay
             {
                 // TODO: Be able to dispose.
                 RelayUserWatcher watcher = gameObject.AddComponent<RelayUserWatcher>();
-                watcher.Initialize(m_networkDriver, m_connections, m_localUser);
+                watcher.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
             }
-        }
-
-        private struct PingJob : IJob
-        {
-            public NetworkDriver driver;
-            public NativeArray<NetworkConnection> connection; // TODO: I think we were using NativeArray to merely contain one entry, since we'd be unable to pass just that via jobs?
-            public float fixedTime;
-            public NativeArray<byte> myName;
-
-            public void Execute()
-            {
-                DataStreamReader strm;
-                NetworkEvent.Type cmd;
-                // Process all events on the connection. If the connection is invalid it will return Empty immediately
-                while (connection.Length > 0 && (cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
-                {
-                    if (cmd == NetworkEvent.Type.Connect)
-                    {
-                        // Same as name sending.
-                        if (myName == null || myName.Length == 0)
-                            return;
-                        List<byte> message = new List<byte>(myName.Length + 1);
-                        message.AddRange(myName);
-                        byte header = (byte) ((((int)MsgType.PlayerName) << 5) + myName.Length); // TODO: Truncate length;
-                        message.Insert(0, header);
-
-                        if (driver.BeginSend(connection[0], out var connectData) == 0) // Oh, should check this first?
-                        {
-                            byte[] bytes = message.ToArray();
-                            unsafe
-                            {
-                                fixed (byte* bytesPtr = bytes)
-                                {
-                                    connectData.WriteBytes(bytesPtr, message.Count);
-                                    driver.EndSend(connectData);
-                                }
-                            }
-                        }
-                    }
-                    else if (cmd == NetworkEvent.Type.Data)
-                    {
-                        //// When the pong message is received we calculate the ping time and disconnect
-                        //pingStats[1] = (int)((fixedTime - pendingPings[0].time) * 1000);
-                        //connection[0].Disconnect(driver);
-                        //connection[0] = default(NetworkConnection);
-                        if (driver.BeginSend(connection[0], out var pingData) == 0)
-                        {
-                            pingData.WriteInt(1234);
-                            driver.EndSend(pingData);
-                        }
-                    }
-                    else if (cmd == NetworkEvent.Type.Disconnect)
-                    {
-                        // If the server disconnected us we clear out connection
-                        connection[0] = default(NetworkConnection);
-                    }
-                }
-            }
-        }
-
-        private void Update()
-        {
-            //// When connecting to the relay we need to this? 
-            //if (m_networkDriver.IsCreated && !m_isRelayConnected)
-            //{
-            //    m_networkDriver.ScheduleUpdate().Complete();
-
-            //    var pingJob = new PingJob
-            //    {
-            //        driver = m_networkDriver,
-            //        connection = m_connections.AsArray(),
-            //        fixedTime = Time.fixedTime,
-            //        myName = new NativeArray<byte>(System.Text.Encoding.UTF8.GetBytes(myName), Allocator.TempJob)
-            //    };
-
-            //    pingJob.Schedule().Complete();
-            //}
-        }
-
-        void FixedUpdate()
-        {
-            //if (m_networkDriver.IsCreated && m_isRelayConnected)
-            //{
-
-            //    // Wait for the previous frames ping to complete before starting a new one, the Complete in LateUpdate is not
-            //    // enough since we can get multiple FixedUpdate per frame on slow clients
-            //    m_currentUpdateHandle.Complete();
-
-            //    var pingJob = new PingJob
-            //    {
-            //        driver = m_networkDriver,
-            //        connection = m_connections,
-            //        fixedTime = Time.fixedTime,
-            //        myName = new NativeArray<byte>(System.Text.Encoding.UTF8.GetBytes(myName), Allocator.TempJob)
-            //    };
-            //    // Schedule a chain with the driver update followed by the ping job
-            //    m_currentUpdateHandle = m_networkDriver.ScheduleUpdate();
-            //    m_currentUpdateHandle = pingJob.Schedule(m_currentUpdateHandle);
-            //}
         }
     }
 }

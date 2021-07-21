@@ -18,18 +18,18 @@ namespace LobbyRelaySample.Relay
     /// </summary>
     public class RelayUserWatcher : MonoBehaviour, IDisposable
     {
-        private LobbyUser m_localUser;
+        protected LobbyUser m_localUser;
+        protected LocalLobby m_localLobby;
         private bool m_hasDisposed = false;
-        private NetworkDriver m_networkDriver;
-        private NativeList<NetworkConnection> m_connections; // TODO: Make it clearer that this is just the one member?
-        private JobHandle m_mostRecentJob;
+        protected NetworkDriver m_networkDriver;
+        protected List<NetworkConnection> m_connections; // TODO: Make it clearer that this is just the one member?
 
-        private int? m_playerId = null; // Provided by the host.
         private bool m_hasSentInitialMessage = false;
 
-        public void Initialize(NetworkDriver networkDriver, NativeList<NetworkConnection> connections, LobbyUser localUser)
+        public void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
         {
             m_localUser = localUser;
+            m_localLobby = localLobby;
             m_localUser.onChanged += OnLocalChange; // TODO: This should break up the state type?
             m_networkDriver = networkDriver;
             m_connections = connections;
@@ -46,102 +46,113 @@ namespace LobbyRelaySample.Relay
 
         private void OnLocalChange(LobbyUser localUser)
         {
-            //if (!m_mostRecentJob.IsCompleted)
-            //    m_mostRecentJob.Complete();
-
+            if (m_connections.Count == 0) // Could be the case for the server, should probably actually break that out after all?
+                return;
             m_networkDriver.ScheduleUpdate().Complete();
-
-            DoUserUpdate(m_networkDriver, m_connections);
-
-            //UserUpdateJob userUpdateJob = new UserUpdateJob
-            //{ 
-            //    driver = m_networkDriver,
-            //    connection = m_connections.AsArray(),
-            //    myName = new NativeArray<byte>(System.Text.Encoding.UTF8.GetBytes(m_localUser.DisplayName), Allocator.TempJob)
-            //};
-            //m_mostRecentJob = userUpdateJob.Schedule();
-
-            // TODO: Force complete on disconnect
+            DoUserUpdate(m_networkDriver, m_connections[0]); // TODO: Hmm...I don't think this ends up working if the host has to manually transmit changes over all connections.
         }
 
         public void Update()
         {
-            m_networkDriver.ScheduleUpdate().Complete();
-            ReceiveNetworkEvents(m_networkDriver, m_connections);
-            if (!m_hasSentInitialMessage)
-                SendInitialMessage(m_networkDriver, m_connections);
+            OnUpdate();
         }
 
-        private void ReceiveNetworkEvents(NetworkDriver driver, NativeArray<NetworkConnection> connection) // TODO: Just the one connection.
+        protected virtual void OnUpdate()
+        {
+            m_networkDriver.ScheduleUpdate().Complete();
+            ReceiveNetworkEvents(m_networkDriver, m_connections);
+            if (!m_hasSentInitialMessage && !(this is RelayHost))
+                SendInitialMessage(m_networkDriver, m_connections[0]);
+        }
+
+        private void ReceiveNetworkEvents(NetworkDriver driver, List<NetworkConnection> connections) // TODO: Just the one connection. Also not NativeArray.
         {
             DataStreamReader strm;
             NetworkEvent.Type cmd;
-            while (connection.Length > 0 && (cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
+            foreach (NetworkConnection connection in connections)
             {
-                if (cmd == NetworkEvent.Type.Data)
+                while ((cmd = connection.PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
                 {
-                    // TODO: Update other users' data, with a shared mechanism with servers.
-
-                    byte header = strm.ReadByte();
-                    MsgType msgType = (MsgType)(header % 8);
-                    header = (byte)(header >> 3);
-                    int playerId = header;
-
-                    if (msgType == MsgType.ProvidePlayerId)
-                    {
-                        byte id = strm.ReadByte();
-                        m_playerId = id;
-                        Debug.LogError("Received an ID! " + id);
-                        // Now, we can send all our info.
-                        WriteString(driver, connection, MsgType.PlayerName, m_localUser.DisplayName);
-                        // TODO: Send all of it.
-
-                    }
+                    ProcessNetworkEvent(strm, cmd);
                 }
             }
         }
 
-        private void SendInitialMessage(NetworkDriver driver, NativeArray<NetworkConnection> connection)
+        protected virtual void ProcessNetworkEvent(DataStreamReader strm, NetworkEvent.Type cmd)
         {
-            // Assuming this is only created after the Relay connection is successful.
-            // TODO: Retry logic for that?
-            WriteString(driver, connection, MsgType.NewPlayer, m_localUser.ID);
-            m_hasSentInitialMessage = true;
-        }
-
-        private void DoUserUpdate(NetworkDriver driver, NativeArray<NetworkConnection> connection)
-        {
-            // Process all events on the connection. If the connection is invalid it will return Empty immediately
-            //while (connection.Length > 0 && (cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
+            if (cmd == NetworkEvent.Type.Data)
             {
-                //if (cmd == NetworkEvent.Type.Connect)
-                //{
-                //    WriteName(driver, connection);
-                //}
-                // TODO: Update other clients' local data
+                MsgType msgType = (MsgType)strm.ReadByte();
+                string id = ReadLengthAndString(ref strm);
+                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id))
+                    return;
 
-                //else if (cmd == NetworkEvent.Type.Disconnect)
-                //{
-                //    // If the server disconnected us we clear out connection
-                //    connection[0] = default(NetworkConnection);
-                //}
+                if (msgType == MsgType.PlayerName)
+                {
+                    string name = ReadLengthAndString(ref strm);
+                    m_localLobby.LobbyUsers[id].DisplayName = name;
+                    Debug.LogError("User id " + id + " is named " + name);
+                }
+                else if (msgType == MsgType.Emote)
+                {
+                    EmoteType emote = (EmoteType)strm.ReadByte();
+                    m_localLobby.LobbyUsers[id].Emote = emote;
+                    Debug.LogError("User id " + id + " has emote " + emote.ToString());
+                }
+                else if (msgType == MsgType.ReadyState)
+                {
+                    UserStatus status = (UserStatus)strm.ReadByte();
+                    m_localLobby.LobbyUsers[id].UserStatus = status;
+                    Debug.LogError("User id " + id + " has state " + status.ToString());
+                }
             }
         }
 
-        // 3-bit message type + 5-bit ID length, 1-byte str length, id, msg
-        private void WriteString(NetworkDriver driver, NativeArray<NetworkConnection> connection, MsgType msgType, string str)
+        unsafe private string ReadLengthAndString(ref DataStreamReader strm)
         {
+            byte length = strm.ReadByte();
+            byte[] bytes = new byte[length];
+            fixed (byte* ptr = bytes)
+            {
+                strm.ReadBytes(ptr, length);
+            }
+            return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+
+        private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
+        {
+            // Assuming this is only created after the Relay connection is successful.
+            // TODO: Retry logic for that?
+            DoUserUpdate(driver, connection);
+            m_hasSentInitialMessage = true;
+        }
+
+        private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection)
+        {
+            // TODO: Combine these all into one message, if I'm just going to send them all each time anyway.
+
+            WriteString(driver, connection, MsgType.PlayerName, m_localUser.DisplayName);
+            WriteByte(driver, connection, MsgType.Emote, (byte)m_localUser.Emote);
+            WriteByte(driver, connection, MsgType.ReadyState, (byte)m_localUser.UserStatus);
+        }
+
+        // TODO: We do have a character limit on the name entry field, right?
+
+        // Msg type, ID length, ID, str length, str
+        // Not doing bit packing.
+        private void WriteString(NetworkDriver driver, NetworkConnection connection, MsgType msgType, string str)
+        {
+            byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(m_localUser.ID);
             byte[] strBytes = System.Text.Encoding.UTF8.GetBytes(str);
-            if (strBytes == null || strBytes.Length == 0)
-                return;
-            byte header = (byte)(((m_playerId ?? 0) << 5) + msgType);
-            byte msgLength = (byte)strBytes.Length;                                                     // TODO: We do have a character limit on the name entry field, right?
-            List<byte> message = new List<byte>(strBytes.Length + 2);
-            message.Add(header);
-            message.Add(msgLength);
+
+            List<byte> message = new List<byte>(idBytes.Length + strBytes.Length + 3);
+            message.Add((byte)msgType);
+            message.Add((byte)idBytes.Length);
+            message.AddRange(idBytes);
+            message.Add((byte)strBytes.Length);
             message.AddRange(strBytes);
 
-            if (driver.BeginSend(connection[0], out var dataStream) == 0) // Oh, should check this first?
+            if (driver.BeginSend(connection, out var dataStream) == 0) // Oh, should check this first?
             {
                 byte[] bytes = message.ToArray();
                 unsafe
@@ -155,47 +166,24 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        private struct UserUpdateJob : IJob
+        private void WriteByte(NetworkDriver driver, NetworkConnection connection, MsgType msgType, byte value)
         {
-            public NetworkDriver driver;
-            public NativeArray<NetworkConnection> connection; // TODO: I think we were using NativeArray to merely contain one entry, since we'd be unable to pass just that via jobs?
-            public NativeArray<byte> myName;
+            byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(m_localUser.ID);
+            List<byte> message = new List<byte>(idBytes.Length + 3);
+            message.Add((byte)msgType);
+            message.Add((byte)idBytes.Length);
+            message.AddRange(idBytes);
+            message.Add(value);
 
-
-            public void Execute()
+            if (driver.BeginSend(connection, out var dataStream) == 0) // Oh, should check this first?
             {
-                DataStreamReader strm;
-                NetworkEvent.Type cmd;
-                // Process all events on the connection. If the connection is invalid it will return Empty immediately
-                while (connection.Length > 0 && (cmd = connection[0].PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
+                byte[] bytes = message.ToArray();
+                unsafe
                 {
-                    if (cmd == NetworkEvent.Type.Connect)
+                    fixed (byte* bytesPtr = bytes)
                     {
-                        // Same as name sending.
-                        if (myName == null || myName.Length == 0)
-                            return;
-                        List<byte> message = new List<byte>(myName.Length + 1);
-                        message.AddRange(myName);
-                        byte header = (byte) ((((int)RelayUTPSetup.MsgType.PlayerName) << 5) + myName.Length); // TODO: Truncate length.
-                        message.Insert(0, header);
-
-                        if (driver.BeginSend(connection[0], out var connectData) == 0) // Oh, should check this first?
-                        {
-                            byte[] bytes = message.ToArray();
-                            unsafe
-                            {
-                                fixed (byte* bytesPtr = bytes)
-                                {
-                                    connectData.WriteBytes(bytesPtr, message.Count);
-                                    driver.EndSend(connectData);
-                                }
-                            }
-                        }
-                    }
-                    else if (cmd == NetworkEvent.Type.Disconnect)
-                    {
-                        // If the server disconnected us we clear out connection
-                        connection[0] = default(NetworkConnection);
+                        dataStream.WriteBytes(bytesPtr, message.Count);
+                        driver.EndSend(dataStream);
                     }
                 }
             }
