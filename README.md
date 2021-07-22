@@ -1,11 +1,11 @@
 
 ### Closed Beta - 7/14/21
-Lobby and Relay are **only** available in closed beta at the moment, to use these services you will need to have signed up here for the services to show in your Organization: https://create.unity3d.com/relay-lobby-beta-signup
+Lobby and Relay are **only** available in closed beta at the moment. To use these services, you will need to have signed up here for the services to show in your organization: https://create.unity3d.com/relay-lobby-beta-signup
 
 # Game Lobby Sample
 ## *Unity 2021.2 0b1*
 
-This is a Unity Project Sample showing how to integrate Lobby and Relay into a typical Game Lobby experience.
+This is a Unity project sample showing how to integrate Lobby and Relay into a typical game lobby experience.
 
 	Features Covered:
 	- Lobby Creation
@@ -26,10 +26,12 @@ Follow the guide to set up your cloud organization:
 
 [Organization Tutorial](https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-)
 
+Then, in the Unity Editor, open Services > General Settings to create a cloud project ID (or link to an existing one) to associate the Unity project with your organization.
+
 
 ## Lobby & Relay
 
-We use the lobby service to create a space that our users can join and share data through.
+We use the Lobby service to create a space that our users can join and share data through.
 
 [Lobby Overview](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
 
@@ -37,7 +39,7 @@ We use the lobby service to create a space that our users can join and share dat
 
 
 
-We use the Relay service to obfuscate the Hosts' IP, while still allowing them to locally host strangers.
+We use the Relay service to obfuscate the hosts' IP, while still allowing them to locally host strangers.
 
 [Relay Overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
 
@@ -45,7 +47,7 @@ We use the Relay service to obfuscate the Hosts' IP, while still allowing them t
 
 
 ### Setup 
-For either one, select "About & Support => Get Started"
+For either one, select "About & Support => Get Started."
 
 **Closed Beta Only**
 
@@ -55,43 +57,43 @@ For either one, select "About & Support => Get Started"
 
 	*If you still cannot find the package namespaces, ensure the Assets/Scripts/LobbyRelaySample.asmdef is referencing the packages.*
 
-Follow the steps until you hit "Lobby/Relay On"
+Follow the steps until you reach "Lobby/Relay On."
 
 
 ## Solo Testing
 
-Create a new Unity Build of the project in the OS of your choice.
-Because the Authentication service creates a unique ID for builds, you will need to host a lobby in Build and join in Editor or vice versa.
+Create a build of the project in the OS of your choice.
+The Authentication service creates a unique ID for builds, so you may run a build and the Editor at the same time to represent two users.
 
-1. Start the game, and hit start to enter the Room List. This Queries the rooms service for available Lobbies, there wont be any right now.
+1. Enter Play mode, and select Start to open the lobby list. This queries the Lobby service for available lobbies, but there are currently none.
 
 ![Join Menu](~Documentation/Images/tutorial_1_lobbyList.png?raw=true "Join Menu")
 
-2. The Create Menu Lets you make a new Lobby.
+2. The Create menu lets you host a new lobby.
 
 ![Create Menu](~Documentation/Images/tutorial_2_createMenu.png?raw=true)
 
-3. This is the Lobby, It has a Room code for you to share with your friends to allow them to join.
-For demonstration purposes we also show the Relay Code, which will be passed to all users in the Lobby.
+3. This is the lobby. It has a shareable lobby code to allow other users to join directly.
+For demonstration purposes, we also show the Relay code, which will be passed to all users in the lobby.
 
 ![Lobby View](~Documentation/Images/tutorial_3_HostGame.png?raw=true)
 
 
-4. Open the second game instance in Editor or in Build, you should now see your Lobby in the list.
+4. Run your build, and as this second user, you should now see your lobby in the list. 
 
 ![Populated Join View](~Documentation/Images/tutorial_4_newLobby.png?raw=true)
 
 
-5. The Lobby holds up to 4 players and will pass the Relay code once all the players are ready.
+5. The lobby holds up to 4 users and will pass the Relay code once all the users are ready. Changes to a user's name or emote will appear for other users after a couple seconds.
 
 ![Relay Ready!](~Documentation/Images/tutorial_5_editorCow.png?raw=true)
 
 
-6. The countdown will start after the rooms data synch has completed. (It is a little slow due to our refresh rate being low at the moment)
+6. Once the lobby host has received a ready signal from all users, it will send out a countdown, and all users will enter a simultaneous countdown before connecting to Relay.
 
 ![Countdown!](~Documentation/Images/tutorial_6_countDown.png?raw=true)
 
 
-7. The relay service IP gets passed to all users in the lobby, and this is where you would connect to a server, if you had one.
+7. An anonymous IP from the Relay service is passed to all users in the lobby, at which point your game logic could connect them to a server and begin transmitting realtime data.
 
 ![InGame!](~Documentation/Images/tutorial_7_ingame.png?raw=true)
