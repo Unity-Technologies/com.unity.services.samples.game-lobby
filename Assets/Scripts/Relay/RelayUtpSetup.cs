@@ -1,8 +1,6 @@
-﻿using LobbyRelaySample;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Jobs;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
@@ -15,7 +13,7 @@ namespace LobbyRelaySample.Relay
     /// Responsible for setting up a connection with Relay using UTP, for the lobby host.
     /// Must be a MonoBehaviour since the binding process doesn't have asynchronous callback options.
     /// </summary>
-    public abstract class RelayUTPSetup : MonoBehaviour
+    public abstract class RelayUtpSetup : MonoBehaviour
     {
         protected bool m_isRelayConnected = false;
         protected NetworkDriver m_networkDriver;
@@ -24,15 +22,15 @@ namespace LobbyRelaySample.Relay
         protected JobHandle m_currentUpdateHandle;
         protected LocalLobby m_localLobby;
         protected LobbyUser m_localUser;
-        protected Action<bool, string> m_onJoinComplete;
+        protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
         public enum MsgType { NewPlayer = 0, ReadyState = 2, PlayerName = 3, Emote = 4 }
 
-        public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser)//, Action<bool, string> onJoinComplete)
+        public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser, Action<bool, RelayUtpClient> onJoinComplete)
         {
             m_localLobby = localLobby;
             m_localUser = localUser;
-//            m_onJoinComplete = onJoinComplete;
+            m_onJoinComplete = onJoinComplete;
             JoinRelay();
         }
         protected abstract void JoinRelay();
@@ -98,7 +96,7 @@ namespace LobbyRelaySample.Relay
         #endregion
     }
 
-    public class RelayUtpSetup_Host : RelayUTPSetup
+    public class RelayUtpSetupHost : RelayUtpSetup
     {
         protected override void JoinRelay()
         {
@@ -127,19 +125,20 @@ namespace LobbyRelaySample.Relay
             if (m_networkDriver.Listen() != 0)
             {
                 Debug.LogError("Server failed to listen");
+                m_onJoinComplete(false, null);
             }
             else
             {
                 Debug.LogWarning("Server is now listening!");
                 m_isRelayConnected = true;
-                // TODO: Be able to dispose.
-                RelayHost host = gameObject.AddComponent<RelayHost>();
+                RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
                 host.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
+                m_onJoinComplete(true, host);
             }
         }
     }
 
-    public class RelayUtpSetup_Client : RelayUTPSetup
+    public class RelayUtpSetupClient : RelayUtpSetup
     {
         protected override void JoinRelay()
         {
@@ -178,12 +177,15 @@ namespace LobbyRelaySample.Relay
                 yield return null;
             }
             if (m_networkDriver.GetConnectionState(m_connections[0]) != NetworkConnection.State.Connected)
+            {
                 Debug.LogError("Client failed to connect to server");
+                m_onJoinComplete(false, null);
+            }
             else
             {
-                // TODO: Be able to dispose.
-                RelayUserWatcher watcher = gameObject.AddComponent<RelayUserWatcher>();
+                RelayUtpClient watcher = gameObject.AddComponent<RelayUtpClient>();
                 watcher.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
+                m_onJoinComplete(true, watcher);
             }
         }
     }

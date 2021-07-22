@@ -1,28 +1,20 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Jobs;
+﻿using System.Collections.Generic;
 using Unity.Networking.Transport;
-using Unity.Networking.Transport.Relay;
-using Unity.Services.Relay.Models;
 using UnityEngine;
-
-using MsgType = LobbyRelaySample.Relay.RelayUTPSetup.MsgType;
+using MsgType = LobbyRelaySample.Relay.RelayUtpSetup.MsgType;
 
 namespace LobbyRelaySample.Relay
 {
     /// <summary>
-    /// This will handle observing the local user and updating remote users over Relay when there are local changes.
+    /// This will handle observing the local player and updating remote players over Relay when there are local changes.
     /// Created after the connection to Relay has been confirmed.
     /// </summary>
-    public class RelayUserWatcher : MonoBehaviour, IDisposable
+    public class RelayUtpClient : MonoBehaviour // This is a MonoBehaviour merely to have access to Update.
     {
         protected LobbyUser m_localUser;
         protected LocalLobby m_localLobby;
-        private bool m_hasDisposed = false;
         protected NetworkDriver m_networkDriver;
-        protected List<NetworkConnection> m_connections; // TODO: Make it clearer that this is just the one member?
+        protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
 
         private bool m_hasSentInitialMessage = false;
 
@@ -30,26 +22,25 @@ namespace LobbyRelaySample.Relay
         {
             m_localUser = localUser;
             m_localLobby = localLobby;
-            m_localUser.onChanged += OnLocalChange; // TODO: This should break up the state type?
+            m_localUser.onChanged += OnLocalChange;
             m_networkDriver = networkDriver;
             m_connections = connections;
+
+            if (this is RelayUtpHost) // The host will be alone in the lobby at first, so they need not send any messages right away.
+                m_hasSentInitialMessage = true;
         }
-        public void Dispose()
+        public void OnDestroy()
         {
-            if (!m_hasDisposed)
-            {
-                m_localUser.onChanged -= OnLocalChange;
-                m_hasDisposed = true;
-            }
+            m_localUser.onChanged -= OnLocalChange;
         }
-        ~RelayUserWatcher() { Dispose(); } // TODO: Disposable or MonoBehaviour?
 
         private void OnLocalChange(LobbyUser localUser)
         {
-            if (m_connections.Count == 0) // Could be the case for the server, should probably actually break that out after all?
+            if (m_connections.Count == 0) // This could be the case for the host alone in the lobby.
                 return;
             m_networkDriver.ScheduleUpdate().Complete();
-            DoUserUpdate(m_networkDriver, m_connections[0]); // TODO: Hmm...I don't think this ends up working if the host has to manually transmit changes over all connections.
+            foreach (NetworkConnection conn in m_connections)
+                DoUserUpdate(m_networkDriver, conn); // TODO: Hmm...I don't think this ends up working if the host has to manually transmit changes over all connections.
         }
 
         public void Update()
@@ -59,9 +50,9 @@ namespace LobbyRelaySample.Relay
 
         protected virtual void OnUpdate()
         {
-            m_networkDriver.ScheduleUpdate().Complete();
+            m_networkDriver.ScheduleUpdate().Complete(); // This pumps all messages, which pings the Relay allocation and keeps it alive.
             ReceiveNetworkEvents(m_networkDriver, m_connections);
-            if (!m_hasSentInitialMessage && !(this is RelayHost))
+            if (!m_hasSentInitialMessage)
                 SendInitialMessage(m_networkDriver, m_connections[0]);
         }
 
@@ -78,7 +69,7 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        protected virtual void ProcessNetworkEvent(DataStreamReader strm, NetworkEvent.Type cmd)
+        private void ProcessNetworkEvent(DataStreamReader strm, NetworkEvent.Type cmd)
         {
             if (cmd == NetworkEvent.Type.Data)
             {
@@ -105,8 +96,11 @@ namespace LobbyRelaySample.Relay
                     m_localLobby.LobbyUsers[id].UserStatus = status;
                     Debug.LogError("User id " + id + " has state " + status.ToString());
                 }
+                ProcessNetworkEventDataAdditional(strm, cmd, msgType, id);
             }
         }
+
+        protected virtual void ProcessNetworkEventDataAdditional(DataStreamReader strm, NetworkEvent.Type cmd, MsgType msgType, string id) { }
 
         unsafe private string ReadLengthAndString(ref DataStreamReader strm)
         {
@@ -121,25 +115,24 @@ namespace LobbyRelaySample.Relay
 
         private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
         {
-            // Assuming this is only created after the Relay connection is successful.
-            // TODO: Retry logic for that?
-            DoUserUpdate(driver, connection);
+            DoUserUpdate(driver, connection); // Assuming this is only created after the Relay connection is successful.
             m_hasSentInitialMessage = true;
         }
 
         private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection)
         {
-            // TODO: Combine these all into one message, if I'm just going to send them all each time anyway.
-
-            WriteString(driver, connection, MsgType.PlayerName, m_localUser.DisplayName);
-            WriteByte(driver, connection, MsgType.Emote, (byte)m_localUser.Emote);
-            WriteByte(driver, connection, MsgType.ReadyState, (byte)m_localUser.UserStatus);
+            // Only update with actual changes. (If multiple change at once, we send messages for each separately, but that shouldn't happen often.)
+            if (0 < (m_localUser.LastChanged & LobbyUser.UserMembers.DisplayName))
+                WriteString(driver, connection, MsgType.PlayerName, m_localUser.DisplayName);
+            if (0 < (m_localUser.LastChanged & LobbyUser.UserMembers.Emote))
+                WriteByte(driver, connection, MsgType.Emote, (byte)m_localUser.Emote);
+            if (0 < (m_localUser.LastChanged & LobbyUser.UserMembers.UserStatus))
+                WriteByte(driver, connection, MsgType.ReadyState, (byte)m_localUser.UserStatus);
         }
 
-        // TODO: We do have a character limit on the name entry field, right?
-
-        // Msg type, ID length, ID, str length, str
-        // Not doing bit packing.
+        /// <summary>
+        /// Write string data as: [1 byte: msgType][1 byte: id length N][N bytes: id][1 byte: string length M][M bytes: string]
+        /// </summary>
         private void WriteString(NetworkDriver driver, NetworkConnection connection, MsgType msgType, string str)
         {
             byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(m_localUser.ID);
@@ -166,6 +159,9 @@ namespace LobbyRelaySample.Relay
             }
         }
 
+        /// <summary>
+        /// Write byte data as: [1 byte: msgType][1 byte: id length N][N bytes: id][1 byte: data]
+        /// </summary>
         private void WriteByte(NetworkDriver driver, NetworkConnection connection, MsgType msgType, byte value)
         {
             byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(m_localUser.ID);

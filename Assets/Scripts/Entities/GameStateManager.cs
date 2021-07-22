@@ -2,7 +2,6 @@ using LobbyRelaySample.Relay;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Services.Relay.Models;
 using UnityEngine;
 
 namespace LobbyRelaySample
@@ -29,8 +28,10 @@ namespace LobbyRelaySample
         LocalLobby m_localLobby;
         LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         LocalGameState m_localGameState = new LocalGameState();
-        ReadyCheck m_ReadyCheck;
-        RelayUTPSetup m_RelaySetup;
+        ReadyCheck m_readyCheck;
+
+        RelayUtpSetup m_relaySetup;
+        RelayUtpClient m_relayClient;
 
         public void Awake()
         {
@@ -40,7 +41,7 @@ namespace LobbyRelaySample
             var unused = Locator.Get;
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
             Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
-            m_ReadyCheck = new ReadyCheck(7);
+            m_readyCheck = new ReadyCheck(7);
             Application.wantsToQuit += OnWantToQuit;
         }
 
@@ -266,17 +267,36 @@ namespace LobbyRelaySample
             Dictionary<string, string> displayNameData = new Dictionary<string, string>();
             displayNameData.Add("DisplayName", m_localUser.DisplayName);
             LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(displayNameData, null);
+            StartRelayConnection();
+        }
 
+        void StartRelayConnection()
+        {
             if (m_localUser.IsHost)
-            {
-                m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Host>();
-                m_RelaySetup.BeginRelayJoin(m_localLobby, m_localUser);
-            }
+                m_relaySetup = gameObject.AddComponent<RelayUtpSetupHost>();
             else
+                m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
+            m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
+        }
+
+        void OnRelayConnected(bool didSucceed, RelayUtpClient client)
+        {
+            Component.Destroy(m_relaySetup);
+            m_relaySetup = null;
+
+            if (!didSucceed)
             {
-                m_RelaySetup = gameObject.AddComponent<RelayUtpSetup_Client>();
-                m_RelaySetup.BeginRelayJoin(m_localLobby, m_localUser);
+                Debug.LogError("Relay connection failed! Retrying in 5s...");
+                StartCoroutine(RetryRelayConnection());
+                return;
             }
+            m_relayClient = client;
+        }
+
+        IEnumerator RetryRelayConnection()
+        {
+            yield return new WaitForSeconds(5);
+            StartRelayConnection();
         }
 
         void OnLeftLobby()
@@ -286,10 +306,13 @@ namespace LobbyRelaySample
             m_lobbyContentHeartbeat.EndTracking();
             LobbyAsyncRequests.Instance.EndTracking();
 
-            if (m_RelaySetup != null)
-            {
-                Component.Destroy(m_RelaySetup);
-                m_RelaySetup = null;
+            if (m_relaySetup != null)
+            {   Component.Destroy(m_relaySetup);
+                m_relaySetup = null;
+            }
+            if (m_relayClient != null)
+            {   Component.Destroy(m_relayClient);
+                m_relayClient = null;
             }
         }
 
@@ -320,7 +343,7 @@ namespace LobbyRelaySample
         /// </summary>
         IEnumerator CountDown()
         {
-            m_ReadyCheck.EndCheckingForReady();
+            m_readyCheck.EndCheckingForReady();
             while (m_localLobby.CountDownTime > 0)
             {
                 yield return new WaitForSeconds(0.2f);
@@ -334,17 +357,6 @@ namespace LobbyRelaySample
             
             // TODO TRANSPORT: Move Relay Join to Pre-Countdown, and do connection and health checks before counting down for the game start.
             //RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoinedRelay); 
-        }
-        
-        /// <summary>
-        /// Non Hosts Connect to server Here
-        /// </summary>
-        void OnJoinedRelay(JoinAllocation joinData)
-        {
-            m_localUser.UserStatus = UserStatus.Connected;
-            var ip = joinData.RelayServer.IpV4;
-            var port = joinData.RelayServer.Port;
-            m_localLobby.RelayServer = new ServerAddress(ip, port);
         }
 
         void ToLobby()
@@ -361,7 +373,7 @@ namespace LobbyRelaySample
             SetGameState(GameState.Lobby);
             m_localUser.UserStatus = UserStatus.Lobby;
             if (m_localUser.IsHost)
-                m_ReadyCheck.BeginCheckingForReady();
+                m_readyCheck.BeginCheckingForReady();
         }
 
         void ResetLocalLobby()
@@ -369,7 +381,7 @@ namespace LobbyRelaySample
             m_localLobby.CopyObserved(new LobbyInfo(), new Dictionary<string, LobbyUser>());
             m_localLobby.CountDownTime = 0;
             m_localLobby.RelayServer = null;
-            m_ReadyCheck.EndCheckingForReady();
+            m_readyCheck.EndCheckingForReady();
         }
 
         void OnDestroy()
