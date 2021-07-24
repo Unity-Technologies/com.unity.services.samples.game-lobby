@@ -3,6 +3,14 @@ using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
 namespace LobbyRelaySample
 {
+
+    // TODO: It might make sense to change UpdateSlow to, rather than have a fixed cycle on which everything is bound, be able to track when each thing should update?
+    // I.e. what I want here now is for when a lobby async request comes in, if it has already been long enough, it immediately fires and then sets a cooldown.
+
+    // This is still necessary for detecting new players, although I think we could hit a case where the relay join ends up coming in before the cooldown?
+    // So, we should be able to create a new LobbyUser that way as well.
+    // That is, creating a (local) player via Relay or via Lobby should go through the same mechanism...? Or do we hold onto the Relay data until the player exists?
+
     /// <summary>
     /// Keep updated on changes to a joined lobby.
     /// </summary>
@@ -82,7 +90,7 @@ namespace LobbyRelaySample
                 if (lobbyRemote == null) return;
                 bool prevShouldPush = m_shouldPushData;
                 var prevState = m_localLobby.State;
-                lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby, m_localUser);
+                lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby);
                 m_shouldPushData = prevShouldPush;
                 CheckForAllPlayersReady();
 

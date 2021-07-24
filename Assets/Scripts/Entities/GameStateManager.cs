@@ -50,6 +50,7 @@ namespace LobbyRelaySample
             Debug.Log("Signed in.");
             m_localUser.ID = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             m_localUser.DisplayName = NameGenerator.GetName(m_localUser.ID);
+            m_localLobby.AddPlayer(m_localUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
         }
 
         public void OnReceiveMessage(MessageType type, object msg)
@@ -63,16 +64,16 @@ namespace LobbyRelaySample
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
                 {
-                    lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
+                    lobby.ToLocalLobby.Convert(r, m_localLobby);
                     OnCreatedLobby();
                 }, OnFailedJoin);
             }
             else if (type == MessageType.JoinLobbyRequest)
             {
-                LobbyInfo lobbyInfo = (LobbyInfo)msg;
+                LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
                 {
-                    lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
+                    lobby.ToLocalLobby.Convert(r, m_localLobby);
                     OnJoinedLobby();
                 }, OnFailedJoin);
             }
@@ -96,7 +97,7 @@ namespace LobbyRelaySample
             {
                 SetGameState((GameState)msg);
             }
-            else if (type == MessageType.UserSetEmote)
+            else if (type == MessageType.UserSetEmote) // TODO: oh what are these doing here
             {
                 EmoteType emote = (EmoteType)msg;
                 m_localUser.Emote = emote;
@@ -126,7 +127,7 @@ namespace LobbyRelaySample
             m_localUser.DisplayName = "New Player";
             Locator.Get.Messenger.Subscribe(this);
             DefaultObserverSetup();
-            InitObservers();
+            BeginObservers();
         }
 
         /// <summary>
@@ -181,51 +182,16 @@ namespace LobbyRelaySample
                 Debug.LogWarning($"Scene has less than the default expected Lobby Service Observers, ensure all the observers in the scene that need to watch the lobby service state  are registered in the LobbyServiceObservers List.");
         }
 
-        void InitObservers()
+        void BeginObservers()
         {
             foreach (var gameStateObs in m_GameStateObservers)
-            {
-                if (gameStateObs == null)
-                {
-                    Debug.LogError("Missing a gameStateObserver, please make sure all GameStateObservers in the scene are registered here.");
-                    continue;
-                }
-
                 gameStateObs.BeginObserving(m_localGameState);
-            }
-
-            foreach (var lobbyObs in m_LocalLobbyObservers)
-            {
-                if (lobbyObs == null)
-                {
-                    Debug.LogError("Missing a gameStateObserver, please make sure all GameStateObservers in the scene are registered here.");
-                    continue;
-                }
-
-                lobbyObs.BeginObserving(m_localLobby);
-            }
-
-            foreach (var userObs in m_LocalUserObservers)
-            {
-                if (userObs == null)
-                {
-                    Debug.LogError("Missing a gameStateObserver, please make sure all GameStateObservers in the scene are registered here.");
-                    continue;
-                }
-
-                userObs.BeginObserving(m_localUser);
-            }
-
             foreach (var serviceObs in m_LobbyServiceObservers)
-            {
-                if (serviceObs == null)
-                {
-                    Debug.LogError("Missing a gameStateObserver, please make sure all GameStateObservers in the scene are registered here.");
-                    continue;
-                }
-
                 serviceObs.BeginObserving(m_lobbyServiceData);
-            }
+            foreach (var lobbyObs in m_LocalLobbyObservers)
+                lobbyObs.BeginObserving(m_localLobby);
+            foreach (var userObs in m_LocalUserObservers)
+                userObs.BeginObserving(m_localUser);
         }
 
         void SetGameState(GameState state)
@@ -373,7 +339,7 @@ namespace LobbyRelaySample
 
         void ResetLocalLobby()
         {
-            m_localLobby.CopyObserved(new LobbyInfo(), new Dictionary<string, LobbyUser>());
+            m_localLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LobbyUser>());
             m_localLobby.CountDownTime = 0;
             m_localLobby.RelayServer = null;
             m_readyCheck.EndCheckingForReady();
