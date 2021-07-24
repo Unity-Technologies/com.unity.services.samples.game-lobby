@@ -7,6 +7,7 @@ namespace LobbyRelaySample
     /// </summary>
     public class LobbyListHeartbeat : MonoBehaviour
     {
+        // This is called in-editor via events.
         public void SetActive(bool isActive)
         {
             if (isActive)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
 namespace LobbyRelaySample
@@ -75,12 +76,12 @@ namespace LobbyRelaySample
 
             void DoLobbyDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(lobby.ToLocalLobby.RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
+                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
             }
 
             void DoPlayerDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(lobby.ToLocalLobby.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
+                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
             }
 
             void OnRetrieve()
@@ -112,6 +113,25 @@ namespace LobbyRelaySample
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.Client_EndReadyCountdownAt, targetTime); // Note that this could be called multiple times.
                 }
             }
+        }
+
+        public static Dictionary<string, string> RetrieveLobbyData(LocalLobby lobby)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add("RelayCode", lobby.RelayCode);
+            data.Add("State", ((int)lobby.State).ToString());
+            // We only want the ArePlayersReadyTime to be set when we actually are ready for it, and it's null otherwise. So, don't set that here.
+            return data;
+        }
+
+        public static Dictionary<string, string> RetrieveUserData(LobbyUser user)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            if (user == null || string.IsNullOrEmpty(user.ID))
+                return data;
+            data.Add("DisplayName", user.DisplayName); // The lobby doesn't need to know any data beyond the name and state; Relay will handle the rest.
+            data.Add("UserStatus", ((int)user.UserStatus).ToString());
+            return data;
         }
     }
 }

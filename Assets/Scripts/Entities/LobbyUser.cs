@@ -39,7 +39,7 @@ namespace LobbyRelaySample
         /// </summary>
         [Flags]
         public enum UserMembers { IsHost = 1, DisplayName = 2, Emote = 4, ID = 8, UserStatus = 16 }
-        private UserMembers m_lastChanged;// TODO: Is the following necessary to prompt an initial update, or do I need to adjust RelayUtpClient.DoUserUpdate to force all messages on the first go? (Or maybe just have some separate call to send full state as one message to start with? Although it should only be name...) = (UserMembers)(-1); // All values are set as changed to begin with, for initial updates.
+        private UserMembers m_lastChanged;
         public UserMembers LastChanged => m_lastChanged;
 
         bool m_isHost;
@@ -122,6 +122,8 @@ namespace LobbyRelaySample
                 (m_id == oldObserved.m_id ?                   0 : (int)UserMembers.ID) |
                 (m_isHost == oldObserved.m_isHost ?           0 : (int)UserMembers.IsHost) |
                 (m_userStatus == oldObserved.m_userStatus ?   0 : (int)UserMembers.UserStatus);
+            if (lastChanged == 0) // Ensure something actually changed.
+                return;
 
             m_displayName = oldObserved.m_displayName;
             m_emote = oldObserved.m_emote;
@@ -130,8 +132,7 @@ namespace LobbyRelaySample
             m_userStatus = oldObserved.m_userStatus;
             m_lastChanged = (UserMembers)lastChanged;
 
-            if (lastChanged != 0) // Ensure something actually changed.
-                OnChanged(this);
+            OnChanged(this);
         }
     }
 }

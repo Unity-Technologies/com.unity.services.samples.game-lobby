@@ -18,12 +18,12 @@ namespace LobbyRelaySample.Relay
         /// <summary>
         /// When a new client connects, they need to be given all up-to-date info.
         /// </summary>
-        protected override void ProcessNetworkEventAdditional(DataStreamReader strm, NetworkEvent.Type cmd)
+        private void OnNewConnection(NetworkConnection conn)
         {
-            if (cmd == NetworkEvent.Type.Connect)
-            {
-
-            }
+            // When a new client connects, they need to be updated with the current state of everyone else.
+            // (We can't exclude this client from the events we send to it, since we don't have its ID in strm, but it will ignore messages about itself on arrival.)
+            foreach (var user in m_localLobby.LobbyUsers)
+                ForceFullUserUpdate(m_networkDriver, conn, user.Value);
         }
 
         protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id)
@@ -70,10 +70,11 @@ namespace LobbyRelaySample.Relay
             }
             while (true)
             {
-                var con = m_networkDriver.Accept();
-                if (!con.IsCreated) // "Nothing more to accept" is signalled by returning an invalid connection from Accept.
+                var conn = m_networkDriver.Accept();
+                if (!conn.IsCreated) // "Nothing more to accept" is signalled by returning an invalid connection from Accept.
                     break;
-                m_connections.Add(con);
+                m_connections.Add(conn);
+                OnNewConnection(conn);
             }
         }
     }

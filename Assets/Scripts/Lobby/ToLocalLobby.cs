@@ -66,25 +66,5 @@ namespace LobbyRelaySample.lobby
             Convert(lobby, data);
             return data;
         }
-
-        public static Dictionary<string, string> RetrieveLobbyData(LocalLobby lobby)
-        {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            data.Add("RelayCode", lobby.RelayCode);
-            data.Add("State", ((int)lobby.State).ToString());
-            // We only want the ArePlayersReadyTime to be set when we actually are ready for it, and it's null otherwise. So, don't set that here.
-            return data;
-        }
-
-        public static Dictionary<string, string> RetrieveUserData(LobbyUser user)
-        {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            if (user == null || string.IsNullOrEmpty(user.ID))
-                return data;
-            data.Add("DisplayName", user.DisplayName);
-            data.Add("Emote", ((int)user.Emote).ToString());
-            data.Add("UserStatus", ((int)user.UserStatus).ToString());
-            return data;
-        }
     }
 }
