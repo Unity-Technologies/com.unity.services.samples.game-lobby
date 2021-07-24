@@ -25,6 +25,7 @@ namespace LobbyRelaySample.Relay
             m_localUser.onChanged += OnLocalChange;
             m_networkDriver = networkDriver;
             m_connections = connections;
+            Locator.Get.UpdateSlow.Subscribe(UpdateSlow);
 
             if (this is RelayUtpHost) // The host will be alone in the lobby at first, so they need not send any messages right away.
                 m_hasSentInitialMessage = true;
@@ -32,6 +33,7 @@ namespace LobbyRelaySample.Relay
         public void OnDestroy()
         {
             m_localUser.onChanged -= OnLocalChange;
+            Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
         }
 
         private void OnLocalChange(LobbyUser localUser)
@@ -46,6 +48,13 @@ namespace LobbyRelaySample.Relay
         public void Update()
         {
             OnUpdate();
+        }
+
+        private void UpdateSlow(float dt)
+        {
+            // Clients need to send any data over UTP periodically, or else the connection will timeout.
+            foreach (NetworkConnection connection in m_connections)
+                WriteByte(m_networkDriver, connection, "0", MsgType.Ping, 0); // The ID doesn't matter here, so send a minimal number of bytes.
         }
 
         protected virtual void OnUpdate()
@@ -64,43 +73,43 @@ namespace LobbyRelaySample.Relay
             {
                 while ((cmd = connection.PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
                 {
-                    ProcessNetworkEvent(strm, cmd);
+                    ProcessNetworkEvent(connection, strm, cmd);
                 }
             }
         }
 
-        private void ProcessNetworkEvent(DataStreamReader strm, NetworkEvent.Type cmd)
+        private void ProcessNetworkEvent(NetworkConnection conn, DataStreamReader strm, NetworkEvent.Type cmd)
         {
             if (cmd == NetworkEvent.Type.Data)
             {
                 MsgType msgType = (MsgType)strm.ReadByte();
                 string id = ReadLengthAndString(ref strm);
-                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id))
+                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // TODO: Do we want to hold onto the message if the user isn't present *now* in case they're pending?
                     return;
 
                 if (msgType == MsgType.PlayerName)
                 {
                     string name = ReadLengthAndString(ref strm);
                     m_localLobby.LobbyUsers[id].DisplayName = name;
-                    Debug.LogError("User id " + id + " is named " + name);
                 }
                 else if (msgType == MsgType.Emote)
                 {
                     EmoteType emote = (EmoteType)strm.ReadByte();
                     m_localLobby.LobbyUsers[id].Emote = emote;
-                    Debug.LogError("User id " + id + " has emote " + emote.ToString());
                 }
                 else if (msgType == MsgType.ReadyState)
                 {
                     UserStatus status = (UserStatus)strm.ReadByte();
                     m_localLobby.LobbyUsers[id].UserStatus = status;
-                    Debug.LogError("User id " + id + " has state " + status.ToString());
                 }
-                ProcessNetworkEventDataAdditional(strm, cmd, msgType, id);
+                ProcessNetworkEventDataAdditional(conn, strm, msgType, id);
             }
+            ProcessNetworkEventAdditional(strm, cmd);
         }
 
-        protected virtual void ProcessNetworkEventDataAdditional(DataStreamReader strm, NetworkEvent.Type cmd, MsgType msgType, string id) { }
+        protected virtual void ProcessNetworkEventAdditional(DataStreamReader strm, NetworkEvent.Type cmd) { }
+
+        protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id) { }
 
         unsafe private string ReadLengthAndString(ref DataStreamReader strm)
         {
@@ -123,19 +132,19 @@ namespace LobbyRelaySample.Relay
         {
             // Only update with actual changes. (If multiple change at once, we send messages for each separately, but that shouldn't happen often.)
             if (0 < (m_localUser.LastChanged & LobbyUser.UserMembers.DisplayName))
-                WriteString(driver, connection, MsgType.PlayerName, m_localUser.DisplayName);
+                WriteString(driver, connection, m_localUser.ID, MsgType.PlayerName, m_localUser.DisplayName);
             if (0 < (m_localUser.LastChanged & LobbyUser.UserMembers.Emote))
-                WriteByte(driver, connection, MsgType.Emote, (byte)m_localUser.Emote);
+                WriteByte(driver, connection, m_localUser.ID, MsgType.Emote, (byte)m_localUser.Emote);
             if (0 < (m_localUser.LastChanged & LobbyUser.UserMembers.UserStatus))
-                WriteByte(driver, connection, MsgType.ReadyState, (byte)m_localUser.UserStatus);
+                WriteByte(driver, connection, m_localUser.ID, MsgType.ReadyState, (byte)m_localUser.UserStatus);
         }
 
         /// <summary>
         /// Write string data as: [1 byte: msgType][1 byte: id length N][N bytes: id][1 byte: string length M][M bytes: string]
         /// </summary>
-        private void WriteString(NetworkDriver driver, NetworkConnection connection, MsgType msgType, string str)
+        protected void WriteString(NetworkDriver driver, NetworkConnection connection, string id, MsgType msgType, string str)
         {
-            byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(m_localUser.ID);
+            byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(id);
             byte[] strBytes = System.Text.Encoding.UTF8.GetBytes(str);
 
             List<byte> message = new List<byte>(idBytes.Length + strBytes.Length + 3);
@@ -162,9 +171,9 @@ namespace LobbyRelaySample.Relay
         /// <summary>
         /// Write byte data as: [1 byte: msgType][1 byte: id length N][N bytes: id][1 byte: data]
         /// </summary>
-        private void WriteByte(NetworkDriver driver, NetworkConnection connection, MsgType msgType, byte value)
+        protected void WriteByte(NetworkDriver driver, NetworkConnection connection, string id, MsgType msgType, byte value)
         {
-            byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(m_localUser.ID);
+            byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(id);
             List<byte> message = new List<byte>(idBytes.Length + 3);
             message.Add((byte)msgType);
             message.Add((byte)idBytes.Length);

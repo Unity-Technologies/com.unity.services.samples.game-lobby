@@ -76,13 +76,21 @@ namespace LobbyRelaySample
 
         #endregion
 
+        private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
+        {
+            Dictionary<string, PlayerDataObject> data = new Dictionary<string, PlayerDataObject>();
+            PlayerDataObject dataObjName = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, player.DisplayName);
+            data.Add("DisplayName", dataObjName);
+            return data;
+        }
+
         /// <summary>
         /// Attempt to create a new lobby and then join it.
         /// </summary>
-        public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, Action<Lobby> onSuccess, Action onFailure)
+        public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
-            LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, OnLobbyCreated);
+            LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, CreateInitialPlayerData(localUser), OnLobbyCreated);
 
             void OnLobbyCreated(Response<Lobby> response)
             {
@@ -97,13 +105,13 @@ namespace LobbyRelaySample
         }
 
         /// <summary>Attempt to join an existing lobby. Either ID xor code can be null.</summary>
-        public void JoinLobbyAsync(string lobbyId, string lobbyCode, Action<Lobby> onSuccess, Action onFailure)
+        public void JoinLobbyAsync(string lobbyId, string lobbyCode, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
             if (!string.IsNullOrEmpty(lobbyId))
-                LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, OnLobbyJoined);
+                LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, CreateInitialPlayerData(localUser), OnLobbyJoined);
             else
-                LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, OnLobbyJoined);
+                LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, CreateInitialPlayerData(localUser), OnLobbyJoined);
 
             void OnLobbyJoined(Response<Lobby> response)
             {

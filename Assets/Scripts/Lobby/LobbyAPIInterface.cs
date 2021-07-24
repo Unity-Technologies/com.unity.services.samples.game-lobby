@@ -35,11 +35,11 @@ namespace LobbyRelaySample.lobby
 
         private const int k_maxLobbiesToShow = 64;
 
-        public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Action<Response<Lobby>> onComplete)
+        public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, PlayerDataObject> localUserData, Action<Response<Lobby>> onComplete)
         {
             CreateLobbyRequest createRequest = new CreateLobbyRequest(new CreateRequest(
                 name: lobbyName,
-                player: new Player(requesterUASId),
+                player: new Player(id: requesterUASId, data: localUserData),
                 maxPlayers: maxPlayers,
                 isPrivate: isPrivate
             ));
@@ -54,16 +54,16 @@ namespace LobbyRelaySample.lobby
             new InProgressRequest<Response>(task, onComplete);
         }
 
-        public static void JoinLobbyAsync_ByCode(string requesterUASId, string lobbyCode, Action<Response<Lobby>> onComplete)
+        public static void JoinLobbyAsync_ByCode(string requesterUASId, string lobbyCode, Dictionary<string, PlayerDataObject> localUserData, Action<Response<Lobby>> onComplete)
         {
-            JoinLobbyByCodeRequest joinRequest = new JoinLobbyByCodeRequest(new JoinByCodeRequest(lobbyCode, new Player(requesterUASId)));
+            JoinLobbyByCodeRequest joinRequest = new JoinLobbyByCodeRequest(new JoinByCodeRequest(lobbyCode, new Player(id: requesterUASId, data: localUserData)));
             var task = LobbyService.LobbyApiClient.JoinLobbyByCodeAsync(joinRequest);
             new InProgressRequest<Response<Lobby>>(task, onComplete);
         }
 
-        public static void JoinLobbyAsync_ById(string requesterUASId, string lobbyId, Action<Response<Lobby>> onComplete)
+        public static void JoinLobbyAsync_ById(string requesterUASId, string lobbyId, Dictionary<string, PlayerDataObject> localUserData, Action<Response<Lobby>> onComplete)
         {
-            JoinLobbyByIdRequest joinRequest = new JoinLobbyByIdRequest(lobbyId, new Player(requesterUASId));
+            JoinLobbyByIdRequest joinRequest = new JoinLobbyByIdRequest(lobbyId, new Player(id: requesterUASId, data: localUserData));
             var task = LobbyService.LobbyApiClient.JoinLobbyByIdAsync(joinRequest);
             new InProgressRequest<Response<Lobby>>(task, onComplete);
         }

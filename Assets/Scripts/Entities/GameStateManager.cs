@@ -61,7 +61,7 @@ namespace LobbyRelaySample
             else if (type == MessageType.CreateLobbyRequest)
             {
                 var createLobbyData = (LocalLobby)msg;
-                LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, (r) =>
+                LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
                 {
                     lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
                     OnCreatedLobby();
@@ -70,7 +70,7 @@ namespace LobbyRelaySample
             else if (type == MessageType.JoinLobbyRequest)
             {
                 LobbyInfo lobbyInfo = (LobbyInfo)msg;
-                LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, (r) =>
+                LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
                 {
                     lobby.ToLocalLobby.Convert(r, m_localLobby, m_localUser);
                     OnJoinedLobby();
@@ -264,9 +264,6 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.BeginTracking(m_localLobby.LobbyID);
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
-            Dictionary<string, string> displayNameData = new Dictionary<string, string>();
-            displayNameData.Add("DisplayName", m_localUser.DisplayName);
-            LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(displayNameData, null);
             StartRelayConnection();
         }
 
@@ -352,19 +349,17 @@ namespace LobbyRelaySample
                 m_localLobby.CountDownTime = m_localLobby.TargetEndTime.Subtract(DateTime.Now).Seconds;
             }
 
-            m_localUser.UserStatus = UserStatus.Connecting;
+            m_localUser.UserStatus = UserStatus.InGame;
             m_localLobby.State = LobbyState.InGame;
             
             // TODO TRANSPORT: Move Relay Join to Pre-Countdown, and do connection and health checks before counting down for the game start.
             //RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoinedRelay); 
         }
 
-        void ToLobby()
+        void ToLobby() // TODO: What to make of this?
         {
             m_localLobby.State = LobbyState.Lobby;
             m_localLobby.CountDownTime = 0;
-            m_localLobby.RelayServer = null;
-            m_localLobby.RelayCode = null;
             SetUserLobbyState();
         }
 

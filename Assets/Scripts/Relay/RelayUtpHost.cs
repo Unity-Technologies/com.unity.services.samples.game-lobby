@@ -3,6 +3,10 @@ using MsgType = LobbyRelaySample.Relay.RelayUtpSetup.MsgType;
 
 namespace LobbyRelaySample.Relay
 {
+    /// <summary>
+    /// In addition to maintaining a heartbeat with the Relay server to keep it from timing out, the host player must pass network events
+    /// from clients to all other clients, since they don't connect to each other.
+    /// </summary>
     public class RelayUtpHost : RelayUtpClient
     {
         protected override void OnUpdate()
@@ -11,8 +15,40 @@ namespace LobbyRelaySample.Relay
             DoHeartbeat();
         }
 
-        protected override void ProcessNetworkEventDataAdditional(DataStreamReader strm, NetworkEvent.Type cmd, MsgType msgType, string id)
+        /// <summary>
+        /// When a new client connects, they need to be given all up-to-date info.
+        /// </summary>
+        protected override void ProcessNetworkEventAdditional(DataStreamReader strm, NetworkEvent.Type cmd)
         {
+            if (cmd == NetworkEvent.Type.Connect)
+            {
+
+            }
+        }
+
+        protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id)
+        {
+            if (msgType == MsgType.PlayerName)
+            {
+                string name = m_localLobby.LobbyUsers[id].DisplayName;
+                foreach (NetworkConnection otherConn in m_connections)
+                {
+                    if (otherConn == conn)
+                        continue;
+                    WriteString(m_networkDriver, otherConn, id, msgType, name);
+                }
+            }
+            else if (msgType == MsgType.Emote || msgType == MsgType.ReadyState)
+            {
+                byte value = msgType == MsgType.Emote ? (byte)m_localLobby.LobbyUsers[id].Emote : (byte)m_localLobby.LobbyUsers[id].UserStatus;
+                foreach (NetworkConnection otherConn in m_connections)
+                {
+                    if (otherConn == conn)
+                        continue;
+                    WriteByte(m_networkDriver, otherConn, id, msgType, value);
+                }
+            }
+
             // Note that the strm contents might have already been consumed, depending on the msgType.
             if (msgType == MsgType.ReadyState)
             {

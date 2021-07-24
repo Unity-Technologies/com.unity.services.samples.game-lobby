@@ -9,11 +9,12 @@ namespace LobbyRelaySample
     [Flags]
     public enum UserStatus
     {
-        Lobby = 1,      // Connected to lobby, not ready yet
-        Ready = 4,      // User clicked ready (Note that 2 is missing; some flags have been removed over time, but we want any serialized values to be unaffected.)
-        Connecting = 8, // User sent join request through Relay
-        Connected = 16, // User connected through Relay
-        Menu = 32,      // User is in a menu, external to the lobby
+        None = 0,
+        Connecting = 1,   // User has joined a lobby but has not yet connected to Relay.
+        Lobby = 2,        // User is in a lobby and connected to Relay.
+        Ready = 4,        // User has selected the ready button, to ready for the "game" to start.
+        InGame = 8,       // User is part of a "game" that has started.
+        Menu = 16         // User is not in a lobby, in one of the main menus.
     }
 
     /// <summary>
@@ -38,7 +39,7 @@ namespace LobbyRelaySample
         /// </summary>
         [Flags]
         public enum UserMembers { IsHost = 1, DisplayName = 2, Emote = 4, ID = 8, UserStatus = 16 }
-        private UserMembers m_lastChanged;
+        private UserMembers m_lastChanged;// TODO: Is the following necessary to prompt an initial update, or do I need to adjust RelayUtpClient.DoUserUpdate to force all messages on the first go? (Or maybe just have some separate call to send full state as one message to start with? Although it should only be name...) = (UserMembers)(-1); // All values are set as changed to begin with, for initial updates.
         public UserMembers LastChanged => m_lastChanged;
 
         bool m_isHost;

@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -11,18 +12,21 @@ namespace Test
 {
     /// <summary>
     /// Hits the Authentication and Lobbies services in order to ensure lobbies can be created and deleted.
-    /// The actual code accessing lobbies should go through LobbyAsyncRequests.
+    /// The actual code accessing lobbies should go through LobbyAsyncRequests. This serves to ensure the connection to the Lobby service is functional.
     /// </summary>
     public class LobbyRoundtripTests
     {
         private string m_workingLobbyId;
         private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
         private bool m_didSigninComplete = false;
+        private Dictionary<string, PlayerDataObject> m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
 
         [OneTimeSetUp]
         public void Setup()
         {
             m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_mockUserData = new Dictionary<string, PlayerDataObject>();
+            m_mockUserData.Add("DisplayName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
         }
 
         [UnityTearDown]
@@ -71,7 +75,7 @@ namespace Test
             Response<Lobby> createResponse = null;
             timeout = 5;
             string lobbyName = "TestLobby-JustATest-123";
-            LobbyAPIInterface.CreateLobbyAsync(m_auth.GetContent("id"), lobbyName, 100, false, (r) => { createResponse = r; });
+            LobbyAPIInterface.CreateLobbyAsync(m_auth.GetContent("id"), lobbyName, 100, false, m_mockUserData, (r) => { createResponse = r; });
             while (createResponse == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -149,7 +153,7 @@ namespace Test
                 Assert.Fail("Did not sign in.");
 
             bool? didComplete = null;
-            LobbyAPIInterface.CreateLobbyAsync("ThisStringIsInvalidHere", "lobby name", 123, false, (r) => { didComplete = (r == null); });
+            LobbyAPIInterface.CreateLobbyAsync("ThisStringIsInvalidHere", "lobby name", 123, false, m_mockUserData, (r) => { didComplete = (r == null); });
             float timeout = 5;
             while (didComplete == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
