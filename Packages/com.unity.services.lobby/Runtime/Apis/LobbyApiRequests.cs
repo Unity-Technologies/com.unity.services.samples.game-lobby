@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -32,17 +33,32 @@ namespace Unity.Services.Lobbies
             key = UnityWebRequest.EscapeURL(key);
             value = UnityWebRequest.EscapeURL(value);
             queryParams.Add($"{key}={value}");
+
             return queryParams;
         }
 
         [Preserve]
-        public List<string> AddParamsToQueryParams(List<string> queryParams, string key, List<string> values)
+        public List<string> AddParamsToQueryParams(List<string> queryParams, string key, List<string> values, string style, bool explode)
         {
-            foreach(var value in values)
+            if (explode)
             {
-                string escapedValue = UnityWebRequest.EscapeURL(value);
-                queryParams.Add($"{UnityWebRequest.EscapeURL(key)}[]={escapedValue}");
+                foreach(var value in values)
+                {
+                    string escapedValue = UnityWebRequest.EscapeURL(value);
+                    queryParams.Add($"{UnityWebRequest.EscapeURL(key)}={escapedValue}");
+                }
             }
+            else
+            {
+                string paramString = $"{UnityWebRequest.EscapeURL(key)}=";
+                foreach(var value in values)
+                {
+                    paramString += UnityWebRequest.EscapeURL(value) + ",";
+                }
+                paramString = paramString.Remove(paramString.Length - 1);
+                queryParams.Add(paramString);
+            }
+
             return queryParams;
         }
 
@@ -342,6 +358,93 @@ namespace Unity.Services.Lobbies
 
             string[] accepts = {
                 "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    [Preserve]
+    public class HeartbeatRequest : LobbyApiBaseRequest
+    {
+        [Preserve]
+        public string LobbyId { get; }
+        [Preserve]
+        public object Body { get; }
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// Heartbeat Request Object.
+        /// Heartbeat a lobby
+        /// </summary>
+        /// <param name="lobbyId">The id of the lobby to execute the request against.</param>
+        /// <param name="body">body param</param>
+        /// <returns>A Heartbeat request object.</returns>
+        [Preserve]
+        public HeartbeatRequest(string lobbyId, object body = default(object))
+        {
+            LobbyId = lobbyId;
+            Body = body;
+            PathAndQueryParams = $"/{lobbyId}/heartbeat";
+
+            List<string> queryParams = new List<string>();
+
+            if (queryParams.Count > 0)
+            {
+                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
+            }
+        }
+
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        public byte[] ConstructBody()
+        {
+            if(Body != null)
+            {
+                return ConstructBody(Body);
+            }
+            return null;
+        }
+
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            string[] contentTypes = {
+                "application/json"
+            };
+
+            string[] accepts = {
                 "application/problem+json"
             };
 

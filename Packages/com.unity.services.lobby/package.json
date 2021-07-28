@@ -1,34 +1,16 @@
 {
-  "name": "com.unity.services.lobby",
-  "displayName": "Unity Lobby",
-  "version": "0.2.0-preview",
-  "unity": "2020.3",
-  "description": "Client API SDK Package for communicating with the Unity Lobby service",
-  "dependencies": {
-    "com.unity.services.core": "1.1.0-pre.2",
-    "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
-    "com.unity.modules.unitywebrequestaudio": "1.0.0",
-    "com.unity.modules.unitywebrequesttexture": "1.0.0",
-    "com.unity.modules.unitywebrequestwww": "1.0.0",
-    "com.unity.nuget.newtonsoft-json": "2.0.0"
-  },
-  "relatedPackages": {
-    "com.unity.services.lobby.tests": "0.2.0-preview"
-  },
-  "upmCi": {
-    "footprint": "aa7999c19cdbcfe8d97e68dde6d16c73ef3411c1"
-  },
-  "repository": {
-    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.services.rooms.git",
-    "type": "git",
-    "revision": "902923a105886dde15661bfeb44db49ee0fdbaff"
-  },
-  "samples": [
-    {
-      "displayName": "Hello World Sample",
-      "description": "This sample walks through using most of the Lobby APIs in a simple, linear way.",
-      "path": "Samples~/HelloWorld"
+    "name": "com.unity.services.lobby",
+    "displayName":"Unity Lobby",
+    "version": "0.2.1-preview",
+    "unity": "2020.3",
+    "description": "Client API SDK Package for communicating with the Unity Lobby service",
+    "dependencies": {
+        "com.unity.services.core": "1.1.0-pre.2",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
+        "com.unity.modules.unitywebrequestaudio": "1.0.0",
+        "com.unity.modules.unitywebrequesttexture": "1.0.0",
+        "com.unity.modules.unitywebrequestwww": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "2.0.0"
     }
-  ]
 }

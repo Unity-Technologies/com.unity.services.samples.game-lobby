@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Unity.Services.Lobbies.Http;
 
 
 
@@ -11,7 +12,10 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// An order for an individual field that is applied to a query.
+    /// <param name="asc">Whether to sort in ascending or descending order.</param>
+    /// <param name="field">The name of the field to order on.</param>
     /// </summary>
+
     [Preserve]
     [DataContract(Name = "QueryOrder")]
     public class QueryOrder
@@ -22,12 +26,13 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="asc">Whether to sort in ascending or descending order.</param>
         /// <param name="field">The name of the field to order on.</param>
         [Preserve]
-        public QueryOrder(bool asc = default(bool), FieldOptions field = default)
+        public QueryOrder(bool asc = default, FieldOptions field = default)
         {
             Asc = asc;
             Field = field;
         }
 
+    
         /// <summary>
         /// Whether to sort in ascending or descending order.
         /// </summary>
@@ -48,6 +53,7 @@ namespace Unity.Services.Lobbies.Models
         /// The name of the field to order on.
         /// </summary>
         /// <value>The name of the field to order on.</value>
+        [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
         public enum FieldOptions
         {
