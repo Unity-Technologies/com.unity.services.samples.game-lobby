@@ -24,7 +24,7 @@ namespace LobbyRelaySample.Relay
         protected LobbyUser m_localUser;
         protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
-        public enum MsgType { NewPlayer = 0, Ping = 1, ReadyState = 2, PlayerName = 3, Emote = 4 }
+        public enum MsgType { NewPlayer = 0, Ping = 1, ReadyState = 2, PlayerName = 3, Emote = 4, StartCountdown = 5, CancelCountdown = 6, ConfirmInGame = 7, EndInGame = 8 }
 
         public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser, Action<bool, RelayUtpClient> onJoinComplete)
         {

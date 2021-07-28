@@ -17,7 +17,7 @@ namespace LobbyRelaySample.UI
         }
         private void ChangeState(UserStatus status)
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeLobbyUserState, status);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.LobbyUserStatus, status);
         }
     }
 }

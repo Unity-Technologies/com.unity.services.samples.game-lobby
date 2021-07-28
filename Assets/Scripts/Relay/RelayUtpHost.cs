@@ -1,4 +1,5 @@
-﻿using Unity.Networking.Transport;
+﻿using System.Collections.Generic;
+using Unity.Networking.Transport;
 using MsgType = LobbyRelaySample.Relay.RelayUtpSetup.MsgType;
 
 namespace LobbyRelaySample.Relay
@@ -7,8 +8,20 @@ namespace LobbyRelaySample.Relay
     /// In addition to maintaining a heartbeat with the Relay server to keep it from timing out, the host player must pass network events
     /// from clients to all other clients, since they don't connect to each other.
     /// </summary>
-    public class RelayUtpHost : RelayUtpClient
+    public class RelayUtpHost : RelayUtpClient, IReceiveMessages
     {
+        public override void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
+        {
+            base.Initialize(networkDriver, connections, localUser, localLobby);
+            m_hasSentInitialMessage = true; // The host will be alone in the lobby at first, so they need not send any messages right away.
+            Locator.Get.Messenger.Subscribe(this);
+        }
+        protected override void Uninitialize()
+        {
+            base.Uninitialize();
+            Locator.Get.Messenger.Unsubscribe(this);
+        }
+
         protected override void OnUpdate()
         {
             base.OnUpdate();
@@ -28,6 +41,9 @@ namespace LobbyRelaySample.Relay
 
         protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id)
         {
+            // Note that the strm contents might have already been consumed, depending on the msgType.
+
+            // Forward messages from clients to other clients.
             if (msgType == MsgType.PlayerName)
             {
                 string name = m_localLobby.LobbyUsers[id].DisplayName;
@@ -49,11 +65,55 @@ namespace LobbyRelaySample.Relay
                 }
             }
 
-            // Note that the strm contents might have already been consumed, depending on the msgType.
+            // If a client has changed state, check if this changes whether all players have readied.
             if (msgType == MsgType.ReadyState)
+                CheckIfAllUsersReady();
+        }
+
+        public void OnReceiveMessage(MessageType type, object msg)
+        {
+            if (type == MessageType.LobbyUserStatus)
+                CheckIfAllUsersReady();
+            else if (type == MessageType.EndGame) // This assumes that only the host will have the End Game button available; otherwise, clients need to be able to send this message, too.
             {
-                // TODO: Check if all players have readied.
+                foreach (NetworkConnection connection in m_connections)
+                    WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.EndInGame, 0);
             }
+        }
+
+        private void CheckIfAllUsersReady()
+        {
+            bool haveAllReadied = true;
+            foreach (var user in m_localLobby.LobbyUsers)
+            {
+                if (user.Value.UserStatus != UserStatus.Ready)
+                {   haveAllReadied = false;
+                    break;
+                }
+            }
+            if (haveAllReadied && m_localLobby.State == LobbyState.Lobby) // Need to notify both this client and all others that all players have readied.
+            {
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
+                foreach (NetworkConnection connection in m_connections)
+                    WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.StartCountdown, 0);
+            }
+            else if (!haveAllReadied && m_localLobby.State == LobbyState.CountDown) // Someone cancelled during the countdown, so abort the countdown.
+            {
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.CancelCountdown, null);
+                foreach (NetworkConnection connection in m_connections)
+                    WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.CancelCountdown, 0);
+            }
+        }
+
+        /// <summary>
+        /// In an actual game, after the countdown, there would be some step here where the host and all clients sync up on game state, load assets, etc.
+        /// Here, we will instead just signal an "in game" state that can be ended by the host.
+        /// </summary>
+        public void SendInGameState()
+        {
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ConfirmInGameState, null);
+            foreach (NetworkConnection connection in m_connections)
+                WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.ConfirmInGame, 0);
         }
 
         /// <summary>

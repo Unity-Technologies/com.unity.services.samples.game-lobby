@@ -58,7 +58,7 @@ namespace LobbyRelaySample.UI
                 case UserStatus.Ready:
                     return "<color=#009E73>Ready</color>"; // Light Mint
                 case UserStatus.Connecting:
-                    return "<color=#F0E442>Connecting</color>"; // Bright Yellow
+                    return "<color=#F0E442>Connecting...</color>"; // Bright Yellow
                 case UserStatus.InGame:
                     return "<color=#005500>In Game</color>"; //Orange
                 default:

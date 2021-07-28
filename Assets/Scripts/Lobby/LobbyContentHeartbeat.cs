@@ -93,25 +93,6 @@ namespace LobbyRelaySample
                 var prevState = m_localLobby.State;
                 lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby);
                 m_shouldPushData = prevShouldPush;
-                CheckForAllPlayersReady();
-
-                if (prevState != LobbyState.Lobby && m_localLobby.State == LobbyState.Lobby)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ToLobby, null);
-            }
-
-
-            void CheckForAllPlayersReady()
-            {
-                bool areAllPlayersReady = m_localLobby.AllPlayersReadyTime != null;
-                if (areAllPlayersReady)
-                {
-                    long targetTimeTicks = m_localLobby.AllPlayersReadyTime.Value;
-                    DateTime targetTime = new DateTime(targetTimeTicks);
-                    if (targetTime.Subtract(DateTime.Now).Seconds < 0)
-                        return;
-
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.Client_EndReadyCountdownAt, targetTime); // Note that this could be called multiple times.
-                }
             }
         }
 

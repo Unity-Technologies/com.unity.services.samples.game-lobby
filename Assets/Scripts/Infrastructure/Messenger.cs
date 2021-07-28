@@ -19,12 +19,14 @@ namespace LobbyRelaySample
         PlayerJoinedLobby = 5,
         PlayerLeftLobby = 6,
         ChangeGameState = 7,
-        ChangeLobbyUserState = 8,
+        LobbyUserStatus = 8,
         HostInitReadyCheck = 9,
         LocalUserReadyCheckResponse = 10,
         UserSetEmote = 11,
-        ToLobby = 12,
-        Client_EndReadyCountdownAt = 13,
+        EndGame = 12,
+        StartCountdown = 13,
+        CancelCountdown = 14,
+        ConfirmInGameState = 15,
     }
 
     /// <summary>

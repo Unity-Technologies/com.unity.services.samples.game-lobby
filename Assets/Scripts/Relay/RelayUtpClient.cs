@@ -16,9 +16,9 @@ namespace LobbyRelaySample.Relay
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
 
-        private bool m_hasSentInitialMessage = false;
+        protected bool m_hasSentInitialMessage = false;
 
-        public void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
+        public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
         {
             m_localUser = localUser;
             m_localLobby = localLobby;
@@ -26,14 +26,15 @@ namespace LobbyRelaySample.Relay
             m_networkDriver = networkDriver;
             m_connections = connections;
             Locator.Get.UpdateSlow.Subscribe(UpdateSlow);
-
-            if (this is RelayUtpHost) // The host will be alone in the lobby at first, so they need not send any messages right away.
-                m_hasSentInitialMessage = true;
         }
-        public void OnDestroy()
+        protected virtual void Uninitialize()
         {
             m_localUser.onChanged -= OnLocalChange;
             Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
+        }
+        public void OnDestroy()
+        {
+            Uninitialize();
         }
 
         private void OnLocalChange(LobbyUser localUser)
@@ -102,6 +103,15 @@ namespace LobbyRelaySample.Relay
                     UserStatus status = (UserStatus)strm.ReadByte();
                     m_localLobby.LobbyUsers[id].UserStatus = status;
                 }
+                else if (msgType == MsgType.StartCountdown)
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
+                else if (msgType == MsgType.CancelCountdown)
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.CancelCountdown, null);
+                else if (msgType == MsgType.ConfirmInGame)
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ConfirmInGameState, null);
+                else if (msgType == MsgType.EndInGame)
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
+
                 ProcessNetworkEventDataAdditional(conn, strm, msgType, id);
             }
         }

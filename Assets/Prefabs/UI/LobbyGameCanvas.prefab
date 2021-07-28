@@ -28,7 +28,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1906352097507614706}
   m_RootOrder: 0
@@ -164,7 +163,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 466693923092094802}
   - {fileID: 2244251208239780121}
@@ -219,7 +217,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  observeOnStart: 1
 --- !u!114 &3403950992349691351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267,7 +264,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4212636328457333019}
   m_Father: {fileID: 2244251207921394025}
@@ -313,7 +309,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  observeOnStart: 1
 --- !u!114 &6860436446719602335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,7 +366,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 466693923092094802}
   m_RootOrder: 0
@@ -510,7 +504,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7445706979321241619}
   m_Father: {fileID: 2244251207921394025}
@@ -556,7 +549,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  observeOnStart: 1
 --- !u!114 &279783410280127446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -684,6 +676,10 @@ PrefabInstance:
     - target: {fileID: 4102997489641105918, guid: 27536a164837c9141bbe1adf7ba37dde, type: 3}
       propertyPath: m_Name
       value: RelayCodeCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7546827419935918100, guid: 27536a164837c9141bbe1adf7ba37dde, type: 3}
+      propertyPath: m_fontSize
+      value: 18.2
       objectReference: {fileID: 0}
     - target: {fileID: 7676491730539518990, guid: 27536a164837c9141bbe1adf7ba37dde, type: 3}
       propertyPath: m_Alpha
@@ -950,6 +946,22 @@ PrefabInstance:
     - target: {fileID: 7208745489711067383, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
       propertyPath: m_Name
       value: PlayerInteractionPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7303921398628037483, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7303921398628037483, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7303921398628037483, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7303921398628037483, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8979361099148208042, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1334,6 +1346,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4463750083940306578, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4463750083940306578, guid: e269788e17cbca145bf78e8971aeb223, type: 3}
+      propertyPath: m_PresetInfoIsWorld
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4463750083940306589, guid: e269788e17cbca145bf78e8971aeb223, type: 3}

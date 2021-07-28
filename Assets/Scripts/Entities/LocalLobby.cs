@@ -77,18 +77,6 @@ namespace LobbyRelaySample
             }
         }
 
-        DateTime m_TargetEndTime;
-
-        public DateTime TargetEndTime
-        {
-            get => m_TargetEndTime;
-            set
-            {
-                m_TargetEndTime = value;
-                OnChanged(this);
-            }
-        }
-
         ServerAddress m_relayServer;
 
         public ServerAddress RelayServer
@@ -223,7 +211,7 @@ namespace LobbyRelaySample
         /// -1 Count means you need all Lobbyusers
         /// </summary>
         /// <returns>True if enough players are of the input status.</returns>
-        public bool PlayersOfState(UserStatus status, int playersCount = -1)
+        public bool PlayersOfState(UserStatus status, int playersCount = -1) // TODO: Remove test-only API.
         {
             var statePlayers = m_LobbyUsers.Values.Count(user => user.UserStatus == status);
 
