@@ -52,12 +52,13 @@ namespace LobbyRelaySample
         {
             if (m_isAwaitingQuery || m_localLobby == null)
                 return;
-
+            LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
             m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
             if (m_shouldPushData)
                 PushDataToLobby();
             else
                 OnRetrieve();
+
 
             void PushDataToLobby()
             {

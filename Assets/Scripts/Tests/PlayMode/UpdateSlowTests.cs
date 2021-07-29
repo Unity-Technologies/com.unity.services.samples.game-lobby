@@ -18,6 +18,7 @@ namespace Test
         private class Subscriber : IDisposable
         {
             private Action m_thingToDo;
+            public float prevDt;
 
             public Subscriber(Action thingToDo)
             {
@@ -33,6 +34,7 @@ namespace Test
             private void OnUpdate(float dt)
             {
                 m_thingToDo?.Invoke();
+                prevDt = dt;
             }
         }
 
@@ -73,14 +75,18 @@ namespace Test
 
             yield return new WaitForSeconds(0.1f);
             Assert.AreEqual(1, updateCount, "Slow update period should have passed.");
+            Assert.AreEqual(1.5f, sub.prevDt, "Slow update should have received the full time delta.");
 
             yield return new WaitForSeconds(k_period);
             Assert.AreEqual(2, updateCount, "Did the slow update again.");
+            Assert.AreEqual(1.5f, sub.prevDt, "Slow update should have received the full time delta again.");
 
             Subscriber sub2 = new Subscriber(() => { updateCount += 7; });
             m_activeSubscribers.Add(sub2);
             yield return new WaitForSeconds(k_period);
             Assert.AreEqual(10, updateCount, "There are two subscribers now.");
+            Assert.AreEqual(1.5f, sub.prevDt, "Slow update should have received the full time delta with two subscribers.");
+            Assert.AreEqual(1.5f, sub2.prevDt, "Slow update should have received the full time delta on the second subscriber as well.");
 
             sub2.Dispose();
             yield return new WaitForSeconds(k_period);

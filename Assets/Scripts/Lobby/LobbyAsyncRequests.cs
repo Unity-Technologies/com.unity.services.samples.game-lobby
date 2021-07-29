@@ -225,5 +225,20 @@ namespace LobbyRelaySample
             }
             return true;
         }
+
+        private float m_heartbeatTime = 0;
+        private const float k_heartbeatPeriod = 8; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+        /// <summary>
+        /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
+        /// </summary>
+        public void DoLobbyHeartbeat(float dt)
+        {
+            m_heartbeatTime += dt;
+            if (m_heartbeatTime > k_heartbeatPeriod)
+            { 
+                m_heartbeatTime -= k_heartbeatPeriod;
+                LobbyAPIInterface.HeartbeatPlayerAsync(m_lastKnownLobby.Id);
+            }
+        }
     }
 }

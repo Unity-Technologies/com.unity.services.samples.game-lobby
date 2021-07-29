@@ -106,5 +106,12 @@ namespace LobbyRelaySample.lobby
             var task = LobbyService.LobbyApiClient.UpdatePlayerAsync(updateRequest);
             new InProgressRequest<Response<Lobby>>(task, onComplete);
         }
+
+        public static void HeartbeatPlayerAsync(string lobbyId)
+        {
+            HeartbeatRequest request = new HeartbeatRequest(lobbyId);
+            var task = LobbyService.LobbyApiClient.HeartbeatAsync(request);
+            new InProgressRequest<Response>(task, null);
+        }
     }
 }
