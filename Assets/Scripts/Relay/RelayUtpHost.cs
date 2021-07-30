@@ -70,6 +70,11 @@ namespace LobbyRelaySample.Relay
                 CheckIfAllUsersReady();
         }
 
+        protected override void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
+        {
+            // TODO: If a client disconnects, see if remaining players are all already ready.
+        }
+
         public void OnReceiveMessage(MessageType type, object msg)
         {
             if (type == MessageType.LobbyUserStatus)

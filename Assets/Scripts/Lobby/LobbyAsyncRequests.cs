@@ -163,12 +163,7 @@ namespace LobbyRelaySample
             void OnLeftLobby(Response response)
             {
                 onComplete?.Invoke();
-
                 // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
-
-                // TEMP. As of 6/31/21, the lobbies service doesn't automatically delete emptied lobbies, though that functionality is expected in the near-term.
-                // Until then, we'll do a delete request whenever we leave, and if it's invalid, we'll just get a 403 back.
-                LobbyAPIInterface.DeleteLobbyAsync(lobbyId, null);
             }
         }
 

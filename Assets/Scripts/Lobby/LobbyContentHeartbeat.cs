@@ -52,7 +52,8 @@ namespace LobbyRelaySample
         {
             if (m_isAwaitingQuery || m_localLobby == null)
                 return;
-            LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
+            if (m_localUser.IsHost)
+                LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
             m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
             if (m_shouldPushData)
                 PushDataToLobby();
@@ -102,7 +103,6 @@ namespace LobbyRelaySample
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add("RelayCode", lobby.RelayCode);
             data.Add("State", ((int)lobby.State).ToString());
-            // We only want the ArePlayersReadyTime to be set when we actually are ready for it, and it's null otherwise. So, don't set that here.
             return data;
         }
 

@@ -30,6 +30,7 @@ namespace LobbyRelaySample.Relay
         protected virtual void Uninitialize()
         {
             m_localUser.onChanged -= OnLocalChange;
+            Leave();
             Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
         }
         public void OnDestroy()
@@ -114,9 +115,19 @@ namespace LobbyRelaySample.Relay
 
                 ProcessNetworkEventDataAdditional(conn, strm, msgType, id);
             }
+            else if (cmd == NetworkEvent.Type.Disconnect)
+                ProcessDisconnectEvent(conn, strm);
         }
 
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id) { }
+
+        protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
+        {
+            // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
+            Debug.LogError("Host disconnected! Leaving the lobby.");
+            Leave();
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+        }
 
         unsafe private string ReadLengthAndString(ref DataStreamReader strm)
         {
@@ -206,6 +217,13 @@ namespace LobbyRelaySample.Relay
                     }
                 }
             }
+        }
+
+        public void Leave()
+        {
+            foreach (NetworkConnection connection in m_connections)
+                connection.Disconnect(m_networkDriver);
+            m_localLobby.RelayServer = null;
         }
     }
 }

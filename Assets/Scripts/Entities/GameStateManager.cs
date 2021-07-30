@@ -180,6 +180,7 @@ namespace LobbyRelaySample
 
         void OnCreatedLobby()
         {
+            m_localUser.IsHost = true;
             OnJoinedLobby();
         }
 
@@ -224,7 +225,7 @@ namespace LobbyRelaySample
 
         void OnLeftLobby()
         {
-            m_localUser.Emote = EmoteType.None;
+            m_localUser.ResetState();
             LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
             m_lobbyContentHeartbeat.EndTracking();
             LobbyAsyncRequests.Instance.EndTracking();
@@ -281,6 +282,7 @@ namespace LobbyRelaySample
         void ResetLocalLobby()
         {
             m_localLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LobbyUser>());
+            m_localLobby.AddPlayer(m_localUser); // As before, the local player will need to be plugged into UI before the lobby join actually happens.
             m_localLobby.CountDownTime = 0;
             m_localLobby.RelayServer = null;
         }

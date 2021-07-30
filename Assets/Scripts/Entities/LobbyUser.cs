@@ -23,16 +23,36 @@ namespace LobbyRelaySample
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, string userStatus = null)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu)
         {
-            m_isHost = isHost;
-            m_displayName = displayName;
-            m_id = id;
-            m_emote = emote;
-            UserStatus status;
-            if (!string.IsNullOrEmpty(userStatus) && Enum.TryParse(userStatus, out status))
-                m_userStatus = status;
+            m_data = new UserData(isHost, displayName, id, emote, userStatus);
         }
+
+        #region Local UserData
+        public struct UserData
+        {
+            public bool IsHost { get; set; }
+            public string DisplayName { get; set; }
+            public string ID { get; set; }
+            public EmoteType Emote { get; set; }
+            public UserStatus UserStatus { get; set; }
+
+            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus)
+            {
+                IsHost = isHost;
+                DisplayName = displayName;
+                ID = id;
+                Emote = emote;
+                UserStatus = userStatus;
+            }
+        }
+
+        private UserData m_data;
+        public void ResetState()
+        {
+            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu); // ID and DisplayName should persist since this might be the local user.
+        }
+        #endregion
 
         /// <summary>
         /// Used for limiting costly OnChanged actions to just the members which actually changed.
@@ -42,60 +62,56 @@ namespace LobbyRelaySample
         private UserMembers m_lastChanged;
         public UserMembers LastChanged => m_lastChanged;
 
-        bool m_isHost;
         public bool IsHost
         {
-            get { return m_isHost; }
+            get { return m_data.IsHost; }
             set
             {
-                if (m_isHost != value)
+                if (m_data.IsHost != value)
                 {
-                    m_isHost = value;
+                    m_data.IsHost = value;
                     m_lastChanged = UserMembers.IsHost;
                     OnChanged(this);
                 }
             }
         }
 
-        string m_displayName = "";
         public string DisplayName
         {
-            get => m_displayName;
+            get => m_data.DisplayName;
             set
             {
-                if (m_displayName != value)
+                if (m_data.DisplayName != value)
                 {
-                    m_displayName = value;
+                    m_data.DisplayName = value;
                     m_lastChanged = UserMembers.DisplayName;
                     OnChanged(this);
                 }
             }
         }
 
-        EmoteType m_emote = EmoteType.None;
         public EmoteType Emote
         {
-            get => m_emote;
+            get => m_data.Emote;
             set
             {
-                if (m_emote != value)
+                if (m_data.Emote != value)
                 {
-                    m_emote = value;
+                    m_data.Emote = value;
                     m_lastChanged = UserMembers.Emote;
                     OnChanged(this);
                 }
             }
         }
 
-        string m_id = "";
         public string ID
         {
-            get => m_id;
+            get => m_data.ID;
             set
             {
-                if (m_id != value)
+                if (m_data.ID != value)
                 {
-                    m_id = value;
+                    m_data.ID = value;
                     m_lastChanged = UserMembers.ID;
                     OnChanged(this);
                 }
@@ -114,22 +130,19 @@ namespace LobbyRelaySample
             }
         }
 
-        public override void CopyObserved(LobbyUser oldObserved)
+        public override void CopyObserved(LobbyUser observed)
         {
+            UserData data = observed.m_data;
             int lastChanged = // Set flags just for the members that will be changed.
-                (m_displayName == oldObserved.m_displayName ? 0 : (int)UserMembers.DisplayName) |
-                (m_emote == oldObserved.m_emote ?             0 : (int)UserMembers.Emote) |
-                (m_id == oldObserved.m_id ?                   0 : (int)UserMembers.ID) |
-                (m_isHost == oldObserved.m_isHost ?           0 : (int)UserMembers.IsHost) |
-                (m_userStatus == oldObserved.m_userStatus ?   0 : (int)UserMembers.UserStatus);
+                (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
+                (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
+                (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
+                (m_data.IsHost == data.IsHost ?           0 : (int)UserMembers.IsHost) |
+                (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus);
             if (lastChanged == 0) // Ensure something actually changed.
                 return;
 
-            m_displayName = oldObserved.m_displayName;
-            m_emote = oldObserved.m_emote;
-            m_id = oldObserved.m_id;
-            m_isHost = oldObserved.m_isHost;
-            m_userStatus = oldObserved.m_userStatus;
+            m_data = data;
             m_lastChanged = (UserMembers)lastChanged;
 
             OnChanged(this);

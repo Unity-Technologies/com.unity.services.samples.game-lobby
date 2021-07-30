@@ -21,7 +21,6 @@ namespace LobbyRelaySample.lobby
                 MaxPlayerCount      = lobby.MaxPlayers,
                 RelayCode           = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : null, // TODO: Remove?
                 State               = lobby.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby, // TODO: Consider TryParse, just in case (and below). Although, we don't have fail logic anyway...
-                AllPlayersReadyTime = lobby.Data?.ContainsKey("AllPlayersReady") == true ? long.Parse(lobby.Data["AllPlayersReady"].Value) : (long?)null // TODO: Remove
             };
 
             Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>(); // TODO: So, right, why this?
@@ -37,7 +36,7 @@ namespace LobbyRelaySample.lobby
                     }
                 }
 
-                // If the player isn't connected to Relay, or if we just don't know about them yet, get the most recent data that the lobby knows. // TODO: Relay should handle the latter case.
+                // If the player isn't connected to Relay, or if we just don't know about them yet, get the most recent data that the lobby knows.
                 // (If we have no local representation of the player, that gets added by the LocalLobby.)
                 LobbyUser incomingData = new LobbyUser(); // TODO: This is unclear; this should be just a data object replacing that of the user, not a new user whose data are taken.
                 incomingData.IsHost = lobby.HostId.Equals(player.Id);

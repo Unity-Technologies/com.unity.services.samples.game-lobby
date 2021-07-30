@@ -98,6 +98,10 @@ namespace LobbyRelaySample.Relay
 
     public class RelayUtpSetupHost : RelayUtpSetup
     {
+        [Flags]
+        private enum JoinState { None = 0, Bound = 1, Joined = 2 }
+        private JoinState m_joinState = JoinState.None;
+
         protected override void JoinRelay()
         {
             RelayInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnAllocation);
@@ -118,6 +122,8 @@ namespace LobbyRelaySample.Relay
         private void OnJoin(JoinAllocation joinAllocation)
         {
             m_localLobby.RelayServer = new ServerAddress(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port);
+            m_joinState |= JoinState.Joined;
+            CheckForComplete();
         }
 
         protected override void OnBindingComplete()
@@ -130,6 +136,15 @@ namespace LobbyRelaySample.Relay
             else
             {
                 Debug.LogWarning("Server is now listening!");
+                m_joinState |= JoinState.Bound;
+                CheckForComplete();
+            }
+        }
+
+        private void CheckForComplete()
+        {
+            if (m_joinState == (JoinState.Joined | JoinState.Bound))
+            {
                 m_isRelayConnected = true;
                 RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
                 host.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
@@ -157,7 +172,7 @@ namespace LobbyRelaySample.Relay
         private void OnJoin(JoinAllocation allocation)
         {
             if (allocation == null)
-                return; // TODO: Error messaging.
+                return;
             BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key, 1);
             m_localLobby.RelayServer = new ServerAddress(allocation.RelayServer.IpV4, allocation.RelayServer.Port);
         }
@@ -169,7 +184,7 @@ namespace LobbyRelaySample.Relay
 
         private IEnumerator ConnectToServer()
         {
-            // Once the client is bound to the Relay server, you can send a connection request
+            // Once the client is bound to the Relay server, send a connection request.
             m_connections.Add(m_networkDriver.Connect(m_endpointForServer));
             while (m_networkDriver.GetConnectionState(m_connections[0]) == NetworkConnection.State.Connecting)
             {

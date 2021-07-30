@@ -32,7 +32,6 @@ namespace LobbyRelaySample
             public bool Private { get; set; }
             public int MaxPlayerCount { get; set; }
             public LobbyState State { get; set; }
-            public long? AllPlayersReadyTime { get; set; }
 
             public LobbyData(LobbyData existing)
             {
@@ -43,7 +42,6 @@ namespace LobbyRelaySample
                 Private = existing.Private;
                 MaxPlayerCount = existing.MaxPlayerCount;
                 State = existing.State;
-                AllPlayersReadyTime = existing.AllPlayersReadyTime;
             }
 
             public LobbyData(string lobbyCode)
@@ -55,7 +53,6 @@ namespace LobbyRelaySample
                 Private = false;
                 MaxPlayerCount = -1;
                 State = LobbyState.Lobby;
-                AllPlayersReadyTime = null;
             }
         }
 
@@ -204,8 +201,6 @@ namespace LobbyRelaySample
             }
         }
 
-        public long? AllPlayersReadyTime => m_data.AllPlayersReadyTime;
-
         /// <summary>
         /// Checks if we have n players that have the Status.
         /// -1 Count means you need all Lobbyusers
@@ -251,6 +246,7 @@ namespace LobbyRelaySample
             OnChanged(this);
         }
 
+        // This ends up being called from the lobby list when we get data about a lobby without having joined it yet.
         public override void CopyObserved(LocalLobby oldObserved)
         {
             CopyObserved(oldObserved.Data, oldObserved.m_LobbyUsers);
