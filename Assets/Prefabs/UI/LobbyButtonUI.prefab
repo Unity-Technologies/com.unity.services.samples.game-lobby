@@ -28,7 +28,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9095092682662508748}
   m_RootOrder: 0
@@ -152,6 +151,7 @@ GameObject:
   - component: {fileID: 1059336587790472163}
   - component: {fileID: 5797179165760832527}
   - component: {fileID: 5385358091761997407}
+  - component: {fileID: 6515571473500817606}
   m_Layer: 5
   m_Name: LobbyButtonUI
   m_TagString: Untagged
@@ -169,7 +169,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7388874116200379571}
   - {fileID: 2246652449813468979}
@@ -319,7 +318,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  observeOnStart: 1
+      - m_Target: {fileID: 6515571473500817606}
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.RecolorForLobbyType, LobbyRelaySample
+        m_MethodName: UpdateLobby
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1059336587790472163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,6 +388,21 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &6515571473500817606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6423115675995281648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4079cd003fcd20c40a3bac78acf44b55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_toRecolor:
+  - {fileID: 4172744935978053658}
+  m_toggles: []
 --- !u!1 &8569242987132969498
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,7 +431,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9095092682662508748}
   m_RootOrder: 1

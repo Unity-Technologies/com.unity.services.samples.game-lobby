@@ -34,6 +34,10 @@ namespace LobbyRelaySample
         RelayUtpSetup m_relaySetup;
         RelayUtpClient m_relayClient;
 
+        /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
+        public void SetLobbyColorFilter(int color) { m_lobbyColorFilter = (LobbyColor)color; }
+        private LobbyColor m_lobbyColorFilter;
+
         public void Awake()
         {
             LogHandler.Get().mode = m_logMode;
@@ -94,7 +98,8 @@ namespace LobbyRelaySample
                         if (er != null)
                             errorLong = er.Status;
                         OnRefreshFailed(errorLong);
-                    });
+                    },
+                    m_lobbyColorFilter);
             }
             else if (type == MessageType.ChangeGameState)
             {

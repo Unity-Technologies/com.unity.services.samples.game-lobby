@@ -98,15 +98,16 @@ namespace LobbyRelaySample
             }
         }
 
-        public static Dictionary<string, string> RetrieveLobbyData(LocalLobby lobby)
+        private static Dictionary<string, string> RetrieveLobbyData(LocalLobby lobby)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add("RelayCode", lobby.RelayCode);
-            data.Add("State", ((int)lobby.State).ToString());
+            data.Add("State", ((int)lobby.State).ToString()); // Using an int is smaller than using the enum state's name.
+            data.Add("Color", ((int)lobby.Color).ToString());
             return data;
         }
 
-        public static Dictionary<string, string> RetrieveUserData(LobbyUser user)
+        private static Dictionary<string, string> RetrieveUserData(LobbyUser user)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             if (user == null || string.IsNullOrEmpty(user.ID))

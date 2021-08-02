@@ -21,9 +21,10 @@ namespace LobbyRelaySample.lobby
                 MaxPlayerCount      = lobby.MaxPlayers,
                 RelayCode           = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : null, // TODO: Remove?
                 State               = lobby.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby, // TODO: Consider TryParse, just in case (and below). Although, we don't have fail logic anyway...
+                Color               = lobby.Data?.ContainsKey("Color") == true ? (LobbyColor) int.Parse(lobby.Data["Color"].Value) : LobbyColor.None
             };
 
-            Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>(); // TODO: So, right, why this?
+            Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>();
             foreach (var player in lobby.Players)
             {
                 // If we already know about this player and this player is already connected to Relay, don't overwrite things that Relay might be changing.
@@ -38,12 +39,14 @@ namespace LobbyRelaySample.lobby
 
                 // If the player isn't connected to Relay, or if we just don't know about them yet, get the most recent data that the lobby knows.
                 // (If we have no local representation of the player, that gets added by the LocalLobby.)
-                LobbyUser incomingData = new LobbyUser(); // TODO: This is unclear; this should be just a data object replacing that of the user, not a new user whose data are taken.
-                incomingData.IsHost = lobby.HostId.Equals(player.Id);
-                incomingData.DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : default;
-                incomingData.Emote       = player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : default;
-                incomingData.UserStatus  = player.Data?.ContainsKey("UserStatus") == true ? (UserStatus)int.Parse(player.Data["UserStatus"].Value) : UserStatus.Connecting;
-                incomingData.ID = player.Id;
+                LobbyUser incomingData = new LobbyUser
+                {
+                    IsHost = lobby.HostId.Equals(player.Id),
+                    DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : default,
+                    Emote       = player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : default,
+                    UserStatus  = player.Data?.ContainsKey("UserStatus") == true ? (UserStatus)int.Parse(player.Data["UserStatus"].Value) : UserStatus.Connecting,
+                    ID = player.Id
+                };
                 lobbyUsers.Add(incomingData.ID, incomingData);
             }
             outputToHere.CopyObserved(info, lobbyUsers);

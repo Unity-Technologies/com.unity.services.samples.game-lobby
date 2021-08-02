@@ -5,13 +5,15 @@ using UnityEngine;
 
 namespace LobbyRelaySample
 {
-    [Flags]
+    [Flags] // Some UI elements will want to specify multiple states in which to be active, so this is Flags.
     public enum LobbyState
     {
         Lobby = 1,
         CountDown = 2,
         InGame = 4
     }
+
+    public enum LobbyColor { None = 0, Orange = 1, Green = 2, Blue = 3 }
 
     /// <summary>
     /// A local wrapper around a lobby's remote data, with additional functionality for providing that data to UI elements and tracking local player objects.
@@ -32,6 +34,7 @@ namespace LobbyRelaySample
             public bool Private { get; set; }
             public int MaxPlayerCount { get; set; }
             public LobbyState State { get; set; }
+            public LobbyColor Color { get; set; }
 
             public LobbyData(LobbyData existing)
             {
@@ -42,6 +45,7 @@ namespace LobbyRelaySample
                 Private = existing.Private;
                 MaxPlayerCount = existing.MaxPlayerCount;
                 State = existing.State;
+                Color = existing.Color;
             }
 
             public LobbyData(string lobbyCode)
@@ -53,6 +57,7 @@ namespace LobbyRelaySample
                 Private = false;
                 MaxPlayerCount = -1;
                 State = LobbyState.Lobby;
+                Color = LobbyColor.None;
             }
         }
 
@@ -197,6 +202,16 @@ namespace LobbyRelaySample
             set
             {
                 m_data.MaxPlayerCount = value;
+                OnChanged(this);
+            }
+        }
+
+        public LobbyColor Color
+        {
+            get => m_data.Color;
+            set
+            {
+                m_data.Color = value;
                 OnChanged(this);
             }
         }

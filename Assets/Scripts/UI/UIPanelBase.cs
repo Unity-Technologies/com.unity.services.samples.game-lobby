@@ -12,7 +12,6 @@ namespace LobbyRelaySample.UI
     {
         [SerializeField]
         private UnityEvent<bool> m_onVisibilityChange;
-        [SerializeField]
         bool showing;
 
         CanvasGroup m_canvasGroup;

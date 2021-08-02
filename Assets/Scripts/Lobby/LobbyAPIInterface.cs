@@ -75,9 +75,9 @@ namespace LobbyRelaySample.lobby
             new InProgressRequest<Response>(task, onComplete);
         }
 
-        public static void QueryAllLobbiesAsync(Action<Response<QueryResponse>> onComplete)
+        public static void QueryAllLobbiesAsync(List<QueryFilter> filters, Action<Response<QueryResponse>> onComplete)
         {
-            QueryLobbiesRequest queryRequest = new QueryLobbiesRequest(new QueryRequest(count: k_maxLobbiesToShow));
+            QueryLobbiesRequest queryRequest = new QueryLobbiesRequest(new QueryRequest(count: k_maxLobbiesToShow, filter: filters));
             var task = LobbyService.LobbyApiClient.QueryLobbiesAsync(queryRequest);
             new InProgressRequest<Response<QueryResponse>>(task, onComplete);
         }

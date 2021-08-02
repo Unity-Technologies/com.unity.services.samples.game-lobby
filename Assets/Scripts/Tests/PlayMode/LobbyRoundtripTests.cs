@@ -62,7 +62,7 @@ namespace Test
             yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request, in case a previous test had one; Query requests can only occur at a rate of 1 per second.
             Response<QueryResponse> queryResponse = null;
             float timeout = 5;
-            LobbyAPIInterface.QueryAllLobbiesAsync((qr) => { queryResponse = qr; });
+            LobbyAPIInterface.QueryAllLobbiesAsync(new List<QueryFilter>(), (qr) => { queryResponse = qr; });
             while (queryResponse == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -89,7 +89,7 @@ namespace Test
             yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
             queryResponse = null;
             timeout = 5;
-            LobbyAPIInterface.QueryAllLobbiesAsync((qr) => { queryResponse = qr; });
+            LobbyAPIInterface.QueryAllLobbiesAsync(new List<QueryFilter>(), (qr) => { queryResponse = qr; });
             while (queryResponse == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -129,7 +129,7 @@ namespace Test
             yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
             Response<QueryResponse> queryResponseTwo = null;
             timeout = 5;
-            LobbyAPIInterface.QueryAllLobbiesAsync((qr) => { queryResponseTwo = qr; });
+            LobbyAPIInterface.QueryAllLobbiesAsync(new List<QueryFilter>(), (qr) => { queryResponseTwo = qr; });
             while (queryResponseTwo == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;

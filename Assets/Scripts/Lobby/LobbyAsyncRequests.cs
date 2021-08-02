@@ -124,9 +124,17 @@ namespace LobbyRelaySample
 
         /// <summary>Used for getting the list of all active lobbies, without needing full info for each.</summary>
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
-        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null)
+        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None)
         {
-            LobbyAPIInterface.QueryAllLobbiesAsync(OnLobbyListRetrieved);
+            List<QueryFilter> filters = new List<QueryFilter>();
+            if (limitToColor == LobbyColor.Orange)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Green)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Blue)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+
+            LobbyAPIInterface.QueryAllLobbiesAsync(filters, OnLobbyListRetrieved);
 
             void OnLobbyListRetrieved(Response<QueryResponse> response)
             {
@@ -197,7 +205,9 @@ namespace LobbyRelaySample
             Dictionary<string, DataObject> dataCurr = lobby.Data ?? new Dictionary<string, DataObject>();
             foreach (var dataNew in data)
             {
-                DataObject dataObj = new DataObject(visibility: DataObject.VisibilityOptions.Public, value: dataNew.Value); // Public so that when we request the list of lobbies, we can get info about them for filtering.
+                // Special case: We want to be able to filter on our color data, so we need to supply an arbitrary index to retrieve later. Uses N# for numerics, instead of S# for strings.
+                DataObject.IndexOptions index = dataNew.Key == "Color" ? DataObject.IndexOptions.N1 : 0;
+                DataObject dataObj = new DataObject(DataObject.VisibilityOptions.Public, dataNew.Value, index); // Public so that when we request the list of lobbies, we can get info about them for filtering.
                 if (dataCurr.ContainsKey(dataNew.Key))
                     dataCurr[dataNew.Key] = dataObj;
                 else
