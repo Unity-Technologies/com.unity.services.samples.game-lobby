@@ -425,7 +425,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.6
+  m_fontSize: 22.8
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -794,7 +794,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.6
+  m_fontSize: 22.8
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1896,10 +1896,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6554840528482635367, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_fontSize
-      value: 35.8
-      objectReference: {fileID: 0}
     - target: {fileID: 7315760059761538639, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1910,14 +1906,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7315760059761538639, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7522528203600751071, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_Size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7522528203600751071, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_Value
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7573825319354851387, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
@@ -1982,18 +1970,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8242294458145102565, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8770739503633793913, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_fontSize
-      value: 21.65
-      objectReference: {fileID: 0}
-    - target: {fileID: 9032799187230319547, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_Size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9032799187230319547, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_Value
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
