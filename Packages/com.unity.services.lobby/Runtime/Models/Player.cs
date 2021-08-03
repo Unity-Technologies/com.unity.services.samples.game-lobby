@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Unity.Services.Lobbies.Http;
 
 
 
@@ -11,7 +12,14 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// Information about a specific player creating, joining, or already in a lobby.
+    /// <param name="id">The unique identifier for the player.  If not provided for a create or join request it will be set to the id of the caller.</param>
+    /// <param name="connectionInfo">(TBD) Connection information for connecting to a relay with this player.</param>
+    /// <param name="data">Custom game-specific properties that apply to an individual player (e.g. &#x60;role&#x60; or &#x60;skill&#x60;).</param>
+    /// <param name="allocationId">An id that associates this player in this lobby with a persistent connection.  When a disconnect notification is recevied, this value is used to identify the associated player in a lobby to mark them as disconnected.</param>
+    /// <param name="joined">The time at which the player joined the lobby.</param>
+    /// <param name="lastUpdated">The last time the metadata for this player was updated.</param>
     /// </summary>
+
     [Preserve]
     [DataContract(Name = "Player")]
     public class Player
@@ -26,7 +34,7 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="joined">The time at which the player joined the lobby.</param>
         /// <param name="lastUpdated">The last time the metadata for this player was updated.</param>
         [Preserve]
-        public Player(string id = null, string connectionInfo = null, Dictionary<string, PlayerDataObject> data = null, string allocationId = null, DateTime joined = default(DateTime), DateTime lastUpdated = default(DateTime))
+        public Player(string id = default, string connectionInfo = default, Dictionary<string, PlayerDataObject> data = default, string allocationId = default, DateTime joined = default, DateTime lastUpdated = default)
         {
             Id = id;
             ConnectionInfo = connectionInfo;
@@ -36,6 +44,7 @@ namespace Unity.Services.Lobbies.Models
             LastUpdated = lastUpdated;
         }
 
+    
         /// <summary>
         /// The unique identifier for the player.  If not provided for a create or join request it will be set to the id of the caller.
         /// </summary>

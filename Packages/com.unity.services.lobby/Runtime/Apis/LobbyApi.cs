@@ -15,6 +15,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Create a lobby
             /// </summary>
             /// <param name="request">Request object for CreateLobby</param>
+            /// <param name="operationConfiguration">Configuration for CreateLobby</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> CreateLobbyAsync(CreateLobbyRequest request, Configuration operationConfiguration = null);
@@ -24,6 +25,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Delete a lobby
             /// </summary>
             /// <param name="request">Request object for DeleteLobby</param>
+            /// <param name="operationConfiguration">Configuration for DeleteLobby</param>
             /// <returns>Task for a Response object containing status code, headers</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response> DeleteLobbyAsync(DeleteLobbyRequest request, Configuration operationConfiguration = null);
@@ -33,15 +35,27 @@ namespace Unity.Services.Lobbies.Apis
             /// Get lobby details
             /// </summary>
             /// <param name="request">Request object for GetLobby</param>
+            /// <param name="operationConfiguration">Configuration for GetLobby</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> GetLobbyAsync(GetLobbyRequest request, Configuration operationConfiguration = null);
 
             /// <summary>
             /// Async Operation.
+            /// Heartbeat a lobby
+            /// </summary>
+            /// <param name="request">Request object for Heartbeat</param>
+            /// <param name="operationConfiguration">Configuration for Heartbeat</param>
+            /// <returns>Task for a Response object containing status code, headers</returns>
+            /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
+            Task<Response> HeartbeatAsync(HeartbeatRequest request, Configuration operationConfiguration = null);
+
+            /// <summary>
+            /// Async Operation.
             /// Join a lobby with lobby code
             /// </summary>
             /// <param name="request">Request object for JoinLobbyByCode</param>
+            /// <param name="operationConfiguration">Configuration for JoinLobbyByCode</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> JoinLobbyByCodeAsync(JoinLobbyByCodeRequest request, Configuration operationConfiguration = null);
@@ -51,6 +65,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Join a lobby with lobby ID
             /// </summary>
             /// <param name="request">Request object for JoinLobbyById</param>
+            /// <param name="operationConfiguration">Configuration for JoinLobbyById</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> JoinLobbyByIdAsync(JoinLobbyByIdRequest request, Configuration operationConfiguration = null);
@@ -60,6 +75,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Query public lobbies
             /// </summary>
             /// <param name="request">Request object for QueryLobbies</param>
+            /// <param name="operationConfiguration">Configuration for QueryLobbies</param>
             /// <returns>Task for a Response object containing status code, headers, and QueryResponse object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<QueryResponse>> QueryLobbiesAsync(QueryLobbiesRequest request, Configuration operationConfiguration = null);
@@ -69,6 +85,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Query available lobbies and join a random one
             /// </summary>
             /// <param name="request">Request object for QuickJoinLobby</param>
+            /// <param name="operationConfiguration">Configuration for QuickJoinLobby</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> QuickJoinLobbyAsync(QuickJoinLobbyRequest request, Configuration operationConfiguration = null);
@@ -78,6 +95,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Remove a player
             /// </summary>
             /// <param name="request">Request object for RemovePlayer</param>
+            /// <param name="operationConfiguration">Configuration for RemovePlayer</param>
             /// <returns>Task for a Response object containing status code, headers</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response> RemovePlayerAsync(RemovePlayerRequest request, Configuration operationConfiguration = null);
@@ -87,6 +105,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Update lobby data
             /// </summary>
             /// <param name="request">Request object for UpdateLobby</param>
+            /// <param name="operationConfiguration">Configuration for UpdateLobby</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> UpdateLobbyAsync(UpdateLobbyRequest request, Configuration operationConfiguration = null);
@@ -96,6 +115,7 @@ namespace Unity.Services.Lobbies.Apis
             /// Update player data
             /// </summary>
             /// <param name="request">Request object for UpdatePlayer</param>
+            /// <param name="operationConfiguration">Configuration for UpdatePlayer</param>
             /// <returns>Task for a Response object containing status code, headers, and Lobby object</returns>
             /// <exception cref="Unity.Services.Lobbies.Http.HttpException">An exception containing the HttpClientResponse with headers, response code, and string of error.</exception>
             Task<Response<Lobby>> UpdatePlayerAsync(UpdatePlayerRequest request, Configuration operationConfiguration = null);
@@ -118,9 +138,8 @@ namespace Unity.Services.Lobbies.Apis
         }
 
         public LobbyApiClient(IHttpClient httpClient,
-            TaskScheduler taskScheduler,
             IAccessToken accessToken,
-            Configuration configuration = null) : base(httpClient, taskScheduler)
+            Configuration configuration = null) : base(httpClient)
         {
             // We don't need to worry about the configuration being null at
             // this stage, we will check this in the accessor.
@@ -168,7 +187,7 @@ namespace Unity.Services.Lobbies.Apis
         public async Task<Response<Lobby>> GetLobbyAsync(GetLobbyRequest request,
             Configuration operationConfiguration = null)
         {
-            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { { "200", typeof(Lobby) },{ "403", typeof(ErrorStatus) },{ "404", typeof(ErrorStatus) } };
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { { "200", typeof(Lobby) },{ "400", typeof(ErrorStatus) },{ "403", typeof(ErrorStatus) },{ "404", typeof(ErrorStatus) } };
 
             // Merge the operation/request level configuration with the client level configuration.
             var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
@@ -181,6 +200,24 @@ namespace Unity.Services.Lobbies.Apis
 
             var handledResponse = ResponseHandler.HandleAsyncResponse<Lobby>(response, statusCodeToTypeMap);
             return new Response<Lobby>(response, handledResponse);
+        }
+
+        public async Task<Response> HeartbeatAsync(HeartbeatRequest request,
+            Configuration operationConfiguration = null)
+        {
+            var statusCodeToTypeMap = new Dictionary<string, System.Type>() { { "204", null },{ "400", typeof(ErrorStatus) },{ "403", typeof(ErrorStatus) },{ "404", typeof(ErrorStatus) } };
+
+            // Merge the operation/request level configuration with the client level configuration.
+            var finalConfiguration = Configuration.MergeConfigurations(operationConfiguration, Configuration);
+
+            var response = await HttpClient.MakeRequestAsync("POST",
+                request.ConstructUrl(finalConfiguration.BasePath),
+                request.ConstructBody(),
+                request.ConstructHeaders(_accessToken, finalConfiguration),
+                finalConfiguration.RequestTimeout);
+
+            ResponseHandler.HandleAsyncResponse(response, statusCodeToTypeMap);
+            return new Response(response);
         }
 
         public async Task<Response<Lobby>> JoinLobbyByCodeAsync(JoinLobbyByCodeRequest request,

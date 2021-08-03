@@ -76,13 +76,21 @@ namespace LobbyRelaySample
 
         #endregion
 
+        private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
+        {
+            Dictionary<string, PlayerDataObject> data = new Dictionary<string, PlayerDataObject>();
+            PlayerDataObject dataObjName = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, player.DisplayName);
+            data.Add("DisplayName", dataObjName);
+            return data;
+        }
+
         /// <summary>
         /// Attempt to create a new lobby and then join it.
         /// </summary>
-        public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, Action<Lobby> onSuccess, Action onFailure)
+        public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
-            LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, OnLobbyCreated);
+            LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, CreateInitialPlayerData(localUser), OnLobbyCreated);
 
             void OnLobbyCreated(Response<Lobby> response)
             {
@@ -97,13 +105,13 @@ namespace LobbyRelaySample
         }
 
         /// <summary>Attempt to join an existing lobby. Either ID xor code can be null.</summary>
-        public void JoinLobbyAsync(string lobbyId, string lobbyCode, Action<Lobby> onSuccess, Action onFailure)
+        public void JoinLobbyAsync(string lobbyId, string lobbyCode, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
             if (!string.IsNullOrEmpty(lobbyId))
-                LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, OnLobbyJoined);
+                LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, CreateInitialPlayerData(localUser), OnLobbyJoined);
             else
-                LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, OnLobbyJoined);
+                LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, CreateInitialPlayerData(localUser), OnLobbyJoined);
 
             void OnLobbyJoined(Response<Lobby> response)
             {
@@ -116,9 +124,17 @@ namespace LobbyRelaySample
 
         /// <summary>Used for getting the list of all active lobbies, without needing full info for each.</summary>
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
-        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null)
+        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None)
         {
-            LobbyAPIInterface.QueryAllLobbiesAsync(OnLobbyListRetrieved);
+            List<QueryFilter> filters = new List<QueryFilter>();
+            if (limitToColor == LobbyColor.Orange)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Green)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Blue)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+
+            LobbyAPIInterface.QueryAllLobbiesAsync(filters, OnLobbyListRetrieved);
 
             void OnLobbyListRetrieved(Response<QueryResponse> response)
             {
@@ -155,12 +171,7 @@ namespace LobbyRelaySample
             void OnLeftLobby(Response response)
             {
                 onComplete?.Invoke();
-
                 // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
-
-                // TEMP. As of 6/31/21, the lobbies service doesn't automatically delete emptied lobbies, though that functionality is expected in the near-term.
-                // Until then, we'll do a delete request whenever we leave, and if it's invalid, we'll just get a 403 back.
-                LobbyAPIInterface.DeleteLobbyAsync(lobbyId, null);
             }
         }
 
@@ -194,7 +205,9 @@ namespace LobbyRelaySample
             Dictionary<string, DataObject> dataCurr = lobby.Data ?? new Dictionary<string, DataObject>();
             foreach (var dataNew in data)
             {
-                DataObject dataObj = new DataObject(visibility: DataObject.VisibilityOptions.Public, value: dataNew.Value); // Public so that when we request the list of lobbies, we can get info about them for filtering.
+                // Special case: We want to be able to filter on our color data, so we need to supply an arbitrary index to retrieve later. Uses N# for numerics, instead of S# for strings.
+                DataObject.IndexOptions index = dataNew.Key == "Color" ? DataObject.IndexOptions.N1 : 0;
+                DataObject dataObj = new DataObject(DataObject.VisibilityOptions.Public, dataNew.Value, index); // Public so that when we request the list of lobbies, we can get info about them for filtering.
                 if (dataCurr.ContainsKey(dataNew.Key))
                     dataCurr[dataNew.Key] = dataObj;
                 else
@@ -216,6 +229,21 @@ namespace LobbyRelaySample
                 return false;
             }
             return true;
+        }
+
+        private float m_heartbeatTime = 0;
+        private const float k_heartbeatPeriod = 8; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+        /// <summary>
+        /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
+        /// </summary>
+        public void DoLobbyHeartbeat(float dt)
+        {
+            m_heartbeatTime += dt;
+            if (m_heartbeatTime > k_heartbeatPeriod)
+            { 
+                m_heartbeatTime -= k_heartbeatPeriod;
+                LobbyAPIInterface.HeartbeatPlayerAsync(m_lastKnownLobby.Id);
+            }
         }
     }
 }

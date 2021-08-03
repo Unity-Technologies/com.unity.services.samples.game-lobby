@@ -5,49 +5,15 @@ using UnityEngine;
 
 namespace LobbyRelaySample
 {
-    [Flags]
+    [Flags] // Some UI elements will want to specify multiple states in which to be active, so this is Flags.
     public enum LobbyState
     {
         Lobby = 1,
         CountDown = 2,
         InGame = 4
     }
-    
-    public struct LobbyInfo
-    {
-        public string LobbyID { get; set; }
-        public string LobbyCode { get; set; }
-        public string RelayCode { get; set; }
-        public string LobbyName { get; set; }
-        public bool Private { get; set; }
-        public int MaxPlayerCount { get; set; }
-        public LobbyState State { get; set; }
-        public long? AllPlayersReadyTime { get; set; }
-        
-        public LobbyInfo(LobbyInfo existing)
-        {
-            LobbyID = existing.LobbyID;
-            LobbyCode = existing.LobbyCode;
-            RelayCode = existing.RelayCode;
-            LobbyName = existing.LobbyName;
-            Private = existing.Private;
-            MaxPlayerCount = existing.MaxPlayerCount;
-            State = existing.State;
-            AllPlayersReadyTime = existing.AllPlayersReadyTime;
-        }
 
-        public LobbyInfo(string lobbyCode)
-        {
-            LobbyID = null;
-            LobbyCode = lobbyCode;
-            RelayCode = null;
-            LobbyName = null;
-            Private = false;
-            MaxPlayerCount = -1;
-            State = LobbyState.Lobby;
-            AllPlayersReadyTime = null;
-        }
-    }
+    public enum LobbyColor { None = 0, Orange = 1, Green = 2, Blue = 3 }
 
     /// <summary>
     /// A local wrapper around a lobby's remote data, with additional functionality for providing that data to UI elements and tracking local player objects.
@@ -59,10 +25,46 @@ namespace LobbyRelaySample
         public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
 
         #region LocalLobbyData
-        private LobbyInfo m_data;
-        public LobbyInfo Data
+        public struct LobbyData
         {
-            get { return new LobbyInfo(m_data); }
+            public string LobbyID { get; set; }
+            public string LobbyCode { get; set; }
+            public string RelayCode { get; set; }
+            public string LobbyName { get; set; }
+            public bool Private { get; set; }
+            public int MaxPlayerCount { get; set; }
+            public LobbyState State { get; set; }
+            public LobbyColor Color { get; set; }
+
+            public LobbyData(LobbyData existing)
+            {
+                LobbyID = existing.LobbyID;
+                LobbyCode = existing.LobbyCode;
+                RelayCode = existing.RelayCode;
+                LobbyName = existing.LobbyName;
+                Private = existing.Private;
+                MaxPlayerCount = existing.MaxPlayerCount;
+                State = existing.State;
+                Color = existing.Color;
+            }
+
+            public LobbyData(string lobbyCode)
+            {
+                LobbyID = null;
+                LobbyCode = lobbyCode;
+                RelayCode = null;
+                LobbyName = null;
+                Private = false;
+                MaxPlayerCount = -1;
+                State = LobbyState.Lobby;
+                Color = LobbyColor.None;
+            }
+        }
+
+        private LobbyData m_data;
+        public LobbyData Data
+        {
+            get { return new LobbyData(m_data); }
         }
 
         float m_CountDownTime;
@@ -73,18 +75,6 @@ namespace LobbyRelaySample
             set
             {
                 m_CountDownTime = value;
-                OnChanged(this);
-            }
-        }
-
-        DateTime m_TargetEndTime;
-
-        public DateTime TargetEndTime
-        {
-            get => m_TargetEndTime;
-            set
-            {
-                m_TargetEndTime = value;
                 OnChanged(this);
             }
         }
@@ -216,14 +206,22 @@ namespace LobbyRelaySample
             }
         }
 
-        public long? AllPlayersReadyTime => m_data.AllPlayersReadyTime;
+        public LobbyColor Color
+        {
+            get => m_data.Color;
+            set
+            {
+                m_data.Color = value;
+                OnChanged(this);
+            }
+        }
 
         /// <summary>
         /// Checks if we have n players that have the Status.
         /// -1 Count means you need all Lobbyusers
         /// </summary>
         /// <returns>True if enough players are of the input status.</returns>
-        public bool PlayersOfState(UserStatus status, int playersCount = -1)
+        public bool PlayersOfState(UserStatus status, int playersCount = -1) // TODO: Remove test-only API.
         {
             var statePlayers = m_LobbyUsers.Values.Count(user => user.UserStatus == status);
 
@@ -232,20 +230,20 @@ namespace LobbyRelaySample
             return statePlayers == playersCount;
         }
 
-        public void CopyObserved(LobbyInfo info, Dictionary<string, LobbyUser> oldUsers)
+        public void CopyObserved(LobbyData data, Dictionary<string, LobbyUser> currUsers)
         {
-            m_data = info;
-            if (oldUsers == null)
+            m_data = data;
+            if (currUsers == null)
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();
             else
             {
                 List<LobbyUser> toRemove = new List<LobbyUser>();
-                foreach (var user in m_LobbyUsers)
+                foreach (var oldUser in m_LobbyUsers)
                 {
-                    if (oldUsers.ContainsKey(user.Key))
-                        user.Value.CopyObserved(oldUsers[user.Key]);
+                    if (currUsers.ContainsKey(oldUser.Key))
+                        oldUser.Value.CopyObserved(currUsers[oldUser.Key]);
                     else
-                        toRemove.Add(user.Value);
+                        toRemove.Add(oldUser.Value);
                 }
 
                 foreach (var remove in toRemove)
@@ -253,16 +251,17 @@ namespace LobbyRelaySample
                     DoRemoveUser(remove);
                 }
 
-                foreach (var oldUser in oldUsers)
+                foreach (var currUser in currUsers)
                 {
-                    if (!m_LobbyUsers.ContainsKey(oldUser.Key))
-                        DoAddPlayer(oldUser.Value);
+                    if (!m_LobbyUsers.ContainsKey(currUser.Key))
+                        DoAddPlayer(currUser.Value);
                 }
             }
 
             OnChanged(this);
         }
 
+        // This ends up being called from the lobby list when we get data about a lobby without having joined it yet.
         public override void CopyObserved(LocalLobby oldObserved)
         {
             CopyObserved(oldObserved.Data, oldObserved.m_LobbyUsers);

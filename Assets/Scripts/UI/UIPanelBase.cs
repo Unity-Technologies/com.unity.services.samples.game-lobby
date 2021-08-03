@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,10 +12,18 @@ namespace LobbyRelaySample.UI
     {
         [SerializeField]
         private UnityEvent<bool> m_onVisibilityChange;
-        [SerializeField]
         bool showing;
 
         CanvasGroup m_canvasGroup;
+        List<UIPanelBase> m_uiPanelsInChildren = new List<UIPanelBase>(); // Otherwise, when this Shows/Hides, the children won't know to update their own visibility.
+
+        public void Start()
+        {
+            var children = GetComponentsInChildren<UIPanelBase>(true); // Note that this won't detect children in GameObjects added during gameplay, if there were any.
+            foreach (var child in children)
+                if (child != this)
+                    m_uiPanelsInChildren.Add(child);
+        }
 
         protected CanvasGroup MyCanvasGroup
         {
@@ -40,6 +49,8 @@ namespace LobbyRelaySample.UI
             MyCanvasGroup.blocksRaycasts = true;
             showing = true;
             m_onVisibilityChange?.Invoke(true);
+            foreach (UIPanelBase child in m_uiPanelsInChildren)
+                child.m_onVisibilityChange?.Invoke(true);
         }
 
         public void Hide()
@@ -49,6 +60,8 @@ namespace LobbyRelaySample.UI
             MyCanvasGroup.blocksRaycasts = false;
             showing = false;
             m_onVisibilityChange?.Invoke(false);
+            foreach (UIPanelBase child in m_uiPanelsInChildren)
+                child.m_onVisibilityChange?.Invoke(false);
         }
     }
 }

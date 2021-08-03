@@ -29,14 +29,13 @@ namespace Unity.Services.Lobbies
         public Task Initialize(CoreRegistry registry)
         {
             _gameObjectFactory = GameObjectFactory.CreateCoreSdkGameObject();
-            var scheduler = _gameObjectFactory.GetComponent<TaskScheduler>();
-            var httpClient = new HttpClient(scheduler);
+            var httpClient = new HttpClient();
             
             var accessTokenLobbyApi = registry.GetServiceComponent<IAccessToken>();
 
             if (accessTokenLobbyApi != null)
             {
-                LobbyService.LobbyApiClient = new LobbyApiClient(httpClient, scheduler, accessTokenLobbyApi);
+                LobbyService.LobbyApiClient = new LobbyApiClient(httpClient, accessTokenLobbyApi);
             }
             
             return Task.CompletedTask;

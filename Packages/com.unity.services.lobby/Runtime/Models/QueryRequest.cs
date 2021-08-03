@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Unity.Services.Lobbies.Http;
 
 
 
@@ -11,7 +12,14 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// The body of a Query request which defines how to sort and filter results, how many results to return, etc.
+    /// <param name="count">The number of results to return.</param>
+    /// <param name="skip">The number of results to skip before selecting results to return.</param>
+    /// <param name="sampleResults">Whether a random sample of results that match the search filter should be returned.</param>
+    /// <param name="filter">A list of filters which can be used to narrow down which lobbies to return.</param>
+    /// <param name="order">A list of orders which define how the results should be ordered in the response.</param>
+    /// <param name="continuationToken">A continuation token that can be passed to subsequent query requests to fetch the next page of results.</param>
     /// </summary>
+
     [Preserve]
     [DataContract(Name = "QueryRequest")]
     public class QueryRequest
@@ -26,7 +34,7 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="order">A list of orders which define how the results should be ordered in the response.</param>
         /// <param name="continuationToken">A continuation token that can be passed to subsequent query requests to fetch the next page of results.</param>
         [Preserve]
-        public QueryRequest(int? count = null, int? skip = null, bool sampleResults = false, List<QueryFilter> filter = default(List<QueryFilter>), List<QueryOrder> order = default(List<QueryOrder>), string continuationToken = null)
+        public QueryRequest(int? count = 10, int? skip = 0, bool sampleResults = false, List<QueryFilter> filter = default, List<QueryOrder> order = default, string continuationToken = default)
         {
             Count = count;
             Skip = skip;
@@ -36,6 +44,7 @@ namespace Unity.Services.Lobbies.Models
             ContinuationToken = continuationToken;
         }
 
+    
         /// <summary>
         /// The number of results to return.
         /// </summary>

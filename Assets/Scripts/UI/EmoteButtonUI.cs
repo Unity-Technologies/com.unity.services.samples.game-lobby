@@ -9,11 +9,11 @@ namespace LobbyRelaySample.UI
     public class EmoteButtonUI : MonoBehaviour
     {
         [SerializeField]
-        TMP_Text m_EmoteTextElement;
+        private EmoteType m_emoteType;
 
         public void SetPlayerEmote()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.UserSetEmote, m_EmoteTextElement.text);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.UserSetEmote, m_emoteType);
         }
     }
 }

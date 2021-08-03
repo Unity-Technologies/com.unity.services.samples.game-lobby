@@ -1,4 +1,5 @@
 using System.Threading;
+using UnityEditor;
 using UnityEngine;
 
 namespace Unity.Services.Lobbies.Scheduler
@@ -14,6 +15,9 @@ namespace Unity.Services.Lobbies.Scheduler
         private static System.Threading.Tasks.TaskScheduler _taskScheduler;
         private static int _mainThreadId;
 
+#if UNITY_EDITOR
+        [InitializeOnLoadMethod]
+#endif
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Init()
         {

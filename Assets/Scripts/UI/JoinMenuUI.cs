@@ -25,7 +25,7 @@ namespace LobbyRelaySample.UI
         Dictionary<string, LocalLobby> m_LocalLobby = new Dictionary<string, LocalLobby>();
 
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
-        LobbyInfo m_LocalLobbySelected;
+        LocalLobby.LobbyData m_LocalLobbySelected;
 
         public void LobbyButtonSelected(LocalLobby lobby)
         {
@@ -35,7 +35,7 @@ namespace LobbyRelaySample.UI
         public void OnJoinCodeInputFieldChanged(string newCode)
         {
             if (!string.IsNullOrEmpty(newCode))
-                m_LocalLobbySelected = new LobbyInfo(newCode.ToUpper());
+                m_LocalLobbySelected = new LocalLobby.LobbyData(newCode.ToUpper());
         }
 
         public void OnJoinButtonPressed()

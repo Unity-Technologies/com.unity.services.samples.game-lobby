@@ -21,8 +21,18 @@ namespace LobbyRelaySample.Relay
 
             private async void DoRequest(Task<T> task, Action<T> onComplete)
             {
-                T result = await task;
-                onComplete?.Invoke(result);
+                T result = default;
+                string currentTrace = System.Environment.StackTrace;
+                try {
+                    result = await task;
+                } catch (Exception e) {
+                    Exception eFull = new Exception($"Call stack before async call:\n{currentTrace}\n", e);
+                    throw eFull;
+                } finally {
+                    onComplete?.Invoke(result);
+                }
+
+                // TODO: Ensure that passing null as result is handled.
             }
         }
 
@@ -42,12 +52,12 @@ namespace LobbyRelaySample.Relay
         {
             AllocateAsync(maxConnections, a =>
             {
-                if (a.Status >= 200 && a.Status < 300)
+                if (a == null)
+                    Debug.LogError("Relay returned a null Allocation. It's possible the Relay service is currently down.");
+                else if (a.Status >= 200 && a.Status < 300)
                     onComplete?.Invoke(a.Result.Data.Allocation);
                 else
-                {
                     Debug.LogError($"Allocation returned a non Success code: {a.Status}");
-                }
             });
         }
 

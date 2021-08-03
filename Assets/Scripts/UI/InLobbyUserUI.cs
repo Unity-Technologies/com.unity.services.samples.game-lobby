@@ -46,7 +46,7 @@ namespace LobbyRelaySample.UI
         {
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
-            m_EmoteText.SetText(observed.Emote);
+            m_EmoteText.SetText(observed.Emote.GetString());
         }
 
         string SetStatusFancy(UserStatus status)
@@ -54,15 +54,15 @@ namespace LobbyRelaySample.UI
             switch (status)
             {
                 case UserStatus.Lobby:
-                    return "<color=#56B4E9>Lobby.</color>"; // Light Blue
+                    return "<color=#56B4E9>In Lobby</color>"; // Light Blue
                 case UserStatus.Ready:
-                    return "<color=#009E73>Ready!</color>"; // Light Mint
+                    return "<color=#009E73>Ready</color>"; // Light Mint
                 case UserStatus.Connecting:
-                    return "<color=#F0E442>Connecting.</color>"; // Bright Yellow
-                case UserStatus.Connected:
-                    return "<color=#005500>Connected.</color>"; //Orange
+                    return "<color=#F0E442>Connecting...</color>"; // Bright Yellow
+                case UserStatus.InGame:
+                    return "<color=#005500>In Game</color>"; // Green
                 default:
-                    return "<color=#56B4E9>In Lobby.</color>";
+                    return "";
             }
         }
     }

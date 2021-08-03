@@ -25,7 +25,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// Some objects might need to be on a slower update loop than the usual MonoBehaviour Update, e.g. to refresh data from services.
+    /// Some objects might need to be on a slower update loop than the usual MonoBehaviour Update and without precise timing, e.g. to refresh data from services.
     /// Some might also not want to be coupled to a Unity object at all but still need an update loop.
     /// </summary>
     public class UpdateSlow : MonoBehaviour, IUpdateSlow
@@ -80,7 +80,7 @@ namespace LobbyRelaySample
             while (m_updateTimer > effectivePeriod)
             {
                 m_updateTimer -= effectivePeriod;
-                OnUpdate(effectivePeriod);
+                OnUpdate(m_updatePeriod); // Using m_updatePeriod will be incorrect on the first update for a new subscriber, due to the staggering. However, we don't expect UpdateSlow subscribers to require precision, and this is less verbose than tracking per-subscriber.
             }
         }
 

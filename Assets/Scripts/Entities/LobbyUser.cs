@@ -9,11 +9,12 @@ namespace LobbyRelaySample
     [Flags]
     public enum UserStatus
     {
-        Lobby = 1,      // Connected to lobby, not ready yet
-        Ready = 4,      // User clicked ready (Note that 2 is missing; some flags have been removed over time, but we want any serialized values to be unaffected.)
-        Connecting = 8, // User sent join request through Relay
-        Connected = 16, // User connected through Relay
-        Menu = 32,      // User is in a menu, external to the lobby
+        None = 0,
+        Connecting = 1,   // User has joined a lobby but has not yet connected to Relay.
+        Lobby = 2,        // User is in a lobby and connected to Relay.
+        Ready = 4,        // User has selected the ready button, to ready for the "game" to start.
+        InGame = 8,       // User is part of a "game" that has started.
+        Menu = 16         // User is not in a lobby, in one of the main menus.
     }
 
     /// <summary>
@@ -22,96 +23,128 @@ namespace LobbyRelaySample
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, string emote = null, string userStatus = null)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu)
         {
-            m_isHost = isHost;
-            m_DisplayName = displayName;
-            m_ID = id;  
-            m_Emote = emote;
-            UserStatus status;
-            if (!string.IsNullOrEmpty(userStatus) && Enum.TryParse(userStatus, out status))
-                m_UserStatus = status;
+            m_data = new UserData(isHost, displayName, id, emote, userStatus);
         }
 
-        bool m_isHost;
+        #region Local UserData
+        public struct UserData
+        {
+            public bool IsHost { get; set; }
+            public string DisplayName { get; set; }
+            public string ID { get; set; }
+            public EmoteType Emote { get; set; }
+            public UserStatus UserStatus { get; set; }
+
+            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus)
+            {
+                IsHost = isHost;
+                DisplayName = displayName;
+                ID = id;
+                Emote = emote;
+                UserStatus = userStatus;
+            }
+        }
+
+        private UserData m_data;
+        public void ResetState()
+        {
+            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu); // ID and DisplayName should persist since this might be the local user.
+        }
+        #endregion
+
+        /// <summary>
+        /// Used for limiting costly OnChanged actions to just the members which actually changed.
+        /// </summary>
+        [Flags]
+        public enum UserMembers { IsHost = 1, DisplayName = 2, Emote = 4, ID = 8, UserStatus = 16 }
+        private UserMembers m_lastChanged;
+        public UserMembers LastChanged => m_lastChanged;
 
         public bool IsHost
         {
-            get { return m_isHost; }
+            get { return m_data.IsHost; }
             set
             {
-                if (m_isHost != value)
+                if (m_data.IsHost != value)
                 {
-                    m_isHost = value;
+                    m_data.IsHost = value;
+                    m_lastChanged = UserMembers.IsHost;
                     OnChanged(this);
                 }
             }
         }
-
-        string m_DisplayName = "";
 
         public string DisplayName
         {
-            get => m_DisplayName;
+            get => m_data.DisplayName;
             set
             {
-                if (m_DisplayName != value)
+                if (m_data.DisplayName != value)
                 {
-                    m_DisplayName = value;
+                    m_data.DisplayName = value;
+                    m_lastChanged = UserMembers.DisplayName;
                     OnChanged(this);
                 }
             }
         }
 
-        string m_Emote = "";
-
-        public string Emote
+        public EmoteType Emote
         {
-            get => m_Emote;
+            get => m_data.Emote;
             set
             {
-                if (m_Emote != value)
+                if (m_data.Emote != value)
                 {
-                    m_Emote = value;
+                    m_data.Emote = value;
+                    m_lastChanged = UserMembers.Emote;
                     OnChanged(this);
                 }
             }
         }
-
-        string m_ID = "";
 
         public string ID
         {
-            get => m_ID;
+            get => m_data.ID;
             set
             {
-                if (m_ID != value)
+                if (m_data.ID != value)
                 {
-                    m_ID = value;
+                    m_data.ID = value;
+                    m_lastChanged = UserMembers.ID;
                     OnChanged(this);
                 }
             }
         }
 
-        UserStatus m_UserStatus = UserStatus.Menu;
-
+        UserStatus m_userStatus = UserStatus.Menu;
         public UserStatus UserStatus
         {
-            get => m_UserStatus;
+            get => m_userStatus;
             set
             {
-                m_UserStatus = value;
+                m_userStatus = value;
+                m_lastChanged = UserMembers.UserStatus;
                 OnChanged(this);
             }
         }
 
-        public override void CopyObserved(LobbyUser oldObserved)
+        public override void CopyObserved(LobbyUser observed)
         {
-            m_DisplayName = oldObserved.m_DisplayName;
-            m_Emote = oldObserved.m_Emote;
-            m_ID = oldObserved.m_ID;
-            m_isHost = oldObserved.m_isHost;
-            m_UserStatus = oldObserved.m_UserStatus;
+            UserData data = observed.m_data;
+            int lastChanged = // Set flags just for the members that will be changed.
+                (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
+                (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
+                (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
+                (m_data.IsHost == data.IsHost ?           0 : (int)UserMembers.IsHost) |
+                (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus);
+            if (lastChanged == 0) // Ensure something actually changed.
+                return;
+
+            m_data = data;
+            m_lastChanged = (UserMembers)lastChanged;
+
             OnChanged(this);
         }
     }

@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Unity.Services.Lobbies.Http;
 
 
 
@@ -11,7 +12,11 @@ namespace Unity.Services.Lobbies.Models
 {
     /// <summary>
     /// Custom data property for a lobby.
+    /// <param name="value">The value of the custom property.  This property can be set to null or empty string.  If this property is indexed (by setting the &#x60;index&#x60; field) then the length of the value must be less than 128 bytes.</param>
+    /// <param name="visibility">Indicates for whom the property should be visible.  If &#x60;public&#x60;, the property will be visible to everyone and will be included in query results.  If &#x60;member&#x60; the data will only be visible to users who are members of the lobby (i.e. those who have successfully joined).  If &#x60;private&#x60;, the metadata will only be visible to the host.</param>
+    /// <param name="index">The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  If   You will not be prevented from indexing multiple objects having properties different with names but the same the same index, but you will likely receive unexpected results from a query.</param>
     /// </summary>
+
     [Preserve]
     [DataContract(Name = "DataObject")]
     public class DataObject
@@ -23,12 +28,20 @@ namespace Unity.Services.Lobbies.Models
         /// <param name="value">The value of the custom property.  This property can be set to null or empty string.  If this property is indexed (by setting the &#x60;index&#x60; field) then the length of the value must be less than 128 bytes.</param>
         /// <param name="index">The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  If   You will not be prevented from indexing multiple objects having properties different with names but the same the same index, but you will likely receive unexpected results from a query.</param>
         [Preserve]
-        public DataObject(VisibilityOptions visibility, string value = null, IndexOptions index = default)
+        public DataObject(VisibilityOptions visibility, string value = default, IndexOptions index = default)
         {
-            Visibility = visibility;
             Value = value;
+            Visibility = visibility;
             Index = index;
         }
+
+    
+        /// <summary>
+        /// The value of the custom property.  This property can be set to null or empty string.  If this property is indexed (by setting the &#x60;index&#x60; field) then the length of the value must be less than 128 bytes.
+        /// </summary>
+        [Preserve]
+        [DataMember(Name = "value", EmitDefaultValue = false)]
+        public string Value{ get; }
 
         /// <summary>
         /// Indicates for whom the property should be visible.  If &#x60;public&#x60;, the property will be visible to everyone and will be included in query results.  If &#x60;member&#x60; the data will only be visible to users who are members of the lobby (i.e. those who have successfully joined).  If &#x60;private&#x60;, the metadata will only be visible to the host.
@@ -39,25 +52,19 @@ namespace Unity.Services.Lobbies.Models
         public VisibilityOptions Visibility{ get; }
 
         /// <summary>
-        /// The value of the custom property.  This property can be set to null or empty string.  If this property is indexed (by setting the &#x60;index&#x60; field) then the length of the value must be less than 128 bytes.
-        /// </summary>
-        [Preserve]
-        [DataMember(Name = "value", EmitDefaultValue = false)]
-        public string Value{ get; }
-
-        /// <summary>
         /// The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  If   You will not be prevented from indexing multiple objects having properties different with names but the same the same index, but you will likely receive unexpected results from a query.
         /// </summary>
         [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
         [DataMember(Name = "index", EmitDefaultValue = false)]
         public IndexOptions Index{ get; }
-
+    
 
         /// <summary>
         /// Indicates for whom the property should be visible.  If &#x60;public&#x60;, the property will be visible to everyone and will be included in query results.  If &#x60;member&#x60; the data will only be visible to users who are members of the lobby (i.e. those who have successfully joined).  If &#x60;private&#x60;, the metadata will only be visible to the host.
         /// </summary>
         /// <value>Indicates for whom the property should be visible.  If &#x60;public&#x60;, the property will be visible to everyone and will be included in query results.  If &#x60;member&#x60; the data will only be visible to users who are members of the lobby (i.e. those who have successfully joined).  If &#x60;private&#x60;, the metadata will only be visible to the host.</value>
+        [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
         public enum VisibilityOptions
         {
@@ -86,6 +93,7 @@ namespace Unity.Services.Lobbies.Models
         /// The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  If   You will not be prevented from indexing multiple objects having properties different with names but the same the same index, but you will likely receive unexpected results from a query.
         /// </summary>
         /// <value>The name of the column to index this property value under, either &#x60;S#&#x60; for strings or &#x60;N#&#x60; for numeric values.  If an index is specified on a property, then you can use that index name in a &#x60;QueryFilter&#x60; to filter results by that property.  If   You will not be prevented from indexing multiple objects having properties different with names but the same the same index, but you will likely receive unexpected results from a query.</value>
+        [Preserve]
         [JsonConverter(typeof(StringEnumConverter))]
         public enum IndexOptions
         {
@@ -153,3 +161,4 @@ namespace Unity.Services.Lobbies.Models
 
     }
 }
+
