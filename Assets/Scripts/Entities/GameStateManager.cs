@@ -321,10 +321,7 @@ namespace LobbyRelaySample
         IEnumerator LeaveBeforeQuit()
         {
             ForceLeaveAttempt();
-
-            // TEMP: Since we're temporarily (as of 6/31/21) deleting empty lobbies when we leave them manually, we'll delay longer to ensure that happens.
-            //yield return null;
-            yield return new WaitForSeconds(0.5f);
+            yield return null;
             Application.Quit();
         }
     }
