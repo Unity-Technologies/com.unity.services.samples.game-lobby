@@ -73,6 +73,8 @@ namespace LobbyRelaySample.Relay
         protected override void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // TODO: If a client disconnects, see if remaining players are all already ready.
+            // TEMP logging
+            UnityEngine.Debug.LogError("Client disconnected!");
         }
 
         public void OnReceiveMessage(MessageType type, object msg)

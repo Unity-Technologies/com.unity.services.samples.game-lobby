@@ -52,6 +52,7 @@ namespace LobbyRelaySample
         public void EndTracking()
         {
             m_currentLobbyId = null;
+            m_lastKnownLobby = null;
         }
 
         private void UpdateLobby(float unused)
@@ -178,10 +179,10 @@ namespace LobbyRelaySample
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
         public void UpdatePlayerDataAsync(Dictionary<string, string> data, Action onComplete)
         {
-            if (!ShouldUpdateData(() => { UpdatePlayerDataAsync(data, onComplete); }, onComplete))
+            if (!ShouldUpdateData(() => { UpdatePlayerDataAsync(data, onComplete); }, onComplete, false))
                 return;
 
-            Lobby lobby = m_lastKnownLobby;
+            string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             Dictionary<string, PlayerDataObject> dataCurr = new Dictionary<string, PlayerDataObject>();
             foreach (var dataNew in data)
             {
@@ -192,13 +193,22 @@ namespace LobbyRelaySample
                     dataCurr.Add(dataNew.Key, dataObj);
             }
 
-            LobbyAPIInterface.UpdatePlayerAsync(lobby.Id, Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id"), dataCurr, (r) => { onComplete?.Invoke(); });
+            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, dataCurr, (r) => { onComplete?.Invoke(); }, null, null);
+        }
+
+        /// <summary>Lobby can be provided info about Relay (or any other remote allocation) so it can add automatic disconnect handling.</summary>
+        public void UpdatePlayerRelayInfoAsync(string allocationId, string connectionInfo, Action onComplete)
+        {
+            if (!ShouldUpdateData(() => { UpdatePlayerRelayInfoAsync(allocationId, connectionInfo, onComplete); }, onComplete, true)) // Do retry here since the RelayUtpSetup that called this might be destroyed right after this.
+                return;
+            string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
+            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, new Dictionary<string, PlayerDataObject>(), (r) => { onComplete?.Invoke(); }, allocationId, connectionInfo);
         }
 
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
         public void UpdateLobbyDataAsync(Dictionary<string, string> data, Action onComplete)
         {
-            if (!ShouldUpdateData(() => { UpdateLobbyDataAsync(data, onComplete); }, onComplete))
+            if (!ShouldUpdateData(() => { UpdateLobbyDataAsync(data, onComplete); }, onComplete, false))
                 return;
 
             Lobby lobby = m_lastKnownLobby;
@@ -217,7 +227,11 @@ namespace LobbyRelaySample
             LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (r) => { onComplete?.Invoke(); });
         }
 
-        private bool ShouldUpdateData(Action caller, Action onComplete)
+        /// <summary>
+        /// If we are in the middle of another operation, hold onto any pending ones until after that.
+        /// If we aren't in a lobby yet, leave it to the caller to decide what to do, since some callers might need to retry and others might not.
+        /// </summary>
+        private bool ShouldUpdateData(Action caller, Action onComplete, bool shouldRetryIfLobbyNull)
         {
             if (m_isMidRetrieve)
             {   m_pendingOperations.Enqueue(caller);
@@ -225,7 +239,10 @@ namespace LobbyRelaySample
             }
             Lobby lobby = m_lastKnownLobby;
             if (lobby == null)
-            {   onComplete?.Invoke();
+            {
+                if (shouldRetryIfLobbyNull)
+                    m_pendingOperations.Enqueue(caller);
+                onComplete?.Invoke();
                 return false;
             }
             return true;

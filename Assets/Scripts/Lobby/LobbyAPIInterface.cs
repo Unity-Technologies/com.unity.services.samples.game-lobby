@@ -98,10 +98,12 @@ namespace LobbyRelaySample.lobby
             new InProgressRequest<Response<Lobby>>(task, onComplete);
         }
 
-        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Response<Lobby>> onComplete)
+        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Response<Lobby>> onComplete, string allocationId, string connectionInfo)
         {
             UpdatePlayerRequest updateRequest = new UpdatePlayerRequest(lobbyId, playerId, new PlayerUpdateRequest(
-                data: data
+                data: data,
+                allocationId: allocationId,
+                connectionInfo: connectionInfo
             ));
             var task = LobbyService.LobbyApiClient.UpdatePlayerAsync(updateRequest);
             new InProgressRequest<Response<Lobby>>(task, onComplete);

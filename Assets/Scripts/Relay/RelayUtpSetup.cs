@@ -24,7 +24,7 @@ namespace LobbyRelaySample.Relay
         protected LobbyUser m_localUser;
         protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
-        public enum MsgType { NewPlayer = 0, Ping = 1, ReadyState = 2, PlayerName = 3, Emote = 4, StartCountdown = 5, CancelCountdown = 6, ConfirmInGame = 7, EndInGame = 8 }
+        public enum MsgType { NewPlayer = 0, Ping, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame }
 
         public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser, Action<bool, RelayUtpClient> onJoinComplete)
         {
@@ -101,6 +101,7 @@ namespace LobbyRelaySample.Relay
         [Flags]
         private enum JoinState { None = 0, Bound = 1, Joined = 2 }
         private JoinState m_joinState = JoinState.None;
+        private Allocation m_allocation;
 
         protected override void JoinRelay()
         {
@@ -109,6 +110,7 @@ namespace LobbyRelaySample.Relay
 
         private void OnAllocation(Allocation allocation)
         {
+            m_allocation = allocation;
             RelayInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
             BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16);
         }
@@ -116,12 +118,7 @@ namespace LobbyRelaySample.Relay
         private void OnRelayCode(string relayCode)
         {
             m_localLobby.RelayCode = relayCode;
-            RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
-        }
-
-        private void OnJoin(JoinAllocation joinAllocation)
-        {
-            m_localLobby.RelayServer = new ServerAddress(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port);
+            m_localLobby.RelayServer = new ServerAddress(m_allocation.RelayServer.IpV4, m_allocation.RelayServer.Port);
             m_joinState |= JoinState.Joined;
             CheckForComplete();
         }
@@ -149,12 +146,15 @@ namespace LobbyRelaySample.Relay
                 RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
                 host.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
                 m_onJoinComplete(true, host);
+                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
             }
         }
     }
 
     public class RelayUtpSetupClient : RelayUtpSetup
     {
+        private JoinAllocation m_allocation;
+
         protected override void JoinRelay()
         {
             m_localLobby.onChanged += OnLobbyChange;
@@ -173,6 +173,7 @@ namespace LobbyRelaySample.Relay
         {
             if (allocation == null)
                 return;
+            m_allocation = allocation;
             BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key, 1);
             m_localLobby.RelayServer = new ServerAddress(allocation.RelayServer.IpV4, allocation.RelayServer.Port);
         }
@@ -201,6 +202,7 @@ namespace LobbyRelaySample.Relay
                 RelayUtpClient watcher = gameObject.AddComponent<RelayUtpClient>();
                 watcher.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
                 m_onJoinComplete(true, watcher);
+                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
             }
         }
     }
