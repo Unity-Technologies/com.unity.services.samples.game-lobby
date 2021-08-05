@@ -12,6 +12,8 @@ namespace Test
     /// <summary>
     /// Accesses the Authentication and Relay services in order to ensure we can connect to Relay and retrieve a join code.
     /// RelayUtp* wraps the Relay API, so go through that in practice. This simply ensures the connection to the Lobby service is functional.
+    ///
+    /// If the tests pass, you can assume you are connecting to the Relay service itself properly.
     /// </summary>
     public class RelayRoundTripTests
     {

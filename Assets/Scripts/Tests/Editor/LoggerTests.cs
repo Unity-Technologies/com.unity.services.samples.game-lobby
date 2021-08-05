@@ -1,9 +1,10 @@
+using LobbyRelaySample;
 using System;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace LobbyRelaySample.Tests
+namespace Test
 {
     /// <summary>
     /// Tests of the LogHandler overriding debug logging.

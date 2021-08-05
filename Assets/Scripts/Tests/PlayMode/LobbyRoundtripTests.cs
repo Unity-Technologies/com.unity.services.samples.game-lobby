@@ -13,6 +13,8 @@ namespace Test
     /// <summary>
     /// Accesses the Authentication and Lobby services in order to ensure lobbies can be created and deleted.
     /// LobbyAsyncRequests wraps the Lobby API, so go through that in practice. This simply ensures the connection to the Lobby service is functional.
+    ///
+    /// If the tests pass, you can assume you are connecting to the Lobby service itself properly.
     /// </summary>
     public class LobbyRoundtripTests
     {

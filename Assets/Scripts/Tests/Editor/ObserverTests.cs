@@ -1,9 +1,10 @@
+using LobbyRelaySample;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
 
-namespace LobbyRelaySample.Tests
+namespace Test
 {
     public class ObserverTests
     {
