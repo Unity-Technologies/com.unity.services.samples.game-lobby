@@ -7,8 +7,11 @@ namespace LobbyRelaySample.Tests
 {
     public class ObserverTests
     {
+        /// <summary>
+        /// When an observed value changes, the Observer should automatically update.
+        /// </summary>
         [UnityTest]
-        public IEnumerator ObserverChangeWhenObservedChanged() // Test if Observer changes when StringField gets set
+        public IEnumerator ObserverChangeWhenObservedChanged()
         {
             var observed = new TestObserved();
             var observer = new GameObject("PlayerObserver").AddComponent<TestObserverBehaviour>();
@@ -23,11 +26,15 @@ namespace LobbyRelaySample.Tests
             Assert.AreEqual(observed.StringField, observer.displayStringField);
         }
 
+        /// <summary>
+        /// When an Observer is registered, it should receive the observed field's initial value.
+        /// </summary>
+        /// <returns></returns>
         [UnityTest]
-        public IEnumerator ObserverRegistersInitialChanges() // Test if Observer changes on Initialization
+        public IEnumerator ObserverRegistersInitialChanges()
         {
             var observed = new TestObserved();
-            observed.StringField = "NewName"; // Set the field before we begin observing
+            observed.StringField = "NewName";
 
             var observer = new GameObject("PlayerObserver").AddComponent<TestObserverBehaviour>();
             Assert.AreNotEqual(observed.StringField, observer.displayStringField);
@@ -38,7 +45,8 @@ namespace LobbyRelaySample.Tests
             Assert.AreEqual(observed.StringField, observer.displayStringField);
         }
 
-        class TestObserved : Observed<TestObserved>
+        // We just have a couple Observers that update some arbitrary member, in this case a string.
+        private class TestObserved : Observed<TestObserved>
         {
             string m_stringField;
 
@@ -59,8 +67,7 @@ namespace LobbyRelaySample.Tests
             }
         }
 
-        //Mock UI Observer
-        class TestObserverBehaviour : ObserverBehaviour<TestObserved>
+        private class TestObserverBehaviour : ObserverBehaviour<TestObserved>
         {
             public string displayStringField;
 

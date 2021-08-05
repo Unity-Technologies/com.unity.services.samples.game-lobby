@@ -6,21 +6,17 @@ using UnityEngine.TestTools;
 
 public class MessengerTests
 {
+    /// <summary>Trivial message recipient that will run some action on any message.</summary>
     private class Subscriber : IReceiveMessages
     {
         private Action m_thingToDo;
-
-        public Subscriber(Action thingToDo)
-        {
-            m_thingToDo = thingToDo;
-        }
-
-        public void OnReceiveMessage(MessageType type, object msg)
-        {
-            m_thingToDo?.Invoke();
-        }
+        public Subscriber(Action thingToDo) { m_thingToDo = thingToDo; }
+        public void OnReceiveMessage(MessageType type, object msg) { m_thingToDo?.Invoke(); }
     }
 
+    /// <summary>
+    /// If a message recipient takes a long time to process a message, we want to be made aware.
+    /// </summary>
     [Test]
     public void WhatIfAMessageIsVerySlow()
     {
