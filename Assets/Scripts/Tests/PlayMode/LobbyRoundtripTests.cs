@@ -11,8 +11,10 @@ using LobbyAPIInterface = LobbyRelaySample.lobby.LobbyAPIInterface;
 namespace Test
 {
     /// <summary>
-    /// Hits the Authentication and Lobbies services in order to ensure lobbies can be created and deleted.
-    /// The actual code accessing lobbies should go through LobbyAsyncRequests. This serves to ensure the connection to the Lobby service is functional.
+    /// Accesses the Authentication and Lobby services in order to ensure lobbies can be created and deleted.
+    /// LobbyAsyncRequests wraps the Lobby API, so go through that in practice. This simply ensures the connection to the Lobby service is functional.
+    ///
+    /// If the tests pass, you can assume you are connecting to the Lobby service itself properly.
     /// </summary>
     public class LobbyRoundtripTests
     {
@@ -46,9 +48,13 @@ namespace Test
             LogAssert.ignoreFailingMessages = false;
         }
 
+        /// <summary>
+        /// Make sure the entire roundtrip for Lobby works: Once signed in, create a lobby, query to make sure it exists, then delete it.
+        /// </summary>
         [UnityTest]
         public IEnumerator DoRoundtrip()
         {
+            #region Setup
             LogAssert.ignoreFailingMessages = true; // Not sure why, but when auth logs in, it sometimes generates an error: "A Native Collection has not been disposed[...]." We don't want this to cause test failures, since in practice it *seems* to not negatively impact behavior.
 
             // Wait a reasonable amount of time for sign-in to complete.
@@ -70,6 +76,7 @@ namespace Test
             Assert.Greater(timeout, 0, "Timeout check (query #0)");
             Assert.IsTrue(queryResponse.Status >= 200 && queryResponse.Status < 300, "QueryAllLobbiesAsync should return a success code. (#0)");
             int numLobbiesIni = queryResponse.Result.Results?.Count ?? 0;
+            #endregion
 
             // Create a test lobby.
             Response<Lobby> createResponse = null;
@@ -143,6 +150,9 @@ namespace Test
             LogAssert.ignoreFailingMessages = false;
         }
 
+        /// <summary>
+        /// If the Lobby create call fails, we want to ensure we call onComplete so we can act on the failure.
+        /// </summary>
         [UnityTest]
         public IEnumerator OnCompletesOnFailure()
         {

@@ -33,7 +33,7 @@ namespace LobbyRelaySample.lobby
             }
         }
 
-        private const int k_maxLobbiesToShow = 64;
+        private const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, PlayerDataObject> localUserData, Action<Response<Lobby>> onComplete)
         {

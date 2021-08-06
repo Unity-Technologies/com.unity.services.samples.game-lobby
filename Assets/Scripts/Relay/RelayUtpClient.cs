@@ -6,7 +6,7 @@ using MsgType = LobbyRelaySample.Relay.RelayUtpSetup.MsgType;
 namespace LobbyRelaySample.Relay
 {
     /// <summary>
-    /// This will handle observing the local player and updating remote players over Relay when there are local changes.
+    /// This observes the local player and updates remote players over Relay when there are local changes, demonstrating basic data transfer over the Unity Transport (UTP).
     /// Created after the connection to Relay has been confirmed.
     /// </summary>
     public class RelayUtpClient : MonoBehaviour // This is a MonoBehaviour merely to have access to Update.
@@ -86,7 +86,7 @@ namespace LobbyRelaySample.Relay
             {
                 MsgType msgType = (MsgType)strm.ReadByte();
                 string id = ReadLengthAndString(ref strm);
-                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // TODO: Do we want to hold onto the message if the user isn't present *now* in case they're pending?
+                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // We don't hold onto messages, since an incoming user will be fully initialized before they send events.
                     return;
 
                 if (msgType == MsgType.PlayerName)
@@ -142,6 +142,7 @@ namespace LobbyRelaySample.Relay
 
         private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
         {
+            WriteByte(driver, connection, m_localUser.ID, MsgType.NewPlayer, 0);
             ForceFullUserUpdate(driver, connection, m_localUser); // Assuming this is only created after the Relay connection is successful.
             m_hasSentInitialMessage = true;
         }
@@ -158,14 +159,14 @@ namespace LobbyRelaySample.Relay
         }
         protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
         {
-            // TODO: Write full state in one message?
+            // Note that it would be better to send a single message with the full state, but for the sake of shorter code we'll leave that out here.
             WriteString(driver, connection, user.ID, MsgType.PlayerName, user.DisplayName);
             WriteByte(driver, connection, user.ID, MsgType.Emote, (byte)user.Emote);
             WriteByte(driver, connection, user.ID, MsgType.ReadyState, (byte)user.UserStatus);
         }
 
         /// <summary>
-        /// Write string data as: [1 byte: msgType][1 byte: id length N][N bytes: id][1 byte: string length M][M bytes: string]
+        /// Write string data as: [1 byte: msgType] [1 byte: id length N] [N bytes: id] [1 byte: string length M] [M bytes: string]
         /// </summary>
         protected void WriteString(NetworkDriver driver, NetworkConnection connection, string id, MsgType msgType, string str)
         {
@@ -194,7 +195,7 @@ namespace LobbyRelaySample.Relay
         }
 
         /// <summary>
-        /// Write byte data as: [1 byte: msgType][1 byte: id length N][N bytes: id][1 byte: data]
+        /// Write byte data as: [1 byte: msgType] [1 byte: id length N] [N bytes: id] [1 byte: data]
         /// </summary>
         protected void WriteByte(NetworkDriver driver, NetworkConnection connection, string id, MsgType msgType, byte value)
         {
