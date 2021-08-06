@@ -96,6 +96,9 @@ namespace LobbyRelaySample.Relay
         #endregion
     }
 
+    /// <summary>
+    /// Host logic: Request a new Allocation, and then both bind to it and request a join code. Once those are both complete, supply data back to the lobby.
+    /// </summary>
     public class RelayUtpSetupHost : RelayUtpSetup
     {
         [Flags]
@@ -105,13 +108,13 @@ namespace LobbyRelaySample.Relay
 
         protected override void JoinRelay()
         {
-            RelayInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnAllocation);
+            RelayAPIInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnAllocation);
         }
 
         private void OnAllocation(Allocation allocation)
         {
             m_allocation = allocation;
-            RelayInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
+            RelayAPIInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
             BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16);
         }
 
@@ -151,6 +154,10 @@ namespace LobbyRelaySample.Relay
         }
     }
 
+    /// <summary>
+    /// Client logic: Wait until the join code is retrieved from the lobby's shared data. Then, use that code to get the Allocation to bind to, and
+    /// then create a connection to the host.
+    /// </summary>
     public class RelayUtpSetupClient : RelayUtpSetup
     {
         private JoinAllocation m_allocation;
@@ -164,7 +171,7 @@ namespace LobbyRelaySample.Relay
         {
             if (m_localLobby.RelayCode != null)
             {
-                RelayInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
+                RelayAPIInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
                 m_localLobby.onChanged -= OnLobbyChange;
             }
         }

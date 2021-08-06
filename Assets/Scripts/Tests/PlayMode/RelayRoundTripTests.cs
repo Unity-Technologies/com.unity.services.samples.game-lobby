@@ -50,7 +50,7 @@ namespace Test
             // Allocation
             float timeout = 5;
             Allocation allocation = null;
-            RelayInterface.AllocateAsync(4, (a) => { allocation = a; });
+            RelayAPIInterface.AllocateAsync(4, (a) => { allocation = a; });
             while (allocation == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -67,7 +67,7 @@ namespace Test
             // Join code retrieval
             timeout = 5;
             string joinCode = null;
-            RelayInterface.GetJoinCodeAsync(allocationId, (j) => { joinCode = j; });
+            RelayAPIInterface.GetJoinCodeAsync(allocationId, (j) => { joinCode = j; });
             while (joinCode == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
@@ -78,7 +78,7 @@ namespace Test
             // Joining with the join code
             timeout = 5;
             Response<JoinResponseBody> joinResponse = null;
-            RelayInterface.JoinAsync(joinCode, (j) => { joinResponse = j; });
+            RelayAPIInterface.JoinAsync(joinCode, (j) => { joinResponse = j; });
             while (joinResponse == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;

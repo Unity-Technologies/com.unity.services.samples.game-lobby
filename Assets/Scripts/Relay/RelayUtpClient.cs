@@ -47,7 +47,7 @@ namespace LobbyRelaySample.Relay
                 DoUserUpdate(m_networkDriver, conn, m_localUser);
         }
 
-        public void Update()
+        private void Update()
         {
             OnUpdate();
         }
@@ -80,6 +80,7 @@ namespace LobbyRelaySample.Relay
             }
         }
 
+        // See the Write* methods for the expected event format.
         private void ProcessNetworkEvent(NetworkConnection conn, DataStreamReader strm, NetworkEvent.Type cmd)
         {
             if (cmd == NetworkEvent.Type.Data)
@@ -120,7 +121,6 @@ namespace LobbyRelaySample.Relay
         }
 
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id) { }
-
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
@@ -129,6 +129,9 @@ namespace LobbyRelaySample.Relay
             Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
         }
 
+        /// <summary>
+        /// Relay uses raw pointers for efficiency. This converts them to byte arrays, assuming the stream contents are 1 byte for array length followed by contents.
+        /// </summary>
         unsafe private string ReadLengthAndString(ref DataStreamReader strm)
         {
             byte length = strm.ReadByte();
@@ -140,6 +143,9 @@ namespace LobbyRelaySample.Relay
             return System.Text.Encoding.UTF8.GetString(bytes);
         }
 
+        /// <summary>
+        /// Once a client is connected, send a message out alerting the host.
+        /// </summary>
         private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
         {
             WriteByte(driver, connection, m_localUser.ID, MsgType.NewPlayer, 0);
@@ -147,6 +153,9 @@ namespace LobbyRelaySample.Relay
             m_hasSentInitialMessage = true;
         }
 
+        /// <summary>
+        /// When player data is updated, send out events for just the data that actually changed.
+        /// </summary>
         private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
         {
             // Only update with actual changes. (If multiple change at once, we send messages for each separately, but that shouldn't happen often.)
@@ -157,6 +166,9 @@ namespace LobbyRelaySample.Relay
             if (0 < (user.LastChanged & LobbyUser.UserMembers.UserStatus))
                 WriteByte(driver, connection, user.ID, MsgType.ReadyState, (byte)user.UserStatus);
         }
+        /// <summary>
+        /// Sometimes (e.g. when a new player joins), we need to send out the full current state of this player.
+        /// </summary>
         protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
         {
             // Note that it would be better to send a single message with the full state, but for the sake of shorter code we'll leave that out here.

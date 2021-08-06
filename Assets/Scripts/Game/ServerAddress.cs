@@ -1,9 +1,7 @@
-using UnityEngine;
-
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// This is where your netcode would go, if you had it.
+    /// Just for displaying the anonymous Relay IP.
     /// </summary>
     public class ServerAddress
     {
@@ -14,7 +12,6 @@ namespace LobbyRelaySample
         {
             m_IP = ip;
             m_Port = port;
-            Debug.Log($"Connected To Game Server: {ip}:{port}");
         }
 
         public override string ToString()

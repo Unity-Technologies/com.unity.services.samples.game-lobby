@@ -6,24 +6,6 @@ namespace LobbyRelaySample
 {
     public delegate void UpdateMethod(float dt);
 
-    public interface IUpdateSlow : IProvidable<IUpdateSlow>
-    {
-        void OnUpdate(float dt);
-        void Subscribe(UpdateMethod onUpdate);
-        void Unsubscribe(UpdateMethod onUpdate);
-    }
-
-    /// <summary>
-    /// A default implementation.
-    /// </summary>
-    public class UpdateSlowNoop : IUpdateSlow
-    {
-        public void OnUpdate(float dt) { }
-        public void Subscribe(UpdateMethod onUpdate) { }
-        public void Unsubscribe(UpdateMethod onUpdate) { }
-        public void OnReProvided(IUpdateSlow prev) { }
-    }
-
     /// <summary>
     /// Some objects might need to be on a slower update loop than the usual MonoBehaviour Update and without precise timing, e.g. to refresh data from services.
     /// Some might also not want to be coupled to a Unity object at all but still need an update loop.
@@ -135,4 +117,23 @@ namespace LobbyRelaySample
                 m_subscribers.AddRange((prevUpdateSlow as UpdateSlow).m_subscribers);
         }
     }
+
+    public interface IUpdateSlow : IProvidable<IUpdateSlow>
+    {
+        void OnUpdate(float dt);
+        void Subscribe(UpdateMethod onUpdate);
+        void Unsubscribe(UpdateMethod onUpdate);
+    }
+
+    /// <summary>
+    /// A default implementation.
+    /// </summary>
+    public class UpdateSlowNoop : IUpdateSlow
+    {
+        public void OnUpdate(float dt) { }
+        public void Subscribe(UpdateMethod onUpdate) { }
+        public void Unsubscribe(UpdateMethod onUpdate) { }
+        public void OnReProvided(IUpdateSlow prev) { }
+    }
+
 }
