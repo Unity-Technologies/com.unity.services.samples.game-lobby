@@ -29,13 +29,11 @@ namespace LobbyRelaySample.Relay
         }
 
         /// <summary>
-        /// When a new client connects, they need to be given all up-to-date info.
+        /// When a new client connects, they need to be updated with the current state of everyone else.
         /// </summary>
         private void OnNewConnection(NetworkConnection conn)
         {
-            // When a new client connects, they need to be updated with the current state of everyone else.
-            // (We can't exclude this client from the events we send to it, since we don't have its ID in strm, but it will ignore messages about itself on arrival.)
-            foreach (var user in m_localLobby.LobbyUsers)
+            foreach (var user in m_localLobby.LobbyUsers) // The host includes itself here since we don't necessarily have an ID available, but it will ignore its own messages on arrival.
                 ForceFullUserUpdate(m_networkDriver, conn, user.Value);
         }
 
@@ -64,6 +62,8 @@ namespace LobbyRelaySample.Relay
                     WriteByte(m_networkDriver, otherConn, id, msgType, value);
                 }
             }
+            else if (msgType == MsgType.NewPlayer) // This ensures clients in builds are sent player state once they establish that they can send (and receive) events.
+                OnNewConnection(conn);
 
             // If a client has changed state, check if this changes whether all players have readied.
             if (msgType == MsgType.ReadyState)
@@ -73,6 +73,8 @@ namespace LobbyRelaySample.Relay
         protected override void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // TODO: If a client disconnects, see if remaining players are all already ready.
+            // TEMP logging
+            UnityEngine.Debug.LogError("Client disconnected!");
         }
 
         public void OnReceiveMessage(MessageType type, object msg)
@@ -139,7 +141,7 @@ namespace LobbyRelaySample.Relay
                 if (!conn.IsCreated) // "Nothing more to accept" is signalled by returning an invalid connection from Accept.
                     break;
                 m_connections.Add(conn);
-                OnNewConnection(conn);
+                OnNewConnection(conn); // This ensures that clients in editors are sent player state once they establish a connection. The timing differs slightly from builds.
             }
         }
     }

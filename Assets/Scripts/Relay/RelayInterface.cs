@@ -31,34 +31,27 @@ namespace LobbyRelaySample.Relay
                 } finally {
                     onComplete?.Invoke(result);
                 }
-
-                // TODO: Ensure that passing null as result is handled.
             }
         }
 
         /// <summary>
         /// Creates a Relay Server, and returns the Allocation (Response.Result.Data.Allocation)
         /// </summary>
-        /// <param name="maxConnections"></param>
-        public static void AllocateAsync(int maxConnections, Action<Response<AllocateResponseBody>> onComplete)
+        public static void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
         {
             CreateAllocationRequest createAllocationRequest = new CreateAllocationRequest(new AllocationRequest(maxConnections));
             var task = RelayService.AllocationsApiClient.CreateAllocationAsync(createAllocationRequest);
+            new InProgressRequest<Response<AllocateResponseBody>>(task, OnResponse);
 
-            new InProgressRequest<Response<AllocateResponseBody>>(task, onComplete);
-        }
-
-        public static void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
-        {
-            AllocateAsync(maxConnections, a =>
+            void OnResponse(Response<AllocateResponseBody> response)
             {
-                if (a == null)
+                if (response == null)
                     Debug.LogError("Relay returned a null Allocation. It's possible the Relay service is currently down.");
-                else if (a.Status >= 200 && a.Status < 300)
-                    onComplete?.Invoke(a.Result.Data.Allocation);
+                else if (response.Status >= 200 && response.Status < 300)
+                    onComplete?.Invoke(response.Result.Data.Allocation);
                 else
-                    Debug.LogError($"Allocation returned a non Success code: {a.Status}");
-            });
+                    Debug.LogError($"Allocation returned a non Success code: {response.Status}");
+            };
         }
 
         /// <summary>

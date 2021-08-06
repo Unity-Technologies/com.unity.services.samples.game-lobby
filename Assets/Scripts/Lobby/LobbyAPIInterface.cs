@@ -33,7 +33,7 @@ namespace LobbyRelaySample.lobby
             }
         }
 
-        private const int k_maxLobbiesToShow = 64;
+        private const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, PlayerDataObject> localUserData, Action<Response<Lobby>> onComplete)
         {
@@ -98,10 +98,12 @@ namespace LobbyRelaySample.lobby
             new InProgressRequest<Response<Lobby>>(task, onComplete);
         }
 
-        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Response<Lobby>> onComplete)
+        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Response<Lobby>> onComplete, string allocationId, string connectionInfo)
         {
             UpdatePlayerRequest updateRequest = new UpdatePlayerRequest(lobbyId, playerId, new PlayerUpdateRequest(
-                data: data
+                data: data,
+                allocationId: allocationId,
+                connectionInfo: connectionInfo
             ));
             var task = LobbyService.LobbyApiClient.UpdatePlayerAsync(updateRequest);
             new InProgressRequest<Response<Lobby>>(task, onComplete);

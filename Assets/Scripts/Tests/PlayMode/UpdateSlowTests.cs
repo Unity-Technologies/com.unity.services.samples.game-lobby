@@ -8,13 +8,17 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Test
-{ 
+{
+    /// <summary>
+    /// Testing some edge cases with the UpdateSlow.
+    /// </summary>
     public class UpdateSlowTests
     {
         private GameObject m_updateSlowObj;
         private List<Subscriber> m_activeSubscribers = new List<Subscriber>(); // For cleaning up, in case an Assert prevents a Subscriber from taking care of itself.
         private const float k_period = 1.5f;
 
+        /// <summary>Trivial Subscriber to do some action every UpdateSlow.</summary>
         private class Subscriber : IDisposable
         {
             private Action m_thingToDo;
