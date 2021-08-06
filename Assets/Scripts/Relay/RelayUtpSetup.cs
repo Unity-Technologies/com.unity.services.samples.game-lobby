@@ -54,7 +54,7 @@ namespace LobbyRelaySample.Relay
             if (m_networkDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)
                 Debug.LogError("Failed to bind to Relay allocation.");
             else
-                StartCoroutine(WaitForBindComplete()); // TODO: This is the only reason for being a MonoBehaviour?
+                StartCoroutine(WaitForBindComplete());
         }
 
         private IEnumerator WaitForBindComplete()
@@ -62,7 +62,7 @@ namespace LobbyRelaySample.Relay
             while (!m_networkDriver.Bound)
             {
                 m_networkDriver.ScheduleUpdate().Complete();
-                yield return null; // TODO: Does this not proceed until a client connects as well?
+                yield return null;
             }
             OnBindingComplete();
         }
