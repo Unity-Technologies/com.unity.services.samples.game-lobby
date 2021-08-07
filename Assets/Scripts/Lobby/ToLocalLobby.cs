@@ -20,7 +20,7 @@ namespace LobbyRelaySample.lobby
                 LobbyName           = lobby.Name,
                 MaxPlayerCount      = lobby.MaxPlayers,
                 RelayCode           = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : null, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
-                State               = lobby.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby, // TODO: Consider TryParse, just in case (and below). Although, we don't have fail logic anyway...
+                State               = lobby.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby,
                 Color               = lobby.Data?.ContainsKey("Color") == true ? (LobbyColor) int.Parse(lobby.Data["Color"].Value) : LobbyColor.None
             };
 
@@ -37,8 +37,8 @@ namespace LobbyRelaySample.lobby
                     }
                 }
 
-                // If the player isn't connected to Relay, or if we just don't know about them yet, get the most recent data that the lobby knows.
-                // (If we have no local representation of the player, that gets added by the LocalLobby.)
+                // If the player isn't connected to Relay, get the most recent data that the lobby knows.
+                // (If we haven't seen this player yet, a new local representation of the player will have already been added by the LocalLobby.)
                 LobbyUser incomingData = new LobbyUser
                 {
                     IsHost = lobby.HostId.Equals(player.Id),
@@ -53,7 +53,7 @@ namespace LobbyRelaySample.lobby
         }
 
         /// <summary>
-        /// Create a list of new LocalLobby from the content of a retrieved lobby.
+        /// Create a list of new LocalLobbies from the result of a lobby list query.
         /// </summary>
         public static List<LocalLobby> Convert(QueryResponse response)
         {

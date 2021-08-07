@@ -4,9 +4,8 @@ using UnityEngine.Events;
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// Observes an Observed class, intitializes with Observed State when beginning observation
+    /// MonoBehaviour that will automatically handle setting up to observe something. It also exposes an event so some other component can effectively observe it as well.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public abstract class ObserverBehaviour<T> : MonoBehaviour where T : Observed<T>
     {
         public T observed { get; set; }

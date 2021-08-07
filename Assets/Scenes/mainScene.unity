@@ -3090,7 +3090,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7716713811812636896, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
       propertyPath: m_Name
-      value: GameStateManager
+      value: GameManager
       objectReference: {fileID: 0}
     - target: {fileID: 7716713811812636910, guid: f80fc24bab3dcda459a2669321e2e5a4, type: 3}
       propertyPath: m_logMode

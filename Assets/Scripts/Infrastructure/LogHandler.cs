@@ -6,7 +6,7 @@ namespace LobbyRelaySample
 {
     public enum LogMode
     {
-        Critical, // Errors only.
+        Critical, // Errors only
         Warnings, // Errors and Warnings
         Verbose // Everything
     }
@@ -19,7 +19,7 @@ namespace LobbyRelaySample
         public LogMode mode = LogMode.Critical;
 
         static LogHandler s_instance;
-        ILogHandler m_DefaultLogHandler = Debug.unityLogger.logHandler; //Store the unity default logger to print to console.
+        ILogHandler m_DefaultLogHandler = Debug.unityLogger.logHandler; // Store the default logger that prints to console.
 
         public static LogHandler Get()
         {
@@ -31,7 +31,7 @@ namespace LobbyRelaySample
 
         public void LogFormat(LogType logType, Object context, string format, params object[] args)
         {
-            if (logType == LogType.Exception) // Exceptions are captured by LogException?
+            if (logType == LogType.Exception) // Exceptions are captured by LogException and should always be logged.
                 return;
 
             if (logType == LogType.Error || logType == LogType.Assert)

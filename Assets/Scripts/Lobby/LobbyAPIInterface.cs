@@ -7,10 +7,13 @@ using Unity.Services.Lobbies.Models;
 namespace LobbyRelaySample.lobby
 {
     /// <summary>
-    /// Does all the interactions with the Lobby API.
+    /// Wrapper for all the interactions with the Lobby API.
     /// </summary>
     public static class LobbyAPIInterface
     {
+        /// <summary>
+        /// API calls are asynchronous, but for debugging and other reasons we want to reify them as objects so that they can be monitored.
+        /// </summary>
         private class InProgressRequest<T>
         {
             public InProgressRequest(Task<T> task, Action<T> onComplete)
@@ -21,7 +24,7 @@ namespace LobbyRelaySample.lobby
             private async void DoRequest(Task<T> task, Action<T> onComplete)
             {
                 T result = default;
-                string currentTrace = System.Environment.StackTrace;
+                string currentTrace = System.Environment.StackTrace; // If we don't get the calling context here, it's lost once the async operation begins.
                 try {
                     result = await task;
                 } catch (Exception e) {

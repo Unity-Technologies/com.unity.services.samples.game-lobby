@@ -36,7 +36,7 @@ namespace LobbyRelaySample
             return response != null && response.Status >= 200 && response.Status < 300; // Uses HTTP status codes, so 2xx is a success.
         }
 
-        #region We want to cache the lobby object so we don't query for it every time we need to do a different lobby operation or view current data.
+        #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         private Queue<Action> m_pendingOperations = new Queue<Action>();
         private string m_currentLobbyId = null;
@@ -105,7 +105,9 @@ namespace LobbyRelaySample
             }
         }
 
-        /// <summary>Attempt to join an existing lobby. Either ID xor code can be null.</summary>
+        /// <summary>
+        /// Attempt to join an existing lobby. Either ID xor code can be null.
+        /// </summary>
         public void JoinLobbyAsync(string lobbyId, string lobbyCode, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
             string uasId = AuthenticationService.Instance.PlayerId;
@@ -123,7 +125,9 @@ namespace LobbyRelaySample
             }
         }
 
-        /// <summary>Used for getting the list of all active lobbies, without needing full info for each.</summary>
+        /// <summary>
+        /// Used for getting the list of all active lobbies, without needing full info for each.
+        /// </summary>
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
         public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None)
         {
@@ -196,7 +200,9 @@ namespace LobbyRelaySample
             LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, dataCurr, (r) => { onComplete?.Invoke(); }, null, null);
         }
 
-        /// <summary>Lobby can be provided info about Relay (or any other remote allocation) so it can add automatic disconnect handling.</summary>
+        /// <summary>
+        /// Lobby can be provided info about Relay (or any other remote allocation) so it can add automatic disconnect handling.
+        /// </summary>
         public void UpdatePlayerRelayInfoAsync(string allocationId, string connectionInfo, Action onComplete)
         {
             if (!ShouldUpdateData(() => { UpdatePlayerRelayInfoAsync(allocationId, connectionInfo, onComplete); }, onComplete, true)) // Do retry here since the RelayUtpSetup that called this might be destroyed right after this.

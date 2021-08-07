@@ -1,52 +1,64 @@
 using LobbyRelaySample.Relay;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace LobbyRelaySample
 {
-    // TODO: This is pretty bloated. Additionally, it needs a pass for removing redundant calls and organizing things in a more intuitive way and whatnot
-
-    public class GameStateManager : MonoBehaviour, IReceiveMessages
+    /// <summary>
+    /// Sets up and runs the entire sample.
+    /// </summary>
+    public class GameManager : MonoBehaviour, IReceiveMessages
     {
         [SerializeField]
-        LogMode m_logMode = LogMode.Critical;
+        [Tooltip("Only logs of this level or higher will appear in the console.")]
+        private LogMode m_logMode = LogMode.Critical;
         /// <summary>
         /// All these should be assigned the observers in the scene at the start.
         /// </summary>
+        #region UI elements that observe the local state. These are 
         [SerializeField]
-        List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
+        private List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
         [SerializeField]
-        List<LocalLobbyObserver> m_LocalLobbyObservers = new List<LocalLobbyObserver>();
+        private List<LocalLobbyObserver> m_LocalLobbyObservers = new List<LocalLobbyObserver>();
         [SerializeField]
-        List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
+        private List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
         [SerializeField]
-        List<LobbyServiceDataObserver> m_LobbyServiceObservers = new List<LobbyServiceDataObserver>();
+        private List<LobbyServiceDataObserver> m_LobbyServiceObservers = new List<LobbyServiceDataObserver>();
+        #endregion
 
+        private LocalGameState m_localGameState = new LocalGameState();
+        private LobbyUser m_localUser;
+        private LocalLobby m_localLobby;
+        private LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
-
-        LobbyUser m_localUser;
-        LocalLobby m_localLobby;
-        LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
-        LocalGameState m_localGameState = new LocalGameState();
-
-        RelayUtpSetup m_relaySetup;
-        RelayUtpClient m_relayClient;
+        private RelayUtpSetup m_relaySetup;
+        private RelayUtpClient m_relayClient;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
         public void SetLobbyColorFilter(int color) { m_lobbyColorFilter = (LobbyColor)color; }
         private LobbyColor m_lobbyColorFilter;
 
-        public void Awake()
+        #region Setup
+        private void Awake()
         {
-            LogHandler.Get().mode = m_logMode;
             // Do some arbitrary operations to instantiate singletons.
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
             var unused = Locator.Get;
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
+#pragma warning restore IDE0059
+
+            LogHandler.Get().mode = m_logMode;
             Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
             Application.wantsToQuit += OnWantToQuit;
+        }
+
+        private void Start()
+        {
+            m_localLobby = new LocalLobby { State = LobbyState.Lobby };
+            m_localUser = new LobbyUser();
+            m_localUser.DisplayName = "New Player";
+            Locator.Get.Messenger.Subscribe(this);
+            BeginObservers();
         }
 
         private void OnAuthSignIn()
@@ -57,95 +69,7 @@ namespace LobbyRelaySample
             m_localLobby.AddPlayer(m_localUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
         }
 
-        /// <summary>
-        /// Primarily used for UI elements to communicate state changes, this will receive messages from arbitrary providers for user interactions.
-        /// </summary>
-        public void OnReceiveMessage(MessageType type, object msg)
-        {
-            if (type == MessageType.RenameRequest)
-            {
-                m_localUser.DisplayName = (string)msg;
-            }
-            else if (type == MessageType.CreateLobbyRequest)
-            {
-                var createLobbyData = (LocalLobby)msg;
-                LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
-                {
-                    lobby.ToLocalLobby.Convert(r, m_localLobby);
-                    OnCreatedLobby();
-                }, OnFailedJoin);
-            }
-            else if (type == MessageType.JoinLobbyRequest)
-            {
-                LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
-                LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
-                {
-                    lobby.ToLocalLobby.Convert(r, m_localLobby);
-                    OnJoinedLobby();
-                }, OnFailedJoin);
-            }
-            else if (type == MessageType.QueryLobbies)
-            {
-                m_lobbyServiceData.State = LobbyServiceState.Fetching;
-                LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
-                    qr =>
-                    {
-                        if (qr != null)
-                            OnRefreshed(lobby.ToLocalLobby.Convert(qr));
-                    }, er =>
-                    {
-                        long errorLong = 0;
-                        if (er != null)
-                            errorLong = er.Status;
-                        OnRefreshFailed(errorLong);
-                    },
-                    m_lobbyColorFilter);
-            }
-            else if (type == MessageType.ChangeGameState)
-            {
-                SetGameState((GameState)msg);
-            }
-            else if (type == MessageType.UserSetEmote)
-            {
-                EmoteType emote = (EmoteType)msg;
-                m_localUser.Emote = emote;
-            }
-            else if (type == MessageType.LobbyUserStatus)
-            {
-                m_localUser.UserStatus = (UserStatus)msg;
-            }
-            else if (type == MessageType.StartCountdown)
-            {
-                BeginCountDown();
-            }
-            else if (type == MessageType.CancelCountdown)
-            {
-                m_localLobby.State = LobbyState.Lobby;
-                m_localLobby.CountDownTime = 0;
-            }
-            else if (type == MessageType.ConfirmInGameState)
-            {
-                m_localUser.UserStatus = UserStatus.InGame;
-                m_localLobby.State = LobbyState.InGame;
-            }
-            else if (type == MessageType.EndGame)
-            {
-                m_localLobby.State = LobbyState.Lobby;
-                m_localLobby.CountDownTime = 0;
-                SetUserLobbyState();
-            }
-        }
-
-        void Start()
-        {
-            m_localLobby = new LocalLobby { State = LobbyState.Lobby };
-            m_localUser = new LobbyUser();
-            m_localUser.DisplayName = "New Player";
-            Locator.Get.Messenger.Subscribe(this);
-            BeginObservers();
-        }
-
-        void BeginObservers()
+        private void BeginObservers()
         {
             foreach (var gameStateObs in m_GameStateObservers)
                 gameStateObs.BeginObserving(m_localGameState);
@@ -156,40 +80,109 @@ namespace LobbyRelaySample
             foreach (var userObs in m_LocalUserObservers)
                 userObs.BeginObserving(m_localUser);
         }
+        #endregion
 
-        void SetGameState(GameState state)
+        /// <summary>
+        /// Primarily used for UI elements to communicate state changes, this will receive messages from arbitrary providers for user interactions.
+        /// </summary>
+        public void OnReceiveMessage(MessageType type, object msg)
+        {
+            if (type == MessageType.RenameRequest)
+            {   m_localUser.DisplayName = (string)msg;
+            }
+            else if (type == MessageType.CreateLobbyRequest)
+            {
+                var createLobbyData = (LocalLobby)msg;
+                LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
+                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    OnCreatedLobby();
+                },
+                OnFailedJoin);
+            }
+            else if (type == MessageType.JoinLobbyRequest)
+            {
+                LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
+                LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
+                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    OnJoinedLobby();
+                },
+                OnFailedJoin);
+            }
+            else if (type == MessageType.QueryLobbies)
+            {
+                m_lobbyServiceData.State = LobbyQueryState.Fetching;
+                LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
+                    qr => {
+                        if (qr != null)
+                            OnLobbiesQueried(lobby.ToLocalLobby.Convert(qr));
+                    },
+                    er => {
+                        long errorLong = 0;
+                        if (er != null)
+                            errorLong = er.Status;
+                        OnLobbyQueryFailed(errorLong);
+                    },
+                    m_lobbyColorFilter);
+            }
+            else if (type == MessageType.ChangeGameState)
+            {   SetGameState((GameState)msg);
+            }
+            else if (type == MessageType.UserSetEmote)
+            {   EmoteType emote = (EmoteType)msg;
+                m_localUser.Emote = emote;
+            }
+            else if (type == MessageType.LobbyUserStatus)
+            {   m_localUser.UserStatus = (UserStatus)msg;
+            }
+            else if (type == MessageType.StartCountdown)
+            {   BeginCountDown();
+            }
+            else if (type == MessageType.CancelCountdown)
+            {   m_localLobby.State = LobbyState.Lobby;
+                m_localLobby.CountDownTime = 0;
+            }
+            else if (type == MessageType.ConfirmInGameState)
+            {   m_localUser.UserStatus = UserStatus.InGame;
+                m_localLobby.State = LobbyState.InGame;
+            }
+            else if (type == MessageType.EndGame)
+            {   m_localLobby.State = LobbyState.Lobby;
+                m_localLobby.CountDownTime = 0;
+                SetUserLobbyState();
+            }
+        }
+
+        private void SetGameState(GameState state)
         {
             bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) && m_localGameState.State == GameState.Lobby;
             m_localGameState.State = state;
             if (isLeavingLobby)
                 OnLeftLobby();
         }
-        
-        void OnRefreshed(IEnumerable<LocalLobby> lobbies)
+
+        private void OnLobbiesQueried(IEnumerable<LocalLobby> lobbies)
         {
             var newLobbyDict = new Dictionary<string, LocalLobby>();
             foreach (var lobby in lobbies)
-            {
                 newLobbyDict.Add(lobby.LobbyID, lobby);
-            }
 
-            m_lobbyServiceData.State = LobbyServiceState.Fetched;
+            m_lobbyServiceData.State = LobbyQueryState.Fetched;
             m_lobbyServiceData.CurrentLobbies = newLobbyDict;
         }
 
-        void OnRefreshFailed(long errorCode)
+        private void OnLobbyQueryFailed(long errorCode)
         {
             m_lobbyServiceData.lastErrorCode = errorCode;
-            m_lobbyServiceData.State = LobbyServiceState.Error;
+            m_lobbyServiceData.State = LobbyQueryState.Error;
         }
 
-        void OnCreatedLobby()
+        private void OnCreatedLobby()
         {
             m_localUser.IsHost = true;
             OnJoinedLobby();
         }
 
-        void OnJoinedLobby()
+        private void OnJoinedLobby()
         {
             LobbyAsyncRequests.Instance.BeginTracking(m_localLobby.LobbyID);
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
@@ -197,38 +190,7 @@ namespace LobbyRelaySample
             StartRelayConnection();
         }
 
-        void StartRelayConnection()
-        {
-            if (m_localUser.IsHost)
-                m_relaySetup = gameObject.AddComponent<RelayUtpSetupHost>();
-            else
-                m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
-            m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
-        }
-
-        void OnRelayConnected(bool didSucceed, RelayUtpClient client)
-        {
-            Component.Destroy(m_relaySetup);
-            m_relaySetup = null;
-
-            if (!didSucceed)
-            {
-                Debug.LogError("Relay connection failed! Retrying in 5s...");
-                StartCoroutine(RetryRelayConnection());
-                return;
-            }
-            m_relayClient = client;
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
-        }
-
-        IEnumerator RetryRelayConnection()
-        {
-            yield return new WaitForSeconds(5);
-            StartRelayConnection();
-        }
-
-        void OnLeftLobby()
+        private void OnLeftLobby()
         {
             m_localUser.ResetState();
             LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
@@ -248,12 +210,43 @@ namespace LobbyRelaySample
         /// <summary>
         /// Back to Join menu if we fail to join for whatever reason.
         /// </summary>
-        void OnFailedJoin()
+        private void OnFailedJoin()
         {
             SetGameState(GameState.JoinMenu);
         }
 
-        void BeginCountDown()
+        private void StartRelayConnection()
+        {
+            if (m_localUser.IsHost)
+                m_relaySetup = gameObject.AddComponent<RelayUtpSetupHost>();
+            else
+                m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
+            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
+            m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
+        }
+
+        private void OnRelayConnected(bool didSucceed, RelayUtpClient client)
+        {
+            Component.Destroy(m_relaySetup);
+            m_relaySetup = null;
+
+            if (!didSucceed)
+            {
+                Debug.LogError("Relay connection failed! Retrying in 5s...");
+                StartCoroutine(RetryRelayConnection());
+                return;
+            }
+            m_relayClient = client;
+            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+        }
+
+        private IEnumerator RetryRelayConnection()
+        {
+            yield return new WaitForSeconds(5);
+            StartRelayConnection();
+        }
+
+        private void BeginCountDown()
         {
             if (m_localLobby.State == LobbyState.CountDown)
                 return;
@@ -261,11 +254,11 @@ namespace LobbyRelaySample
             m_localLobby.State = LobbyState.CountDown;
             StartCoroutine(CountDown());
         }
-        
+
         /// <summary>
         /// The CountdownUI will pick up on changes to the lobby's countdown timer. This can be interrupted if the lobby leaves the countdown state (via a CancelCountdown message).
         /// </summary>
-        IEnumerator CountDown()
+        private IEnumerator CountDown()
         {
             while (m_localLobby.CountDownTime > 0)
             {
@@ -278,13 +271,13 @@ namespace LobbyRelaySample
                 (m_relayClient as RelayUtpHost).SendInGameState();
         }
 
-        void SetUserLobbyState()
+        private void SetUserLobbyState()
         {
             SetGameState(GameState.Lobby);
             OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }
 
-        void ResetLocalLobby()
+        private void ResetLocalLobby()
         {
             m_localLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LobbyUser>());
             m_localLobby.AddPlayer(m_localUser); // As before, the local player will need to be plugged into UI before the lobby join actually happens.
@@ -292,19 +285,31 @@ namespace LobbyRelaySample
             m_localLobby.RelayServer = null;
         }
 
-        void OnDestroy()
+        #region Teardown
+        /// <summary>
+        /// In builds, if we are in a lobby and try to send a Leave request on application quit, it won't go through if we're quitting on the same frame.
+        /// So, we need to delay just briefly to let the request happen (though we don't need to wait for the result).
+        /// </summary>
+        private IEnumerator LeaveBeforeQuit()
         {
             ForceLeaveAttempt();
+            yield return null;
+            Application.Quit();
         }
 
-        bool OnWantToQuit()
+        private bool OnWantToQuit()
         {
             bool canQuit = string.IsNullOrEmpty(m_localLobby?.LobbyID);
             StartCoroutine(LeaveBeforeQuit());
             return canQuit;
         }
 
-        void ForceLeaveAttempt()
+        private void OnDestroy()
+        {
+            ForceLeaveAttempt();
+        }
+
+        private void ForceLeaveAttempt()
         {
             Locator.Get.Messenger.Unsubscribe(this);
             if (!string.IsNullOrEmpty(m_localLobby?.LobbyID))
@@ -313,16 +318,6 @@ namespace LobbyRelaySample
                 m_localLobby = null;
             }
         }
-
-        /// <summary>
-        /// In builds, if we are in a lobby and try to send a Leave request on application quit, it won't go through if we're quitting on the same frame.
-        /// So, we need to delay just briefly to let the request happen (though we don't need to wait for the result).
-        /// </summary>
-        IEnumerator LeaveBeforeQuit()
-        {
-            ForceLeaveAttempt();
-            yield return null;
-            Application.Quit();
-        }
+        #endregion
     }
 }

@@ -8,10 +8,13 @@ using UnityEngine;
 namespace LobbyRelaySample.Relay
 {
     /// <summary>
-    /// Does all the interaction with relay.
+    /// Wrapper for all the interaction with the Relay API.
     /// </summary>
-    public static class RelayInterface
+    public static class RelayAPIInterface
     {
+        /// <summary>
+        /// API calls are asynchronous, but for debugging and other reasons we want to reify them as objects so that they can be monitored.
+        /// </summary>
         private class InProgressRequest<T>
         {
             public InProgressRequest(Task<T> task, Action<T> onComplete)
@@ -22,7 +25,7 @@ namespace LobbyRelaySample.Relay
             private async void DoRequest(Task<T> task, Action<T> onComplete)
             {
                 T result = default;
-                string currentTrace = System.Environment.StackTrace;
+                string currentTrace = System.Environment.StackTrace; // If we don't get the calling context here, it's lost once the async operation begins.
                 try {
                     result = await task;
                 } catch (Exception e) {
@@ -35,7 +38,7 @@ namespace LobbyRelaySample.Relay
         }
 
         /// <summary>
-        /// Creates a Relay Server, and returns the Allocation (Response.Result.Data.Allocation)
+        /// A Relay Allocation represents a "server" for a new host.
         /// </summary>
         public static void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
         {
@@ -55,16 +58,9 @@ namespace LobbyRelaySample.Relay
         }
 
         /// <summary>
-        /// Get a JoinCode( Response.Result.Data.JoinCode) from an Allocated Server
+        /// Only after an Allocation has been completed can a Relay join code be obtained. This code will be stored in the lobby's data as non-public
+        /// such that players can retrieve the Relay join code only after connecting to the lobby.
         /// </summary>
-        public static void GetJoinCodeAsync(Guid hostAllocationId, Action<Response<JoinCodeResponseBody>> onComplete)
-        {
-            CreateJoincodeRequest joinCodeRequest = new CreateJoincodeRequest(new JoinCodeRequest(hostAllocationId));
-            var task = RelayService.AllocationsApiClient.CreateJoincodeAsync(joinCodeRequest);
-
-            new InProgressRequest<Response<JoinCodeResponseBody>>(task, onComplete);
-        }
-
         public static void GetJoinCodeAsync(Guid hostAllocationId, Action<string> onComplete)
         {
             GetJoinCodeAsync(hostAllocationId, a =>
@@ -77,18 +73,16 @@ namespace LobbyRelaySample.Relay
                 }
             });
         }
-
-        /// <summary>
-        /// Retrieve an Allocation(Response.Result.Data.Allocation) by join code
-        /// </summary>
-        public static void JoinAsync(string joinCode, Action<Response<JoinResponseBody>> onComplete)
+        private static void GetJoinCodeAsync(Guid hostAllocationId, Action<Response<JoinCodeResponseBody>> onComplete)
         {
-            JoinRelayRequest joinRequest = new JoinRelayRequest(new JoinRequest(joinCode));
-            var task = RelayService.AllocationsApiClient.JoinRelayAsync(joinRequest);
-
-            new InProgressRequest<Response<JoinResponseBody>>(task, onComplete);
+            CreateJoincodeRequest joinCodeRequest = new CreateJoincodeRequest(new JoinCodeRequest(hostAllocationId));
+            var task = RelayService.AllocationsApiClient.CreateJoincodeAsync(joinCodeRequest);
+            new InProgressRequest<Response<JoinCodeResponseBody>>(task, onComplete);
         }
 
+        /// <summary>
+        /// Clients call this to retrieve the host's Allocation via a Relay join code.
+        /// </summary>
         public static void JoinAsync(string joinCode, Action<JoinAllocation> onComplete)
         {
             JoinAsync(joinCode, a =>
@@ -100,6 +94,13 @@ namespace LobbyRelaySample.Relay
                     Debug.LogError($"Join Call returned a non Success code: {a.Status}");
                 }
             });
+        }
+
+        public static void JoinAsync(string joinCode, Action<Response<JoinResponseBody>> onComplete)
+        {
+            JoinRelayRequest joinRequest = new JoinRelayRequest(new JoinRequest(joinCode));
+            var task = RelayService.AllocationsApiClient.JoinRelayAsync(joinRequest);
+            new InProgressRequest<Response<JoinResponseBody>>(task, onComplete);
         }
     }
 }

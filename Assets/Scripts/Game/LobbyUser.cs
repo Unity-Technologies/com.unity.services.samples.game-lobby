@@ -124,9 +124,12 @@ namespace LobbyRelaySample
             get => m_userStatus;
             set
             {
-                m_userStatus = value;
-                m_lastChanged = UserMembers.UserStatus;
-                OnChanged(this);
+                if (m_userStatus != value)
+                {
+                    m_userStatus = value;
+                    m_lastChanged = UserMembers.UserStatus;
+                    OnChanged(this);
+                }
             }
         }
 

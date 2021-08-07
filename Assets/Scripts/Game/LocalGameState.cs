@@ -3,8 +3,8 @@ using System;
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// Current state of the local Game.
-    /// Set as a flag to allow for the unity inspector to select multiples for various UI features.
+    /// Current state of the local game.
+    /// Set as a flag to allow for the Inspector to select multiple valid states for various UI features.
     /// </summary>
     [Flags]
     public enum GameState
@@ -15,7 +15,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// Awaits player input to change the local game Data
+    /// Awaits player input to change the local game data.
     /// </summary>
     [System.Serializable]
     public class LocalGameState : Observed<LocalGameState>

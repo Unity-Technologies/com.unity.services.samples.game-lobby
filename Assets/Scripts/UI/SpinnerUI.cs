@@ -15,14 +15,14 @@ namespace LobbyRelaySample.UI
 
         public override void ObservedUpdated(LobbyServiceData observed)
         {
-            if (observed.State == LobbyServiceState.Fetching)
+            if (observed.State == LobbyQueryState.Fetching)
             {
                 Show();
                 spinnerImage.Show();
                 noServerText.Hide();
                 errorTextVisibility.Hide();
             }
-            else if (observed.State == LobbyServiceState.Error)
+            else if (observed.State == LobbyQueryState.Error)
             {
                 spinnerImage.Hide();
                 errorTextVisibility.Show();
@@ -35,7 +35,7 @@ namespace LobbyRelaySample.UI
                 errorString.Append(codeString);
                 errorText.SetText(errorString.ToString());
             }
-            else if (observed.State == LobbyServiceState.Fetched)
+            else if (observed.State == LobbyQueryState.Fetched)
             {
                 if (observed.CurrentLobbies.Count < 1)
                 {
