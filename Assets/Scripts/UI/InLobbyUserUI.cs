@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LobbyRelaySample.UI
 {
@@ -17,6 +18,9 @@ namespace LobbyRelaySample.UI
 
         [SerializeField]
         TMP_Text m_EmoteText;
+
+        [SerializeField]
+        Image m_HostIcon;
 
         public bool IsAssigned
         {
@@ -47,6 +51,7 @@ namespace LobbyRelaySample.UI
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
             m_EmoteText.SetText(observed.Emote.GetString());
+            m_HostIcon.enabled = observed.IsHost;
         }
 
         string SetStatusFancy(UserStatus status)
