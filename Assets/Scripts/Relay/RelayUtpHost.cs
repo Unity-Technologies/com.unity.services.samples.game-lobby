@@ -72,8 +72,8 @@ namespace LobbyRelaySample.Relay
 
         protected override void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
+            // When a disconnect from the host occurs, no additional action is required. This override just prevents the base behavior from occurring.
             // TODO: If a client disconnects, see if remaining players are all already ready.
-            // TEMP logging
             UnityEngine.Debug.LogError("Client disconnected!");
         }
 
@@ -114,7 +114,7 @@ namespace LobbyRelaySample.Relay
 
         /// <summary>
         /// In an actual game, after the countdown, there would be some step here where the host and all clients sync up on game state, load assets, etc.
-        /// Here, we will instead just signal an "in game" state that can be ended by the host.
+        /// Here, we will instead just signal an "in-game" state that can be ended by the host.
         /// </summary>
         public void SendInGameState()
         {

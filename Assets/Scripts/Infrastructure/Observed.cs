@@ -3,9 +3,12 @@ using System;
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// In your Observed children, be sure to call OnChanged when setting the value of any property.
+    /// Something that exposes some data that, when changed, an observer would want to be notified about automatically.
+    /// Used for UI elements and for keeping our local Lobby state synchronized with the remote Lobby service data.
+    /// 
+    /// In your Observed child implementations, be sure to call OnChanged when setting the value of any property.
     /// </summary>
-    /// <typeparam name="T">The Data we want to view.</typeparam>
+    /// <typeparam name="T">The type of object to be observed.</typeparam>
     public abstract class Observed<T>
     {
         /// <summary>
