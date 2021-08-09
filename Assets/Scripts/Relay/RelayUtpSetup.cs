@@ -94,6 +94,12 @@ namespace LobbyRelaySample.Relay
             }
         }
         #endregion
+
+        private void OnDestroy()
+        {
+            if (!m_isRelayConnected && m_networkDriver.IsCreated)
+                m_networkDriver.Dispose();
+        }
     }
 
     /// <summary>
@@ -206,9 +212,10 @@ namespace LobbyRelaySample.Relay
             }
             else
             {
-                RelayUtpClient watcher = gameObject.AddComponent<RelayUtpClient>();
-                watcher.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
-                m_onJoinComplete(true, watcher);
+                m_isRelayConnected = true;
+                RelayUtpClient client = gameObject.AddComponent<RelayUtpClient>();
+                client.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
+                m_onJoinComplete(true, client);
                 LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
             }
         }
