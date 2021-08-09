@@ -98,7 +98,7 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.services.core": "1.1.0-pre.2",
+        "com.unity.services.core": "1.1.0-pre.4",
         "com.unity.modules.unitywebrequest": "1.0.0",
         "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
         "com.unity.modules.unitywebrequestaudio": "1.0.0",
@@ -112,7 +112,7 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.services.core": "1.1.0-pre.2",
+        "com.unity.services.core": "1.1.0-pre.4",
         "com.unity.modules.unitywebrequest": "1.0.0",
         "com.unity.modules.unitywebrequestassetbundle": "1.0.0",
         "com.unity.modules.unitywebrequestaudio": "1.0.0",

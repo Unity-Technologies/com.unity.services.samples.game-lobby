@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
 
-namespace Unity.Services.Lobbies.Http
+namespace Unity.Services.Relay.Http
 {
     public class JsonObject
     {

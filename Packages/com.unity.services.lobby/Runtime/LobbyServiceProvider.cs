@@ -1,11 +1,8 @@
 using UnityEngine;
 using System.Threading.Tasks;
-
-using Unity.Services.Lobbies.Apis;
-
+using Unity.Services.Lobbies.Apis.Lobby;
 using Unity.Services.Lobbies.Http;
 using Unity.Services.Lobbies.Scheduler;
-using TaskScheduler = Unity.Services.Lobbies.Scheduler.TaskScheduler;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
 
@@ -20,24 +17,25 @@ namespace Unity.Services.Lobbies
         {
             // Pass an instance of this class to Core
             var generatedPackageRegistry =
-            CoreRegistry.Instance.RegisterPackage(new LobbyServiceProvider());
-                // And specify what components it requires, or provides.
+                CoreRegistry.Instance.RegisterPackage(new LobbyServiceProvider());
+
+            // And specify what components it requires, or provides.
             generatedPackageRegistry.DependsOn<IAccessToken>();
-;
+            ;
         }
 
         public Task Initialize(CoreRegistry registry)
         {
             _gameObjectFactory = GameObjectFactory.CreateCoreSdkGameObject();
             var httpClient = new HttpClient();
-            
+
             var accessTokenLobbyApi = registry.GetServiceComponent<IAccessToken>();
 
             if (accessTokenLobbyApi != null)
             {
                 LobbyService.LobbyApiClient = new LobbyApiClient(httpClient, accessTokenLobbyApi);
             }
-            
+
             return Task.CompletedTask;
         }
     }

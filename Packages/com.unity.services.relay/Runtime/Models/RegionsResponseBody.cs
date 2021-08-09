@@ -11,35 +11,28 @@ using Unity.Services.Relay.Http;
 namespace Unity.Services.Relay.Models
 {
     /// <summary>
-    /// JoinResponseBody model
-    /// <param name="meta">meta param</param>
+    /// RegionsResponseBody model
     /// <param name="data">data param</param>
     /// </summary>
 
     [Preserve]
-    [DataContract(Name = "JoinResponseBody")]
-    public class JoinResponseBody
+    [DataContract(Name = "RegionsResponseBody")]
+    public class RegionsResponseBody
     {
         /// <summary>
-        /// Creates an instance of JoinResponseBody.
+        /// Creates an instance of RegionsResponseBody.
         /// </summary>
-        /// <param name="meta">meta param</param>
         /// <param name="data">data param</param>
         [Preserve]
-        public JoinResponseBody(ResponseMeta meta, JoinData data)
+        public RegionsResponseBody(RegionsData data)
         {
-            Meta = meta;
             Data = data;
         }
 
     
         [Preserve]
-        [DataMember(Name = "meta", IsRequired = true, EmitDefaultValue = true)]
-        public ResponseMeta Meta{ get; }
-
-        [Preserve]
         [DataMember(Name = "data", IsRequired = true, EmitDefaultValue = true)]
-        public JoinData Data{ get; }
+        public RegionsData Data{ get; }
     
     }
 }

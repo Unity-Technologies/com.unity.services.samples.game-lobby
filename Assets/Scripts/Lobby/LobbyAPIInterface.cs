@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Lobby;
 using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample.lobby

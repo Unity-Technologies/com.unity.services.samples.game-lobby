@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
@@ -23,7 +23,7 @@ namespace Unity.Services.Relay.Http
                     success = false;
                     args.ErrorContext.Handled = true;
                 },
-                MissingMemberHandling = MissingMemberHandling.Ignore
+                MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
             };
             result = JsonConvert.DeserializeObject<T>(@this, settings);
             return success;
