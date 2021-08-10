@@ -11,7 +11,7 @@ namespace LobbyRelaySample.UI
     public class UIPanelBase : MonoBehaviour
     {
         [SerializeField]
-        private UnityEvent<bool> m_onVisibilityChange;
+        protected UnityEvent<bool> m_onVisibilityChange;
         bool showing;
 
         CanvasGroup m_canvasGroup;
