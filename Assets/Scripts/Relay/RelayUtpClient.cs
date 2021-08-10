@@ -32,6 +32,7 @@ namespace LobbyRelaySample.Relay
             m_localUser.onChanged -= OnLocalChange;
             Leave();
             Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
+            m_networkDriver.Dispose();
         }
         public void OnDestroy()
         {
