@@ -28,7 +28,7 @@ namespace LobbyRelaySample
 
         public LobbyAsyncRequests()
         {
-            Locator.Get.UpdateSlow.Subscribe(UpdateLobby); // Shouldn't need to unsubscribe since this instance won't be replaced.
+            Locator.Get.UpdateSlow.Subscribe(UpdateLobby, 1.5f); // Shouldn't need to unsubscribe since this instance won't be replaced.
         }
 
         private static bool IsSuccessful(Response response)

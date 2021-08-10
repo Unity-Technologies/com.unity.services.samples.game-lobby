@@ -17,7 +17,7 @@ namespace LobbyRelaySample
         {
             m_localLobby = lobby;
             m_localUser = localUser;
-            Locator.Get.UpdateSlow.Subscribe(OnUpdate);
+            Locator.Get.UpdateSlow.Subscribe(OnUpdate, 1.5f);
             m_localLobby.onChanged += OnLocalLobbyChanged;
             m_shouldPushData = true; // Ensure the initial presence of a new player is pushed to the lobby; otherwise, when a non-host joins, the LocalLobby never receives their data until they push something new.
         }

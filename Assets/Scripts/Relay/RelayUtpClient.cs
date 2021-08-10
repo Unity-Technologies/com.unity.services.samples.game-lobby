@@ -15,8 +15,8 @@ namespace LobbyRelaySample.Relay
         protected LocalLobby m_localLobby;
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
-
         protected bool m_hasSentInitialMessage = false;
+        private const float k_heartbeatPeriod = 5;
 
         public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
         {
@@ -25,7 +25,7 @@ namespace LobbyRelaySample.Relay
             m_localUser.onChanged += OnLocalChange;
             m_networkDriver = networkDriver;
             m_connections = connections;
-            Locator.Get.UpdateSlow.Subscribe(UpdateSlow);
+            Locator.Get.UpdateSlow.Subscribe(UpdateSlow, k_heartbeatPeriod);
         }
         protected virtual void Uninitialize()
         {
