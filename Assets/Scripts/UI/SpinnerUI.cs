@@ -28,11 +28,13 @@ namespace LobbyRelaySample.UI
                 errorTextVisibility.Show();
                 var errorString = new StringBuilder();
                 errorString.Append("Error");
-                var codeString = ": " + observed.lastErrorCode;
-                if (observed.lastErrorCode < 1)
-                    codeString = ".";
-
+                var codeString = ": ";
+                if (observed.lastErrorCode > 0)
+                    codeString += observed.lastErrorCode;
+                
                 errorString.Append(codeString);
+                errorString.Append("Check Unity Console Log for Details.");
+
                 errorText.SetText(errorString.ToString());
             }
             else if (observed.State == LobbyQueryState.Fetched)
