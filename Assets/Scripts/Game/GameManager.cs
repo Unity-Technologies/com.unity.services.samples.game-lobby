@@ -36,7 +36,7 @@ namespace LobbyRelaySample
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
 
-        //the Lobby API limits requests to 1.5 a second, and will return a 429 "Too Many Requests" error otherwise.
+        // The Lobby API rate limits query requests to one every 1.5s, and it will return a 429 "Too Many Requests" error otherwise.
         private const float k_lobbyAssignmentCoolingSeconds = 1.5f;
         private bool m_coolingDown;
 
