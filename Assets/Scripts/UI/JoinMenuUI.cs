@@ -74,20 +74,15 @@ namespace LobbyRelaySample.UI
                 RemoveLobbyButton(m_LocalLobby[key]);
         }
 
-        private bool CanDisplay(LocalLobby lobby)
-        {
-            return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
-        }
-
-        private void Awake()
-        {
-            m_onVisibilityChange.AddListener(JoinMenuChangedVisibility);
-        }
-
-        private void JoinMenuChangedVisibility(bool show)
+        public void JoinMenuChangedVisibility(bool show)
         {
             if (show)
                 OnRefresh();
+        }
+
+        private bool CanDisplay(LocalLobby lobby)
+        {
+            return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
         }
 
         /// <summary>
