@@ -1,12 +1,16 @@
 using System;
-using Unity.Services.Authentication.Utilities;
 using UnityEngine;
-using Logger = Unity.Services.Authentication.Utilities.Logger;
 
 namespace Unity.Services.Authentication
 {
-    public class AuthenticationService
+    /// <summary>
+    /// The entry class to the Authentication Service.
+    /// </summary>
+    public static class AuthenticationService
     {
+        /// <summary>
+        /// The default singleton instance to access authentication service.
+        /// </summary>
         public static IAuthenticationService Instance { get; internal set; }
     }
 }

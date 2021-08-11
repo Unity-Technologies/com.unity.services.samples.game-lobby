@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Base class for asynchronous operations.

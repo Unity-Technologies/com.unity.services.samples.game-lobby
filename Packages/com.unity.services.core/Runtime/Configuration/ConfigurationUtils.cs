@@ -8,12 +8,11 @@ namespace Unity.Services.Core.Configuration
         public const string StreamingAssetsFolder = "StreamingAssets";
         public const string StreamingAssetsPath = "Assets/" + StreamingAssetsFolder;
         public const string ConfigFileName = "UnityServicesProjectConfiguration.json";
-        public const string ConfigAssetPath = StreamingAssetsPath + "/" + ConfigFileName;
 
         public static string RuntimeConfigFullPath { get; }
             = Path.Combine(Application.streamingAssetsPath, ConfigFileName);
 
         public static IConfigurationLoader ConfigurationLoader { get; internal set; }
-            = new RuntimeConfigurationLoader();
+            = new StreamingAssetsConfigurationLoader();
     }
 }

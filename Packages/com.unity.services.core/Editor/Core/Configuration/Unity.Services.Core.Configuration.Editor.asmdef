@@ -2,7 +2,8 @@
     "name": "Unity.Services.Core.Configuration.Editor",
     "references": [
         "Unity.Services.Core",
-        "Unity.Services.Core.Configuration"
+        "Unity.Services.Core.Configuration",
+        "Unity.Services.Core.Internal"
     ],
     "includePlatforms": [
         "Editor"

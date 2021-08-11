@@ -1,4 +1,4 @@
-namespace Unity.Services.Core.Networking
+namespace Unity.Services.Core.Networking.Internal
 {
     /// <summary>
     /// Utility extensions on <see cref="HttpRequest"/>.

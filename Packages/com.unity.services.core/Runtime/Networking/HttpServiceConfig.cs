@@ -1,4 +1,5 @@
 using System;
+using Unity.Services.Core.Networking.Internal;
 
 namespace Unity.Services.Core.Networking
 {

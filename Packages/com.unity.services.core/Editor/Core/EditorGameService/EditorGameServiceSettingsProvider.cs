@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.Connect;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Editor
 {
@@ -26,6 +27,7 @@ namespace Unity.Services.Core.Editor
 #if ENABLE_EDITOR_GAME_SERVICES
         IProjectEditorDrawerFactory m_ProjectBindDrawerFactory;
         IProjectEditorDrawerFactory m_CoppaDrawerFactory;
+        IUserRoleHandler m_UserRoleHandler;
 #endif
 
         /// <summary>
@@ -53,13 +55,14 @@ namespace Unity.Services.Core.Editor
 
 #if ENABLE_EDITOR_GAME_SERVICES
         internal EditorGameServiceSettingsProvider(string path, SettingsScope scopes, IProjectEditorDrawerFactory projectBindDrawer,
-                                                   IProjectEditorDrawerFactory projectCoppaDrawer, IProjectStateRequest projectStateRequest = null, IUserRoleRequest userRoleRequest = null, IEnumerable<string> keywords = null)
+                                                   IProjectEditorDrawerFactory projectCoppaDrawer, IProjectStateRequest projectStateRequest = null, IUserRoleHandler userRoleHandler = null, IEnumerable<string> keywords = null)
             : base(path, scopes, keywords)
         {
             m_ProjectStateRequest = projectStateRequest ?? new ProjectStateRequest();
             m_CurrentProjectState = m_ProjectStateRequest.GetProjectState();
             m_ProjectBindDrawerFactory = projectBindDrawer;
             m_CoppaDrawerFactory = projectCoppaDrawer;
+            m_UserRoleHandler = userRoleHandler ?? EditorGameServiceRegistry.Instance.UserRoleHandler;
             activateHandler = ActivateSettingsProvider;
             deactivateHandler = DeactivateSettingsProvider;
         }
@@ -72,8 +75,8 @@ namespace Unity.Services.Core.Editor
 
 #if ENABLE_EDITOR_GAME_SERVICES
             CloudProjectSettingsEventManager.instance.projectStateChanged += OnProjectStateChanged;
-            EditorGameServiceRegistry.Instance.UserRoleHandler.UserRoleChanged += OnUserRoleChanged;
-            EditorGameServiceRegistry.Instance.UserRoleHandler.TrySendUserRoleRequest();
+            m_UserRoleHandler.UserRoleChanged += OnUserRoleChanged;
+            m_UserRoleHandler.TrySendUserRoleRequest();
 #endif
         }
 
@@ -81,14 +84,16 @@ namespace Unity.Services.Core.Editor
         {
 #if ENABLE_EDITOR_GAME_SERVICES
             CloudProjectSettingsEventManager.instance.projectStateChanged -= OnProjectStateChanged;
-            EditorGameServiceRegistry.Instance.UserRoleHandler.UserRoleChanged -= OnUserRoleChanged;
+            m_UserRoleHandler.UserRoleChanged -= OnUserRoleChanged;
 #endif
         }
 
         void OnProjectStateChanged()
         {
-            if (EditorGameServiceRegistry.Instance.UserRoleHandler.IsBusy())
+#if ENABLE_EDITOR_GAME_SERVICES
+            if (m_UserRoleHandler.IsBusy())
                 return;
+#endif
 
             var projectState = m_ProjectStateRequest.GetProjectState();
             if (m_CurrentProjectState.HasDiff(projectState))
@@ -209,7 +214,7 @@ namespace Unity.Services.Core.Editor
         void DrawAccessTokenErrorUI(VisualElement parentVisualElement)
         {
             AccessTokenErrorUiHelper.AddAccessTokenErrorUI(parentVisualElement);
-            Debug.LogWarning(k_AuthenticationErrorMessage);
+            CoreLogger.LogWarning(k_AuthenticationErrorMessage);
         }
 
         internal static bool IsUserLoggedIn(ProjectState projectState)
@@ -229,14 +234,14 @@ namespace Unity.Services.Core.Editor
             return projectState.ProjectBound;
         }
 
-        static bool IsUserRoleSet()
+        bool IsUserRoleSet()
         {
-            return EditorGameServiceRegistry.Instance.UserRoleHandler.CurrentUserRole != UserRole.Unknown;
+            return m_UserRoleHandler.CurrentUserRole != UserRole.Unknown;
         }
 
-        static bool IsUserRoleRequestNotAuthorized()
+        bool IsUserRoleRequestNotAuthorized()
         {
-            return EditorGameServiceRegistry.Instance.UserRoleHandler.HasAuthorizationError;
+            return m_UserRoleHandler.HasAuthorizationError;
         }
 
         void DrawUserRoleUI(VisualElement parentVisualElement)
@@ -288,7 +293,7 @@ namespace Unity.Services.Core.Editor
             }
 
             parentVisualElement.Add(coppaDrawer.GetVisualElement());
-            if (!IsUserAllowedToEditCoppaCompliance(EditorGameServiceRegistry.Instance.UserRoleHandler.CurrentUserRole))
+            if (!IsUserAllowedToEditCoppaCompliance(m_UserRoleHandler.CurrentUserRole))
             {
                 parentVisualElement.Q<VisualElement>(NodeName.CoppaContainer)?.Q<VisualElement>(className: ClassName.EditMode)?.SetEnabled(false);
             }
@@ -359,7 +364,7 @@ namespace Unity.Services.Core.Editor
                 if (EditorGameService?.Enabler != null)
                 {
                     var toggleValue = EditorGameService.Enabler.IsEnabled();
-                    var toggleEnabled = IsUserAllowedToEditServiceToggle(EditorGameService, projectState, EditorGameServiceRegistry.Instance.UserRoleHandler.CurrentUserRole);
+                    var toggleEnabled = IsUserAllowedToEditServiceToggle(EditorGameService, projectState, m_UserRoleHandler.CurrentUserRole);
                     var tooltip = string.Empty;
                     if (!toggleEnabled)
                     {

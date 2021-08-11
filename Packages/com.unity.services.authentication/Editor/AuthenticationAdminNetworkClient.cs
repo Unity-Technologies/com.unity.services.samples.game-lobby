@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.Services.Authentication.Editor.Models;
 using Unity.Services.Authentication.Utilities;
 using UnityEngine;
-using ILogger = Unity.Services.Authentication.Utilities.ILogger;
 
 namespace Unity.Services.Authentication.Editor
 {
@@ -40,8 +39,7 @@ namespace Unity.Services.Authentication.Editor
         internal AuthenticationAdminNetworkClient(string servicesGatewayHost,
                                                   string organizationId,
                                                   string projectId,
-                                                  INetworkingUtilities networkClient,
-                                                  ILogger logger)
+                                                  INetworkingUtilities networkClient)
         {
             m_ServicesGatewayHost = servicesGatewayHost;
             m_OrganizationId = organizationId;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
+using UnityEngine;
 
 [assembly: InternalsVisibleTo("Unity.Services.Authentication.Editor")]
 [assembly: InternalsVisibleTo("Unity.Services.Utilities.Tests")]
@@ -28,13 +29,11 @@ namespace Unity.Services.Authentication.Utilities
     class NetworkingUtilities : INetworkingUtilities
     {
         readonly IScheduler m_Scheduler;
-        readonly ILogger m_Logger;
         readonly int m_DefaultRedirectLimit;
 
-        public NetworkingUtilities(IScheduler scheduler, ILogger logger)
+        public NetworkingUtilities(IScheduler scheduler)
         {
             m_Scheduler = scheduler;
-            m_Logger = logger;
         }
 
         /// <summary>
@@ -45,7 +44,6 @@ namespace Unity.Services.Authentication.Utilities
         public IWebRequest<T> Get<T>(string url, IDictionary<string, string> headers = null, int maximumAttempts = 1)
         {
             var request = new WebRequest<T>(m_Scheduler,
-                m_Logger,
                 WebRequestVerb.Get,
                 url,
                 headers,
@@ -69,7 +67,6 @@ namespace Unity.Services.Authentication.Utilities
         public IWebRequest<T> Post<T>(string url, IDictionary<string, string> headers = null, int maximumAttempts = 1)
         {
             var request = new WebRequest<T>(m_Scheduler,
-                m_Logger,
                 WebRequestVerb.Post,
                 url,
                 headers,
@@ -95,7 +92,6 @@ namespace Unity.Services.Authentication.Utilities
             var jsonPayload = JsonConvert.SerializeObject(payload);
 
             var request = new WebRequest<T>(m_Scheduler,
-                m_Logger,
                 WebRequestVerb.Post,
                 url,
                 headers,
@@ -119,7 +115,6 @@ namespace Unity.Services.Authentication.Utilities
         public IWebRequest<T> PostForm<T>(string url, string payload, IDictionary<string, string> headers = null, int maximumAttempts = 1)
         {
             var request = new WebRequest<T>(m_Scheduler,
-                m_Logger,
                 WebRequestVerb.Post,
                 url,
                 headers,
@@ -145,7 +140,6 @@ namespace Unity.Services.Authentication.Utilities
             var jsonPayload = JsonConvert.SerializeObject(payload);
 
             var request = new WebRequest<T>(m_Scheduler,
-                m_Logger,
                 WebRequestVerb.Put,
                 url,
                 headers,
@@ -169,7 +163,6 @@ namespace Unity.Services.Authentication.Utilities
         public IWebRequest<T> Delete<T>(string url, IDictionary<string, string> headers = null, int maximumAttempts = 1)
         {
             var request = new WebRequest<T>(m_Scheduler,
-                m_Logger,
                 WebRequestVerb.Delete,
                 url,
                 headers,

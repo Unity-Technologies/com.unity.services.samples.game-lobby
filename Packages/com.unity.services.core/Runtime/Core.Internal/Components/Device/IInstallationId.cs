@@ -1,4 +1,6 @@
-namespace Unity.Services.Core.Device
+using Unity.Services.Core.Internal;
+
+namespace Unity.Services.Core.Device.Internal
 {
     /// <summary>
     /// Component providing a Unity Installation Identifier
@@ -8,6 +10,7 @@ namespace Unity.Services.Core.Device
         /// <summary>
         /// Returns Unity Installation Identifier
         /// </summary>
+        /// <returns>The Installation Identifier</returns>
         string GetOrCreateIdentifier();
     }
 }

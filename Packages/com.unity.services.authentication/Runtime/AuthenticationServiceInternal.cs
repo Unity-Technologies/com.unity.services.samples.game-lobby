@@ -1,14 +1,9 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Unity.Services.Authentication.Models;
 using Unity.Services.Authentication.Utilities;
-using Unity.Services.Core;
-
-[assembly: InternalsVisibleTo("Unity.Services.Authentication.Tests")]
-[assembly: InternalsVisibleTo("Unity.Services.Authentication.EditorTests")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] // For Moq
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Authentication
 {
@@ -65,7 +60,6 @@ namespace Unity.Services.Authentication
         readonly ICache m_Cache;
         readonly IScheduler m_Scheduler;
         readonly IDateTimeWrapper m_DateTime;
-        readonly ILogger m_Logger;
 
         IWebRequest<SignInResponse> m_DelayedTokenRequest;
         string m_PlayerId;
@@ -103,15 +97,13 @@ namespace Unity.Services.Authentication
                                                IJwtDecoder jwtDecoder,
                                                ICache cache,
                                                IScheduler scheduler,
-                                               IDateTimeWrapper dateTime,
-                                               ILogger logger)
+                                               IDateTimeWrapper dateTime)
         {
             m_NetworkClient = networkClient;
             m_JwtDecoder = jwtDecoder;
             m_Cache = cache;
             m_Scheduler = scheduler;
             m_DateTime = dateTime;
-            m_Logger = logger;
 
             State = AuthenticationState.SignedOut;
         }
@@ -133,7 +125,7 @@ namespace Unity.Services.Authentication
                 {
                     if (attempt < k_WellKnownKeysMaxAttempt)
                     {
-                        m_Logger.Warning($"Well-known keys request failed (attempt: {attempt}): {response.ResponseCode}, {response.ErrorMessage}");
+                        Logger.LogWarning($"Well-known keys request failed (attempt: {attempt}): {response.ResponseCode}, {response.ErrorMessage}");
                         GetWellKnownKeys(asyncOperation, attempt + 1);
                     }
                     else
@@ -144,7 +136,7 @@ namespace Unity.Services.Authentication
                     return;
                 }
 
-                m_Logger.Info("Well-known keys have arrived!");
+                Logger.LogVerbose("Well-known keys have arrived!");
                 WellKnownKeys = response.ResponseBody;
 
                 if (State == AuthenticationState.VerifyingAccessToken)
@@ -258,7 +250,7 @@ namespace Unity.Services.Authentication
 
         internal IAsyncOperation LinkWithExternalToken(ExternalTokenRequest externalToken)
         {
-            var operation = new AuthenticationAsyncOperation(m_Logger);
+            var operation = new AuthenticationAsyncOperation();
             if (IsAuthorized)
             {
                 var linkResult = m_NetworkClient.LinkWithExternalToken(AccessToken, externalToken);
@@ -266,7 +258,7 @@ namespace Unity.Services.Authentication
             }
             else
             {
-                m_Logger.Warning("The player is not authorized. Wait until authorized before attempting to link.");
+                Logger.LogWarning("The player is not authorized. Wait until authorized before attempting to link.");
                 operation.Fail(AuthenticationError.ClientInvalidUserState);
             }
 
@@ -288,7 +280,7 @@ namespace Unity.Services.Authentication
                     return SessionTokenNotExistsError();
                 }
 
-                m_Logger.Info("Continuing existing session with cached token.");
+                Logger.LogVerbose("Continuing existing session with cached token.");
 
                 return StartSigningIn(m_NetworkClient.SignInWithSessionToken(sessionToken), isRefreshRequest);
             }
@@ -350,7 +342,7 @@ namespace Unity.Services.Authentication
 
                 if (WellKnownKeys == null)
                 {
-                    m_Logger.Info("Well-known keys have not arrived yet, waiting on them to complete sign-in.");
+                    Logger.LogVerbose("Well-known keys have not arrived yet, waiting on them to complete sign-in.");
 
                     m_DelayedTokenRequest = request;
 
@@ -434,7 +426,7 @@ namespace Unity.Services.Authentication
         {
             if (IsSignedIn)
             {
-                m_Logger.Info("Making token refresh request...");
+                Logger.LogVerbose("Making token refresh request...");
 
                 if (State != AuthenticationState.Expired)
                 {
@@ -449,19 +441,19 @@ namespace Unity.Services.Authentication
         {
             if (request.RequestFailed)
             {
-                m_Logger.Error($"Request failed: {request.ResponseCode}, {request.ErrorMessage}");
+                Logger.LogError($"Request failed: {request.ResponseCode}, {request.ErrorMessage}");
 
                 // NOTE: depending on how long it took to fail, this might occur before the access token has _actually_ expired.
                 // This is likely safer than risking an expired access token reaching a consuming service.
 
                 if (request.ServerError && request.ResponseCode < 500)
                 {
-                    m_Logger.Warning("Failed to refresh access token due to server error, signing out.");
+                    Logger.LogWarning("Failed to refresh access token due to server error, signing out.");
                     SignOut();
                 }
                 else
                 {
-                    m_Logger.Warning("Failed to refresh access token due to network error or internal server error, will retry later.");
+                    Logger.LogWarning("Failed to refresh access token due to network error or internal server error, will retry later.");
 
                     m_Scheduler.ScheduleAction(RefreshAccessToken, k_ExpiredRefreshAttemptFrequency);
 
@@ -473,15 +465,16 @@ namespace Unity.Services.Authentication
             }
             else
             {
-                var asyncOp = new AuthenticationAsyncOperation(m_Logger);
+                var asyncOp = new AuthenticationAsyncOperation();
+
                 CompleteSignIn(asyncOp, request.ResponseBody);
                 if (asyncOp.Status == AsyncOperationStatus.Succeeded)
                 {
-                    m_Logger.Info("Refresh complete!");
+                    Logger.LogVerbose("Refresh complete!");
                 }
                 else
                 {
-                    m_Logger.Warning("The access token is not valid. Retry JWKS and refresh again.");
+                    Logger.LogWarning("The access token is not valid. Retry JWKS and refresh again.");
 
                     // Refresh failed since we received a bad token. Retry.
                     m_Scheduler.ScheduleAction(RefreshAccessToken, k_ExpiredRefreshAttemptFrequency);
@@ -494,7 +487,7 @@ namespace Unity.Services.Authentication
             if (IsAuthorized &&
                 m_DateTime.UtcNow > m_AccessTokenExpiryTime)
             {
-                m_Logger.Info("Application unpause found the access token to have expired already.");
+                Logger.LogVerbose("Application unpause found the access token to have expired already.");
                 Expire();
                 RefreshAccessToken();
             }
@@ -513,7 +506,7 @@ namespace Unity.Services.Authentication
             // NOTE: always call this at the end of a method where state is changed, so that any consumer
             // that has subscribed to the event will get the correct data for the new state.
 
-            m_Logger.Info($"Moved from state [{State}] to [{newState}]");
+            Logger.LogVerbose($"Moved from state [{State}] to [{newState}]");
 
             var oldState = State;
             State = newState;
@@ -550,9 +543,8 @@ namespace Unity.Services.Authentication
             var exception = new AuthenticationException(
                 AuthenticationError.ClientInvalidUserState,
                 "The player is already signed in. Sign out before attempting to sign in again.");
-            m_Logger.Warning(exception.Message);
 
-            var asyncOp = new AuthenticationAsyncOperation(null);
+            var asyncOp = new AuthenticationAsyncOperation();
             asyncOp.Fail(exception);
             return asyncOp;
         }
@@ -567,13 +559,12 @@ namespace Unity.Services.Authentication
             var exception = new AuthenticationException(
                 AuthenticationError.ClientNoActiveSession,
                 "There is no cached session token.");
-            m_Logger.Warning(exception.Message);
 
             // At this point, the contents of the cache are invalid, and we don't want future
             // SignInAnonymously or SignInWithSessionToken to read the current contents of the key.
             m_Cache.DeleteKey(k_CacheKeySessionToken);
 
-            var asyncOp = new AuthenticationAsyncOperation(null);
+            var asyncOp = new AuthenticationAsyncOperation();
             asyncOp.Fail(exception);
             return asyncOp;
         }
@@ -593,7 +584,7 @@ namespace Unity.Services.Authentication
                 return false;
             }
 
-            m_Logger.Error($"Request failed: {request.ResponseCode}, {request.ErrorMessage}");
+            Logger.LogError($"Request failed: {request.ResponseCode}, {request.ErrorMessage}");
 
             if (request.NetworkError)
             {
@@ -630,7 +621,7 @@ namespace Unity.Services.Authentication
         /// </summary>
         internal AuthenticationAsyncOperation CreateSignInAsyncOperation()
         {
-            var asyncOp = new AuthenticationAsyncOperation(m_Logger);
+            var asyncOp = new AuthenticationAsyncOperation();
             asyncOp.BeforeFail += SendSignInFailedEvent;
 
             return asyncOp;

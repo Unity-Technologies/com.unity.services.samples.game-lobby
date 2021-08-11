@@ -1,4 +1,4 @@
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Placeholder for required <see cref="IServiceComponent"/> registered into a <see cref="CoreRegistry"/>.

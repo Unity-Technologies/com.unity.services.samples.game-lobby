@@ -1,6 +1,5 @@
-using System;
 using Unity.Services.Authentication.Editor.Models;
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Authentication.Editor
 {

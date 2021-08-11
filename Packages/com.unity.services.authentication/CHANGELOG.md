@@ -6,7 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.4.0-preview] - 2021-06-16
+## [0.7.1-preview] - 2021-07-22
+### Changed
+- Updated the core SDK dependency to latest version.
+
+## [0.7.0-preview] - 2021-07-22
+### Changed
+- Updated the core SDK dependency to latest version.
+### Added
+- Add missing xmldoc for the public functions.
+
+## [0.6.0-preview] - 2021-07-15
+### Added
+- Add support for Unity Environments
+
+## [0.5.0-preview] - 2021-06-16
 ### Changed
 - Remove `SetOAuthClient()` as the authentication flow is simplified.
 - Updated the initialization code to initialize with `UnityServices.Initialize()`

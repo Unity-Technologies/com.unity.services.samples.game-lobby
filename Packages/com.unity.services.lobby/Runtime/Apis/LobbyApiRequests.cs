@@ -8,9 +8,9 @@ using Unity.Services.Lobbies.Http;
 using UnityEngine;
 using UnityEngine.Networking;
 using Unity.Services.Lobbies.Models;
-using Unity.Services.Authentication;
+using Unity.Services.Authentication.Internal;
 
-namespace Unity.Services.Lobbies
+namespace Unity.Services.Lobbies.Lobby
 {
     internal static class JsonSerialization
     {
@@ -65,6 +65,11 @@ namespace Unity.Services.Lobbies
         [Preserve]
         public List<string> AddParamsToQueryParams<T>(List<string> queryParams, string key, T value)
         {
+            if (queryParams == null)
+            {
+                queryParams = new List<string>();
+            }
+
             key = UnityWebRequest.EscapeURL(key);
             string valueString = UnityWebRequest.EscapeURL(value.ToString());
             queryParams.Add($"{key}={valueString}");

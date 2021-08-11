@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -33,7 +34,6 @@ namespace Unity.Services.Authentication.Utilities
         const int k_RetryBackoffSeconds = 10;
 
         readonly IScheduler m_Scheduler;
-        readonly ILogger m_Logger;
         readonly WebRequestVerb m_Verb;
         readonly string m_Url;
         readonly IDictionary<string, string> m_Headers;
@@ -54,7 +54,6 @@ namespace Unity.Services.Authentication.Utilities
         internal int RequestTimeout { get; set; }
 
         internal WebRequest(IScheduler scheduler,
-                            ILogger logger,
                             WebRequestVerb verb,
                             string url,
                             IDictionary<string, string> headers,
@@ -64,7 +63,6 @@ namespace Unity.Services.Authentication.Utilities
                             int attempts)
         {
             m_Scheduler = scheduler;
-            m_Logger = logger;
             m_Verb = verb;
             m_Url = url;
             m_Headers = headers;
@@ -78,6 +76,10 @@ namespace Unity.Services.Authentication.Utilities
 
         internal void Send()
         {
+            Logger.LogVerbose($"[WebRequest] {m_Verb.ToString().ToUpper()} {m_Url}\n" +
+                $"{string.Join("\n", m_Headers?.Select(x => x.Key + ": " + x.Value) ?? new string[]{})}\n" +
+                (m_Payload ?? ""));
+
             UnityWebRequest unityWebRequest;
             switch (m_Verb)
             {
@@ -104,7 +106,8 @@ namespace Unity.Services.Authentication.Utilities
                 case WebRequestVerb.Put:
                     if (string.IsNullOrEmpty(m_Payload))
                     {
-                        unityWebRequest = UnityWebRequest.Put(m_Url, string.Empty);
+                        // UnityWebRequest doesn't allow empty put request body.
+                        throw new ArgumentException("PUT payload cannot be empty.");
                     }
                     else
                     {
@@ -119,10 +122,10 @@ namespace Unity.Services.Authentication.Utilities
                     break;
                 case WebRequestVerb.Delete:
                     unityWebRequest = UnityWebRequest.Delete(m_Url);
+                    unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
                     break;
                 default:
-                    unityWebRequest = UnityWebRequest.Get(m_Url);
-                    break;
+                    throw new ArgumentException("Unknown verb " + m_Verb);
             }
 
             if (m_Headers != null)
@@ -151,6 +154,8 @@ namespace Unity.Services.Authentication.Utilities
                 unityWebRequest.error,
                 unityWebRequest.downloadHandler?.text,
                 unityWebRequest.GetResponseHeaders());
+
+            unityWebRequest.Dispose();
         }
 
         internal void RequestCompleted(long responseCode,
@@ -160,12 +165,16 @@ namespace Unity.Services.Authentication.Utilities
             string bodyText,
             IDictionary<string, string> headers)
         {
+            Logger.LogVerbose($"[WebResponse] {m_Verb.ToString().ToUpper()} {m_Url}\n" +
+                $"{string.Join("\n", headers?.Select(x => x.Key + ": " + x.Value) ?? new string[]{})}\n" +
+                $"{bodyText}\n{errorText}\n");
+
             NetworkError = hasNetworkError;
             ServerError = hasServerError;
 
-            if (hasNetworkError && m_Attempts > 0)
+            if (hasNetworkError && m_Scheduler != null && m_Attempts > 0)
             {
-                m_Logger.Warning("Network error detected, retrying...");
+                Logger.LogWarning("Network error detected, retrying...");
 
                 m_Scheduler.ScheduleAction(Send, k_RetryBackoffSeconds);
             }
@@ -186,7 +195,7 @@ namespace Unity.Services.Authentication.Utilities
                         ErrorMessage = errorText;
                     }
 
-                    m_Logger.Warning("Request completed with error: {0}", ErrorMessage);
+                    Logger.LogWarning($"Request completed with error: {ErrorMessage}");
                 }
                 else
                 {
@@ -195,7 +204,7 @@ namespace Unity.Services.Authentication.Utilities
                     // Check if the response body has any contents to parse
                     if (string.IsNullOrEmpty(bodyText))
                     {
-                        m_Logger.Info("Request completed successfully!");
+                        Logger.LogVerbose("Request completed successfully!");
                     }
                     else
                     {
@@ -203,11 +212,12 @@ namespace Unity.Services.Authentication.Utilities
                         {
                             ResponseBody = JsonConvert.DeserializeObject<T>(bodyText);
 
-                            m_Logger.Info("Request completed successfully!");
+                            Logger.LogVerbose("Request completed successfully!");
                         }
                         catch (Exception ex)
                         {
-                            m_Logger.Warning("Failed to deserialize object!" + ex.Message);
+                            Logger.LogError("Failed to deserialize object! " + ex.Message);
+                            Logger.LogException(ex);
                             ErrorMessage = ex.Message;
                             RequestFailed = true;
                         }

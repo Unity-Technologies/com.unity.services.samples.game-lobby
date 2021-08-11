@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Contract for objects allowing to use the <see langword="await"/> keyword on an <see cref="IAsyncOperation"/>.

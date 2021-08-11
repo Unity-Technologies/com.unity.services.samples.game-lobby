@@ -6,8 +6,8 @@ using Unity.Services.Relay.Apis.Allocations;
 using Unity.Services.Relay.Http;
 using Unity.Services.Relay.Scheduler;
 using TaskScheduler = Unity.Services.Relay.Scheduler.TaskScheduler;
-using Unity.Services.Core;
-using Unity.Services.Authentication;
+using Unity.Services.Core.Internal;
+using Unity.Services.Authentication.Internal;
 
 namespace Unity.Services.Relay
 {
@@ -29,14 +29,13 @@ namespace Unity.Services.Relay
         public Task Initialize(CoreRegistry registry)
         {
             _gameObjectFactory = GameObjectFactory.CreateCoreSdkGameObject();
-            var scheduler = _gameObjectFactory.GetComponent<TaskScheduler>();
-            var httpClient = new HttpClient(scheduler);
+            var httpClient = new HttpClient();
             
             var accessTokenAllocationsApi = registry.GetServiceComponent<IAccessToken>();
 
             if (accessTokenAllocationsApi != null)
             {
-                RelayService.AllocationsApiClient = new AllocationsApiClient(httpClient, scheduler, accessTokenAllocationsApi);
+                RelayService.AllocationsApiClient = new AllocationsApiClient(httpClient, accessTokenAllocationsApi);
             }
             
             return Task.CompletedTask;

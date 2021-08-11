@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
+using Unity.Services.Core.Internal;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -23,6 +24,7 @@ namespace Unity.Services.Core.Editor
             {
                 resultAsyncOp.Fail(ex);
             }
+
             return resultAsyncOp;
         }
 
@@ -60,6 +62,7 @@ namespace Unity.Services.Core.Editor
                 {
                     throw new RequestNotAuthorizedException();
                 }
+
                 var currentUserRole = UserRole.Unknown;
                 var userList = ExtractUserListFromUnityWebRequest(getProjectUsersRequest);
                 if (userList != null)
@@ -78,6 +81,7 @@ namespace Unity.Services.Core.Editor
                 {
                     throw new UserListNotFoundException();
                 }
+
                 resultAsyncOp.Succeed(currentUserRole);
             }
             catch (Exception ex)
@@ -100,6 +104,7 @@ namespace Unity.Services.Core.Editor
                     return userList;
                 }
             }
+
             return null;
         }
 
@@ -112,48 +117,73 @@ namespace Unity.Services.Core.Editor
                     return user;
                 }
             }
+
             return null;
         }
 
+        /// <remarks>
+        /// Serialized field don't follow naming conventions for interoperability reasons.
+        /// </remarks>
+        [Serializable]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         class UserList
         {
-            [JsonProperty("users")]
-            public User[] Users { get; set; }
+            [SerializeField]
+            User[] users;
+
+            public User[] Users => users;
         }
 
+        /// <remarks>
+        /// Serialized field don't follow naming conventions for interoperability reasons.
+        /// </remarks>
+        [Serializable]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         class User
         {
-            [JsonProperty("foreign_key")]
-            public string Id { get; set; }
+            [SerializeField]
+            string foreign_key;
 
-            [JsonProperty("name")]
-            public string Name { get; set; }
+            public string Id => foreign_key;
 
-            [JsonProperty("email")]
-            public string Email { get; set; }
+            [SerializeField]
+            string name;
 
-            [JsonProperty("access_granted_by")]
-            public string AccessGrantedBy { get; set; }
+            public string Name => name;
 
-            [JsonProperty("role")]
-            public string RawRole { get; set; }
+            [SerializeField]
+            string email;
+
+            public string Email => email;
+
+            [SerializeField]
+            string access_granted_by;
+
+            public string AccessGrantedBy => access_granted_by;
+
+            [SerializeField]
+            string role;
 
             public UserRole Role
             {
                 get
                 {
-                    if (Enum.TryParse(RawRole, true, out UserRole userRole))
+                    if (Enum.TryParse(role, true, out UserRole userRole))
                     {
                         return userRole;
                     }
+
                     throw new UnknownUserRoleException();
                 }
             }
         }
 
         internal class RequestNotAuthorizedException : Exception {}
+
         class CurrentUserNotFoundException : Exception {}
+
         class UserListNotFoundException : Exception {}
+
         class UnknownUserRoleException : Exception {}
     }
 }

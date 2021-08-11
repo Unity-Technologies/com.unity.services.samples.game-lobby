@@ -38,3 +38,22 @@ namespace Unity.Services.Core
         public static System.Threading.Tasks.Task Initialize(Unity.Services.Core.InitializationOptions options);
     }
 }
+
+namespace Unity.Services.Privacy
+{
+    public enum ConsentStatus
+    {
+        public const Unity.Services.Privacy.ConsentStatus NotRequested = 0;
+        public const Unity.Services.Privacy.ConsentStatus OptedIn = 1;
+        public const Unity.Services.Privacy.ConsentStatus OptedOut = 2;
+        public int value__;
+    }
+
+    public enum Legislation
+    {
+        public const Unity.Services.Privacy.Legislation CCPA = 1;
+        public const Unity.Services.Privacy.Legislation GDPR = 2;
+        public const Unity.Services.Privacy.Legislation None = 0;
+        public int value__;
+    }
+}

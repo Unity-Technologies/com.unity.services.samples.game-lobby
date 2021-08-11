@@ -20,7 +20,7 @@ namespace Unity.Services.Lobbies.Http
             {
                 return JsonConvert.SerializeObject(obj);
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
                 throw new System.Exception("Failed to convert JsonObject to string.");
             }
@@ -44,7 +44,7 @@ namespace Unity.Services.Lobbies.Http
             {
                 throw new DeserializationException(e.Message);
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
                 throw new DeserializationException("Unable to deserialize object.");
             }

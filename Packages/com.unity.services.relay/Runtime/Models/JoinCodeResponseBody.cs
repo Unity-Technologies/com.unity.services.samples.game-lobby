@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Unity.Services.Relay.Http;
 
 
 
@@ -11,14 +12,21 @@ namespace Unity.Services.Relay.Models
 {
     /// <summary>
     /// JoinCodeResponseBody model
-    /// </summary>
     /// <param name="meta">meta param</param>
     /// <param name="links">links param</param>
     /// <param name="data">data param</param>
+    /// </summary>
+
     [Preserve]
     [DataContract(Name = "JoinCodeResponseBody")]
     public class JoinCodeResponseBody
     {
+        /// <summary>
+        /// Creates an instance of JoinCodeResponseBody.
+        /// </summary>
+        /// <param name="meta">meta param</param>
+        /// <param name="links">links param</param>
+        /// <param name="data">data param</param>
         [Preserve]
         public JoinCodeResponseBody(ResponseMeta meta, ResponseLinks links, JoinCodeData data)
         {
@@ -27,6 +35,7 @@ namespace Unity.Services.Relay.Models
             Data = data;
         }
 
+    
         [Preserve]
         [DataMember(Name = "meta", IsRequired = true, EmitDefaultValue = true)]
         public ResponseMeta Meta{ get; }

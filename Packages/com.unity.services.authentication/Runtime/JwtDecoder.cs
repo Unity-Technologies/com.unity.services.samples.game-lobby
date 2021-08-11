@@ -24,12 +24,10 @@ namespace Unity.Services.Authentication
         static readonly char[] k_JwtSeparator = { '.' };
 
         readonly IDateTimeWrapper m_DateTime;
-        readonly ILogger m_Logger;
 
-        internal JwtDecoder(IDateTimeWrapper dateTime, ILogger logger)
+        internal JwtDecoder(IDateTimeWrapper dateTime)
         {
             m_DateTime = dateTime;
-            m_Logger = logger;
         }
 
         public T Decode<T>(string token, WellKnownKeys keys) where T : BaseJwt
@@ -51,7 +49,7 @@ namespace Unity.Services.Authentication
                 var secondsSinceEpoch = m_DateTime.SecondsSinceUnixEpoch();
                 if (secondsSinceEpoch >= payloadData.ExpirationTimeUnix)
                 {
-                    m_Logger.Error("Token has expired.");
+                    Logger.LogError("Token has expired.");
                     return null;
                 }
 
@@ -63,11 +61,11 @@ namespace Unity.Services.Authentication
                     return payloadData;
                 }
 
-                m_Logger.Error("Token signature could not be verified.");
+                Logger.LogError("Token signature could not be verified.");
                 return null;
             }
 
-            m_Logger.Error($"That is not a valid token (expected 3 parts but has {parts.Length}).");
+            Logger.LogError($"That is not a valid token (expected 3 parts but has {parts.Length}).");
             return null;
         }
 
@@ -80,13 +78,13 @@ namespace Unity.Services.Authentication
                 var verified = Verify(header, payload, signature, Base64UrlDecode(key.N), Base64UrlDecode(key.E));
                 if (!verified)
                 {
-                    m_Logger.Error("Signature failed verification!");
+                    Logger.LogError("Signature failed verification!");
                 }
 
                 return verified;
             }
 
-            m_Logger.Error("Unable to verify signature, does not use a well-known key ID.");
+            Logger.LogError("Unable to verify signature, does not use a well-known key ID.");
             return false;
         }
 

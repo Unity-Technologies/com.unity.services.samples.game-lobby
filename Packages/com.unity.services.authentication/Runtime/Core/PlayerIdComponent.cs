@@ -1,4 +1,5 @@
 using System;
+using Unity.Services.Authentication.Internal;
 
 namespace Unity.Services.Authentication
 {

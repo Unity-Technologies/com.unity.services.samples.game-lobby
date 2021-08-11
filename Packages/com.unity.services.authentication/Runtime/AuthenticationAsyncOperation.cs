@@ -1,19 +1,18 @@
 using System;
 using System.Collections;
-using Unity.Services.Authentication.Utilities;
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
+using AsyncOperation = Unity.Services.Core.Internal.AsyncOperation;
+using Logger = Unity.Services.Authentication.Utilities.Logger;
 
 namespace Unity.Services.Authentication
 {
     class AuthenticationAsyncOperation : IAsyncOperation
     {
-        ILogger m_Logger;
         AsyncOperation m_AsyncOperation;
         AuthenticationException m_AuthenticationException;
 
-        public AuthenticationAsyncOperation(ILogger logger)
+        public AuthenticationAsyncOperation()
         {
-            m_Logger = logger;
             m_AsyncOperation = new AsyncOperation();
             m_AsyncOperation.SetInProgress();
         }
@@ -43,7 +42,7 @@ namespace Unity.Services.Authentication
             {
                 m_AuthenticationException = new AuthenticationException(AuthenticationError.UnknownError, null, innerException);
             }
-            LogAuthenticationException(m_AuthenticationException);
+            Logger.LogException(m_AuthenticationException);
 
             BeforeFail?.Invoke(this);
             m_AsyncOperation.Fail(m_AuthenticationException);
@@ -108,20 +107,5 @@ namespace Unity.Services.Authentication
 
         /// <inheritdoc/>
         object IEnumerator.Current => null;
-
-        void LogAuthenticationException(AuthenticationException exception)
-        {
-            if (m_Logger == null)
-            {
-                return;
-            }
-
-            var logMessage = exception.Message;
-            if (exception.InnerException != null)
-            {
-                logMessage += $" cause: ${exception.InnerException}";
-            }
-            m_Logger.Error(logMessage);
-        }
     }
 }

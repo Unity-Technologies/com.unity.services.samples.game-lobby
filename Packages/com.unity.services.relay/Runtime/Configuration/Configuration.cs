@@ -8,12 +8,12 @@ namespace Unity.Services.Relay
     public class Configuration
     {
         public string BasePath;
-        public int RequestTimeout;
-        public int NumberOfRetries;
+        public int? RequestTimeout;
+        public int? NumberOfRetries;
         public IDictionary<string, string> Headers;
         
 
-        public Configuration(string basePath, int requestTimeout, int numRetries, IDictionary<string, string> headers)
+        public Configuration(string basePath, int? requestTimeout, int? numRetries, IDictionary<string, string> headers)
         {
             BasePath = basePath;
             RequestTimeout = requestTimeout;
@@ -60,8 +60,10 @@ namespace Unity.Services.Relay
                 }
             }
 
-            mergedConfig.Headers = headers;
-            
+            mergedConfig.Headers = headers;            
+            mergedConfig.RequestTimeout = mergedConfig.RequestTimeout ?? b.RequestTimeout;
+            mergedConfig.NumberOfRetries = mergedConfig.NumberOfRetries ?? b.NumberOfRetries;
+
 
             return mergedConfig;
         }

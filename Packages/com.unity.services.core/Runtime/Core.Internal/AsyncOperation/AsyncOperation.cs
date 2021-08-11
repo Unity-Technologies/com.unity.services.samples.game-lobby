@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Default implementation for <see cref="IAsyncOperation"/>.

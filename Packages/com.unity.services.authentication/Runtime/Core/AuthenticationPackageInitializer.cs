@@ -1,9 +1,9 @@
-using System;
 using System.Threading.Tasks;
+using Unity.Services.Authentication.Internal;
 using Unity.Services.Authentication.Utilities;
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
+using Unity.Services.Core.Environments.Internal;
 using UnityEngine;
-using Logger = Unity.Services.Authentication.Utilities.Logger;
 
 namespace Unity.Services.Authentication
 {
@@ -17,21 +17,18 @@ namespace Unity.Services.Authentication
 
         public Task Initialize(CoreRegistry registry)
         {
-            var logger = new Logger("[Authentication]");
-
             var dateTime = new DateTimeWrapper();
-            var networkUtilities = new NetworkingUtilities(Scheduler.Instance, logger);
+            var networkUtilities = new NetworkingUtilities(Scheduler.Instance);
             var networkClient = new AuthenticationNetworkClient(k_UasHost,
                 Application.cloudProjectId,
+                registry.GetServiceComponent<IEnvironments>(),
                 new CodeChallengeGenerator(),
-                networkUtilities,
-                logger);
+                networkUtilities);
             var authenticationService = new AuthenticationServiceInternal(networkClient,
-                new JwtDecoder(dateTime, logger),
+                new JwtDecoder(dateTime),
                 new PlayerPrefsCache("unity.services.authentication"),
                 Scheduler.Instance,
-                dateTime,
-                logger);
+                dateTime);
 
             AuthenticationService.Instance = authenticationService;
             registry.RegisterServiceComponent<IPlayerId>(new PlayerIdComponent(authenticationService));
@@ -44,6 +41,7 @@ namespace Unity.Services.Authentication
         static void Register()
         {
             CoreRegistry.Instance.RegisterPackage(new AuthenticationPackageInitializer())
+                .DependsOn<IEnvironments>()
                 .ProvidesComponent<IPlayerId>()
                 .ProvidesComponent<IAccessToken>();
         }

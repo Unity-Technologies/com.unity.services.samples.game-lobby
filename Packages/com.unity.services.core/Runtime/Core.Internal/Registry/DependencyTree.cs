@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Contain dependency relations between <see cref="IInitializablePackage"/>
@@ -27,7 +27,10 @@ namespace Unity.Services.Core
         /// </summary>
         public Dictionary<int, List<int>> PackageTypeHashToComponentTypeHashDependencies;
 
-        /// <inheritdoc cref="CoreRegistry.ComponentTypeHashToInstance"/>
+        /// <summary>
+        /// Key: Hash code of a <see cref="IServiceComponent"/> type.
+        /// Value: Component instance.
+        /// </summary>
         public readonly Dictionary<int, IServiceComponent> ComponentTypeHashToInstance;
 
         internal DependencyTree()

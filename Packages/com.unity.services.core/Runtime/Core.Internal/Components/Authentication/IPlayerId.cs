@@ -1,7 +1,7 @@
 using System;
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
 
-namespace Unity.Services.Authentication
+namespace Unity.Services.Authentication.Internal
 {
     /// <summary>
     /// Contract for objects providing information with the player identification (PlayerID) for currently signed in player.

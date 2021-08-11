@@ -1,6 +1,6 @@
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
 
-namespace Unity.Services.Authentication
+namespace Unity.Services.Authentication.Internal
 {
     /// <summary>
     /// Contract for objects providing an access token to access remote services.

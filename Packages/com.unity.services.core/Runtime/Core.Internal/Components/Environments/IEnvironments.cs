@@ -1,4 +1,6 @@
-namespace Unity.Services.Core.Environments
+using Unity.Services.Core.Internal;
+
+namespace Unity.Services.Core.Environments.Internal
 {
     /// <summary>
     /// Component providing the Unity Service Environment

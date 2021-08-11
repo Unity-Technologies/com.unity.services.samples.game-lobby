@@ -23,6 +23,7 @@ namespace Unity.Services.Core.Editor
             var formattedUrl = editorGameService.GetFormattedDashboardUrl();
             if (Uri.IsWellFormedUriString(formattedUrl, UriKind.Absolute))
             {
+                EditorGameServiceAnalyticsSender.SendProjectSettingsGoToDashboardEvent(editorGameService.Identifier.GetKey());
                 Application.OpenURL(formattedUrl);
             }
             else
