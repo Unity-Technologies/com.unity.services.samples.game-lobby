@@ -30,7 +30,6 @@ namespace Test
         public void Teardown()
         {
             m_auth?.Dispose();
-            LogAssert.ignoreFailingMessages = false;
         }
 
         /// <summary>
@@ -40,7 +39,6 @@ namespace Test
         [UnityTest]
         public IEnumerator DoBaseRoundTrip()
         {
-            LogAssert.ignoreFailingMessages = true;
             if (!m_didSigninComplete)
                 yield return new WaitForSeconds(3);
             if (!m_didSigninComplete)

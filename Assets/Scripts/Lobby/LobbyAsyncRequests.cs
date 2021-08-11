@@ -53,6 +53,7 @@ namespace LobbyRelaySample
         {
             m_currentLobbyId = null;
             m_lastKnownLobby = null;
+            m_heartbeatTime = 0;
         }
 
         private void UpdateLobby(float unused)

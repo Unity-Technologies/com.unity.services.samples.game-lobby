@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
@@ -45,7 +46,6 @@ namespace Test
         public void Teardown()
         {
             m_auth?.Dispose();
-            LogAssert.ignoreFailingMessages = false;
         }
 
         /// <summary>
@@ -55,8 +55,6 @@ namespace Test
         public IEnumerator DoRoundtrip()
         {
             #region Setup
-            LogAssert.ignoreFailingMessages = true; // Not sure why, but when auth logs in, it sometimes generates an error: "A Native Collection has not been disposed[...]." We don't want this to cause test failures, since in practice it *seems* to not negatively impact behavior.
-
             // Wait a reasonable amount of time for sign-in to complete.
             if (!m_didSigninComplete)
                 yield return new WaitForSeconds(3);
@@ -147,7 +145,6 @@ namespace Test
 
             // Some error messages might be asynchronous, so to reduce spillover into other tests, just wait here for a bit before proceeding.
             yield return new WaitForSeconds(3);
-            LogAssert.ignoreFailingMessages = false;
         }
 
         /// <summary>
@@ -156,7 +153,7 @@ namespace Test
         [UnityTest]
         public IEnumerator OnCompletesOnFailure()
         {
-            LogAssert.ignoreFailingMessages = true;
+            LogAssert.Expect(LogType.Exception, new Regex(".*400 Bad Request.*"));
             if (!m_didSigninComplete)
                 yield return new WaitForSeconds(3);
             if (!m_didSigninComplete)
