@@ -1,0 +1,23 @@
+{
+    "name": "Unity.Services.Authentication.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Services.Core.Editor",
+        "Unity.Services.Core",
+        "Unity.Services.Core.Internal",
+        "Unity.Settings.Editor",
+        "Unity.Services.Authentication",
+        "Unity.Services.Authentication.Models"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

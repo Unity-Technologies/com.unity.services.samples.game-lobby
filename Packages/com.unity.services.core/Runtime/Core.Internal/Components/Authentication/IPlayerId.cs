@@ -1,0 +1,21 @@
+using System;
+using Unity.Services.Core.Internal;
+
+namespace Unity.Services.Authentication.Internal
+{
+    /// <summary>
+    /// Contract for objects providing information with the player identification (PlayerID) for currently signed in player.
+    /// </summary>
+    public interface IPlayerId : IServiceComponent
+    {
+        /// <summary>
+        /// The ID of the player.
+        /// </summary>
+        string PlayerId { get; }
+
+        /// <summary>
+        /// Event raised when the player id changed.
+        /// </summary>
+        event Action<string> PlayerIdChanged;
+    }
+}

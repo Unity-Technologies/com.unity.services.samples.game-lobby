@@ -1,0 +1,59 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.Services.Core
+{
+    public class InitializationOptions
+    {
+        public InitializationOptions() {}
+        public Unity.Services.Core.InitializationOptions SetOption(string key, bool value);
+        public Unity.Services.Core.InitializationOptions SetOption(string key, int value);
+        public Unity.Services.Core.InitializationOptions SetOption(string key, float value);
+        public Unity.Services.Core.InitializationOptions SetOption(string key, string value);
+        public bool TryGetOption(string key, out bool option);
+        public bool TryGetOption(string key, out int option);
+        public bool TryGetOption(string key, out float option);
+        public bool TryGetOption(string key, out string option);
+    }
+
+    public class ServicesInitializationException : System.Exception
+    {
+        public ServicesInitializationException() {}
+        public ServicesInitializationException(string message) {}
+        public ServicesInitializationException(string message, System.Exception innerException) {}
+    }
+
+    public enum ServicesInitializationState
+    {
+        public const Unity.Services.Core.ServicesInitializationState Initialized = 2;
+        public const Unity.Services.Core.ServicesInitializationState Initializing = 1;
+        public const Unity.Services.Core.ServicesInitializationState Uninitialized = 0;
+        public int value__;
+    }
+
+    public static class UnityServices
+    {
+        public static Unity.Services.Core.ServicesInitializationState State { get; }
+        public static System.Threading.Tasks.Task Initialize();
+        public static System.Threading.Tasks.Task Initialize(Unity.Services.Core.InitializationOptions options);
+    }
+}
+
+namespace Unity.Services.Privacy
+{
+    public enum ConsentStatus
+    {
+        public const Unity.Services.Privacy.ConsentStatus NotRequested = 0;
+        public const Unity.Services.Privacy.ConsentStatus OptedIn = 1;
+        public const Unity.Services.Privacy.ConsentStatus OptedOut = 2;
+        public int value__;
+    }
+
+    public enum Legislation
+    {
+        public const Unity.Services.Privacy.Legislation CCPA = 1;
+        public const Unity.Services.Privacy.Legislation GDPR = 2;
+        public const Unity.Services.Privacy.Legislation None = 0;
+        public int value__;
+    }
+}

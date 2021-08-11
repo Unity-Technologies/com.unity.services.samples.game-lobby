@@ -1,0 +1,53 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Unity.Services.Authentication
+{
+    public static class AuthenticationError
+    {
+        public const string AuthCodeNotFound = AUTH_CODE_NOT_FOUND;
+        public const string ClientInvalidUserState = CLIENT_INVALID_USER_STATE;
+        public const string ClientNoActiveSession = CLIENT_NO_ACTIVE_SESSION;
+        public const string EntityExists = ENTITY_EXISTS;
+        public const string InvalidAccessToken = INVALID_ACCESS_TOKEN;
+        public const string InvalidParameters = INVALID_PARAMETERS;
+        public const string NetworkError = NETWORK_ERROR;
+        public const string PermissionDenied = PERMISSION_DENIED;
+        public const string UnknownError = UNKNOWN_ERROR;
+    }
+
+    public class AuthenticationException : System.Exception
+    {
+        public string ErrorCode { get; }
+        public AuthenticationException(string errorCode) {}
+        public AuthenticationException(string errorCode, string message) {}
+        public AuthenticationException(string errorCode, string message, System.Exception innerException) {}
+    }
+
+    public static class AuthenticationService
+    {
+        public static Unity.Services.Authentication.IAuthenticationService Instance { get; }
+    }
+
+    public interface IAuthenticationService
+    {
+        public event System.Action SignedIn;
+        public event System.Action SignedOut;
+        public event System.Action<Unity.Services.Authentication.AuthenticationException> SignInFailed;
+        public abstract string AccessToken { get; }
+        public abstract bool IsSignedIn { get; }
+        public abstract string PlayerId { get; }
+        public abstract void ApplicationUnpaused();
+        public abstract System.Threading.Tasks.Task LinkWithAppleAsync(string idToken);
+        public abstract System.Threading.Tasks.Task LinkWithFacebookAsync(string accessToken);
+        public abstract System.Threading.Tasks.Task LinkWithGoogleAsync(string idToken);
+        public abstract System.Threading.Tasks.Task LinkWithSteamAsync(string sessionTicket);
+        public abstract System.Threading.Tasks.Task SignInAnonymouslyAsync();
+        public abstract System.Threading.Tasks.Task SignInWithAppleAsync(string idToken);
+        public abstract System.Threading.Tasks.Task SignInWithFacebookAsync(string accessToken);
+        public abstract System.Threading.Tasks.Task SignInWithGoogleAsync(string idToken);
+        public abstract System.Threading.Tasks.Task SignInWithSessionTokenAsync();
+        public abstract System.Threading.Tasks.Task SignInWithSteamAsync(string sessionTicket);
+        public abstract void SignOut();
+    }
+}
