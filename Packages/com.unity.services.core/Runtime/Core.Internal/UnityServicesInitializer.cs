@@ -1,14 +1,20 @@
-using Unity.Services.Authentication;
 using UnityEngine;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
-    class UnityServicesInitializer
+    static class UnityServicesInitializer
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void Initialize()
+        static void CreateStaticInstance()
         {
-            UnityServices.Instance = new UnityServicesInternal();
+            UnityServices.Instance = new UnityServicesInternal(CoreRegistry.Instance);
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void EnableServicesInitialization()
+        {
+            var instance = (UnityServicesInternal)UnityServices.Instance;
+            instance.EnableInitialization();
         }
     }
 }

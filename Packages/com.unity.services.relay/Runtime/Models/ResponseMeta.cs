@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Unity.Services.Relay.Http;
 
 
 
@@ -11,13 +12,19 @@ namespace Unity.Services.Relay.Models
 {
     /// <summary>
     /// Metadata for a response returned from an API call
-    /// </summary>
-    /// <param name="request_id">Unique ID for this request that triggered this response</param>
+    /// <param name="requestId">Unique ID for this request that triggered this response</param>
     /// <param name="status">Indicates the HTTP status code of the response</param>
+    /// </summary>
+
     [Preserve]
     [DataContract(Name = "ResponseMeta")]
     public class ResponseMeta
     {
+        /// <summary>
+        /// Metadata for a response returned from an API call
+        /// </summary>
+        /// <param name="requestId">Unique ID for this request that triggered this response</param>
+        /// <param name="status">Indicates the HTTP status code of the response</param>
         [Preserve]
         public ResponseMeta(string requestId, int status)
         {
@@ -25,10 +32,17 @@ namespace Unity.Services.Relay.Models
             Status = status;
         }
 
+    
+        /// <summary>
+        /// Unique ID for this request that triggered this response
+        /// </summary>
         [Preserve]
-        [DataMember(Name = "request_id", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "requestId", IsRequired = true, EmitDefaultValue = true)]
         public string RequestId{ get; }
 
+        /// <summary>
+        /// Indicates the HTTP status code of the response
+        /// </summary>
         [Preserve]
         [DataMember(Name = "status", IsRequired = true, EmitDefaultValue = true)]
         public int Status{ get; }

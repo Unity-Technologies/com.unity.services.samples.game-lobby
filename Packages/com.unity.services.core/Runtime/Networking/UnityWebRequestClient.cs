@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine.Networking;
+using Unity.Services.Core.Internal;
+using Unity.Services.Core.Networking.Internal;
 
 namespace Unity.Services.Core.Networking
 {

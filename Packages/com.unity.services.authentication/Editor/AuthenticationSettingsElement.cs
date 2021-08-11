@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Services.Authentication.Editor.Models;
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Helper object to sort <see cref="IInitializablePackage"/> stored into a

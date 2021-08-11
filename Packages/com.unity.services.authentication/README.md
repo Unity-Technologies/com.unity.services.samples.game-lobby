@@ -4,7 +4,7 @@ This package provides a system for working with the Unity User Authentication Se
 
 ## Integration
 
-The Authentication SDK is currently available on the UPM Candidates Repository. You will need to add the UPM Candidates Registry (https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates) as a Scoped Registry to your project. Once you have done that, you can add the package `com.unity.services.authentication` with the latest version: `0.5.0-preview`.
+The Authentication SDK is currently available on the UPM Candidates Repository. You will need to add the UPM Candidates Registry (https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates) as a Scoped Registry to your project. Once you have done that, you can add the package `com.unity.services.authentication` with the latest version: `0.7.1-preview`.
 
 Once you have installed the Authentication package, you must link your Unity project to a Unity Cloud Project using the Services window.
 

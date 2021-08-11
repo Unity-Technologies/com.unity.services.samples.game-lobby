@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Contract for objects able to register a set of <see cref="IServiceComponent"/>

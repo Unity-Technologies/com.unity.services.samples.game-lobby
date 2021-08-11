@@ -24,10 +24,9 @@ namespace Unity.Services.Authentication
         public AuthenticationException(string errorCode, string message, System.Exception innerException) {}
     }
 
-    public class AuthenticationService
+    public static class AuthenticationService
     {
         public static Unity.Services.Authentication.IAuthenticationService Instance { get; }
-        public AuthenticationService() {}
     }
 
     public interface IAuthenticationService
@@ -50,17 +49,5 @@ namespace Unity.Services.Authentication
         public abstract System.Threading.Tasks.Task SignInWithSessionTokenAsync();
         public abstract System.Threading.Tasks.Task SignInWithSteamAsync(string sessionTicket);
         public abstract void SignOut();
-    }
-}
-
-namespace Unity.Services.Authentication.Utilities
-{
-    public enum LogLevel
-    {
-        public const Unity.Services.Authentication.Utilities.LogLevel ErrorsOnly = 1;
-        public const Unity.Services.Authentication.Utilities.LogLevel Off = 0;
-        public int value__;
-        public const Unity.Services.Authentication.Utilities.LogLevel Verbose = 3;
-        public const Unity.Services.Authentication.Utilities.LogLevel WarningsAndErrors = 2;
     }
 }

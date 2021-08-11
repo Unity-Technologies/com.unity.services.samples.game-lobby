@@ -1,25 +1,24 @@
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Handle to a registered <see cref="IInitializablePackage"/>.
-    /// Provides a fluent interface to define its dependencies and provided components and services.
+    /// Provides a fluent interface to define its components dependencies and provisions.
     /// </summary>
     public readonly struct CoreRegistration
     {
         /// <summary>
-        /// The registry to register additional dependencies and provisions.
+        /// The registry containing dependencies and provisions.
         /// </summary>
-        readonly CoreRegistry m_Registry;
+        readonly IPackageRegistry m_Registry;
 
         /// <summary>
         /// The hash of the type of the handled <see cref="IInitializablePackage"/>.
         /// </summary>
         readonly int m_PackageHash;
 
-        internal CoreRegistration(CoreRegistry registry, int packageHash)
+        internal CoreRegistration(IPackageRegistry registry, int packageHash)
         {
             m_Registry = registry;
-
             m_PackageHash = packageHash;
         }
 
@@ -36,7 +35,6 @@ namespace Unity.Services.Core
             where T : IServiceComponent
         {
             m_Registry.RegisterDependency<T>(m_PackageHash);
-
             return this;
         }
 
@@ -53,7 +51,6 @@ namespace Unity.Services.Core
             where T : IServiceComponent
         {
             m_Registry.RegisterOptionalDependency<T>(m_PackageHash);
-
             return this;
         }
 
@@ -70,7 +67,6 @@ namespace Unity.Services.Core
             where T : IServiceComponent
         {
             m_Registry.RegisterProvision<T>(m_PackageHash);
-
             return this;
         }
     }

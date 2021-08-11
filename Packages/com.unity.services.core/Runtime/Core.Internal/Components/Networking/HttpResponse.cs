@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Unity.Services.Core.Networking
+namespace Unity.Services.Core.Networking.Internal
 {
     /// <summary>
     /// Contain all data from a server response to a <see cref="HttpRequest"/>.

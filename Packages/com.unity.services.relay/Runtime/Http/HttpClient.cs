@@ -21,61 +21,9 @@ namespace Unity.Services.Relay.Http
         };
 
         private static readonly List<int> ErrorCodes = new List<int> {408, 500, 502, 503, 504};
-        private TaskScheduler _scheduler;
 
-        public HttpClient(TaskScheduler scheduler)
+        public HttpClient()
         {
-            _scheduler = scheduler;
-        }
-
-        public void Get(string url, Dictionary<string, string> headers, Action<HttpClientResponse> onCompleted,
-            int requestTimeout = 10)
-        {
-            _scheduler.ScheduleMainThreadTask(() =>
-            {
-                _scheduler.StartCoroutine(ProcessRequest(UnityWebRequest.kHttpVerbGET, url, headers, null,
-                    requestTimeout, onCompleted));
-            });
-        }
-
-        public void Delete(string url, Dictionary<string, string> headers, Action<HttpClientResponse> onCompleted,
-            int requestTimeout = 10)
-        {
-            _scheduler.ScheduleMainThreadTask(() =>
-            {
-                _scheduler.StartCoroutine(ProcessRequest(UnityWebRequest.kHttpVerbDELETE, url, headers, null,
-                    requestTimeout, onCompleted));
-            });
-        }
-
-        public void Post(string url, byte[] body, Dictionary<string, string> headers,
-            Action<HttpClientResponse> onCompleted, int requestTimeout = 10)
-        {
-            _scheduler.ScheduleMainThreadTask(() =>
-            {
-                _scheduler.StartCoroutine(ProcessRequest(UnityWebRequest.kHttpVerbPOST, url, headers, body,
-                    requestTimeout, onCompleted));
-            });
-        }
-
-        public void Put(string url, byte[] body, Dictionary<string, string> headers,
-            Action<HttpClientResponse> onCompleted, int requestTimeout = 10)
-        {
-            _scheduler.ScheduleMainThreadTask(() =>
-            {
-                _scheduler.StartCoroutine(ProcessRequest(UnityWebRequest.kHttpVerbPUT, url, headers, body,
-                    requestTimeout, onCompleted));
-            });
-        }
-
-        public void MakeRequest(string method, string url, byte[] body, Dictionary<string, string> headers,
-            Action<HttpClientResponse> onCompleted, int requestTimeout = 10)
-        {
-            _scheduler.ScheduleMainThreadTask(() =>
-            {
-                _scheduler.StartCoroutine(ProcessRequest(method.ToUpper(), url, headers, body, requestTimeout,
-                    onCompleted));
-            });
         }
 
         public async Task<HttpClientResponse> MakeRequestAsync(string method, string url, byte[] body,

@@ -1,161 +1,27 @@
 using System;
-using System.Text;
+using System.Diagnostics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Unity.Services.Authentication.Utilities
 {
-    /// <summary>
-    /// LogLevel is used to control the logs that are written to Unity for debugging.
-    /// </summary>
-    public enum LogLevel
+    static class Logger
     {
-        /// <summary>
-        /// Disable all logs from Authentication SDK.
-        /// </summary>
-        Off = 0,
+        const string k_Tag = "[Authentication]";
 
-        /// <summary>
-        /// Show errors in Authentication SDK.
-        /// </summary>
-        ErrorsOnly = 1,
+        const string k_VerboseLoggingDefine = "ENABLE_UNITY_AUTHENTICATION_VERBOSE_LOGGING";
 
-        /// <summary>
-        /// Show warnings and errors in Authentication SDK.
-        /// </summary>
-        WarningsAndErrors = 2,
+        public static void Log(object message) => Debug.unityLogger.Log(k_Tag, message);
+        public static void LogWarning(object message) => Debug.unityLogger.LogWarning(k_Tag, message);
+        public static void LogError(object message) => Debug.unityLogger.LogError(k_Tag, message);
+        public static void LogException(Exception exception) => Debug.unityLogger.Log(LogType.Exception, k_Tag, exception);
 
-        /// <summary>
-        /// Show all logs in Authentication SDK.
-        /// </summary>
-        Verbose = 3
-    }
+        [Conditional("UNITY_ASSERTIONS")]
+        public static void LogAssertion(object message) => Debug.unityLogger.Log(LogType.Assert, k_Tag, message);
 
-    interface ILogger
-    {
-        void Info(string message);
-        void Warning(string message);
-        void Error(string message);
-
-        void Info(string format, params object[] args);
-        void Warning(string format, params object[] args);
-        void Error(string format, params object[] args);
-    }
-
-    class Logger : ILogger
-    {
-        readonly string m_Prefix;
-
-        delegate void LogMethod(object message);
-
-        public LogLevel LogLevel { get; private set; }
-
-        public Logger(string prefix, LogLevel logLevel = LogLevel.ErrorsOnly)
-        {
-            m_Prefix = prefix;
-            LogLevel = logLevel;
-        }
-
-        public void SetLogLevel(LogLevel level)
-        {
-            LogLevel = level;
-        }
-
-        public void Info(string message)
-        {
-            if (LogLevel >= LogLevel.Verbose)
-            {
-                Log(Debug.Log, message);
-            }
-        }
-
-        public void Info(string format, params object[] args)
-        {
-            if (LogLevel >= LogLevel.Verbose)
-            {
-                Log(Debug.Log, format, args);
-            }
-        }
-
-        public void Warning(string message)
-        {
-            if (LogLevel >= LogLevel.WarningsAndErrors)
-            {
-                Log(Debug.LogWarning, message);
-            }
-        }
-
-        public void Warning(string format, params object[] args)
-        {
-            if (LogLevel >= LogLevel.WarningsAndErrors)
-            {
-                Log(Debug.LogWarning, format, args);
-            }
-        }
-
-        public void Error(string message)
-        {
-            if (LogLevel >= LogLevel.ErrorsOnly)
-            {
-                Log(Debug.LogError, message);
-            }
-        }
-
-        public void Error(string format, params object[] args)
-        {
-            if (LogLevel >= LogLevel.ErrorsOnly)
-            {
-                Log(Debug.LogError, format, args);
-            }
-        }
-
-        void Log(LogMethod log, string format, params object[] args)
-        {
-            try
-            {
-                var sb = new StringBuilder();
-                sb.Append(m_Prefix);
-                sb.Append(" ");
-                if (args?.Length == 0)
-                {
-                    // There is no args, so it's supposed to be a raw string to log.
-                    // Don't do AppendFormat since it will throw FormatException if the format string contains
-                    // placeholder character {}.
-                    sb.Append(format);
-                }
-                else
-                {
-                    sb.AppendFormat(format, args);
-                }
-
-                log(sb.ToString());
-            }
-            catch (Exception e)
-            {
-                try
-                {
-                    // It's possible to get FormatException if the format string doesn't match args.
-                    // Fallback to a non-formatted string
-
-                    var sb = new StringBuilder();
-                    sb.Append(m_Prefix);
-                    sb.Append(" [");
-                    sb.Append(e.Message);
-                    sb.Append("] ");
-                    sb.Append(format);
-                    foreach (var arg in args)
-                    {
-                        sb.Append(" ");
-                        sb.Append(arg);
-                    }
-
-                    log(sb.ToString());
-                }
-                catch
-                {
-                    // Ignore the exception if it fails again, best effort.
-                    // It's possible that log() itself throws exception, then there isn't a good way to write a log.
-                }
-            }
-        }
+#if !ENABLE_UNITY_SERVICES_VERBOSE_LOGGING
+        [Conditional(k_VerboseLoggingDefine)]
+#endif
+        public static void LogVerbose(object message) => Debug.unityLogger.Log(k_Tag, message);
     }
 }

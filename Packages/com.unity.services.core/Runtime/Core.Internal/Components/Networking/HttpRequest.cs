@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Unity.Services.Core.Networking
+namespace Unity.Services.Core.Networking.Internal
 {
     /// <summary>
     /// Contain all data of an HTTP request.

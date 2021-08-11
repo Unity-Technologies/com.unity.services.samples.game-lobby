@@ -12,6 +12,9 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Unity.Services.Core.Editor")]
 [assembly: InternalsVisibleTo("Unity.Services.Core.Networking")]
 
+[assembly: InternalsVisibleTo("Unity.Services.Core.Registration")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.Configuration")]
+[assembly: InternalsVisibleTo("Unity.Services.Core.Configuration.Editor")]
 // Test assemblies
 #if UNITY_INCLUDE_TESTS
 [assembly: InternalsVisibleTo("Unity.Services.Core.Tests")]

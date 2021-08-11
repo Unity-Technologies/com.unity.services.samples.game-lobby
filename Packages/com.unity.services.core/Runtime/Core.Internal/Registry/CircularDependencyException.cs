@@ -1,4 +1,4 @@
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Exception to use two registered <see cref="IInitializablePackage"/> depend on the other.

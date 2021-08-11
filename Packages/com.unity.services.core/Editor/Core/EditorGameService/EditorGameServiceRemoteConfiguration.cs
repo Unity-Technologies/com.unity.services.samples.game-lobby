@@ -1,7 +1,10 @@
 using System;
 using System.Text;
+using Unity.Services.Core.Internal;
 using Unity.Services.Core.Networking;
+using Unity.Services.Core.Networking.Internal;
 using UnityEditor;
+using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
@@ -137,9 +140,10 @@ namespace Unity.Services.Core.Editor
                 {
                     return Encoding.UTF8.GetString(bytes);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // ignored, String decoding failed, we'll return null
+                    // The exception is ignored; String decoding failed, we'll return null
+                    Debug.LogWarning(e);
                 }
             }
 

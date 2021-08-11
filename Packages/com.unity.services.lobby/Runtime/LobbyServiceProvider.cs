@@ -1,13 +1,13 @@
 using UnityEngine;
 using System.Threading.Tasks;
 
-using Unity.Services.Lobbies.Apis;
+using Unity.Services.Lobbies.Apis.Lobby;
 
 using Unity.Services.Lobbies.Http;
 using Unity.Services.Lobbies.Scheduler;
 using TaskScheduler = Unity.Services.Lobbies.Scheduler.TaskScheduler;
-using Unity.Services.Core;
-using Unity.Services.Authentication;
+using Unity.Services.Core.Internal;
+using Unity.Services.Authentication.Internal;
 
 namespace Unity.Services.Lobbies
 {

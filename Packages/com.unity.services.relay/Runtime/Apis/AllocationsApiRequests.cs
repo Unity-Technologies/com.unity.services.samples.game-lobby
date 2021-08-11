@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,7 +8,7 @@ using Unity.Services.Relay.Http;
 using UnityEngine;
 using UnityEngine.Networking;
 using Unity.Services.Relay.Models;
-using Unity.Services.Authentication;
+using Unity.Services.Authentication.Internal;
 
 namespace Unity.Services.Relay.Allocations
 {
@@ -32,23 +33,43 @@ namespace Unity.Services.Relay.Allocations
             key = UnityWebRequest.EscapeURL(key);
             value = UnityWebRequest.EscapeURL(value);
             queryParams.Add($"{key}={value}");
+
             return queryParams;
         }
 
         [Preserve]
-        public List<string> AddParamsToQueryParams(List<string> queryParams, string key, List<string> values)
+        public List<string> AddParamsToQueryParams(List<string> queryParams, string key, List<string> values, string style, bool explode)
         {
-            foreach(var value in values)
+            if (explode)
             {
-                string escapedValue = UnityWebRequest.EscapeURL(value);
-                queryParams.Add($"{UnityWebRequest.EscapeURL(key)}[]={escapedValue}");
+                foreach(var value in values)
+                {
+                    string escapedValue = UnityWebRequest.EscapeURL(value);
+                    queryParams.Add($"{UnityWebRequest.EscapeURL(key)}={escapedValue}");
+                }
             }
+            else
+            {
+                string paramString = $"{UnityWebRequest.EscapeURL(key)}=";
+                foreach(var value in values)
+                {
+                    paramString += UnityWebRequest.EscapeURL(value) + ",";
+                }
+                paramString = paramString.Remove(paramString.Length - 1);
+                queryParams.Add(paramString);
+            }
+
             return queryParams;
         }
 
         [Preserve]
         public List<string> AddParamsToQueryParams<T>(List<string> queryParams, string key, T value)
         {
+            if (queryParams == null)
+            {
+                queryParams = new List<string>();
+            }
+
             key = UnityWebRequest.EscapeURL(key);
             string valueString = UnityWebRequest.EscapeURL(value.ToString());
             queryParams.Add($"{key}={valueString}");
@@ -337,6 +358,81 @@ namespace Unity.Services.Relay.Allocations
 
             string[] contentTypes = {
                 "application/json"
+            };
+
+            string[] accepts = {
+                "application/json",
+                "application/problem+json"
+            };
+
+            var acceptHeader = GenerateAcceptHeader(accepts);
+            if (!string.IsNullOrEmpty(acceptHeader))
+            {
+                headers.Add("Accept", acceptHeader);
+            }
+            var contentTypeHeader = GenerateContentTypeHeader(contentTypes);
+            if (!string.IsNullOrEmpty(contentTypeHeader))
+            {
+                headers.Add("Content-Type", contentTypeHeader);
+            }
+
+
+            // We also check if there are headers that are defined as part of
+            // the request configuration.
+            if (operationConfiguration != null && operationConfiguration.Headers != null)
+            {
+                foreach (var pair in operationConfiguration.Headers)
+                {
+                    headers[pair.Key] = pair.Value;
+                }
+            }
+
+            return headers;
+        }
+    }
+    [Preserve]
+    public class ListRegionsRequest : AllocationsApiBaseRequest
+    {
+        string PathAndQueryParams;
+
+        /// <summary>
+        /// ListRegions Request Object.
+        /// List relay regions
+        /// </summary>
+        /// <returns>A ListRegions request object.</returns>
+        [Preserve]
+        public ListRegionsRequest()
+        {
+            PathAndQueryParams = $"/v1/regions";
+
+            List<string> queryParams = new List<string>();
+
+            if (queryParams.Count > 0)
+            {
+                PathAndQueryParams = $"{PathAndQueryParams}?{string.Join("&", queryParams)}";
+            }
+        }
+
+        public string ConstructUrl(string requestBasePath)
+        {
+            return requestBasePath + PathAndQueryParams;
+        }
+
+        public byte[] ConstructBody()
+        {
+            return null;
+        }
+
+        public Dictionary<string, string> ConstructHeaders(IAccessToken accessToken,
+            Configuration operationConfiguration = null)
+        {
+            var headers = new Dictionary<string, string>();
+            if(!string.IsNullOrEmpty(accessToken.AccessToken))
+            {
+                headers.Add("authorization", "Bearer " + accessToken.AccessToken);
+            }
+
+            string[] contentTypes = {
             };
 
             string[] accepts = {

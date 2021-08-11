@@ -1,4 +1,6 @@
-namespace Unity.Services.Core.Networking
+using Unity.Services.Core.Internal;
+
+namespace Unity.Services.Core.Networking.Internal
 {
     /// <summary>
     /// Contract for objects able to send an HTTP request.

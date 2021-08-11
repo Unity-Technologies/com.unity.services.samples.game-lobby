@@ -1,5 +1,5 @@
 using System;
-using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
@@ -7,11 +7,11 @@ namespace Unity.Services.Core.Editor
     {
         internal static bool TryJsonDeserialize<T>(string json, ref T dest)
         {
-            if (!string.IsNullOrEmpty((json)))
+            if (!string.IsNullOrEmpty(json))
             {
                 try
                 {
-                    dest = JsonConvert.DeserializeObject<T>(json);
+                    dest = JsonUtility.FromJson<T>(json);
                     return true;
                 }
                 catch (Exception)

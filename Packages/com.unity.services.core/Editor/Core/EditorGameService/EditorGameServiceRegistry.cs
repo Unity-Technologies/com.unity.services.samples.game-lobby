@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using UnityEditor;
+using Unity.Services.Core.Internal;
 using UnityEngine;
 
 namespace Unity.Services.Core.Editor
@@ -63,7 +64,7 @@ namespace Unity.Services.Core.Editor
                 }
                 else
                 {
-                    Debug.LogError($"Type `{type.FullName}` is not a valid service.");
+                    CoreLogger.LogError($"Type `{type.FullName}` is not a valid service.");
                 }
             }
 
@@ -78,6 +79,9 @@ namespace Unity.Services.Core.Editor
 #endif
         }
 
+        /// <summary>
+        /// Destructor of the registry.
+        /// </summary>
         ~EditorGameServiceRegistry()
         {
             StopListeningToProjectStateChanges();
@@ -218,9 +222,9 @@ namespace Unity.Services.Core.Editor
         }
 
         /// <summary>
-        /// Get the instance of a <see cref="IEditorGameService"/> type.
+        /// Get the instance of a registered <see cref="IEditorGameService"/>.
         /// </summary>
-        /// <param name="serviceIdentifier">The identifier for a service</param>
+        /// <typeparam name="TIdentifier">The type of the identifier for a service</typeparam>
         /// <returns>Return the instance of the given <see cref="IEditorGameService"/> type if it has been registered.</returns>
         public IEditorGameService GetEditorGameService<TIdentifier>()
             where TIdentifier : struct, IEditorGameServiceIdentifier

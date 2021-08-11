@@ -1,4 +1,6 @@
-namespace Unity.Services.Core.Configuration
+using Unity.Services.Core.Internal;
+
+namespace Unity.Services.Core.Configuration.Internal
 {
     /// <summary>
     /// Component for project configuration.

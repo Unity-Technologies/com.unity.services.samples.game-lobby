@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Unity.Services.Authentication.Models;
 using Unity.Services.Authentication.Utilities;
+using Unity.Services.Core.Environments.Internal;
+using Logger = Unity.Services.Authentication.Utilities.Logger;
 
 namespace Unity.Services.Authentication
 {
@@ -32,7 +34,6 @@ namespace Unity.Services.Authentication
 
         readonly INetworkingUtilities m_NetworkClient;
         readonly ICodeChallengeGenerator m_CodeChallengeGenerator;
-        readonly ILogger m_Logger;
 
         readonly string m_WellKnownUrl;
         readonly string m_AnonymousUrl;
@@ -48,15 +49,20 @@ namespace Unity.Services.Authentication
         string m_OAuthClientId;
         string m_SessionChallengeCode;
 
+        /// <summary>
+        /// the environments component in the core registry.
+        /// this is stored in case there is a reinitialization or a change in environments ever happens during runtime.
+        /// </summary>
+        IEnvironments m_EnvironmentComponent;
+
         internal AuthenticationNetworkClient(string authenticationHost,
                                              string projectId,
+                                             IEnvironments environment,
                                              ICodeChallengeGenerator codeChallengeGenerator,
-                                             INetworkingUtilities networkClient,
-                                             ILogger logger)
+                                             INetworkingUtilities networkClient)
         {
             m_NetworkClient = networkClient;
             m_CodeChallengeGenerator = codeChallengeGenerator;
-            m_Logger = logger;
 
             m_OAuthClientId = "default";
 
@@ -68,6 +74,8 @@ namespace Unity.Services.Authentication
             m_OAuthUrl = authenticationHost + k_OAuthUrlStem;
             m_OAuthTokenUrl = authenticationHost + k_OAuthTokenUrlStem;
             m_OAuthRevokeTokenUrl = authenticationHost + k_OauthRevokeStem;
+
+            m_EnvironmentComponent = environment;
 
             m_CommonHeaders = new Dictionary<string, string>
             {
@@ -89,7 +97,7 @@ namespace Unity.Services.Authentication
 
         public IWebRequest<SignInResponse> SignInAnonymously()
         {
-            return m_NetworkClient.Post<SignInResponse>(m_AnonymousUrl, m_CommonHeaders);
+            return m_NetworkClient.Post<SignInResponse>(m_AnonymousUrl, WithEnvironment(GetCommonHeaders()));
         }
 
         public IWebRequest<SignInResponse> SignInWithSessionToken(string token)
@@ -97,17 +105,17 @@ namespace Unity.Services.Authentication
             return m_NetworkClient.PostJson<SignInResponse>(m_SessionTokenUrl, new SessionTokenRequest
             {
                 SessionToken = token
-            }, m_CommonHeaders);
+            }, WithEnvironment(GetCommonHeaders()));
         }
 
         public IWebRequest<SignInResponse> SignInWithExternalToken(ExternalTokenRequest externalToken)
         {
-            return m_NetworkClient.PostJson<SignInResponse>(m_ExternalTokenUrl, externalToken, m_CommonHeaders);
+            return m_NetworkClient.PostJson<SignInResponse>(m_ExternalTokenUrl, externalToken, WithEnvironment(GetCommonHeaders()));
         }
 
         public IWebRequest<SignInResponse> LinkWithExternalToken(string accessToken, ExternalTokenRequest externalToken)
         {
-            return m_NetworkClient.PostJson<SignInResponse>(m_LinkExternalTokenUrl, externalToken, WithAccessToken(accessToken));
+            return m_NetworkClient.PostJson<SignInResponse>(m_LinkExternalTokenUrl, externalToken, WithEnvironment(WithAccessToken(GetCommonHeaders(), accessToken)));
         }
 
         public IWebRequest<OAuthAuthCodeResponse> RequestAuthCode(string idToken)
@@ -152,7 +160,8 @@ namespace Unity.Services.Authentication
             }
             catch (Exception ex)
             {
-                m_Logger.Error("Failed to extract auth code. " + ex);
+                Logger.LogError("Failed to extract auth code. " + ex.Message);
+                Logger.LogException(ex);
                 return null;
             }
         }
@@ -164,7 +173,7 @@ namespace Unity.Services.Authentication
             string code;
             if (!queryParams.TryGetValue("code", out code))
             {
-                m_Logger.Error($"Failed to extract auth code. Query parameter 'code' is not found. Location: {locationUri}");
+                Logger.LogError($"Failed to extract auth code. Query parameter 'code' is not found. Location: {locationUri}");
             }
 
             return code;
@@ -201,9 +210,25 @@ namespace Unity.Services.Authentication
             return authCodeRequest.ResponseBody.AccessToken;
         }
 
-        Dictionary<string, string> WithAccessToken(string accessToken)
+        Dictionary<string, string> WithAccessToken(Dictionary<string, string> headers, string accessToken)
         {
-            return new Dictionary<string, string>(m_CommonHeaders) { ["Authorization"] = "Bearer " + accessToken };
+            headers["Authorization"] = "Bearer " + accessToken;
+            return headers;
+        }
+
+        Dictionary<string, string> WithEnvironment(Dictionary<string, string> headers)
+        {
+            var env = m_EnvironmentComponent.Current;
+            if (!string.IsNullOrEmpty(env))
+            {
+                headers["UnityEnvironment"] = m_EnvironmentComponent.Current;
+            }
+            return headers;
+        }
+
+        Dictionary<string, string> GetCommonHeaders()
+        {
+            return new Dictionary<string, string>(m_CommonHeaders);
         }
     }
 }

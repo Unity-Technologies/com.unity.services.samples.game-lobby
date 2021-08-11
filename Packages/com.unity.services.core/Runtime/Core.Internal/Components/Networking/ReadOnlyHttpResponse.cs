@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Unity.Services.Core.Networking
+namespace Unity.Services.Core.Networking.Internal
 {
     /// <summary>
     /// Read-only handle to a <see cref="HttpResponse"/>.

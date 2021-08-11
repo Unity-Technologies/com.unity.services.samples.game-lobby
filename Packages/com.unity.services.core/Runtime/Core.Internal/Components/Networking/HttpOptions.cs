@@ -1,4 +1,4 @@
-namespace Unity.Services.Core.Networking
+namespace Unity.Services.Core.Networking.Internal
 {
     /// <summary>
     /// Contract for objects containing all settings to customize the behaviour of a HTTP request sending.

@@ -1,6 +1,6 @@
 using System;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Default implementation for <see cref="IAsyncOperationAwaiter"/>.

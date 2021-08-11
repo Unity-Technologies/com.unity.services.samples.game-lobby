@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Configuration
 {
     static class StreamingAssetsUtils
     {

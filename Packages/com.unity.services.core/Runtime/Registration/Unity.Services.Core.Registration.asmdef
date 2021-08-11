@@ -4,6 +4,7 @@
         "Unity.Services.Core.Internal",
         "Unity.Services.Core.Device",
         "Unity.Services.Core.Environments",
+        "Unity.Services.Core.Environments.Internal",
         "Unity.Services.Core.Configuration",
         "Unity.Services.Core"
     ],

@@ -7,9 +7,9 @@ namespace Unity.Services.Relay.Http
     {
         protected readonly IHttpClient HttpClient;
 
-        public BaseApiClient(IHttpClient httpClient, TaskScheduler scheduler)
+        public BaseApiClient(IHttpClient httpClient)
         {
-            HttpClient = httpClient ?? new HttpClient(scheduler);
+            HttpClient = httpClient ?? new HttpClient();
         }
     }
 }

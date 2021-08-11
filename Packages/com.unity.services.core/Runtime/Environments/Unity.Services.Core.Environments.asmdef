@@ -1,14 +1,16 @@
 {
     "name": "Unity.Services.Core.Environments",
+    "rootNamespace": "",
     "references": [
-        "Unity.Services.Core.Internal"
+        "Unity.Services.Core.Internal",
+        "Unity.Services.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

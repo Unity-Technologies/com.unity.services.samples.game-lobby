@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.0-pre.3] - 2021-08-06
+
+* Updates to latest version of Relay Service API
+* Multi-region support
+
+## [1.0.0-pre.2] - 2021-07-30
+
+* Update Third Party Notices
+* Update package description
+* Use generator version `v0.4.0`
+    * uses `com.unity.services.core` `v1.1.0-pre.4`
+    * allows compatibility with `com.unity.services.authentication` `v0.7.1`
+* Adds `ListRegions`
+* `CreateAllocationAsync` takes optional argument `region`
+
 ## [0.0.1-preview.9] - 2021-07-07
 
 * Update documentation, points to dashboard

@@ -4,6 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.1.0-pre.4] - 2021-07-21
+### Changed
+- [Breaking Change] Move all classes meant for internal use to `*.Internal` namespace.
+
+## [1.1.0-pre.3] - 2021-07-15
+### Added
+- `SetEnvironmentName` Initialization option to set the environment services should use.
+- MiniJson.
+
+### Removed
+- Newtonsoft dependency.
+
 ## [1.1.0-pre.2] - 2021-06-14
 ### Added
 - `IProjectConfiguration` component to access services settings at runtime.
@@ -29,32 +43,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Installation Identifier component.
 - Service Activation popup.
 
-### Changed 
+### Changed
 - Review of the Editor API to rename the following:
   - `OperateService` to `EditorGameService`
-    - Members: 
+    - Members:
       - `ServiceName` to `Name`
       - `OperateServiceEnabler` to `Enabler`
   - `IServiceIdentifier` to `IEditorGameServiceIdentifier`
   - `OperateDashboardHelper` to `EditorGameServiceDashboardHelper`
   - `ServiceFlagEnabler` to `EditorGameServiceFlagEnabler`
-    - Members: 
+    - Members:
       - `ServiceFlagName` to `FlagName`
   - `IOperateServiceEnabler` to `IEditorGameServiceEnabler`
   - `OperateServiceRegistry` to `EditorGameServiceRegistry`
     - Methods:
        - `GetService` to `GetEditorGameService`
   - `IOperateServiceRegistry` to `IEditorGameServiceRegistry`
-    - Methods: 
+    - Methods:
       - `GetService` to `GetEditorGameService`
   - `OperateRemoteConfiguration` to `EditorGameServiceRemoteConfiguration`
   - `OperateServiceSettingsProvider` to `EditorGameServiceSettingsProvider`
-    - Members: 
+    - Members:
       - `OperateService` to `EditorGameService`
   - `OperateSettingsCommonHeaderUiHelper` to `SettingsCommonHeaderUiHelper`
-  - GlobalDefine: 
+  - GlobalDefine:
     - `ENABLE_OPERATE_SERVICES` to `ENABLE_EDITOR_GAME_SERVICES`
-    
 
 ## [0.2.0-preview] - 2021-04-14
 ### Added

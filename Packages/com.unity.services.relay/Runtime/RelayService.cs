@@ -10,6 +10,6 @@ namespace Unity.Services.Relay
         /// </summary>
         public static IAllocationsApiClient AllocationsApiClient { get; internal set; }
         
-        public static Configuration Configuration = new Configuration("https://relay-allocations.cloud.unity3d.com", 10, 4, null);
+        public static Configuration Configuration = new Configuration("https://relay-allocations.services.api.unity.com", 10, 4, null);
     }
 }

@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.Networking;
+using Unity.Services.Core.Internal;
 
 namespace Unity.Services.Core.Editor
 {
@@ -27,10 +26,11 @@ namespace Unity.Services.Core.Editor
             {
                 resultAsyncOp.Fail(ex);
             }
+
             return resultAsyncOp;
         }
 
-        void QueryProjectFlags(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<IServiceFlags> resultAsyncOp)
+        static void QueryProjectFlags(IAsyncOperation<DefaultCdnEndpointConfiguration> configurationRequestTask, AsyncOperation<IServiceFlags> resultAsyncOp)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace Unity.Services.Core.Editor
             }
         }
 
-        void OnFetchServiceFlagsCompleted(UnityWebRequest getServiceFlagsRequest, AsyncOperation<IServiceFlags> resultAsyncOp)
+        static void OnFetchServiceFlagsCompleted(UnityWebRequest getServiceFlagsRequest, AsyncOperation<IServiceFlags> resultAsyncOp)
         {
             try
             {
@@ -73,19 +73,21 @@ namespace Unity.Services.Core.Editor
 
         static IServiceFlags ExtractServiceFlagsFromUnityWebRequest(UnityWebRequest unityWebRequest)
         {
-            var flags = new Dictionary<string, object>();
+            IDictionary<string, object> flags = null;
             if (UnityWebRequestHelper.IsUnityWebRequestReadyForTextExtract(unityWebRequest, out var jsonContent))
             {
                 try
                 {
-                    var jsonEntries = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
-                    flags = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonEntries[k_ServiceFlagsKey].ToString());
+                    var jsonEntries = (IDictionary<string, object>)MiniJson.Deserialize(jsonContent);
+                    flags = (IDictionary<string, object>)jsonEntries[k_ServiceFlagsKey];
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Exception occurred when fetching service flags:\n{ex.Message}");
+                    CoreLogger.LogError($"Exception occurred when fetching service flags:\n{ex.Message}");
+                    flags = new Dictionary<string, object>();
                 }
             }
+
             return new ServiceFlags(flags);
         }
     }

@@ -13,23 +13,23 @@ namespace Unity.Services.Relay.Http
         {
             var settings = new JsonSerializerSettings
             {
-                MissingMemberHandling = MissingMemberHandling.Ignore
+                MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
             };
 
-            return JsonConvert.DeserializeObject<T>(GetDeserializardJson(response.Data), settings);
+            return JsonConvert.DeserializeObject<T>(GetDeserializedJson(response.Data), settings);
         }
 
         public static object TryDeserializeResponse(HttpClientResponse response, Type type)
         {
             var settings = new JsonSerializerSettings
             {
-                MissingMemberHandling = MissingMemberHandling.Ignore
+                MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
             };
 
-            return JsonConvert.DeserializeObject(GetDeserializardJson(response.Data), type, settings);
+            return JsonConvert.DeserializeObject(GetDeserializedJson(response.Data), type, settings);
         }
 
-        private static string GetDeserializardJson(byte[] data)
+        private static string GetDeserializedJson(byte[] data)
         {
             return Encoding.UTF8.GetString(data);
         }
@@ -68,24 +68,24 @@ namespace Unity.Services.Relay.Http
             }
             catch (ArgumentException e)
             {
-                throw new DeserializationException(response, e.Message);
+                throw new ResponseDeserializationException(response, e.Message);
             }
             catch (MissingFieldException)
             {
-                throw new DeserializationException(response,
+                throw new ResponseDeserializationException(response,
                     "Discriminator field not found in the parsed json response.");
             }
-            catch (DeserializationException e) when (e.response == null)
+            catch (ResponseDeserializationException e)
             {
-                throw new DeserializationException(response, e.Message);
-            }
-            catch (DeserializationException)
-            {
+                if (e.response == null)
+                {
+                    throw new ResponseDeserializationException(response, e.Message);
+                }
                 throw;
             }
             catch (Exception)
             {
-                throw new DeserializationException(response);
+                throw new ResponseDeserializationException(response);
             }
         }
 
@@ -109,24 +109,24 @@ namespace Unity.Services.Relay.Http
             }
             catch (ArgumentException e)
             {
-                throw new DeserializationException(response, e.Message);
+                throw new ResponseDeserializationException(response, e.Message);
             }
             catch (MissingFieldException)
             {
-                throw new DeserializationException(response,
+                throw new ResponseDeserializationException(response,
                     "Discriminator field not found in the parsed json response.");
             }
-            catch (DeserializationException e) when (e.response == null)
+            catch (ResponseDeserializationException e)
             {
-                throw new DeserializationException(response, e.Message);
-            }
-            catch (DeserializationException)
-            {
+                if (e.response == null)
+                {
+                    throw new ResponseDeserializationException(response, e.Message);
+                }
                 throw;
             }
             catch (Exception)
             {
-                throw new DeserializationException(response);
+                throw new ResponseDeserializationException(response);
             }
         }
 
@@ -144,24 +144,24 @@ namespace Unity.Services.Relay.Http
             }
             catch (ArgumentException e)
             {
-                throw new DeserializationException(response, e.Message);
+                throw new ResponseDeserializationException(response, e.Message);
             }
             catch (MissingFieldException)
             {
-                throw new DeserializationException(response,
+                throw new ResponseDeserializationException(response,
                     "Discriminator field not found in the parsed json response.");
             }
-            catch (DeserializationException e) when (e.response == null)
+            catch (ResponseDeserializationException e)
             {
-                throw new DeserializationException(response, e.Message);
-            }
-            catch (DeserializationException)
-            {
+                if (e.response == null)
+                {
+                    throw new ResponseDeserializationException(response, e.Message);
+                }
                 throw;
             }
             catch (Exception)
             {
-                throw new DeserializationException(response);
+                throw new ResponseDeserializationException(response);
             }
         }
     }

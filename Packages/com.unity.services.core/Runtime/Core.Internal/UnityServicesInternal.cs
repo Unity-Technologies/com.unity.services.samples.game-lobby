@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Utility to initialize all Unity services from a single endpoint.
@@ -13,13 +13,22 @@ namespace Unity.Services.Core
         /// <summary>
         /// Initialization state.
         /// </summary>
-        public ServicesInitializationState State { get; internal set; }
+        public ServicesInitializationState State { get; private set; }
 
-        public InitializationOptions Options { get; internal set; }
+        public InitializationOptions Options { get; private set; }
 
         internal bool CanInitialize;
 
-        internal AsyncOperation Initialization;
+        AsyncOperation m_Initialization;
+
+        [NotNull]
+        CoreRegistry Registry { get; }
+
+        public UnityServicesInternal(
+            [NotNull] CoreRegistry registry)
+        {
+            Registry = registry;
+        }
 
         /// <summary>
         /// Single entry point to initialize all used services.
@@ -42,57 +51,58 @@ namespace Unity.Services.Core
             if (!CanInitialize
                 || State != ServicesInitializationState.Uninitialized)
             {
-                return Initialization.AsTask();
+                return m_Initialization.AsTask();
             }
 
             StartInitialization();
 
-            return Initialization.AsTask();
+            return m_Initialization.AsTask();
         }
 
         bool HasRequestedInitialization()
         {
-            return !(Initialization is null);
+            return !(m_Initialization is null);
         }
 
         bool HasInitializationFailed()
         {
-            return Initialization.Status == AsyncOperationStatus.Failed;
+            return m_Initialization.Status == AsyncOperationStatus.Failed;
         }
 
         void CreateInitialization()
         {
-            Initialization = new AsyncOperation();
-            Initialization.SetInProgress();
-            Initialization.Completed += OnInitializationCompleted;
+            m_Initialization = new AsyncOperation();
+            m_Initialization.SetInProgress();
+            m_Initialization.Completed += OnInitializationCompleted;
         }
 
         void StartInitialization()
         {
             State = ServicesInitializationState.Initializing;
-            var registry = CoreRegistry.Instance;
-            var sortedPackageTypeHashes = new List<int>(registry.Tree.PackageTypeHashToInstance.Count);
+            var sortedPackageTypeHashes = new List<int>(
+                Registry.PackageRegistry.Tree?.PackageTypeHashToInstance.Count ?? 0);
 
             try
             {
-                var sorter = new DependencyTreeInitializeOrderSorter(registry.Tree, sortedPackageTypeHashes);
+                var sorter = new DependencyTreeInitializeOrderSorter(
+                    Registry.PackageRegistry.Tree, sortedPackageTypeHashes);
                 sorter.SortRegisteredPackagesIntoTarget();
             }
             catch (Exception reason)
             {
-                Initialization.Fail(reason);
+                m_Initialization.Fail(reason);
 
                 return;
             }
 
             try
             {
-                var initializer = new CoreRegistryInitializer(registry, Initialization, sortedPackageTypeHashes);
+                var initializer = new CoreRegistryInitializer(Registry, m_Initialization, sortedPackageTypeHashes);
                 initializer.InitializeRegistry();
             }
             catch (Exception reason)
             {
-                Initialization.Fail(reason);
+                m_Initialization.Fail(reason);
             }
         }
 
@@ -103,7 +113,7 @@ namespace Unity.Services.Core
                 case AsyncOperationStatus.Succeeded:
                 {
                     State = ServicesInitializationState.Initialized;
-                    CoreRegistry.Instance.LockComponentRegistration();
+                    Registry.LockComponentRegistration();
 
                     break;
                 }
@@ -116,17 +126,15 @@ namespace Unity.Services.Core
             }
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        internal static void EnableInitialization()
+        internal void EnableInitialization()
         {
-            var instance = (UnityServicesInternal)UnityServices.Instance;
+            CanInitialize = true;
 
-            instance.CanInitialize = true;
-            CoreRegistry.Instance.LockPackageRegistration();
+            Registry.LockPackageRegistration();
 
-            if (instance.HasRequestedInitialization())
+            if (HasRequestedInitialization())
             {
-                instance.StartInitialization();
+                StartInitialization();
             }
         }
     }

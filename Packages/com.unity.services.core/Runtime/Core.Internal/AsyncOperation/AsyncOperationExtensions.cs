@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Set of utility functions added as extensions to

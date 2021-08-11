@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Configuration
 {
     static class UnityWebRequestUtils
     {

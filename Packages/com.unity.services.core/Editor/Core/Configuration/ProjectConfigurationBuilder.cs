@@ -5,12 +5,12 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEngine;
 
 namespace Unity.Services.Core.Configuration.Editor
 {
     class ProjectConfigurationBuilder : IPreprocessBuildWithReport,
-        IPostprocessBuildWithReport,
-        IDisposable
+        IPostprocessBuildWithReport
     {
         static ProjectConfigurationBuilder s_EditorInstance;
 
@@ -26,11 +26,6 @@ namespace Unity.Services.Core.Configuration.Editor
         public ProjectConfigurationBuilder(IEnumerable<IConfigurationProvider> orderedConfigProviders)
         {
             m_OrderedConfigProviders = orderedConfigProviders;
-        }
-
-        ~ProjectConfigurationBuilder()
-        {
-            RemoveConfigFromProject();
         }
 
         [InitializeOnLoadMethod]
@@ -58,9 +53,9 @@ namespace Unity.Services.Core.Configuration.Editor
         static void SetUpPlayModeConfigOnEnteringPlayMode(EnterPlayModeOptions _)
         {
             CreateEditorInstanceIfNone();
-            ConfigurationUtils.ConfigurationLoader = new EditorConfigurationLoader
+            ConfigurationUtils.ConfigurationLoader = new MemoryConfigurationLoader
             {
-                PlayModeConfig = s_EditorInstance.BuildConfiguration()
+                Config = s_EditorInstance.BuildConfiguration()
             };
         }
 
@@ -95,7 +90,7 @@ namespace Unity.Services.Core.Configuration.Editor
 
         public static void RemoveConfigFromProject()
         {
-            AssetDatabase.DeleteAsset(ConfigurationUtils.ConfigAssetPath);
+            IoUtils.TryDeleteAssetFile(ConfigurationUtils.RuntimeConfigFullPath);
         }
 
         int IOrderedCallback.callbackOrder { get; }
@@ -108,14 +103,22 @@ namespace Unity.Services.Core.Configuration.Editor
             }
 
             GenerateConfigFileInProject();
+
+            EditorApplication.update += RemoveConfigFromProjectWhenBuildEnds;
+
+            void RemoveConfigFromProjectWhenBuildEnds()
+            {
+                if (BuildPipeline.isBuildingPlayer)
+                {
+                    return;
+                }
+
+                EditorApplication.update -= RemoveConfigFromProjectWhenBuildEnds;
+                RemoveConfigFromProject();
+            }
         }
 
         void IPostprocessBuildWithReport.OnPostprocessBuild(BuildReport report)
-        {
-            RemoveConfigFromProject();
-        }
-
-        void IDisposable.Dispose()
         {
             RemoveConfigFromProject();
         }

@@ -1,4 +1,4 @@
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// All supported status of an <see cref="IAsyncOperation"/>.

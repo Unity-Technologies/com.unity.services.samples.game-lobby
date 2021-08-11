@@ -5,10 +5,8 @@ using Newtonsoft.Json;
 using Unity.Services.Authentication.Editor.Models;
 using Unity.Services.Authentication.Models;
 using Unity.Services.Authentication.Utilities;
-using Unity.Services.Core;
+using Unity.Services.Core.Internal;
 using UnityEditor;
-using UnityEngine;
-using ILogger = Unity.Services.Authentication.Utilities.ILogger;
 using Logger = Unity.Services.Authentication.Utilities.Logger;
 
 [assembly: InternalsVisibleTo("Unity.Services.Authentication.Editor.Tests")]
@@ -23,17 +21,15 @@ namespace Unity.Services.Authentication.Editor
 
         static IAuthenticationAdminClient AuthenticationAdminClient()
         {
-            var logger = new Logger("[Authentication]");
             IDateTimeWrapper dateTime = new DateTimeWrapper();
-            INetworkingUtilities networkUtilities = new NetworkingUtilities(null, logger);
+            INetworkingUtilities networkUtilities = new NetworkingUtilities(null);
             string orgId = GetOrganizationId();
             var networkClient = new AuthenticationAdminNetworkClient("https://services.unity.com",
                 orgId,
                 CloudProjectSettings.projectId,
-                networkUtilities,
-                logger);
+                networkUtilities);
 
-            return new AuthenticationAdminClient(logger, networkClient);
+            return new AuthenticationAdminClient(networkClient);
         }
 
         // GetOrganizationId will gets the organization id associated with this Unity project.
@@ -54,7 +50,6 @@ namespace Unity.Services.Authentication.Editor
     {
         string m_IdDomain;
         IAuthenticationAdminNetworkClient m_AuthenticationAdminNetworkClient;
-        ILogger m_Logger;
 
         string m_orgForeignKey;
         string m_servicesGatewayToken;
@@ -66,9 +61,8 @@ namespace Unity.Services.Authentication.Editor
             AuthenticationAdmin
         }
 
-        public AuthenticationAdminClient(ILogger logger, IAuthenticationAdminNetworkClient networkClient, string genesisToken = "")
+        public AuthenticationAdminClient(IAuthenticationAdminNetworkClient networkClient, string genesisToken = "")
         {
-            m_Logger = logger;
             m_AuthenticationAdminNetworkClient = networkClient;
             m_genesisToken = genesisToken;
         }
@@ -256,7 +250,7 @@ namespace Unity.Services.Authentication.Editor
                 asyncOp.Fail(new AuthenticationException(AuthenticationError.NetworkError));
                 return true;
             }
-            m_Logger?.Error("Error message: " + request.ErrorMessage);
+            Logger.LogError("Error message: " + request.ErrorMessage);
 
             try
             {
@@ -277,10 +271,12 @@ namespace Unity.Services.Authentication.Editor
             }
             catch (JsonException ex)
             {
+                Logger.LogException(ex);
                 asyncOp.Fail(new AuthenticationException(AuthenticationError.UnknownError, "Failed to deserialize server response: " + request.ErrorMessage));
             }
             catch (Exception ex)
             {
+                Logger.LogException(ex);
                 asyncOp.Fail(new AuthenticationException(AuthenticationError.UnknownError, "Unknown error deserializing server response: " + request.ErrorMessage));
             }
 

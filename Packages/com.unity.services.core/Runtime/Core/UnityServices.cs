@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Unity.Services.Core
 {
@@ -36,6 +37,13 @@ namespace Unity.Services.Core
         /// </returns>
         public static Task Initialize(InitializationOptions options)
         {
+            if (!Application.isPlaying)
+            {
+                return Task.FromException(
+                    new ServicesInitializationException("You are attempting to initialize Unity Services in Edit Mode." +
+                        " Unity Services can only be initialized in Play Mode"));
+            }
+
             if (Instance == null)
             {
                 return Task.FromException(

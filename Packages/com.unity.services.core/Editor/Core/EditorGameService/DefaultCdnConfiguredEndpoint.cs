@@ -1,13 +1,19 @@
-using Newtonsoft.Json;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 
 namespace Unity.Services.Core.Editor
 {
     class DefaultCdnConfiguredEndpoint : CdnConfiguredEndpoint<DefaultCdnEndpointConfiguration> {}
 
+    [Serializable]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     class DefaultCdnEndpointConfiguration
     {
-        [JsonProperty("core")]
-        public string Core { get; set; }
+        [SerializeField]
+        string core;
+
+        public string Core => core;
 
         internal string BuildApiUrl()
         {

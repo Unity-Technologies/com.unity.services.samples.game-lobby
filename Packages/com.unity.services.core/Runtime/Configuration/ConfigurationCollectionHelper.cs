@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Unity.Services.Core.Internal;
 using UnityEngine;
 
 namespace Unity.Services.Core.Configuration
@@ -36,7 +37,7 @@ namespace Unity.Services.Core.Configuration
             {
                 if (!existingEntry.TrySetValue(entry))
                 {
-                    Debug.LogWarning(
+                    CoreLogger.LogWarning(
                         $"You are attempting to initialize Operate Solution SDK with an option \"{key}\"" +
                         " which is readonly at runtime and can be modified only through Project Settings." +
                         " The value provided as initialization option will be ignored." +

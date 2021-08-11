@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Unity.Services.Core
+namespace Unity.Services.Core.Internal
 {
     /// <summary>
     /// Helper object to initialize all <see cref="IInitializablePackage"/> registered in a <see cref="CoreRegistry"/>.
@@ -31,7 +31,6 @@ namespace Unity.Services.Core
             if (m_SortedPackageTypeHashes.Count <= 0)
             {
                 CompleteInitialization();
-
                 return;
             }
 
@@ -45,7 +44,6 @@ namespace Unity.Services.Core
                 || m_PackageInitializationFailureReasons.Count <= 0)
             {
                 m_Operation.Succeed();
-                m_Registry.Tree = null;
             }
             else
             {
@@ -56,6 +54,7 @@ namespace Unity.Services.Core
                 m_Operation.Fail(reason);
             }
 
+            m_Registry.PackageRegistry.Tree = null;
             m_PackageInitializationFailureReasons = null;
         }
 
@@ -98,8 +97,7 @@ namespace Unity.Services.Core
         IInitializablePackage GetPackageAt(int index)
         {
             var packageTypeHash = m_SortedPackageTypeHashes[index];
-
-            return m_Registry.Tree.PackageTypeHashToInstance[packageTypeHash];
+            return m_Registry.PackageRegistry.Tree.PackageTypeHashToInstance[packageTypeHash];
         }
     }
 }

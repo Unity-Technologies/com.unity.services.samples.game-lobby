@@ -12,6 +12,7 @@ namespace Unity.Services.Authentication.Editor
         /// <summary>
         /// Key for the Authentication package
         /// </summary>
+        /// <returns>The identifier of the game service.</returns>
         public string GetKey() => "Authentication";
     }
 }

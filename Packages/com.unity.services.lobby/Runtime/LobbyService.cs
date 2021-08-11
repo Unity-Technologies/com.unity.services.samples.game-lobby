@@ -1,4 +1,4 @@
-using Unity.Services.Lobbies.Apis;
+using Unity.Services.Lobbies.Apis.Lobby;
 
 
 namespace Unity.Services.Lobbies
@@ -10,6 +10,6 @@ namespace Unity.Services.Lobbies
         /// </summary>
         public static ILobbyApiClient LobbyApiClient { get; internal set; }
         
-        public static Configuration Configuration = new Configuration("https://lobby.cloud.unity3d.com/v1", 10, 4, null);
+        public static Configuration Configuration = new Configuration("https://lobby.services.api.unity.com/v1", 10, 4, null);
     }
 }

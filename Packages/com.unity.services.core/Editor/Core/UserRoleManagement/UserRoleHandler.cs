@@ -1,11 +1,10 @@
 using System;
+using Unity.Services.Core.Internal;
 using UnityEditor;
-using UnityEngine;
-using Unity.Services.Core.Editor;
 
 namespace Unity.Services.Core.Editor
 {
-    class UserRoleHandler : IDisposable
+    class UserRoleHandler : IDisposable, IUserRoleHandler
     {
         IAsyncOperation<UserRole> m_CurrentUserRoleOperation;
 

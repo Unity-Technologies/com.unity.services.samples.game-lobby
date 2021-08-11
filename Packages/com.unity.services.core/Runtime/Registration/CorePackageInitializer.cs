@@ -2,9 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Core.Configuration;
+using Unity.Services.Core.Configuration.Internal;
 using Unity.Services.Core.Device;
+using Unity.Services.Core.Device.Internal;
 using Unity.Services.Core.Environments;
+using Unity.Services.Core.Environments.Internal;
+using Unity.Services.Core.Internal;
 using UnityEngine;
+using NotNull = JetBrains.Annotations.NotNullAttribute;
 
 namespace Unity.Services.Core.Registration
 {
@@ -31,9 +36,13 @@ namespace Unity.Services.Core.Registration
         /// </returns>
         public async Task Initialize(CoreRegistry registry)
         {
+            // There are potential race conditions with other services we're trying to avoid by calling
+            // RegisterInstallationId as the _very first_ thing we do.
             RegisterInstallationId(registry);
-            RegisterEnvironments(registry);
-            await RegisterProjectConfigurationAsync(registry);
+
+            var projectConfiguration = await RegisterProjectConfigurationAsync(
+                registry, UnityServices.Instance.Options);
+            RegisterEnvironments(registry, projectConfiguration);
         }
 
         internal static void RegisterInstallationId(CoreRegistry registry)
@@ -43,21 +52,24 @@ namespace Unity.Services.Core.Registration
             registry.RegisterServiceComponent<IInstallationId>(installationId);
         }
 
-        internal static void RegisterEnvironments(CoreRegistry registry)
+        internal static void RegisterEnvironments(CoreRegistry registry, IProjectConfiguration projectConfiguration)
         {
-            var environments = new Environments.Environments();
+            var environments = new Environments.Internal.Environments();
+            environments.Current = projectConfiguration.GetString(EnvironmentsOptionsExtensions.EnvironmentNameKey, "production");
             registry.RegisterServiceComponent<IEnvironments>(environments);
         }
 
-        internal static async Task RegisterProjectConfigurationAsync(CoreRegistry registry)
+        internal static async Task<IProjectConfiguration> RegisterProjectConfigurationAsync(
+            [NotNull] CoreRegistry registry,
+            [NotNull] InitializationOptions options)
         {
-            var options = UnityServices.Instance.Options;
             var projectConfig = await GenerateProjectConfigurationAsync(options);
             registry.RegisterServiceComponent<IProjectConfiguration>(projectConfig);
+            return projectConfig;
         }
 
         internal static async Task<ProjectConfiguration> GenerateProjectConfigurationAsync(
-            InitializationOptions options)
+            [NotNull] InitializationOptions options)
         {
             var serializedConfig = await GetSerializedConfigOrEmptyAsync();
             var configValues = new Dictionary<string, ConfigurationEntry>(serializedConfig.Keys.Length);
@@ -75,7 +87,7 @@ namespace Unity.Services.Core.Registration
             }
             catch (Exception e)
             {
-                Debug.LogError(
+                CoreLogger.LogError(
                     "En error occured while trying to get the project configuration for services." +
                     $"\n{e.Message}" +
                     $"\n{e.StackTrace}");

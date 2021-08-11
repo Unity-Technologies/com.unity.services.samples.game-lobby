@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Unity.Services.Core.Editor
 {
-    class ServiceFlags: IServiceFlags
+    class ServiceFlags : IServiceFlags
     {
         Dictionary<string, bool> m_FlagsDictionary;
         List<string> m_FlagNames;
@@ -24,13 +24,15 @@ namespace Unity.Services.Core.Editor
             {
                 return m_FlagsDictionary[flagName];
             }
+
             throw new Exception("Flag does not exist");
         }
 
-        public ServiceFlags(Dictionary<string, object> flagsDictionary)
+        public ServiceFlags(IDictionary<string, object> flagsDictionary)
         {
-            m_FlagsDictionary = new Dictionary<string, bool>();
-            m_FlagNames = new List<string>();
+            var flagCount = flagsDictionary.Count;
+            m_FlagsDictionary = new Dictionary<string, bool>(flagCount);
+            m_FlagNames = new List<string>(flagCount);
             foreach (var entry in flagsDictionary)
             {
                 m_FlagNames.Add(entry.Key);
