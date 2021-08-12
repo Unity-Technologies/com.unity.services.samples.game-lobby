@@ -34,7 +34,7 @@ namespace LobbyRelaySample.Auth
 
         private async void DoSignIn(Action onSigninComplete)
         {
-            await UnityServices.Initialize();
+            await UnityServices.InitializeAsync();
             AuthenticationService.Instance.SignedIn += OnSignInChange;
             AuthenticationService.Instance.SignedOut += OnSignInChange;
 
