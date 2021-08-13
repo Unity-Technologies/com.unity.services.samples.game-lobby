@@ -53,9 +53,14 @@ namespace LobbyRelaySample.UI
                 child.m_onVisibilityChange?.Invoke(true);
         }
 
-        public void Hide()
+        public void Hide() // Called by some serialized events, so we can't just have targetAlpha as an optional parameter.
         {
-            MyCanvasGroup.alpha = 0;
+            Hide(0);
+        }
+
+        public void Hide(float targetAlpha)
+        {
+            MyCanvasGroup.alpha = targetAlpha;
             MyCanvasGroup.interactable = false;
             MyCanvasGroup.blocksRaycasts = false;
             showing = false;

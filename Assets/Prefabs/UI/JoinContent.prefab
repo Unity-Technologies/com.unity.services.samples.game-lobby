@@ -322,7 +322,6 @@ GameObject:
   - component: {fileID: 3931324176504405867}
   - component: {fileID: 1462126939442648229}
   - component: {fileID: 7550446569341709048}
-  - component: {fileID: 7645291363343340383}
   m_Layer: 5
   m_Name: JoinContent
   m_TagString: Untagged
@@ -384,19 +383,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_onVisibilityChange:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7645291363343340383}
-        m_TargetAssemblyTypeName: LobbyRooms.RoomsListHeartbeat, LobbyRooms
-        m_MethodName: SetActive
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_LobbyButtonPrefab: {fileID: 7018369548608736188, guid: f6d35a456ba76a24587dce83bd088b7d, type: 3}
   m_LobbyCodeField: {fileID: 8659642538454988273}
   m_LobbyButtonParent: {fileID: 7824921818678239159}
@@ -427,18 +414,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &7645291363343340383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 785260762106121644}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48ec34a3875818e4690f1bf0be69ccd9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &891284586109156510
 GameObject:
   m_ObjectHideFlags: 0
@@ -1774,6 +1749,9 @@ GameObject:
   - component: {fileID: 7588080595629456861}
   - component: {fileID: 6677898783497457153}
   - component: {fileID: 2237434810424445170}
+  - component: {fileID: 3932890662139234867}
+  - component: {fileID: 3262820153109060702}
+  - component: {fileID: 1874295389668054338}
   m_Layer: 5
   m_Name: RefreshButton
   m_TagString: Untagged
@@ -1915,6 +1893,48 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!225 &3932890662139234867
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272638571207087159}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &3262820153109060702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272638571207087159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab355d5994635724dbde297a055fb586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1874295389668054338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272638571207087159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 771ddda4ce2ee2a4dad57866ecc1170d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_target: {fileID: 3262820153109060702}
+  m_alphaWhenHidden: 0.5
+  m_requestType: 0
 --- !u!1 &4581814564158191570
 GameObject:
   m_ObjectHideFlags: 0

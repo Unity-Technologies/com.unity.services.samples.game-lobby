@@ -115,6 +115,8 @@ namespace LobbyRelaySample
                     qr => {
                         if (qr != null)
                             OnLobbiesQueried(lobby.ToLocalLobby.Convert(qr));
+                        else
+                            m_lobbyServiceData.State = LobbyQueryState.Error;
                     },
                     er => {
                         long errorLong = 0;
