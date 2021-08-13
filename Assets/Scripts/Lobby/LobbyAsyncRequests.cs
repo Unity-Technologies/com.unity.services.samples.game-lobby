@@ -92,7 +92,7 @@ namespace LobbyRelaySample
 
         private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
         private RateLimitCooldown m_rateLimitJoin  = new RateLimitCooldown(3f);
-        // TODO: Shift to using this to do rate limiting for all API calls? E.g. the 
+        // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
         #endregion
 
         private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
@@ -159,7 +159,9 @@ namespace LobbyRelaySample
         {
             if (!m_rateLimitQuery.CanCall())
             {
+                // We assume this can only occur when leaving a lobby and returning to the join menu; the refresh button is rate-limited, but we might have recently queried while still in the lobby.
                 onListRetrieved?.Invoke(null);
+                m_pendingOperations.Enqueue(() => { RetrieveLobbyListAsync(onListRetrieved, onError, limitToColor); }); // With that assumption, retry the refresh after the limit, as though entering the join menu from the main menu.
                 return;
             }
 
@@ -311,7 +313,7 @@ namespace LobbyRelaySample
             public bool IsInCooldown
             {
                 get => m_isInCooldown;
-                set
+                private set
                 {   if (m_isInCooldown != value)
                     {   m_isInCooldown = value;
                         OnChanged(this);
@@ -343,7 +345,8 @@ namespace LobbyRelaySample
                 if (m_timeSinceLastCall >= m_cooldownTime)
                 {
                     IsInCooldown = false;
-                    Locator.Get.UpdateSlow.Unsubscribe(OnUpdate); // Note that this is after IsInCooldown is set, to prevent an Observer from kicking off CanCall again immediately.
+                    if (!m_isInCooldown) // It's possible that by setting IsInCooldown, something called CanCall immediately, in which case we want to stay on UpdateSlow.
+                        Locator.Get.UpdateSlow.Unsubscribe(OnUpdate); // Note that this is after IsInCooldown is set, to prevent an Observer from kicking off CanCall again immediately.
                 }
             }
 

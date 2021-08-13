@@ -32,7 +32,7 @@ namespace LobbyRelaySample.UI
             m_LocalLobbySelected = lobby.Data;
         }
 
-        public void OnJoinCodeInputFieldChanged(string newCode)
+        public void OnJoinCodeInputFieldChanged(string newCode) // TODO: LobbyCode or JoinCode?
         {
             if (!string.IsNullOrEmpty(newCode))
                 m_LocalLobbySelected = new LocalLobby.LobbyData(newCode.ToUpper());
