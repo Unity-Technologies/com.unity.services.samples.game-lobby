@@ -27,13 +27,18 @@ namespace LobbyRelaySample
             get => m_State;
             set
             {
-                m_State = value;
-                OnChanged(this);
+                if (m_State != value)
+                {
+                    m_State = value;
+                    OnChanged(this);
+                }
             }
         }
 
         public override void CopyObserved(LocalGameState oldObserved)
         {
+            if (m_State == oldObserved.State)
+                return;
             m_State = oldObserved.State;
             OnChanged(this);
         }

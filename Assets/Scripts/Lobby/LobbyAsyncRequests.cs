@@ -80,14 +80,19 @@ namespace LobbyRelaySample
 
         #endregion
 
-        #region Lobby API calls are rate limited, and some other operations might want to know when the rate limits have passed.
-        public enum RequestType { Query = 0 }
+        #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
+        // Note that some APIs limit to 1 call per N seconds, while others limit to M calls per N seconds. We'll treat all APIs as though they limited to 1 call per N seconds.
+        public enum RequestType { Query = 0, Join }
         public RateLimitCooldown GetRateLimit(RequestType type)
         {
+            if (type == RequestType.Join)
+                return m_rateLimitJoin;
             return m_rateLimitQuery;
         }
 
-        private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f);
+        private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
+        private RateLimitCooldown m_rateLimitJoin  = new RateLimitCooldown(3f);
+        // TODO: Shift to using this to do rate limiting for all API calls? E.g. the 
         #endregion
 
         private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
@@ -123,6 +128,14 @@ namespace LobbyRelaySample
         /// </summary>
         public void JoinLobbyAsync(string lobbyId, string lobbyCode, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
+            if (!m_rateLimitJoin.CanCall() ||
+                (lobbyId == null && lobbyCode == null))
+            {
+                onFailure?.Invoke();
+                // TODO: Emit some failure message.
+                return;
+            }
+
             string uasId = AuthenticationService.Instance.PlayerId;
             if (!string.IsNullOrEmpty(lobbyId))
                 LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, CreateInitialPlayerData(localUser), OnLobbyJoined);
