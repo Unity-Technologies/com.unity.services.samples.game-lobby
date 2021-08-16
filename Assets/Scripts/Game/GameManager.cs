@@ -94,22 +94,27 @@ namespace LobbyRelaySample
             {
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
-                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
-                    OnCreatedLobby();
-                },
-                OnFailedJoin);
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                        OnCreatedLobby();
+                    },
+                    OnFailedJoin);
             }
             else if (type == MessageType.JoinLobbyRequest)
             {
                 LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
-                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
-                    OnJoinedLobby();
-                },
-                OnFailedJoin);
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                        OnJoinedLobby();
+                    },
+                    OnFailedJoin);
             }
             else if (type == MessageType.QueryLobbies)
             {
+                if (LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query).IsInCooldown)
+                {
+                    //Debug.LogError("Cooldown!");
+                    //return;
+                }
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
                 LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
                     qr => {

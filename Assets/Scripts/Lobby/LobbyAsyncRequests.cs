@@ -155,13 +155,19 @@ namespace LobbyRelaySample
         /// Used for getting the list of all active lobbies, without needing full info for each.
         /// </summary>
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
-        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None)
+        /// <param name="isRecursive">Just as a backup to effectively batch together multiple retrievals into one if they arrive in rapid succession.</param>
+        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None, bool isRecursive = false)
         {
             if (!m_rateLimitQuery.CanCall())
             {
                 // We assume this can only occur when leaving a lobby and returning to the join menu; the refresh button is rate-limited, but we might have recently queried while still in the lobby.
-                onListRetrieved?.Invoke(null);
-                m_pendingOperations.Enqueue(() => { RetrieveLobbyListAsync(onListRetrieved, onError, limitToColor); }); // With that assumption, retry the refresh after the limit, as though entering the join menu from the main menu.
+                if (!isRecursive)
+                {
+                    m_pendingOperations.Enqueue(() => { RetrieveLobbyListAsync(onListRetrieved, onError, limitToColor, true); }); // With that assumption, retry the refresh after the limit, as though entering the join menu from the main menu.
+                    UnityEngine.Debug.LogError("Enqueuing...");   
+                }
+                else
+                    UnityEngine.Debug.LogError("Blocking recursive call");
                 return;
             }
 

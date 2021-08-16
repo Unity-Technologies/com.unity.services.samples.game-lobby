@@ -3053,7 +3053,8 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4928485776352161055, guid: f1d618bdc6f1813449d428126e640aa5, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f1d618bdc6f1813449d428126e640aa5, type: 3}
 --- !u!114 &2637199315837045694 stripped
 MonoBehaviour:
