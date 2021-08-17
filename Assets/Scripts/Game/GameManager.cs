@@ -110,11 +110,6 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.QueryLobbies)
             {
-                if (LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query).IsInCooldown)
-                {
-                    //Debug.LogError("Cooldown!");
-                    //return;
-                }
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
                 LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
                     qr => {

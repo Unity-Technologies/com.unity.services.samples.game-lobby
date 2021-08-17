@@ -29,7 +29,6 @@ namespace LobbyRelaySample
         public LobbyAsyncRequests()
         {
             Locator.Get.UpdateSlow.Subscribe(UpdateLobby, 0.5f); // Shouldn't need to unsubscribe since this instance won't be replaced. 0.5s is arbitrary; the rate limits are tracked later.
-            m_rateLimitQuery.onChanged += HandlePendingOperations;
         }
 
         private static bool IsSuccessful(Response response)
@@ -39,7 +38,6 @@ namespace LobbyRelaySample
 
         #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
-        private Queue<Action> m_pendingOperations = new Queue<Action>();
         private string m_currentLobbyId = null;
         private Lobby m_lastKnownLobby;
         public Lobby CurrentLobby => m_lastKnownLobby;
@@ -68,14 +66,6 @@ namespace LobbyRelaySample
                     m_lastKnownLobby = lobby;
                 }
             }
-        }
-
-        private void HandlePendingOperations(RateLimitCooldown rateLimit)
-        {
-            if (rateLimit.IsInCooldown)
-                return;
-            while (m_pendingOperations.Count > 0)
-                m_pendingOperations.Dequeue()?.Invoke(); // Note: If this ends up enqueuing a bunch of operations, we might need to batch them and/or ensure they don't all execute at once.
         }
 
         #endregion
@@ -155,19 +145,12 @@ namespace LobbyRelaySample
         /// Used for getting the list of all active lobbies, without needing full info for each.
         /// </summary>
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
-        /// <param name="isRecursive">Just as a backup to effectively batch together multiple retrievals into one if they arrive in rapid succession.</param>
-        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None, bool isRecursive = false)
+        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None)
         {
             if (!m_rateLimitQuery.CanCall())
             {
-                // We assume this can only occur when leaving a lobby and returning to the join menu; the refresh button is rate-limited, but we might have recently queried while still in the lobby.
-                if (!isRecursive)
-                {
-                    m_pendingOperations.Enqueue(() => { RetrieveLobbyListAsync(onListRetrieved, onError, limitToColor, true); }); // With that assumption, retry the refresh after the limit, as though entering the join menu from the main menu.
-                    UnityEngine.Debug.LogError("Enqueuing...");   
-                }
-                else
-                    UnityEngine.Debug.LogError("Blocking recursive call");
+                onListRetrieved?.Invoke(null);
+                m_rateLimitQuery.EnqueuePendingOperation(() => { RetrieveLobbyListAsync(onListRetrieved, onError, limitToColor); });
                 return;
             }
 
@@ -281,14 +264,14 @@ namespace LobbyRelaySample
         private bool ShouldUpdateData(Action caller, Action onComplete, bool shouldRetryIfLobbyNull)
         {
             if (m_rateLimitQuery.IsInCooldown)
-            {   m_pendingOperations.Enqueue(caller);
+            {   m_rateLimitQuery.EnqueuePendingOperation(caller);
                 return false;
             }
             Lobby lobby = m_lastKnownLobby;
             if (lobby == null)
             {
                 if (shouldRetryIfLobbyNull)
-                    m_pendingOperations.Enqueue(caller);
+                    m_rateLimitQuery.EnqueuePendingOperation(caller);
                 onComplete?.Invoke();
                 return false;
             }
@@ -314,6 +297,14 @@ namespace LobbyRelaySample
         {
             private float m_timeSinceLastCall = float.MaxValue;
             private readonly float m_cooldownTime;
+            private Queue<Action> m_pendingOperations = new Queue<Action>();
+            private bool m_isHandlingPending = false; // Just in case a pending operation tries to enqueue itself again.
+
+            public void EnqueuePendingOperation(Action action)
+            {
+                if (!m_isHandlingPending)
+                    m_pendingOperations.Enqueue(action);
+            }
 
             private bool m_isInCooldown = false;
             public bool IsInCooldown
@@ -348,11 +339,18 @@ namespace LobbyRelaySample
             private void OnUpdate(float dt)
             {
                 m_timeSinceLastCall += dt;
+                m_isHandlingPending = false; // (Backup in case a pending operation hit an exception.)
                 if (m_timeSinceLastCall >= m_cooldownTime)
                 {
                     IsInCooldown = false;
                     if (!m_isInCooldown) // It's possible that by setting IsInCooldown, something called CanCall immediately, in which case we want to stay on UpdateSlow.
+                    {
                         Locator.Get.UpdateSlow.Unsubscribe(OnUpdate); // Note that this is after IsInCooldown is set, to prevent an Observer from kicking off CanCall again immediately.
+                        m_isHandlingPending = true;
+                        while (m_pendingOperations.Count > 0)
+                            m_pendingOperations.Dequeue()?.Invoke(); // Note: If this ends up enqueuing many operations, we might need to batch them and/or ensure they don't all execute at once.
+                        m_isHandlingPending = false;
+                    }
                 }
             }
 
