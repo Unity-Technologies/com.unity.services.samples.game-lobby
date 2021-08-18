@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using RelayException = Unity.Services.Relay.Http.HttpException;
-using LobbyException = Unity.Services.Lobbies.Http.HttpException;
 using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
