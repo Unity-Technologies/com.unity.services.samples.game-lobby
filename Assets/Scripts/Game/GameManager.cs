@@ -41,10 +41,7 @@ namespace LobbyRelaySample
         private bool m_coolingDown;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
-        public void SetLobbyColorFilter(int color)
-        {
-            m_lobbyColorFilter = (LobbyColor)color;
-        }
+        public void SetLobbyColorFilter(int color){ m_lobbyColorFilter = (LobbyColor)color; }
 
         private LobbyColor m_lobbyColorFilter;
 

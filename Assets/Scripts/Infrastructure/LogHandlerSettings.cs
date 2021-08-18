@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
@@ -11,20 +12,20 @@ namespace LobbyRelaySample
         private LogMode m_editorLogVerbosity = LogMode.Critical;
 
         [SerializeField]
-        PopUpUI popUpPrefab;
+        private PopUpUI m_popUpPrefab;
 
         [SerializeField]
-        List<ErrorReaction> m_errorReactions = new List<ErrorReaction>();
+        private ErrorReaction m_errorReaction;
 
         void Awake()
         {
             LogHandler.Get().mode = m_editorLogVerbosity;
-            LogHandler.Get().SetLogReactions(m_errorReactions);
+            LogHandler.Get().SetLogReactions(m_errorReaction);
         }
 
         public void SpawnErrorPopup(string errorMessage)
         {
-            var popupInstance = Instantiate(popUpPrefab, transform);
+            var popupInstance = Instantiate(m_popUpPrefab, transform);
             popupInstance.ShowPopup(errorMessage, Color.red);
         }
     }

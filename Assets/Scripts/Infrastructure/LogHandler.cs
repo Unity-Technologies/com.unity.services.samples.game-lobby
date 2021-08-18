@@ -24,7 +24,7 @@ namespace LobbyRelaySample
 
         static LogHandler s_instance;
         ILogHandler m_DefaultLogHandler = Debug.unityLogger.logHandler; // Store the default logger that prints to console.
-        List<ErrorReaction> m_errorReactions = new List<ErrorReaction>();
+        ErrorReaction m_reaction;
 
         public static LogHandler Get()
         {
@@ -34,9 +34,9 @@ namespace LobbyRelaySample
             return s_instance;
         }
 
-        public void SetLogReactions(List<ErrorReaction> reactions)
+        public void SetLogReactions(ErrorReaction reactions)
         {
-            m_errorReactions = reactions;
+            m_reaction = reactions;
         }
 
         public void LogFormat(LogType logType, Object context, string format, params object[] args)
@@ -73,11 +73,13 @@ namespace LobbyRelaySample
 
         private void LogReaction(Exception exception)
         {
-            foreach (var reaction in m_errorReactions)
-                reaction.Filter(exception);
+            m_reaction?.Filter(exception);
         }
     }
 
+    /// <summary>
+    /// The idea here is to 
+    /// </summary>
     [Serializable]
     public class ErrorReaction
     {
@@ -87,7 +89,7 @@ namespace LobbyRelaySample
         {
             string message = "";
             var rawExceptionMessage = "";
-            
+
             //We want to Ensure the most relevant error message is on top
             if (exception.InnerException != null)
                 rawExceptionMessage = exception.InnerException.ToString();
@@ -97,7 +99,7 @@ namespace LobbyRelaySample
             var firstLineIndex = rawExceptionMessage.IndexOf("\n");
             var firstRelayString = rawExceptionMessage.Substring(0, firstLineIndex);
             message = firstRelayString;
-            
+
             if (string.IsNullOrEmpty(message))
                 return;
             m_logMessageCallback?.Invoke(message);
