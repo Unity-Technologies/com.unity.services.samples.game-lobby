@@ -11,13 +11,12 @@ namespace LobbyRelaySample
     /// </summary>
     public class GameManager : MonoBehaviour, IReceiveMessages
     {
-        [SerializeField]
-        [Tooltip("Only logs of this level or higher will appear in the console.")]
-        private LogMode m_logMode = LogMode.Critical;
         /// <summary>
         /// All these should be assigned the observers in the scene at the start.
         /// </summary>
+
         #region UI elements that observe the local state. These are 
+
         [SerializeField]
         private List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
         [SerializeField]
@@ -26,6 +25,7 @@ namespace LobbyRelaySample
         private List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
         [SerializeField]
         private List<LobbyServiceDataObserver> m_LobbyServiceObservers = new List<LobbyServiceDataObserver>();
+
         #endregion
 
         private LocalGameState m_localGameState = new LocalGameState();
@@ -41,10 +41,12 @@ namespace LobbyRelaySample
         private bool m_coolingDown;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
-        public void SetLobbyColorFilter(int color) { m_lobbyColorFilter = (LobbyColor)color; }
+        public void SetLobbyColorFilter(int color){ m_lobbyColorFilter = (LobbyColor)color; }
+
         private LobbyColor m_lobbyColorFilter;
 
         #region Setup
+
         private void Awake()
         {
             // Do some arbitrary operations to instantiate singletons.
@@ -52,7 +54,6 @@ namespace LobbyRelaySample
             var unused = Locator.Get;
 #pragma warning restore IDE0059
 
-            LogHandler.Get().mode = m_logMode;
             Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
             Application.wantsToQuit += OnWantToQuit;
         }
@@ -85,6 +86,7 @@ namespace LobbyRelaySample
             foreach (var userObs in m_LocalUserObservers)
                 userObs.BeginObserving(m_localUser);
         }
+
         #endregion
 
         /// <summary>
@@ -93,7 +95,8 @@ namespace LobbyRelaySample
         public void OnReceiveMessage(MessageType type, object msg)
         {
             if (type == MessageType.RenameRequest)
-            {   m_localUser.DisplayName = (string)msg;
+            {
+                m_localUser.DisplayName = (string)msg;
             }
             else if (type == MessageType.CreateLobbyRequest)
             {
@@ -102,7 +105,8 @@ namespace LobbyRelaySample
 
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
-                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    {
+                        lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnCreatedLobby();
                     },
                     OnFailedJoin);
@@ -114,7 +118,8 @@ namespace LobbyRelaySample
 
                 LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
-                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    {
+                        lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnJoinedLobby();
                     },
                     OnFailedJoin);
@@ -125,11 +130,13 @@ namespace LobbyRelaySample
                     return;
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
                 LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
-                    qr => {
+                    qr =>
+                    {
                         if (qr != null)
                             OnLobbiesQueried(lobby.ToLocalLobby.Convert(qr));
                     },
-                    er => {
+                    er =>
+                    {
                         long errorLong = 0;
                         if (er != null)
                             errorLong = er.Status;
@@ -138,28 +145,35 @@ namespace LobbyRelaySample
                     m_lobbyColorFilter);
             }
             else if (type == MessageType.ChangeGameState)
-            {   SetGameState((GameState)msg);
+            {
+                SetGameState((GameState)msg);
             }
             else if (type == MessageType.UserSetEmote)
-            {   EmoteType emote = (EmoteType)msg;
+            {
+                EmoteType emote = (EmoteType)msg;
                 m_localUser.Emote = emote;
             }
             else if (type == MessageType.LobbyUserStatus)
-            {   m_localUser.UserStatus = (UserStatus)msg;
+            {
+                m_localUser.UserStatus = (UserStatus)msg;
             }
             else if (type == MessageType.StartCountdown)
-            {   BeginCountDown();
+            {
+                BeginCountDown();
             }
             else if (type == MessageType.CancelCountdown)
-            {   m_localLobby.State = LobbyState.Lobby;
+            {
+                m_localLobby.State = LobbyState.Lobby;
                 m_localLobby.CountDownTime = 0;
             }
             else if (type == MessageType.ConfirmInGameState)
-            {   m_localUser.UserStatus = UserStatus.InGame;
+            {
+                m_localUser.UserStatus = UserStatus.InGame;
                 m_localLobby.State = LobbyState.InGame;
             }
             else if (type == MessageType.EndGame)
-            {   m_localLobby.State = LobbyState.Lobby;
+            {
+                m_localLobby.State = LobbyState.Lobby;
                 m_localLobby.CountDownTime = 0;
                 SetUserLobbyState();
             }
@@ -211,11 +225,14 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.EndTracking();
 
             if (m_relaySetup != null)
-            {   Component.Destroy(m_relaySetup);
+            {
+                Component.Destroy(m_relaySetup);
                 m_relaySetup = null;
             }
+
             if (m_relayClient != null)
-            {   Component.Destroy(m_relayClient);
+            {
+                Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
         }
@@ -264,6 +281,7 @@ namespace LobbyRelaySample
                 StartCoroutine(RetryRelayConnection());
                 return;
             }
+
             m_relayClient = client;
             OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }
@@ -295,6 +313,7 @@ namespace LobbyRelaySample
                     yield break;
                 m_localLobby.CountDownTime -= Time.deltaTime;
             }
+
             if (m_relayClient is RelayUtpHost)
                 (m_relayClient as RelayUtpHost).SendInGameState();
         }
@@ -314,6 +333,7 @@ namespace LobbyRelaySample
         }
 
         #region Teardown
+
         /// <summary>
         /// In builds, if we are in a lobby and try to send a Leave request on application quit, it won't go through if we're quitting on the same frame.
         /// So, we need to delay just briefly to let the request happen (though we don't need to wait for the result).
@@ -346,6 +366,7 @@ namespace LobbyRelaySample
                 m_localLobby = null;
             }
         }
+
         #endregion
     }
 }
