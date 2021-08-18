@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using RelayException = Unity.Services.Relay.Http.HttpException;
+using LobbyException = Unity.Services.Lobbies.Http.HttpException;
 using UnityEngine;
+using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 namespace LobbyRelaySample
@@ -20,6 +24,7 @@ namespace LobbyRelaySample
 
         static LogHandler s_instance;
         ILogHandler m_DefaultLogHandler = Debug.unityLogger.logHandler; // Store the default logger that prints to console.
+        ErrorReaction m_reaction;
 
         public static LogHandler Get()
         {
@@ -27,6 +32,11 @@ namespace LobbyRelaySample
             s_instance = new LogHandler();
             Debug.unityLogger.logHandler = s_instance;
             return s_instance;
+        }
+
+        public void SetLogReactions(ErrorReaction reactions)
+        {
+            m_reaction = reactions;
         }
 
         public void LogFormat(LogType logType, Object context, string format, params object[] args)
@@ -57,7 +67,42 @@ namespace LobbyRelaySample
 
         public void LogException(Exception exception, Object context)
         {
+            LogReaction(exception);
             m_DefaultLogHandler.LogException(exception, context);
+        }
+
+        private void LogReaction(Exception exception)
+        {
+            m_reaction?.Filter(exception);
+        }
+    }
+
+    /// <summary>
+    /// The idea here is to 
+    /// </summary>
+    [Serializable]
+    public class ErrorReaction
+    {
+        public UnityEvent<string> m_logMessageCallback;
+
+        public void Filter(Exception exception)
+        {
+            string message = "";
+            var rawExceptionMessage = "";
+
+            //We want to Ensure the most relevant error message is on top
+            if (exception.InnerException != null)
+                rawExceptionMessage = exception.InnerException.ToString();
+            else
+                rawExceptionMessage = exception.ToString();
+
+            var firstLineIndex = rawExceptionMessage.IndexOf("\n");
+            var firstRelayString = rawExceptionMessage.Substring(0, firstLineIndex);
+            message = firstRelayString;
+
+            if (string.IsNullOrEmpty(message))
+                return;
+            m_logMessageCallback?.Invoke(message);
         }
     }
 }
