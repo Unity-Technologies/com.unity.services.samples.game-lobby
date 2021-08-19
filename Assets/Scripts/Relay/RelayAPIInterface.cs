@@ -13,43 +13,18 @@ namespace LobbyRelaySample.Relay
     public static class RelayAPIInterface
     {
         /// <summary>
-        /// API calls are asynchronous, but for debugging and other reasons we want to reify them as objects so that they can be monitored.
-        /// </summary>
-        private class InProgressRequest<T>
-        {
-            public InProgressRequest(Task<T> task, Action<T> onComplete)
-            {
-                DoRequest(task, onComplete);
-            }
-
-            private async void DoRequest(Task<T> task, Action<T> onComplete)
-            {
-                T result = default;
-                string currentTrace = System.Environment.StackTrace; // If we don't get the calling context here, it's lost once the async operation begins.
-                try {
-                    result = await task;
-                } catch (Exception e) {
-                    Exception eFull = new Exception($"Call stack before async call:\n{currentTrace}\n", e);
-                    throw eFull;
-                } finally {
-                    onComplete?.Invoke(result);
-                }
-            }
-        }
-
-        /// <summary>
         /// A Relay Allocation represents a "server" for a new host.
         /// </summary>
         public static void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
         {
             CreateAllocationRequest createAllocationRequest = new CreateAllocationRequest(new AllocationRequest(maxConnections));
             var task = RelayService.AllocationsApiClient.CreateAllocationAsync(createAllocationRequest);
-            new InProgressRequest<Response<AllocateResponseBody>>(task, OnResponse);
+            AsyncRequest.DoRequest(task, OnResponse);
 
             void OnResponse(Response<AllocateResponseBody> response)
             {
                 if (response == null)
-                    Debug.LogError("Relay returned a null Allocation. It's possible the Relay service is currently down.");
+                    Debug.LogError("Relay returned a null Allocation. This might occur if the Relay service has an outage, if your cloud project ID isn't linked, or if your Relay package version is outdated.");
                 else if (response.Status >= 200 && response.Status < 300)
                     onComplete?.Invoke(response.Result.Data.Allocation);
                 else
@@ -77,7 +52,7 @@ namespace LobbyRelaySample.Relay
         {
             CreateJoincodeRequest joinCodeRequest = new CreateJoincodeRequest(new JoinCodeRequest(hostAllocationId));
             var task = RelayService.AllocationsApiClient.CreateJoincodeAsync(joinCodeRequest);
-            new InProgressRequest<Response<JoinCodeResponseBody>>(task, onComplete);
+            AsyncRequest.DoRequest(task, onComplete);
         }
 
         /// <summary>
@@ -100,7 +75,7 @@ namespace LobbyRelaySample.Relay
         {
             JoinRelayRequest joinRequest = new JoinRelayRequest(new JoinRequest(joinCode));
             var task = RelayService.AllocationsApiClient.JoinRelayAsync(joinRequest);
-            new InProgressRequest<Response<JoinResponseBody>>(task, onComplete);
+            AsyncRequest.DoRequest(task, onComplete);
         }
     }
 }

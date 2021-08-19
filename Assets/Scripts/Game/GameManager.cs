@@ -138,9 +138,7 @@ namespace LobbyRelaySample
                     er =>
                     {
                         long errorLong = 0;
-                        if (er != null)
-                            errorLong = er.Status;
-                        OnLobbyQueryFailed(errorLong);
+                        OnLobbyQueryFailed(errorLong); // TODO: What to supply here?
                     },
                     m_lobbyColorFilter);
             }
