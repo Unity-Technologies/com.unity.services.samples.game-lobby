@@ -1,4 +1,3 @@
-using System;
 using LobbyRelaySample.Relay;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,10 +34,6 @@ namespace LobbyRelaySample
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
-
-        // The Lobby API rate limits query requests to one every 1.5s, and it will return a 429 "Too Many Requests" error otherwise.
-        private const float k_lobbyAssignmentCoolingSeconds = 1.5f;
-        private bool m_coolingDown;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
         public void SetLobbyColorFilter(int color) { m_lobbyColorFilter = (LobbyColor)color; }
@@ -97,32 +92,24 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.CreateLobbyRequest)
             {
-                if (!LobbyRequestCooledDown())
-                    return;
-
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
-                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnCreatedLobby();
                     },
                     OnFailedJoin);
             }
             else if (type == MessageType.JoinLobbyRequest)
             {
-                if (!LobbyRequestCooledDown())
-                    return;
-
                 LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
-                {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnJoinedLobby();
                     },
                     OnFailedJoin);
             }
             else if (type == MessageType.QueryLobbies)
             {
-                if (!LobbyRequestCooledDown())
-                    return;
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
                 LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
                     qr => {
@@ -218,21 +205,6 @@ namespace LobbyRelaySample
             {   Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
-        }
-
-        private bool LobbyRequestCooledDown()
-        {
-            if (m_coolingDown)
-                return false;
-            StartCoroutine(RequestCoolDown());
-            return true;
-        }
-
-        private IEnumerator RequestCoolDown()
-        {
-            m_coolingDown = true;
-            yield return new WaitForSeconds(k_lobbyAssignmentCoolingSeconds);
-            m_coolingDown = false;
         }
 
         /// <summary>

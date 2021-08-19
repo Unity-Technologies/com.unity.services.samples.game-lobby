@@ -35,6 +35,10 @@ namespace LobbyRelaySample.Relay
         }
         protected abstract void JoinRelay();
 
+        /// <summary>
+        /// Shared behavior for binding to the Relay allocation, which is required for use.
+        /// Note that a host will send bytes from the Allocation it creates, whereas a client will send bytes from the JoinAllocation it receives using a relay code.
+        /// </summary>
         protected void BindToAllocation(string ip, int port, byte[] allocationIdBytes, byte[] connectionDataBytes, byte[] hostConnectionDataBytes, byte[] hmacKeyBytes, int connectionCapacity)
         {
             NetworkEndPoint     serverEndpoint     = NetworkEndPoint.Parse(ip, (ushort)port);
@@ -161,7 +165,7 @@ namespace LobbyRelaySample.Relay
     }
 
     /// <summary>
-    /// Client logic: Wait until the join code is retrieved from the lobby's shared data. Then, use that code to get the Allocation to bind to, and
+    /// Client logic: Wait until the Relay join code is retrieved from the lobby's shared data. Then, use that code to get the Allocation to bind to, and
     /// then create a connection to the host.
     /// </summary>
     public class RelayUtpSetupClient : RelayUtpSetup
@@ -182,13 +186,13 @@ namespace LobbyRelaySample.Relay
             }
         }
 
-        private void OnJoin(JoinAllocation allocation)
+        private void OnJoin(JoinAllocation joinAllocation)
         {
-            if (allocation == null)
+            if (joinAllocation == null)
                 return;
-            m_allocation = allocation;
-            BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.HostConnectionData, allocation.Key, 1);
-            m_localLobby.RelayServer = new ServerAddress(allocation.RelayServer.IpV4, allocation.RelayServer.Port);
+            m_allocation = joinAllocation;
+            BindToAllocation(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1);
+            m_localLobby.RelayServer = new ServerAddress(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port);
         }
 
         protected override void OnBindingComplete()

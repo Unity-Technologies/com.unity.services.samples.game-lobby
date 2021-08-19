@@ -16,7 +16,6 @@ namespace Test
     {
         private GameObject m_updateSlowObj;
         private List<Subscriber> m_activeSubscribers = new List<Subscriber>(); // For cleaning up, in case an Assert prevents a Subscriber from taking care of itself.
-        private const float k_period = 1.5f;
 
         /// <summary>Trivial Subscriber to do some action every UpdateSlow.</summary>
         private class Subscriber : IDisposable
@@ -24,9 +23,9 @@ namespace Test
             private Action m_thingToDo;
             public float prevDt;
 
-            public Subscriber(Action thingToDo)
+            public Subscriber(Action thingToDo, float period)
             {
-                Locator.Get.UpdateSlow.Subscribe(OnUpdate);
+                Locator.Get.UpdateSlow.Subscribe(OnUpdate, period);
                 m_thingToDo = thingToDo;
             }
 
@@ -65,101 +64,120 @@ namespace Test
         }
 
         [UnityTest]
-        public IEnumerator BasicBehavior()
+        public IEnumerator BasicBehavior_MultipleSubs()
         {
             int updateCount = 0;
-            Subscriber sub = new Subscriber(() => { updateCount++; });
+            float period = 1.5f;
+            Subscriber sub = new Subscriber(() => { updateCount++; }, period);
             m_activeSubscribers.Add(sub);
 
             yield return null;
             Assert.AreEqual(0, updateCount, "Update loop should be slow and not update per-frame.");
 
-            yield return new WaitForSeconds(k_period - 0.1f);
+            yield return new WaitForSeconds(period - 0.1f);
             Assert.AreEqual(0, updateCount, "Assuming a default period of 1.5s and a reasonable frame rate, the slow update should still not have hit.");
 
             yield return new WaitForSeconds(0.1f);
             Assert.AreEqual(1, updateCount, "Slow update period should have passed.");
-            Assert.AreEqual(1.5f, sub.prevDt, "Slow update should have received the full time delta.");
+            Assert.AreNotEqual(period, sub.prevDt, "Slow update should have received the actual amount of time that passed, not necessarily its period.");
+            Assert.True(sub.prevDt - period < 0.05f && sub.prevDt - period > 0, "The time delta received by slow update should match the actual time since their previous update.");
 
-            yield return new WaitForSeconds(k_period);
+            yield return new WaitForSeconds(period);
             Assert.AreEqual(2, updateCount, "Did the slow update again.");
-            Assert.AreEqual(1.5f, sub.prevDt, "Slow update should have received the full time delta again.");
+            Assert.AreNotEqual(period, sub.prevDt, "Slow update should have received the full time delta, not just its period, again.");
+            Assert.True(sub.prevDt - period < 0.05f && sub.prevDt - period > 0, "The time delta received by slow update should match the actual time since their previous update, again.");
 
-            Subscriber sub2 = new Subscriber(() => { updateCount += 7; });
+            float period2 = period - 0.2f;
+            Subscriber sub2 = new Subscriber(() => { updateCount += 7; }, period2);
             m_activeSubscribers.Add(sub2);
-            yield return new WaitForSeconds(k_period);
+            yield return new WaitForSeconds(period);
             Assert.AreEqual(10, updateCount, "There are two subscribers now.");
-            Assert.AreEqual(1.5f, sub.prevDt, "Slow update should have received the full time delta with two subscribers.");
-            Assert.AreEqual(1.5f, sub2.prevDt, "Slow update should have received the full time delta on the second subscriber as well.");
+            Assert.True(sub.prevDt - period < 0.05f && sub.prevDt - period > 0, "Slow update on the first subscriber should have received the full time delta with two subscribers.");
+            Assert.True(sub2.prevDt - period2 < 0.05f && sub2.prevDt - period2 > 0, "Slow update on the second subscriber should receive the actual time, even if its period is shorter.");
 
             sub2.Dispose();
-            yield return new WaitForSeconds(k_period);
+            yield return new WaitForSeconds(period);
             Assert.AreEqual(11, updateCount, "Should have unsubscribed just the one subscriber.");
 
             sub.Dispose();
-            yield return new WaitForSeconds(k_period);
+            yield return new WaitForSeconds(period);
             Assert.AreEqual(11, updateCount, "Should have unsubscribed the remaining subscriber.");
+        }
+
+        [UnityTest]
+        public IEnumerator BasicBehavior_UpdateEveryFrame()
+        {
+            int updateCount = 0;
+            Subscriber sub = new Subscriber(() => { updateCount++; }, 0);
+            m_activeSubscribers.Add(sub);
+
+            yield return null;
+            Assert.AreEqual(1, updateCount, "Update loop should update per-frame if a subscriber opts for that (#1).");
+            yield return null;
+            Assert.AreEqual(2, updateCount, "Update loop should update per-frame if a subscriber opts for that (#2).");
+            Assert.AreEqual(sub.prevDt, Time.deltaTime, "Subscriber should receive the correct update time since their previous update.");
+
+            sub.Dispose();
+            yield return new WaitForSeconds(0.5f);
+            Assert.AreEqual(2, updateCount, "Should have unsubscribed the subscriber.");
         }
 
         [UnityTest]
         public IEnumerator HandleLambda()
         {
             int updateCount = 0;
-            Locator.Get.UpdateSlow.Subscribe((dt) => { updateCount++; });
+            float period = 0.5f;
+            Locator.Get.UpdateSlow.Subscribe((dt) => { updateCount++; }, period);
             LogAssert.Expect(LogType.Error, new Regex(".*Removed anonymous.*"));
-            yield return new WaitForSeconds(k_period + 0.1f);
+            yield return new WaitForSeconds(period + 0.1f);
             Assert.AreEqual(0, updateCount, "Lambdas should not be permitted, since they can't be Unsubscribed.");
+
+            Locator.Get.UpdateSlow.Subscribe(ThisIsALocalFunction, period);
+            LogAssert.Expect(LogType.Error, new Regex(".*Removed local function.*"));
+            yield return new WaitForSeconds(period + 0.1f);
+            Assert.AreEqual(0, updateCount, "Local functions should not be permitted, since they can't be Unsubscribed.");
+
+            void ThisIsALocalFunction(float dt) { }
         }
 
         [UnityTest]
-        public IEnumerator StaggerClients()
+        public IEnumerator SubscribeNoDuplicates()
         {
-            int updateCountA = 0, updateCountB = 0;
-            Subscriber subA = new Subscriber(() => { updateCountA++; });
-            Subscriber subB = new Subscriber(() => { updateCountB++; });
-            m_activeSubscribers.Add(subA);
-            m_activeSubscribers.Add(subB);
-            float periodHalf = k_period / 2;
+            dummyOnUpdateCalls = 0;
+            Locator.Get.UpdateSlow.Subscribe(DummyOnUpdate, 1);
+            Locator.Get.UpdateSlow.Subscribe(DummyOnUpdate, 0.1f);
 
-            yield return new WaitForSeconds(periodHalf - 0.1f);
-            Assert.AreEqual(0, updateCountA, "Base case (count A)");
-            Assert.AreEqual(0, updateCountB, "Base case (count B)");
-            
+            yield return new WaitForSeconds(0.9f);
+            Assert.AreEqual(0, dummyOnUpdateCalls, "The second Subscribe call should not have gone through.");
+
             yield return new WaitForSeconds(0.2f);
-            Assert.AreEqual(1, updateCountA, "Updates are now on half the normal period. First update is first.");
-            Assert.AreEqual(0, updateCountB, "Updates are now on half the normal period. Second update is second.");
+            Assert.AreEqual(1, dummyOnUpdateCalls, "The first Subscribe call should have gone through.");
 
-            yield return new WaitForSeconds(periodHalf);
-            Assert.AreEqual(1, updateCountA, "First update is still offset.");
-            Assert.AreEqual(1, updateCountB, "Second update should hit now.");
-
-            subB.Dispose();
-            yield return new WaitForSeconds(periodHalf);
-            Assert.AreEqual(1, updateCountA, "First update should no longer be offset.");
-            Assert.AreEqual(1, updateCountB, "Second update is unsubscribed.");
-
-            yield return new WaitForSeconds(periodHalf);
-            Assert.AreEqual(2, updateCountA, "First update should hit with normal timing.");
-            Assert.AreEqual(1, updateCountB, "Second update is still unsubscribed.");
+            Locator.Get.UpdateSlow.Unsubscribe(DummyOnUpdate);
+            yield return new WaitForSeconds(1);
+            Assert.AreEqual(1, dummyOnUpdateCalls, "Unsubscribe should work as expected.");
         }
+        private int dummyOnUpdateCalls = 0;
+        private void DummyOnUpdate(float dt) { dummyOnUpdateCalls++; }
 
         [UnityTest]
         public IEnumerator WhatIfASubscriberIsVerySlow()
         {
             int updateCount = 0;
             string inefficientString = "";
+            float period = 1.5f;
             Subscriber sub = new Subscriber(() => 
             {   for (int n = 0; n < 12345; n++)
                     inefficientString += n.ToString();
                 updateCount++;
-            });
+            }, period);
             m_activeSubscribers.Add(sub);
 
             LogAssert.Expect(LogType.Error, new Regex(".*took too long.*"));
-            yield return new WaitForSeconds(k_period + 0.1f);
+            yield return new WaitForSeconds(period + 0.1f);
             Assert.AreEqual(1, updateCount, "Executed the slow update.");
 
-            yield return new WaitForSeconds(k_period);
+            yield return new WaitForSeconds(period);
             Assert.AreEqual(1, updateCount, "Should have removed the offending subscriber.");
         }
     }
