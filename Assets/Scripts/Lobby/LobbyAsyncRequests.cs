@@ -89,8 +89,6 @@ namespace LobbyRelaySample
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, CreateInitialPlayerData(localUser), OnLobbyCreated);
 
-            // TODO: What about errors?
-
             void OnLobbyCreated(Lobby response)
             {
                 if (response == null)
@@ -141,7 +139,7 @@ namespace LobbyRelaySample
                 if (response != null)
                     onListRetrieved?.Invoke(response);
                 else
-                    onError?.Invoke(response); // TODO: Hmm...how do we know if there was a failure?
+                    onError?.Invoke(response);
             }
         }
         /// <param name="onComplete">If no lobby is retrieved, this is given null.</param>

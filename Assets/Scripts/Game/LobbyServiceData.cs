@@ -21,7 +21,6 @@ namespace LobbyRelaySample
     {
         LobbyQueryState m_CurrentState = LobbyQueryState.Empty;
 
-        public long lastErrorCode;
         public LobbyQueryState State
         {
             get { return m_CurrentState; }

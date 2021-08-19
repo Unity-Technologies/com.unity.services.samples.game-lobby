@@ -26,17 +26,7 @@ namespace LobbyRelaySample.UI
             {
                 spinnerImage.Hide();
                 errorTextVisibility.Show();
-                var errorString = new StringBuilder();
-                errorString.Append("Error");
-                errorString.Append(": ");
-                if (observed.lastErrorCode > 0)
-                {
-                    errorString.Append(observed.lastErrorCode);
-                    errorString.Append(", ");
-                }
-                errorString.Append("Check Unity Console Log for Details.");
-
-                errorText.SetText(errorString.ToString());
+                errorText.SetText("Error. See Unity Console log for details.");
             }
             else if (observed.State == LobbyQueryState.Fetched)
             {

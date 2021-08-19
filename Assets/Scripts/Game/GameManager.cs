@@ -131,14 +131,11 @@ namespace LobbyRelaySample
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
                 LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
                     qr =>
-                    {
-                        if (qr != null)
+                    {   if (qr != null)
                             OnLobbiesQueried(lobby.ToLocalLobby.Convert(qr));
                     },
                     er =>
-                    {
-                        long errorLong = 0;
-                        OnLobbyQueryFailed(errorLong); // TODO: What to supply here?
+                    {   OnLobbyQueryFailed();
                     },
                     m_lobbyColorFilter);
             }
@@ -195,9 +192,8 @@ namespace LobbyRelaySample
             m_lobbyServiceData.CurrentLobbies = newLobbyDict;
         }
 
-        private void OnLobbyQueryFailed(long errorCode)
+        private void OnLobbyQueryFailed()
         {
-            m_lobbyServiceData.lastErrorCode = errorCode;
             m_lobbyServiceData.State = LobbyQueryState.Error;
         }
 
