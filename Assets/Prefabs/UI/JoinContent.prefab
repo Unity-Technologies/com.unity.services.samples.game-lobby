@@ -396,8 +396,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_LobbyButtonPrefab: {fileID: 7018369548608736188, guid: f6d35a456ba76a24587dce83bd088b7d,
-    type: 3}
+  m_LobbyButtonPrefab: {fileID: 7018369548608736188, guid: f6d35a456ba76a24587dce83bd088b7d, type: 3}
   m_LobbyButtonParent: {fileID: 7824921818678239159}
 --- !u!114 &7550446569341709048
 MonoBehaviour:
@@ -4051,8 +4050,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1462126939442648229}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.JoinMenuUI, LobbyRooms
-        m_MethodName: OnJoinCodeInputFieldChanged
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.JoinMenuUI, LobbyRelaySample
+        m_MethodName: OnLobbyCodeInputFieldChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4115,13 +4114,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spinner
       objectReference: {fileID: 0}
-    - target: {fileID: 7859013680193933450, guid: c9b04951bd45e154b8096955d9bc8a0b,
-        type: 3}
+    - target: {fileID: 7859013680193933450, guid: c9b04951bd45e154b8096955d9bc8a0b, type: 3}
       propertyPath: m_text
       value: 'Error: Check the console log.'
       objectReference: {fileID: 0}
-    - target: {fileID: 8141644855275361747, guid: c9b04951bd45e154b8096955d9bc8a0b,
-        type: 3}
+    - target: {fileID: 8141644855275361747, guid: c9b04951bd45e154b8096955d9bc8a0b, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
       objectReference: {fileID: 0}

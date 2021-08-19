@@ -165,7 +165,7 @@ namespace LobbyRelaySample.Relay
     }
 
     /// <summary>
-    /// Client logic: Wait until the join code is retrieved from the lobby's shared data. Then, use that code to get the Allocation to bind to, and
+    /// Client logic: Wait until the Relay join code is retrieved from the lobby's shared data. Then, use that code to get the Allocation to bind to, and
     /// then create a connection to the host.
     /// </summary>
     public class RelayUtpSetupClient : RelayUtpSetup

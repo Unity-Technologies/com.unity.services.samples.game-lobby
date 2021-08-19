@@ -69,7 +69,7 @@ namespace LobbyRelaySample.Relay
                     onComplete.Invoke(a.Result.Data.JoinCode);
                 else
                 {
-                    Debug.LogError($"Join Code Get returned a non Success code: {a.Status}");
+                    Debug.LogError($"Relay GetJoinCodeAsync returned a non-success code: {a.Status}");
                 }
             });
         }
