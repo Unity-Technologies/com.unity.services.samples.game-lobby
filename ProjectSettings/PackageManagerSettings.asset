@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 13964, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EnablePreReleasePackages: 0
-  m_EnablePackageDependencies: 0
+  m_EnablePreviewPackages: 1
+  m_EnablePackageDependencies: 1
   m_AdvancedSettingsExpanded: 1
   m_ScopedRegistriesSettingsExpanded: 1
-  m_SeeAllPackageVersions: 0
   oneTimeWarningShown: 1
   m_Registries:
   - m_Id: main
@@ -25,11 +24,40 @@ MonoBehaviour:
     m_Scopes: []
     m_IsDefault: 1
     m_Capabilities: 7
-  m_UserSelectedRegistryName: 
+  - m_Id: scoped:Candidates
+    m_Name: Candidates
+    m_Url: https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates
+    m_Scopes:
+    - com.unity.services.lobby
+    - com.unity.services.relay
+    - com.unity.services.authentication
+    - com.unity.services.core
+    - com.unity.transport
+    m_IsDefault: 0
+    m_Capabilities: 0
+  m_UserSelectedRegistryName: Candidates
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
-    m_Modified: 0
     m_ErrorMessage: 
-    m_UserModificationsInstanceId: -822
-    m_OriginalInstanceId: -824
-  m_LoadAssets: 0
+    m_Original:
+      m_Id: scoped:Candidates
+      m_Name: Candidates
+      m_Url: https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates
+      m_Scopes:
+      - com.unity.services.lobby
+      - com.unity.services.relay
+      - com.unity.services.authentication
+      - com.unity.services.core
+      - com.unity.transport
+      m_IsDefault: 0
+      m_Capabilities: 0
+    m_Modified: 0
+    m_Name: Candidates
+    m_Url: https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates
+    m_Scopes:
+    - com.unity.services.lobby
+    - com.unity.services.relay
+    - com.unity.services.authentication
+    - com.unity.services.core
+    - com.unity.transport
+    m_SelectedScopeIndex: 0

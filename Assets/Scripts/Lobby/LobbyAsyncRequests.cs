@@ -31,11 +31,6 @@ namespace LobbyRelaySample
             Locator.Get.UpdateSlow.Subscribe(UpdateLobby, 0.5f); // Shouldn't need to unsubscribe since this instance won't be replaced. 0.5s is arbitrary; the rate limits are tracked later.
         }
 
-        private static bool IsSuccessful(Response response)
-        {
-            return response != null && response.Status >= 200 && response.Status < 300; // Uses HTTP status codes, so 2xx is a success.
-        }
-
         #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         private string m_currentLobbyId = null;
@@ -101,15 +96,12 @@ namespace LobbyRelaySample
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, CreateInitialPlayerData(localUser), OnLobbyCreated);
 
-            void OnLobbyCreated(Response<Lobby> response)
+            void OnLobbyCreated(Lobby response)
             {
-                if (!IsSuccessful(response))
+                if (response == null)
                     onFailure?.Invoke();
                 else
-                {
-                    var pendingLobby = response.Result;
-                    onSuccess?.Invoke(pendingLobby); // The Create request automatically joins the lobby, so we need not take further action.
-                }
+                    onSuccess?.Invoke(response); // The Create request automatically joins the lobby, so we need not take further action.
             }
         }
 
@@ -132,12 +124,12 @@ namespace LobbyRelaySample
             else
                 LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, CreateInitialPlayerData(localUser), OnLobbyJoined);
 
-            void OnLobbyJoined(Response<Lobby> response)
+            void OnLobbyJoined(Lobby response)
             {
-                if (!IsSuccessful(response))
+                if (response == null)
                     onFailure?.Invoke();
                 else
-                    onSuccess?.Invoke(response?.Result);
+                    onSuccess?.Invoke(response);
             }
         }
 
@@ -145,7 +137,7 @@ namespace LobbyRelaySample
         /// Used for getting the list of all active lobbies, without needing full info for each.
         /// </summary>
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
-        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<Response<QueryResponse>> onError = null, LobbyColor limitToColor = LobbyColor.None)
+        public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<QueryResponse> onError = null, LobbyColor limitToColor = LobbyColor.None)
         {
             if (!m_rateLimitQuery.CanCall())
             {
@@ -164,10 +156,10 @@ namespace LobbyRelaySample
 
             LobbyAPIInterface.QueryAllLobbiesAsync(filters, OnLobbyListRetrieved);
 
-            void OnLobbyListRetrieved(Response<QueryResponse> response)
+            void OnLobbyListRetrieved(QueryResponse response)
             {
-                if (IsSuccessful(response))
-                    onListRetrieved?.Invoke(response?.Result);
+                if (response != null)
+                    onListRetrieved?.Invoke(response);
                 else
                     onError?.Invoke(response);
             }
@@ -182,9 +174,9 @@ namespace LobbyRelaySample
             }
             LobbyAPIInterface.GetLobbyAsync(lobbyId, OnGet);
 
-            void OnGet(Response<Lobby> response)
+            void OnGet(Lobby response)
             {
-                onComplete?.Invoke(response?.Result);
+                onComplete?.Invoke(response);
             }
         }
 
@@ -197,7 +189,7 @@ namespace LobbyRelaySample
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.LeaveLobbyAsync(uasId, lobbyId, OnLeftLobby);
 
-            void OnLeftLobby(Response response)
+            void OnLeftLobby()
             {
                 onComplete?.Invoke();
                 // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.

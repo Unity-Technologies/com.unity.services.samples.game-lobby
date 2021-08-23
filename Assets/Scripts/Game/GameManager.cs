@@ -10,9 +10,6 @@ namespace LobbyRelaySample
     /// </summary>
     public class GameManager : MonoBehaviour, IReceiveMessages
     {
-        [SerializeField]
-        [Tooltip("Only logs of this level or higher will appear in the console.")]
-        private LogMode m_logMode = LogMode.Critical;
         /// <summary>
         /// All these should be assigned the observers in the scene at the start.
         /// </summary>
@@ -40,6 +37,7 @@ namespace LobbyRelaySample
         private LobbyColor m_lobbyColorFilter;
 
         #region Setup
+
         private void Awake()
         {
             // Do some arbitrary operations to instantiate singletons.
@@ -47,7 +45,6 @@ namespace LobbyRelaySample
             var unused = Locator.Get;
 #pragma warning restore IDE0059
 
-            LogHandler.Get().mode = m_logMode;
             Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
             Application.wantsToQuit += OnWantToQuit;
         }
@@ -80,6 +77,7 @@ namespace LobbyRelaySample
             foreach (var userObs in m_LocalUserObservers)
                 userObs.BeginObserving(m_localUser);
         }
+
         #endregion
 
         /// <summary>
@@ -117,10 +115,7 @@ namespace LobbyRelaySample
                             OnLobbiesQueried(lobby.ToLocalLobby.Convert(qr));
                     },
                     er => {
-                        long errorLong = 0;
-                        if (er != null)
-                            errorLong = er.Status;
-                        OnLobbyQueryFailed(errorLong);
+                        OnLobbyQueryFailed();
                     },
                     m_lobbyColorFilter);
             }
@@ -170,9 +165,8 @@ namespace LobbyRelaySample
             m_lobbyServiceData.CurrentLobbies = newLobbyDict;
         }
 
-        private void OnLobbyQueryFailed(long errorCode)
+        private void OnLobbyQueryFailed()
         {
-            m_lobbyServiceData.lastErrorCode = errorCode;
             m_lobbyServiceData.State = LobbyQueryState.Error;
         }
 
