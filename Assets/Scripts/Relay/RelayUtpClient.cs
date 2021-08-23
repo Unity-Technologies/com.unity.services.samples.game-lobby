@@ -43,7 +43,6 @@ namespace LobbyRelaySample.Relay
         {
             if (m_connections.Count == 0) // This could be the case for the host alone in the lobby.
                 return;
-            m_networkDriver.ScheduleUpdate().Complete();
             foreach (NetworkConnection conn in m_connections)
                 DoUserUpdate(m_networkDriver, conn, m_localUser);
         }
@@ -62,22 +61,22 @@ namespace LobbyRelaySample.Relay
 
         protected virtual void OnUpdate()
         {
-            m_networkDriver.ScheduleUpdate().Complete(); // This pumps all messages, which pings the Relay allocation and keeps it alive.
-            ReceiveNetworkEvents(m_networkDriver, m_connections);
             if (!m_hasSentInitialMessage)
-                SendInitialMessage(m_networkDriver, m_connections[0]);
+                ReceiveNetworkEvents(m_networkDriver); // Just on the first execution, make sure to handle any events that accumulated while completing the connection.
+            m_networkDriver.ScheduleUpdate().Complete(); // This pumps all messages, which pings the Relay allocation and keeps it alive. It should be called no more often than ReceiveNetworkEvents.
+            ReceiveNetworkEvents(m_networkDriver); // This reads the message queue which was just updated.
+            if (!m_hasSentInitialMessage)
+                SendInitialMessage(m_networkDriver, m_connections[0]); // On a client, the 0th (and only) connection is to the host.
         }
 
-        private void ReceiveNetworkEvents(NetworkDriver driver, List<NetworkConnection> connections)
+        private void ReceiveNetworkEvents(NetworkDriver driver)
         {
+            NetworkConnection conn;
             DataStreamReader strm;
             NetworkEvent.Type cmd;
-            foreach (NetworkConnection connection in connections)
+            while ((cmd = driver.PopEvent(out conn, out strm)) != NetworkEvent.Type.Empty) // NetworkConnection also has PopEvent, but NetworkDriver.PopEvent automatically includes new connections.
             {
-                while ((cmd = connection.PopEvent(driver, out strm)) != NetworkEvent.Type.Empty)
-                {
-                    ProcessNetworkEvent(connection, strm, cmd);
-                }
+                ProcessNetworkEvent(conn, strm, cmd);
             }
         }
 
