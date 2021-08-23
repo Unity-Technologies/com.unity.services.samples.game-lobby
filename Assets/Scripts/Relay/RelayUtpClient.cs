@@ -63,7 +63,7 @@ namespace LobbyRelaySample.Relay
         {
             if (!m_hasSentInitialMessage)
                 ReceiveNetworkEvents(m_networkDriver); // Just on the first execution, make sure to handle any events that accumulated while completing the connection.
-            m_networkDriver.ScheduleUpdate().Complete(); // This pumps all messages, which pings the Relay allocation and keeps it alive. It should be called 1:1 with ReceiveNetworkEvents.
+            m_networkDriver.ScheduleUpdate().Complete(); // This pumps all messages, which pings the Relay allocation and keeps it alive. It should be called no more often than ReceiveNetworkEvents.
             ReceiveNetworkEvents(m_networkDriver); // This reads the message queue which was just updated.
             if (!m_hasSentInitialMessage)
                 SendInitialMessage(m_networkDriver, m_connections[0]); // On a client, the 0th (and only) connection is to the host.
