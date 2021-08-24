@@ -128,8 +128,6 @@ namespace LobbyRelaySample.relay
         /// </summary>
         private void DoHeartbeat()
         {
-            m_networkDriver.ScheduleUpdate().Complete();
-
             for (int c = m_connections.Count - 1; c >= 0; c--)
             {
                 if (!m_connections[c].IsCreated)
@@ -137,7 +135,7 @@ namespace LobbyRelaySample.relay
             }
             while (true)
             {
-                var conn = m_networkDriver.Accept();
+                var conn = m_networkDriver.Accept(); // Note that since we pumped the event queue earlier in Update, m_networkDriver has been updated already this frame.
                 if (!conn.IsCreated) // "Nothing more to accept" is signalled by returning an invalid connection from Accept.
                     break;
                 m_connections.Add(conn);

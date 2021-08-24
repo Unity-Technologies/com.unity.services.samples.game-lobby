@@ -23,7 +23,7 @@ namespace LobbyRelaySample.relay
             }
             catch (RelayServiceException ex)
             {
-                Debug.LogError(ex.Message + "\n" + ex.StackTrace);
+                Debug.LogError($"Relay AllocateAsync returned a relay exception: {ex.Reason} - {ex.Message}");
                 throw;
             }
         }
@@ -40,10 +40,10 @@ namespace LobbyRelaySample.relay
                 onComplete.Invoke(joinCode);
             }
             catch (RelayServiceException ex)
-            {
-                Debug.LogError(ex.Message + "\n" + ex.StackTrace);
-                throw;
-            }
+                {
+                 	Debug.LogError($"Relay GetJoinCodeAsync returned a relay exception: {ex.Reason} - {ex.Message}");
+                	throw;
+                }
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace LobbyRelaySample.relay
             }
             catch (RelayServiceException ex)
             {
-                Debug.LogError(ex.Message + "\n" + ex.StackTrace);
+              	Debug.LogError($"Relay JoinCodeAsync returned a relay exception: {ex.Reason} - {ex.Message}");
                 throw;
             }
         }

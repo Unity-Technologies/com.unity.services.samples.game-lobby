@@ -75,7 +75,7 @@ namespace LobbyRelaySample
     }
 
     /// <summary>
-    /// The idea here is to 
+    /// The idea here is to present the most relevant error first.
     /// </summary>
     [Serializable]
     public class ErrorReaction
@@ -87,7 +87,7 @@ namespace LobbyRelaySample
             string message = "";
             var rawExceptionMessage = "";
 
-            //We want to Ensure the most relevant error message is on top
+            // We want to ensure the most relevant error message is on top.
             if (exception.InnerException != null)
                 rawExceptionMessage = exception.InnerException.ToString();
             else

@@ -1,4 +1,3 @@
-using System;
 using LobbyRelaySample.relay;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,10 +34,6 @@ namespace LobbyRelaySample
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
-
-        // The Lobby API rate limits query requests to one every 1.5s, and it will return a 429 "Too Many Requests" error otherwise.
-        private const float k_lobbyAssignmentCoolingSeconds = 1.5f;
-        private bool m_coolingDown;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
         public void SetLobbyColorFilter(int color)
@@ -98,83 +93,62 @@ namespace LobbyRelaySample
         public void OnReceiveMessage(MessageType type, object msg)
         {
             if (type == MessageType.RenameRequest)
-            {
-                m_localUser.DisplayName = (string)msg;
+            {   m_localUser.DisplayName = (string)msg;
             }
             else if (type == MessageType.CreateLobbyRequest)
             {
-                if (!LobbyRequestCooledDown())
-                    return;
-
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
-                    {
-                        lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnCreatedLobby();
                     },
                     OnFailedJoin);
             }
             else if (type == MessageType.JoinLobbyRequest)
             {
-                if (!LobbyRequestCooledDown())
-                    return;
-
                 LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
-                    {
-                        lobby.ToLocalLobby.Convert(r, m_localLobby);
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnJoinedLobby();
                     },
                     OnFailedJoin);
             }
             else if (type == MessageType.QueryLobbies)
             {
-                if (!LobbyRequestCooledDown())
-                    return;
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
                 LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
-                    qr =>
-                    {
+                    qr => {
                         if (qr != null)
                             OnLobbiesQueried(lobby.ToLocalLobby.Convert(qr));
                     },
-                    er =>
-                    {
-                        long errorLong = 0;
-                        OnLobbyQueryFailed(errorLong); // TODO: What to supply here?
+                    er => {
+                        OnLobbyQueryFailed();
                     },
                     m_lobbyColorFilter);
             }
             else if (type == MessageType.ChangeGameState)
-            {
-                SetGameState((GameState)msg);
+            {   SetGameState((GameState)msg);
             }
             else if (type == MessageType.UserSetEmote)
-            {
-                EmoteType emote = (EmoteType)msg;
+            {   EmoteType emote = (EmoteType)msg;
                 m_localUser.Emote = emote;
             }
             else if (type == MessageType.LobbyUserStatus)
-            {
-                m_localUser.UserStatus = (UserStatus)msg;
+            {   m_localUser.UserStatus = (UserStatus)msg;
             }
             else if (type == MessageType.StartCountdown)
-            {
-                BeginCountDown();
+            {   BeginCountDown();
             }
             else if (type == MessageType.CancelCountdown)
-            {
-                m_localLobby.State = LobbyState.Lobby;
+            {   m_localLobby.State = LobbyState.Lobby;
                 m_localLobby.CountDownTime = 0;
             }
             else if (type == MessageType.ConfirmInGameState)
-            {
-                m_localUser.UserStatus = UserStatus.InGame;
+            {   m_localUser.UserStatus = UserStatus.InGame;
                 m_localLobby.State = LobbyState.InGame;
             }
             else if (type == MessageType.EndGame)
-            {
-                m_localLobby.State = LobbyState.Lobby;
+            {   m_localLobby.State = LobbyState.Lobby;
                 m_localLobby.CountDownTime = 0;
                 SetUserLobbyState();
             }
@@ -198,9 +172,8 @@ namespace LobbyRelaySample
             m_lobbyServiceData.CurrentLobbies = newLobbyDict;
         }
 
-        private void OnLobbyQueryFailed(long errorCode)
+        private void OnLobbyQueryFailed()
         {
-            m_lobbyServiceData.lastErrorCode = errorCode;
             m_lobbyServiceData.State = LobbyQueryState.Error;
         }
 
@@ -236,21 +209,6 @@ namespace LobbyRelaySample
                 Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
-        }
-
-        private bool LobbyRequestCooledDown()
-        {
-            if (m_coolingDown)
-                return false;
-            StartCoroutine(RequestCoolDown());
-            return true;
-        }
-
-        private IEnumerator RequestCoolDown()
-        {
-            m_coolingDown = true;
-            yield return new WaitForSeconds(k_lobbyAssignmentCoolingSeconds);
-            m_coolingDown = false;
         }
 
         /// <summary>

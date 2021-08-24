@@ -81,6 +81,7 @@ namespace LobbyRelaySample
 
         ServerAddress m_relayServer;
 
+        /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
         public ServerAddress RelayServer
         {
             get => m_relayServer;
