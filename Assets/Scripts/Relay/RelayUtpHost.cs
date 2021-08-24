@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Unity.Networking.Transport;
-using MsgType = LobbyRelaySample.Relay.RelayUtpSetup.MsgType;
+using MsgType = LobbyRelaySample.relay.RelayUtpSetup.MsgType;
 
-namespace LobbyRelaySample.Relay
+namespace LobbyRelaySample.relay
 {
     /// <summary>
     /// In addition to maintaining a heartbeat with the Relay server to keep it from timing out, the host player must pass network events

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Unity.Services.Authentication;
-using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample
@@ -32,6 +31,7 @@ namespace LobbyRelaySample
         }
 
         #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
+
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         private Queue<Action> m_pendingOperations = new Queue<Action>();
         private string m_currentLobbyId = null;
@@ -144,6 +144,7 @@ namespace LobbyRelaySample
                     onError?.Invoke(response); // TODO: Hmm...how do we know if there was a failure?
             }
         }
+
         /// <param name="onComplete">If no lobby is retrieved, this is given null.</param>
         private void RetrieveLobbyAsync(string lobbyId, Action<Lobby> onComplete)
         {
@@ -171,6 +172,7 @@ namespace LobbyRelaySample
             void OnLeftLobby()
             {
                 onComplete?.Invoke();
+
                 // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
             }
         }
@@ -224,7 +226,7 @@ namespace LobbyRelaySample
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
             }
-            
+
             LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (r) => { onComplete?.Invoke(); });
         }
 
@@ -235,9 +237,11 @@ namespace LobbyRelaySample
         private bool ShouldUpdateData(Action caller, Action onComplete, bool shouldRetryIfLobbyNull)
         {
             if (m_isMidRetrieve)
-            {   m_pendingOperations.Enqueue(caller);
+            {
+                m_pendingOperations.Enqueue(caller);
                 return false;
             }
+
             Lobby lobby = m_lastKnownLobby;
             if (lobby == null)
             {
@@ -246,11 +250,13 @@ namespace LobbyRelaySample
                 onComplete?.Invoke();
                 return false;
             }
+
             return true;
         }
 
         private float m_heartbeatTime = 0;
         private const float k_heartbeatPeriod = 8; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+
         /// <summary>
         /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
         /// </summary>
@@ -258,7 +264,7 @@ namespace LobbyRelaySample
         {
             m_heartbeatTime += dt;
             if (m_heartbeatTime > k_heartbeatPeriod)
-            { 
+            {
                 m_heartbeatTime -= k_heartbeatPeriod;
                 LobbyAPIInterface.HeartbeatPlayerAsync(m_lastKnownLobby.Id);
             }
