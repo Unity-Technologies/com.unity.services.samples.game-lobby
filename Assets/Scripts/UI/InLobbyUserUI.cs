@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace LobbyRelaySample.UI
@@ -21,6 +22,10 @@ namespace LobbyRelaySample.UI
 
         [SerializeField]
         Image m_HostIcon;
+
+        [SerializeField]
+        Toggle m_MuteButton;
+        
 
         public bool IsAssigned
         {
@@ -45,6 +50,11 @@ namespace LobbyRelaySample.UI
             Hide();
             m_observer.EndObserving();
         }
+        
+        public void OnMuteToggled(bool muted)
+        {
+            
+        }
 
         public override void ObservedUpdated(LobbyUser observed)
         {
@@ -54,6 +64,9 @@ namespace LobbyRelaySample.UI
             m_HostIcon.enabled = observed.IsHost;
         }
 
+       
+        
+        
         string SetStatusFancy(UserStatus status)
         {
             switch (status)
