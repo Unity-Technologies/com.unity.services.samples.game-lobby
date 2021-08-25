@@ -35,7 +35,7 @@ MonoBehaviour:
     - com.unity.transport
     m_IsDefault: 0
     m_Capabilities: 0
-  m_UserSelectedRegistryName: Candidates
+  m_UserSelectedRegistryName: 
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
     m_ErrorMessage: 

@@ -24,13 +24,13 @@ namespace LobbyRelaySample.UI
         Image m_HostIcon;
 
         [SerializeField]
-        Toggle m_MuteButton;
+        MuteUI m_MuteUI;
+        
+        [SerializeField]
+        LobbyUserVolumeUI m_lobbyUserVolumeUI;
         
 
-        public bool IsAssigned
-        {
-            get { return UserId != null; }
-        }
+        public bool IsAssigned => UserId != null;
 
         public string UserId { get; private set; }
         private LobbyUserObserver m_observer;
@@ -56,16 +56,19 @@ namespace LobbyRelaySample.UI
             
         }
 
+        public void OnVolumeSlide(float volume)
+        {
+            
+        }
+
         public override void ObservedUpdated(LobbyUser observed)
         {
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
             m_EmoteText.SetText(observed.Emote.GetString());
+//            m_MuteUI.Show();
             m_HostIcon.enabled = observed.IsHost;
         }
-
-       
-        
         
         string SetStatusFancy(UserStatus status)
         {

@@ -2,13 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MuteUI : MonoBehaviour
+namespace LobbyRelaySample.UI
 {
-    [SerializeField]
-    CanvasGroup m_canvasGroup;
-
-    public void SetSpeakerAlpha(float alpha)
+    public class MuteUI : UIPanelBase
     {
-        m_canvasGroup.alpha = alpha;
+        [SerializeField]
+        CanvasGroup m_voiceRings;
+
+        public void EnableVoice()
+        {
+            Show();
+        }
+
+        public void DisableVoice()
+        {
+            Hide(1);
+        }
+        
+        /// <summary>
+        /// Controls the visibility of the volume rings to show activity levels of the voice channel on this user.
+        /// </summary>
+        /// <param name="normalizedVolume"></param>
+        public void OnSoundDetected(float normalizedVolume)
+        {
+            m_voiceRings.alpha = normalizedVolume;
+        }
+        
     }
 }
