@@ -34,12 +34,12 @@ namespace LobbyRelaySample.Auth
 
         private async void DoSignIn(Action onSigninComplete)
         {
-            await UnityServices.Initialize();
+            await UnityServices.InitializeAsync();
             AuthenticationService.Instance.SignedIn += OnSignInChange;
             AuthenticationService.Instance.SignedOut += OnSignInChange;
 
             if (!AuthenticationService.Instance.IsSignedIn)
-                await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Note: We don't want to sign out later, since that changes the UAS anonymous token, which would prevent the player from exiting lobbies they're already in.
+                await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Don't sign out later, since that changes the anonymous token, which would prevent the player from exiting lobbies they're already in.
             onSigninComplete?.Invoke();
         }
 

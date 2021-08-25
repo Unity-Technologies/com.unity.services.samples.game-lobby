@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -13,9 +14,6 @@ namespace LobbyRelaySample.UI
         LobbyButtonUI m_LobbyButtonPrefab;
 
         [SerializeField]
-        TMP_InputField m_LobbyCodeField;
-
-        [SerializeField]
         RectTransform m_LobbyButtonParent;
 
         /// <summary>
@@ -25,17 +23,17 @@ namespace LobbyRelaySample.UI
         Dictionary<string, LocalLobby> m_LocalLobby = new Dictionary<string, LocalLobby>();
 
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
-        LobbyInfo m_LocalLobbySelected;
+        LocalLobby.LobbyData m_LocalLobbySelected;
 
         public void LobbyButtonSelected(LocalLobby lobby)
         {
             m_LocalLobbySelected = lobby.Data;
         }
 
-        public void OnJoinCodeInputFieldChanged(string newCode)
+        public void OnLobbyCodeInputFieldChanged(string newCode)
         {
             if (!string.IsNullOrEmpty(newCode))
-                m_LocalLobbySelected = new LobbyInfo(newCode.ToUpper());
+                m_LocalLobbySelected = new LocalLobby.LobbyData(newCode.ToUpper());
         }
 
         public void OnJoinButtonPressed()
@@ -76,7 +74,13 @@ namespace LobbyRelaySample.UI
                 RemoveLobbyButton(m_LocalLobby[key]);
         }
 
-        bool CanDisplay(LocalLobby lobby)
+        public void JoinMenuChangedVisibility(bool show)
+        {
+            if (show)
+                OnRefresh();
+        }
+
+        private bool CanDisplay(LocalLobby lobby)
         {
             return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
         }
@@ -84,7 +88,7 @@ namespace LobbyRelaySample.UI
         /// <summary>
         /// Instantiates UI element and initializes the observer with the LobbyData
         /// </summary>
-        void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
+        private void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
         {
             var lobbyButtonInstance = Instantiate(m_LobbyButtonPrefab, m_LobbyButtonParent);
             lobbyButtonInstance.GetComponent<LocalLobbyObserver>().BeginObserving(lobby);
@@ -94,12 +98,12 @@ namespace LobbyRelaySample.UI
             m_LocalLobby.Add(lobbyCode, lobby);
         }
 
-        void UpdateLobbyButton(string lobbyCode, LocalLobby lobby)
+        private void UpdateLobbyButton(string lobbyCode, LocalLobby lobby)
         {
             m_LobbyButtons[lobbyCode].UpdateLobby(lobby);
         }
 
-        void RemoveLobbyButton(LocalLobby lobby)
+        private void RemoveLobbyButton(LocalLobby lobby)
         {
             var lobbyID = lobby.LobbyID;
             var lobbyButton = m_LobbyButtons[lobbyID];

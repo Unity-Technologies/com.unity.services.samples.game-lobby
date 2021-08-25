@@ -4,7 +4,8 @@ using System.Collections.Generic;
 namespace LobbyRelaySample.Auth
 {
     /// <summary>
-    /// Each context will have its own identity needs, so we'll allow each to define whatever parameters it needs.
+    /// Represents some provider of credentials.
+    /// Each provider will have its own identity needs, so we'll allow each to define whatever parameters it needs.
     /// Anything that accesses the contents should know what it's looking for.
     /// </summary>
     public class SubIdentity : Observed<SubIdentity>
@@ -47,18 +48,13 @@ namespace LobbyRelaySample.Auth
     }
 
     /// <summary>
-    /// Our internal representation of a player, wrapping the data required for interfacing with the identities of that player in the services.
-    /// One will be created for the local player, as well as for each other member of the lobby.
+    /// Our internal representation of the local player's credentials, wrapping the data required for interfacing with the identities of that player in the services.
+    /// (In use here, it just wraps Auth, but it can be used to combine multiple sets of credentials into one concept of a player.)
     /// </summary>
     public class Identity : IIdentity, IDisposable
     {
         private Dictionary<IIdentityType, SubIdentity> m_subIdentities = new Dictionary<IIdentityType, SubIdentity>();
 
-        public Identity()
-        {
-            m_subIdentities.Add(IIdentityType.Local, new SubIdentity());
-            m_subIdentities.Add(IIdentityType.Auth, new SubIdentity_Authentication());
-        }
         public Identity(Action callbackOnAuthLogin)
         {
             m_subIdentities.Add(IIdentityType.Local, new SubIdentity());

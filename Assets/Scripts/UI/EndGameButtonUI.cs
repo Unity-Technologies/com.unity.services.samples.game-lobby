@@ -9,7 +9,7 @@ namespace LobbyRelaySample.UI
     {
         public void EndGame()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ToLobby, null);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
         }
     }
 }
