@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Jobs;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-namespace LobbyRelaySample.Relay
+namespace LobbyRelaySample.relay
 {
     /// <summary>
     /// Responsible for setting up a connection with Relay using UTP, for the lobby host.
@@ -19,7 +18,6 @@ namespace LobbyRelaySample.Relay
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections;
         protected NetworkEndPoint m_endpointForServer;
-        protected JobHandle m_currentUpdateHandle;
         protected LocalLobby m_localLobby;
         protected LobbyUser m_localUser;
         protected Action<bool, RelayUtpClient> m_onJoinComplete;

@@ -1,4 +1,4 @@
-using LobbyRelaySample.Relay;
+using LobbyRelaySample.relay;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +13,9 @@ namespace LobbyRelaySample
         /// <summary>
         /// All these should be assigned the observers in the scene at the start.
         /// </summary>
+
         #region UI elements that observe the local state. These are 
+
         [SerializeField]
         private List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
         [SerializeField]
@@ -22,6 +24,7 @@ namespace LobbyRelaySample
         private List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
         [SerializeField]
         private List<LobbyServiceDataObserver> m_LobbyServiceObservers = new List<LobbyServiceDataObserver>();
+
         #endregion
 
         private LocalGameState m_localGameState = new LocalGameState();
@@ -33,7 +36,11 @@ namespace LobbyRelaySample
         private RelayUtpClient m_relayClient;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
-        public void SetLobbyColorFilter(int color) { m_lobbyColorFilter = (LobbyColor)color; }
+        public void SetLobbyColorFilter(int color)
+        {
+            m_lobbyColorFilter = (LobbyColor)color;
+        }
+
         private LobbyColor m_lobbyColorFilter;
 
         #region Setup
@@ -192,11 +199,14 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.EndTracking();
 
             if (m_relaySetup != null)
-            {   Component.Destroy(m_relaySetup);
+            {
+                Component.Destroy(m_relaySetup);
                 m_relaySetup = null;
             }
+
             if (m_relayClient != null)
-            {   Component.Destroy(m_relayClient);
+            {
+                Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
         }
@@ -230,6 +240,7 @@ namespace LobbyRelaySample
                 StartCoroutine(RetryRelayConnection());
                 return;
             }
+
             m_relayClient = client;
             OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }
@@ -261,6 +272,7 @@ namespace LobbyRelaySample
                     yield break;
                 m_localLobby.CountDownTime -= Time.deltaTime;
             }
+
             if (m_relayClient is RelayUtpHost)
                 (m_relayClient as RelayUtpHost).SendInGameState();
         }
@@ -280,6 +292,7 @@ namespace LobbyRelaySample
         }
 
         #region Teardown
+
         /// <summary>
         /// In builds, if we are in a lobby and try to send a Leave request on application quit, it won't go through if we're quitting on the same frame.
         /// So, we need to delay just briefly to let the request happen (though we don't need to wait for the result).
@@ -312,6 +325,7 @@ namespace LobbyRelaySample
                 m_localLobby = null;
             }
         }
+
         #endregion
     }
 }

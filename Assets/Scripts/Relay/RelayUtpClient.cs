@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Unity.Networking.Transport;
 using UnityEngine;
-using MsgType = LobbyRelaySample.Relay.RelayUtpSetup.MsgType;
+using MsgType = LobbyRelaySample.relay.RelayUtpSetup.MsgType;
 
-namespace LobbyRelaySample.Relay
+namespace LobbyRelaySample.relay
 {
     /// <summary>
     /// This observes the local player and updates remote players over Relay when there are local changes, demonstrating basic data transfer over the Unity Transport (UTP).
@@ -15,6 +15,7 @@ namespace LobbyRelaySample.Relay
         protected LocalLobby m_localLobby;
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
+
         protected bool m_hasSentInitialMessage = false;
         private const float k_heartbeatPeriod = 5;
 

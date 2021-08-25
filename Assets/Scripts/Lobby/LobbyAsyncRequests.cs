@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Unity.Services.Authentication;
-using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample
@@ -192,6 +191,7 @@ namespace LobbyRelaySample
             void OnLeftLobby()
             {
                 onComplete?.Invoke();
+
                 // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
             }
         }
@@ -245,7 +245,7 @@ namespace LobbyRelaySample
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
             }
-            
+
             LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (r) => { onComplete?.Invoke(); });
         }
 
@@ -272,6 +272,7 @@ namespace LobbyRelaySample
 
         private float m_heartbeatTime = 0;
         private const float k_heartbeatPeriod = 8; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+
         /// <summary>
         /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
         /// </summary>
@@ -279,7 +280,7 @@ namespace LobbyRelaySample
         {
             m_heartbeatTime += dt;
             if (m_heartbeatTime > k_heartbeatPeriod)
-            { 
+            {
                 m_heartbeatTime -= k_heartbeatPeriod;
                 LobbyAPIInterface.HeartbeatPlayerAsync(m_lastKnownLobby.Id);
             }
