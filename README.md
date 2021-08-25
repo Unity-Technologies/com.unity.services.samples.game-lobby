@@ -72,7 +72,7 @@ You will need two “players” to demonstrate the full sample functionality. Cr
 
 #### **Lobby Join Menu**
 
-![alt_text](~Documents/1_lobby_list.PNG "Lobby List")
+![alt_text](~Documents/Images/1_lobby_list.PNG "Lobby List")
 
 The Lobby Join menu contains the lobby list UI, which acts as a hub for players to connect to each other using the public lobby list or lobby code.
 
@@ -89,7 +89,7 @@ The Lobby Join menu contains the lobby list UI, which acts as a hub for players 
 
 #### **Lobby View**
 
-![alt_text](~Documents/2_lobby.PNG "Lobby")
+![alt_text](~Documents/Images/2_lobby.PNG "Lobby")
 
 
 The Lobby View UI displays information from Lobby and Relay for all players in a lobby. When a new player joins, they immediately begin connecting to the host, after which they synchronize emotes and state changes with the other lobby members.
