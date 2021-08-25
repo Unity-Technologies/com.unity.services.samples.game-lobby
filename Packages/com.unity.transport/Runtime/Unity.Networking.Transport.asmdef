@@ -1,0 +1,11 @@
+{
+    "name": "Unity.Networking.Transport",
+    "references": [
+           "Unity.Burst",
+           "Unity.Collections",
+           "Unity.Mathematics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true
+}

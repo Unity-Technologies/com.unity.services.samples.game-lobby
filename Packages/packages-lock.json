@@ -111,7 +111,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.services.relay": {
-      "version": "1.0.0-pre.4",
+      "version": "1.0.1-pre.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -173,15 +173,14 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.transport": {
-      "version": "1.0.0-pre.1",
+      "version": "file:com.unity.transport",
       "depth": 0,
-      "source": "registry",
+      "source": "embedded",
       "dependencies": {
         "com.unity.collections": "1.0.0-pre.3",
         "com.unity.burst": "1.5.1",
         "com.unity.mathematics": "1.2.1"
-      },
-      "url": "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates"
+      }
     },
     "com.unity.ugui": {
       "version": "1.0.0",
