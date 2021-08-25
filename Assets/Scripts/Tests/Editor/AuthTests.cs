@@ -5,6 +5,9 @@ namespace Test
 {
     public class AuthTests
     {
+        /// <summary>
+        /// Ensure that any changes to a flavor of SubIdentity are automatically updated.
+        /// </summary>
         [Test]
         public void IdentityBasicSubidentity()
         {

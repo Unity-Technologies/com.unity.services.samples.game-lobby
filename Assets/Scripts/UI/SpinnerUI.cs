@@ -15,27 +15,20 @@ namespace LobbyRelaySample.UI
 
         public override void ObservedUpdated(LobbyServiceData observed)
         {
-            if (observed.State == LobbyServiceState.Fetching)
+            if (observed.State == LobbyQueryState.Fetching)
             {
                 Show();
                 spinnerImage.Show();
                 noServerText.Hide();
                 errorTextVisibility.Hide();
             }
-            else if (observed.State == LobbyServiceState.Error)
+            else if (observed.State == LobbyQueryState.Error)
             {
                 spinnerImage.Hide();
                 errorTextVisibility.Show();
-                var errorString = new StringBuilder();
-                errorString.Append("Error");
-                var codeString = ": " + observed.lastErrorCode;
-                if (observed.lastErrorCode < 1)
-                    codeString = ".";
-
-                errorString.Append(codeString);
-                errorText.SetText(errorString.ToString());
+                errorText.SetText("Error. See Unity Console log for details.");
             }
-            else if (observed.State == LobbyServiceState.Fetched)
+            else if (observed.State == LobbyQueryState.Fetched)
             {
                 if (observed.CurrentLobbies.Count < 1)
                 {

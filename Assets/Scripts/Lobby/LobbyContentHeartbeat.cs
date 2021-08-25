@@ -1,10 +1,10 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// Keep updated on changes to a joined lobby.
+    /// Keep updated on changes to a joined lobby, at a speed compliant with Lobby's rate limiting.
     /// </summary>
     public class LobbyContentHeartbeat
     {
@@ -17,7 +17,7 @@ namespace LobbyRelaySample
         {
             m_localLobby = lobby;
             m_localUser = localUser;
-            Locator.Get.UpdateSlow.Subscribe(OnUpdate);
+            Locator.Get.UpdateSlow.Subscribe(OnUpdate, 1.5f);
             m_localLobby.onChanged += OnLocalLobbyChanged;
             m_shouldPushData = true; // Ensure the initial presence of a new player is pushed to the lobby; otherwise, when a non-host joins, the LocalLobby never receives their data until they push something new.
         }
@@ -39,16 +39,22 @@ namespace LobbyRelaySample
             m_shouldPushData = true;
         }
 
-        public void OnUpdate(float dt)
+        /// <summary>
+        /// If there have been any data changes since the last update, push them to Lobby. Regardless, pull for the most recent data.
+        /// (Unless we're already awaiting a query, in which case continue waiting.)
+        /// </summary>
+        private void OnUpdate(float dt)
         {
             if (m_isAwaitingQuery || m_localLobby == null)
                 return;
-
+            if (m_localUser.IsHost)
+                LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
             m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
             if (m_shouldPushData)
                 PushDataToLobby();
             else
                 OnRetrieve();
+
 
             void PushDataToLobby()
             {
@@ -67,12 +73,12 @@ namespace LobbyRelaySample
 
             void DoLobbyDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(lobby.ToLocalLobby.RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
+                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
             }
 
             void DoPlayerDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(lobby.ToLocalLobby.RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
+                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
             }
 
             void OnRetrieve()
@@ -82,28 +88,28 @@ namespace LobbyRelaySample
                 if (lobbyRemote == null) return;
                 bool prevShouldPush = m_shouldPushData;
                 var prevState = m_localLobby.State;
-                lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby, m_localUser);
+                lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby);
                 m_shouldPushData = prevShouldPush;
-                CheckForAllPlayersReady();
-
-                if (prevState != LobbyState.Lobby && m_localLobby.State == LobbyState.Lobby)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ToLobby, null);
             }
+        }
 
+        private static Dictionary<string, string> RetrieveLobbyData(LocalLobby lobby)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            data.Add("RelayCode", lobby.RelayCode);
+            data.Add("State", ((int)lobby.State).ToString()); // Using an int is smaller than using the enum state's name.
+            data.Add("Color", ((int)lobby.Color).ToString());
+            return data;
+        }
 
-            void CheckForAllPlayersReady()
-            {
-                bool areAllPlayersReady = m_localLobby.AllPlayersReadyTime != null;
-                if (areAllPlayersReady)
-                {
-                    long targetTimeTicks = m_localLobby.AllPlayersReadyTime.Value;
-                    DateTime targetTime = new DateTime(targetTimeTicks);
-                    if (targetTime.Subtract(DateTime.Now).Seconds < 0)
-                        return;
-
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.Client_EndReadyCountdownAt, targetTime); // Note that this could be called multiple times.
-                }
-            }
+        private static Dictionary<string, string> RetrieveUserData(LobbyUser user)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            if (user == null || string.IsNullOrEmpty(user.ID))
+                return data;
+            data.Add("DisplayName", user.DisplayName); // The lobby doesn't need to know any data beyond the name and state; Relay will handle the rest.
+            data.Add("UserStatus", ((int)user.UserStatus).ToString());
+            return data;
         }
     }
 }

@@ -11,46 +11,49 @@ namespace LobbyRelaySample.lobby
         /// <summary>
         /// Create a new LocalLobby from the content of a retrieved lobby. Its data can be copied into an existing LocalLobby for use.
         /// </summary>
-        public static void Convert(Lobby lobby, LocalLobby outputToHere, LobbyUser existingLocalUser = null)
+        public static void Convert(Lobby lobby, LocalLobby outputToHere)
         {
-            LobbyInfo info = new LobbyInfo
+            LocalLobby.LobbyData info = new LocalLobby.LobbyData // Technically, this is largely redundant after the first assignment, but it won't do any harm to assign it again.
             {   LobbyID             = lobby.Id,
                 LobbyCode           = lobby.LobbyCode,
                 Private             = lobby.IsPrivate,
                 LobbyName           = lobby.Name,
                 MaxPlayerCount      = lobby.MaxPlayers,
-                RelayCode           = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : null,
+                RelayCode           = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : null, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
                 State               = lobby.Data?.ContainsKey("State") == true ? (LobbyState) int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby,
-                AllPlayersReadyTime = lobby.Data?.ContainsKey("AllPlayersReady") == true ? long.Parse(lobby.Data["AllPlayersReady"].Value) : (long?)null
+                Color               = lobby.Data?.ContainsKey("Color") == true ? (LobbyColor) int.Parse(lobby.Data["Color"].Value) : LobbyColor.None
             };
+
             Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>();
             foreach (var player in lobby.Players)
             {
-                if (existingLocalUser != null && player.Id.Equals(existingLocalUser.ID))
+                // If we already know about this player and this player is already connected to Relay, don't overwrite things that Relay might be changing.
+                if (player.Data?.ContainsKey("UserStatus") == true && int.TryParse(player.Data["UserStatus"].Value, out int status))
                 {
-                    existingLocalUser.IsHost = lobby.HostId.Equals(player.Id);
-                    existingLocalUser.DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : existingLocalUser.DisplayName;
-                    existingLocalUser.Emote = player.Data?.ContainsKey("Emote") == true ? player.Data["Emote"].Value : existingLocalUser.Emote;
-                    lobbyUsers.Add(existingLocalUser.ID, existingLocalUser);
+                    if (status > (int)UserStatus.Connecting && outputToHere.LobbyUsers.ContainsKey(player.Id))
+                    {
+                        lobbyUsers.Add(player.Id, outputToHere.LobbyUsers[player.Id]);
+                        continue;
+                    }
                 }
-                else
-                {
-                    LobbyUser user = new LobbyUser(
-                        displayName: player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : "NewPlayer",
-                        isHost: lobby.HostId.Equals(player.Id),
-                        id: player.Id,
-                        emote: player.Data?.ContainsKey("Emote") == true ? player.Data["Emote"].Value : null,
-                        userStatus: player.Data?.ContainsKey("UserStatus") == true ? player.Data["UserStatus"].Value : UserStatus.Lobby.ToString()
-                    );
-                    lobbyUsers.Add(user.ID, user);
-                }
-            }
 
+                // If the player isn't connected to Relay, get the most recent data that the lobby knows.
+                // (If we haven't seen this player yet, a new local representation of the player will have already been added by the LocalLobby.)
+                LobbyUser incomingData = new LobbyUser
+                {
+                    IsHost = lobby.HostId.Equals(player.Id),
+                    DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : default,
+                    Emote       = player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : default,
+                    UserStatus  = player.Data?.ContainsKey("UserStatus") == true ? (UserStatus)int.Parse(player.Data["UserStatus"].Value) : UserStatus.Connecting,
+                    ID = player.Id
+                };
+                lobbyUsers.Add(incomingData.ID, incomingData);
+            }
             outputToHere.CopyObserved(info, lobbyUsers);
         }
 
         /// <summary>
-        /// Create a list of new LocalLobby from the content of a retrieved lobby.
+        /// Create a list of new LocalLobbies from the result of a lobby list query.
         /// </summary>
         public static List<LocalLobby> Convert(QueryResponse response)
         {
@@ -62,27 +65,7 @@ namespace LobbyRelaySample.lobby
         private static LocalLobby Convert(Lobby lobby)
         {
             LocalLobby data = new LocalLobby();
-            Convert(lobby, data, null);
-            return data;
-        }
-
-        public static Dictionary<string, string> RetrieveLobbyData(LocalLobby lobby)
-        {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            data.Add("RelayCode", lobby.RelayCode);
-            data.Add("State", ((int)lobby.State).ToString());
-            // We only want the ArePlayersReadyTime to be set when we actually are ready for it, and it's null otherwise. So, don't set that here.
-            return data;
-        }
-
-        public static Dictionary<string, string> RetrieveUserData(LobbyUser user)
-        {
-            Dictionary<string, string> data = new Dictionary<string, string>();
-            if (user == null || string.IsNullOrEmpty(user.ID))
-                return data;
-            data.Add("DisplayName", user.DisplayName);
-            data.Add("Emote", user.Emote); // Emote could be null, which is fine.
-            data.Add("UserStatus", user.UserStatus.ToString());
+            Convert(lobby, data);
             return data;
         }
     }

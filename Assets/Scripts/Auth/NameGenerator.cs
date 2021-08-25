@@ -4,7 +4,7 @@ using System.Text;
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// Just for fun, give a cute default player name if no name is provided.
+    /// Just for fun, give a cute default player name if no name is provided, based on a hash of their anonymous ID.
     /// </summary>
     public static class NameGenerator
     {
@@ -20,7 +20,7 @@ namespace LobbyRelaySample
             else if (word == 1)
                 nameOutput.Append("Bear");
             else if (word == 2)
-                nameOutput.Append("Cow");
+                nameOutput.Append("Crow");
             else if (word == 3)
                 nameOutput.Append("Dog");
             else if (word == 4)
@@ -48,7 +48,7 @@ namespace LobbyRelaySample
             else if (word == 15)
                 nameOutput.Append("Puffin");
             else if (word == 16)
-                nameOutput.Append("Raven");
+                nameOutput.Append("Rabbit");
             else if (word == 17)
                 nameOutput.Append("Snake");
             else if (word == 18)
