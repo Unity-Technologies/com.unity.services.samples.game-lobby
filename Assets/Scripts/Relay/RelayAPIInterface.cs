@@ -1,8 +1,7 @@
 using System;
-using Unity.Services.Relay;
-using Unity.Services.Relay.Allocations;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using RelayService = Unity.Services.Relay.Relay;
 
 namespace LobbyRelaySample.Relay
 {
@@ -16,18 +15,15 @@ namespace LobbyRelaySample.Relay
         /// </summary>
         public static void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
         {
-            CreateAllocationRequest createAllocationRequest = new CreateAllocationRequest(new AllocationRequest(maxConnections));
-            var task = RelayService.AllocationsApiClient.CreateAllocationAsync(createAllocationRequest);
+            var task = RelayService.Instance.CreateAllocationAsync(maxConnections);
             AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
 
-            void OnResponse(Response<AllocateResponseBody> response)
+            void OnResponse(Allocation response)
             {
                 if (response == null)
                     Debug.LogError("Relay returned a null Allocation. This might occur if the Relay service has an outage, if your cloud project ID isn't linked, or if your Relay package version is outdated.");
-                else if (response.Status >= 200 && response.Status < 300)
-                    onComplete?.Invoke(response.Result.Data.Allocation);
                 else
-                    Debug.LogError($"Allocation returned a non Success code: {response.Status}");
+                    onComplete?.Invoke(response);
             };
         }
 
@@ -37,21 +33,16 @@ namespace LobbyRelaySample.Relay
         /// </summary>
         public static void GetJoinCodeAsync(Guid hostAllocationId, Action<string> onComplete)
         {
-            GetJoinCodeAsync(hostAllocationId, a =>
+            var task = RelayService.Instance.GetJoinCodeAsync(hostAllocationId);
+            AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
+
+            void OnResponse(string response)
             {
-                if (a.Status >= 200 && a.Status < 300)
-                    onComplete.Invoke(a.Result.Data.JoinCode);
+                if (response == null)
+                    Debug.LogError("Could not retrieve a Relay join code.");
                 else
-                {
-                    Debug.LogError($"Relay GetJoinCodeAsync returned a non-success code: {a.Status}");
-                }
-            });
-        }
-        private static void GetJoinCodeAsync(Guid hostAllocationId, Action<Response<JoinCodeResponseBody>> onComplete)
-        {
-            CreateJoincodeRequest joinCodeRequest = new CreateJoincodeRequest(new JoinCodeRequest(hostAllocationId));
-            var task = RelayService.AllocationsApiClient.CreateJoincodeAsync(joinCodeRequest);
-            AsyncRequestRelay.Instance.DoRequest(task, onComplete);
+                    onComplete?.Invoke(response);
+            }
         }
 
         /// <summary>
@@ -59,22 +50,16 @@ namespace LobbyRelaySample.Relay
         /// </summary>
         public static void JoinAsync(string joinCode, Action<JoinAllocation> onComplete)
         {
-            JoinAsync(joinCode, a =>
-            {
-                if (a.Status >= 200 && a.Status < 300)
-                    onComplete.Invoke(a.Result.Data.Allocation);
-                else
-                {
-                    Debug.LogError($"Join Call returned a non Success code: {a.Status}");
-                }
-            });
-        }
+            var task = RelayService.Instance.JoinAllocationAsync(joinCode);
+            AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
 
-        public static void JoinAsync(string joinCode, Action<Response<JoinResponseBody>> onComplete)
-        {
-            JoinRelayRequest joinRequest = new JoinRelayRequest(new JoinRequest(joinCode));
-            var task = RelayService.AllocationsApiClient.JoinRelayAsync(joinRequest);
-            AsyncRequestRelay.Instance.DoRequest(task, onComplete);
+            void OnResponse(JoinAllocation response)
+            {
+                if (response == null)
+                    Debug.LogError("Could not join async with Relay join code " + joinCode);
+                else
+                    onComplete?.Invoke(response);
+            };
         }
     }
 }

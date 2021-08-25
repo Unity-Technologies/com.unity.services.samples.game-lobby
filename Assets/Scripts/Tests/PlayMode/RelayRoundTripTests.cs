@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using LobbyRelaySample.Relay;
 using NUnit.Framework;
-using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -75,15 +74,15 @@ namespace Test
 
             // Joining with the join code
             timeout = 5;
-            Response<JoinResponseBody> joinResponse = null;
+            JoinAllocation joinResponse = null;
             RelayAPIInterface.JoinAsync(joinCode, (j) => { joinResponse = j; });
             while (joinResponse == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
             }
             Assert.Greater(timeout, 0, "Timeout Check (Join)");
-            var codeIp = joinResponse.Result.Data.Allocation.RelayServer.IpV4;
-            var codePort = joinResponse.Result.Data.Allocation.RelayServer.Port;
+            var codeIp = joinResponse.RelayServer.IpV4;
+            var codePort = joinResponse.RelayServer.Port;
             Assert.AreEqual(codeIp, allocationIP);
             Assert.AreEqual(codePort, allocationPort);
         }
