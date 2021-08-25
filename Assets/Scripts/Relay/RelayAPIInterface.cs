@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Allocations;
 using Unity.Services.Relay.Models;
@@ -19,7 +18,7 @@ namespace LobbyRelaySample.Relay
         {
             CreateAllocationRequest createAllocationRequest = new CreateAllocationRequest(new AllocationRequest(maxConnections));
             var task = RelayService.AllocationsApiClient.CreateAllocationAsync(createAllocationRequest);
-            AsyncRequest.DoRequest(task, OnResponse);
+            AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
 
             void OnResponse(Response<AllocateResponseBody> response)
             {
@@ -52,7 +51,7 @@ namespace LobbyRelaySample.Relay
         {
             CreateJoincodeRequest joinCodeRequest = new CreateJoincodeRequest(new JoinCodeRequest(hostAllocationId));
             var task = RelayService.AllocationsApiClient.CreateJoincodeAsync(joinCodeRequest);
-            AsyncRequest.DoRequest(task, onComplete);
+            AsyncRequestRelay.Instance.DoRequest(task, onComplete);
         }
 
         /// <summary>
@@ -75,7 +74,7 @@ namespace LobbyRelaySample.Relay
         {
             JoinRelayRequest joinRequest = new JoinRelayRequest(new JoinRequest(joinCode));
             var task = RelayService.AllocationsApiClient.JoinRelayAsync(joinRequest);
-            AsyncRequest.DoRequest(task, onComplete);
+            AsyncRequestRelay.Instance.DoRequest(task, onComplete);
         }
     }
 }
