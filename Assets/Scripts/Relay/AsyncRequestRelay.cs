@@ -15,9 +15,18 @@ namespace LobbyRelaySample.Relay
             }
         }
 
+        /// <summary>
+        /// The Relay service will wrap HTTP errors in RelayServiceExceptions. We can filter on RelayServiceException.Reason for custom behavior.
+        /// </summary>
         protected override void ParseServiceException(Exception e)
         {
-            // TODO: Implement
+            if (!(e is RelayServiceException))
+                return;
+            var relayEx = e as RelayServiceException;
+            if (relayEx.Reason == RelayExceptionReason.Unknown)
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Relay Error: Relay service had an unknown error.");
+            else
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, $"Relay Error: {relayEx.Message}");
         }
     }
 }

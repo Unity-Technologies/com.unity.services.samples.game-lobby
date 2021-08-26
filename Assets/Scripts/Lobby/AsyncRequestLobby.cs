@@ -25,7 +25,7 @@ namespace LobbyRelaySample.lobby
             var lobbyEx = e as LobbyServiceException;
             if (lobbyEx.Reason == LobbyExceptionReason.RateLimited) // We have other ways of preventing players from hitting the rate limit, so the developer-facing 429 error is sufficient here.
                 return;
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, $"Error: {lobbyEx.Message} ({lobbyEx.InnerException.Message})"); // Lobby error type, then HTTP error type.
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, $"Lobby Error: {lobbyEx.Message} ({lobbyEx.InnerException.Message})"); // Lobby error type, then HTTP error type.
         }
     }
 }
