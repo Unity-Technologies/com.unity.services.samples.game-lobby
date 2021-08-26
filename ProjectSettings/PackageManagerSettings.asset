@@ -28,14 +28,10 @@ MonoBehaviour:
     m_Name: Candidates
     m_Url: https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates
     m_Scopes:
-    - com.unity.services.lobby
-    - com.unity.services.relay
-    - com.unity.services.authentication
-    - com.unity.services.core
     - com.unity.transport
     m_IsDefault: 0
     m_Capabilities: 0
-  m_UserSelectedRegistryName: Candidates
+  m_UserSelectedRegistryName: 
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
     m_ErrorMessage: 
@@ -44,10 +40,6 @@ MonoBehaviour:
       m_Name: Candidates
       m_Url: https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates
       m_Scopes:
-      - com.unity.services.lobby
-      - com.unity.services.relay
-      - com.unity.services.authentication
-      - com.unity.services.core
       - com.unity.transport
       m_IsDefault: 0
       m_Capabilities: 0
@@ -55,9 +47,5 @@ MonoBehaviour:
     m_Name: Candidates
     m_Url: https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates
     m_Scopes:
-    - com.unity.services.lobby
-    - com.unity.services.relay
-    - com.unity.services.authentication
-    - com.unity.services.core
     - com.unity.transport
     m_SelectedScopeIndex: 0

@@ -52,10 +52,6 @@
       "name": "Candidates",
       "url": "https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-candidates",
       "scopes": [
-        "com.unity.services.lobby",
-        "com.unity.services.relay",
-        "com.unity.services.authentication",
-        "com.unity.services.core",
         "com.unity.transport"
       ]
     }
