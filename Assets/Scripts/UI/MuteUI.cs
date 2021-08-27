@@ -16,17 +16,18 @@ namespace LobbyRelaySample.UI
 
         public void DisableVoice()
         {
-            Hide(1);
+            Hide(0.4f);
         }
-        
-        /// <summary>
-        /// Controls the visibility of the volume rings to show activity levels of the voice channel on this user.
-        /// </summary>
-        /// <param name="normalizedVolume"></param>
-        public void OnSoundDetected(float normalizedVolume)
-        {
-            m_voiceRings.alpha = normalizedVolume;
-        }
-        
+
+        /* TODO : If we can hook in the volume from a user, we can plug it in here.
+              /// <summary>
+              /// Controls the visibility of the volume rings to show activity levels of the voice channel on this user.
+              /// </summary>
+              /// <param name="normalizedVolume"></param>
+              public void OnSoundDetected(float normalizedVolume)
+              {
+                  m_voiceRings.alpha = normalizedVolume;
+              }
+              */
     }
 }

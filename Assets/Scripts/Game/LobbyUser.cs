@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace LobbyRelaySample
 {
@@ -23,9 +24,9 @@ namespace LobbyRelaySample
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu, bool hasVoice = false, bool muted = false, float volume = 0)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu, bool hasVoice = false)
         {
-            m_data = new UserData(isHost, displayName, id, emote, userStatus, hasVoice, muted, volume);
+            m_data = new UserData(isHost, displayName, id, emote, userStatus, hasVoice);
         }
 
         #region Local UserData
@@ -38,10 +39,8 @@ namespace LobbyRelaySample
             public EmoteType Emote { get; set; }
             public UserStatus UserStatus { get; set; }
             public bool HasVoice { get; set; }
-            public bool Muted { get; set; }
-            public float UserVolume { get; set; }
 
-            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus, bool hasVoice, bool muted, float userVolume)
+            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus, bool hasVoice)
             {
                 IsHost = isHost;
                 DisplayName = displayName;
@@ -49,8 +48,6 @@ namespace LobbyRelaySample
                 Emote = emote;
                 UserStatus = userStatus;
                 HasVoice = hasVoice;
-                Muted = muted;
-                UserVolume = userVolume;
             }
         }
 
@@ -58,7 +55,7 @@ namespace LobbyRelaySample
 
         public void ResetState()
         {
-            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu, false, false, 0); // ID and DisplayName should persist since this might be the local user.
+            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu, false); // ID and DisplayName should persist since this might be the local user.
         }
 
         #endregion
@@ -74,9 +71,9 @@ namespace LobbyRelaySample
             Emote = 4,
             ID = 8,
             UserStatus = 16,
-            HasVoice = 32,
-            Muted = 64,
-            Volume = 128
+            HasVoice = 32
+
+            //TODO Add in lobbyUsers Voice Activity for animation?
         }
 
         private UserMembers m_lastChanged;
@@ -156,41 +153,13 @@ namespace LobbyRelaySample
 
         public bool HasVoice
         {
-            get { return m_data.Muted; }
+            get { return m_data.HasVoice; }
             set
             {
-                if (m_data.Muted != value)
+                if (m_data.HasVoice != value)
                 {
-                    m_data.Muted = value;
+                    m_data.HasVoice = value;
                     m_lastChanged = UserMembers.HasVoice;
-                    OnChanged(this);
-                }
-            }
-        }
-
-        public bool Muted
-        {
-            get { return m_data.Muted; }
-            set
-            {
-                if (m_data.Muted != value)
-                {
-                    m_data.Muted = value;
-                    m_lastChanged = UserMembers.Muted;
-                    OnChanged(this);
-                }
-            }
-        }
-
-        public float Volume
-        {
-            get { return m_data.UserVolume; }
-            set
-            {
-                if (Math.Abs(m_data.UserVolume - value) > 0.05f)
-                {
-                    m_data.UserVolume = value;
-                    m_lastChanged = UserMembers.Volume;
                     OnChanged(this);
                 }
             }
@@ -205,9 +174,8 @@ namespace LobbyRelaySample
                 (m_data.ID == data.ID ? 0 : (int)UserMembers.ID) |
                 (m_data.Emote == data.Emote ? 0 : (int)UserMembers.Emote) |
                 (m_data.UserStatus == data.UserStatus ? 0 : (int)UserMembers.UserStatus) |
-                (m_data.HasVoice == data.HasVoice ? 0 : (int)UserMembers.HasVoice) |
-                (m_data.Muted == data.Muted ? 0 : (int)UserMembers.Muted) |
-                (Math.Abs(m_data.UserVolume - data.UserVolume) < 0.05f ? 0 : (int)UserMembers.Volume);
+                (m_data.HasVoice == data.HasVoice ? 0 : (int)UserMembers.HasVoice);
+
             if (lastChanged == 0) // Ensure something actually changed.
                 return;
 

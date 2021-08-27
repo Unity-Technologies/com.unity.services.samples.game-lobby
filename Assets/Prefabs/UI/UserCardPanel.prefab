@@ -432,7 +432,8 @@ MonoBehaviour:
   m_StatusText: {fileID: 3667934756810823183}
   m_EmoteText: {fileID: 7097926522474954833}
   m_HostIcon: {fileID: 2063326445664711249}
-  m_MuteButton: {fileID: 0}
+  m_MuteUI: {fileID: 5371667691979465528}
+  m_lobbyUserVolumeUI: {fileID: 7750493951695561362}
 --- !u!114 &788426075660952210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -498,6 +499,7 @@ GameObject:
   - component: {fileID: 7240929418107909207}
   - component: {fileID: 5467963549174563591}
   - component: {fileID: 5371667691979465528}
+  - component: {fileID: 5564390157418853622}
   m_Layer: 5
   m_Name: MuteArea
   m_TagString: Untagged
@@ -580,6 +582,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_voiceRings: {fileID: 1287953984161108202}
+--- !u!225 &5564390157418853622
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3010031715874034773}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &3079367817526768243
 GameObject:
   m_ObjectHideFlags: 0
@@ -739,7 +754,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5235189765028238254}
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.InLobbyUserUI, LobbyRelaySample
+        m_MethodName: OnMuteToggled
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
 --- !u!222 &1712551819190407003
 CanvasRenderer:
@@ -1144,6 +1171,7 @@ GameObject:
   - component: {fileID: 478472562358024413}
   - component: {fileID: 1918995816743806069}
   - component: {fileID: 7750493951695561362}
+  - component: {fileID: 5190888420783209525}
   m_Layer: 5
   m_Name: VolumeArea
   m_TagString: Untagged
@@ -1211,6 +1239,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06ec4a4943ad514da7a222eacb66528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!225 &5190888420783209525
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4809966060551735762}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5448682293735175078
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,7 +1418,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5235189765028238254}
+        m_TargetAssemblyTypeName: LobbyRelaySample.UI.InLobbyUserUI, LobbyRelaySample
+        m_MethodName: OnVolumeSlide
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6130740818904467730
 GameObject:
   m_ObjectHideFlags: 0
@@ -1463,7 +1518,7 @@ GameObject:
   - component: {fileID: 4467506543349070405}
   - component: {fileID: 2063326445664711249}
   m_Layer: 5
-  m_Name: Image
+  m_Name: HostIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

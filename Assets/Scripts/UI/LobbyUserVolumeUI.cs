@@ -4,9 +4,17 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
-    public class LobbyUserVolumeUI : MonoBehaviour
+    public class LobbyUserVolumeUI : UIPanelBase
     {
-    
+        public void EnableVoice()
+        {
+            Show();
+        }
+
+        public void DisableVoice()
+        {
+            Hide();
+        }
     }
 
 

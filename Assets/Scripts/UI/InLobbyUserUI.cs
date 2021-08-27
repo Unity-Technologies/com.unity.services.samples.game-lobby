@@ -25,10 +25,11 @@ namespace LobbyRelaySample.UI
 
         [SerializeField]
         MuteUI m_MuteUI;
-        
+
         [SerializeField]
         LobbyUserVolumeUI m_lobbyUserVolumeUI;
-        
+
+        LobbyUserAudio m_userAudio = new LobbyUserAudio("None");
 
         public bool IsAssigned => UserId != null;
 
@@ -42,6 +43,7 @@ namespace LobbyRelaySample.UI
                 m_observer = GetComponent<LobbyUserObserver>();
             m_observer.BeginObserving(myLobbyUser);
             UserId = myLobbyUser.ID;
+            m_userAudio = new LobbyUserAudio(UserId);
         }
 
         public void OnUserLeft()
@@ -50,15 +52,17 @@ namespace LobbyRelaySample.UI
             Hide();
             m_observer.EndObserving();
         }
-        
+
         public void OnMuteToggled(bool muted)
         {
-            
+            m_userAudio.Muted = muted;
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.SetPlayerSound, m_userAudio);
         }
 
         public void OnVolumeSlide(float volume)
         {
-            
+            m_userAudio.UserVolume = volume;
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.SetPlayerSound, m_userAudio);
         }
 
         public override void ObservedUpdated(LobbyUser observed)
@@ -66,10 +70,27 @@ namespace LobbyRelaySample.UI
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
             m_EmoteText.SetText(observed.Emote.GetString());
-//            m_MuteUI.Show();
             m_HostIcon.enabled = observed.IsHost;
+            SetAudioState(observed.HasVoice);
         }
-        
+
+        /// <summary>
+        ///  Disable or show the Volume Icons in sync with the package.
+        /// </summary>
+        void SetAudioState(bool hasVoice)
+        {
+            if (hasVoice)
+            {
+                m_MuteUI.EnableVoice();
+                m_lobbyUserVolumeUI.EnableVoice();
+            }
+            else
+            {
+                m_MuteUI.DisableVoice();
+                m_lobbyUserVolumeUI.DisableVoice();
+            }
+        }
+
         string SetStatusFancy(UserStatus status)
         {
             switch (status)
