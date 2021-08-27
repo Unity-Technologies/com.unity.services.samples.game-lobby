@@ -34,6 +34,7 @@ namespace LobbyRelaySample
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
+        private vivox.VivoxSetup m_vivoxSetup = new vivox.VivoxSetup();
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
         public void SetLobbyColorFilter(int color)
@@ -71,6 +72,7 @@ namespace LobbyRelaySample
             m_localUser.ID = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             m_localUser.DisplayName = NameGenerator.GetName(m_localUser.ID);
             m_localLobby.AddPlayer(m_localUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
+            m_vivoxSetup.Initialize(null);
         }
 
         private void BeginObservers()
@@ -189,6 +191,7 @@ namespace LobbyRelaySample
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
             StartRelayConnection();
+            m_vivoxSetup.JoinLobbyChannel(m_localLobby.LobbyID);
         }
 
         private void OnLeftLobby()
@@ -197,16 +200,14 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
             m_lobbyContentHeartbeat.EndTracking();
             LobbyAsyncRequests.Instance.EndTracking();
+            m_vivoxSetup.LeaveLobbyChannel();
 
             if (m_relaySetup != null)
-            {
-                Component.Destroy(m_relaySetup);
+            {   Component.Destroy(m_relaySetup);
                 m_relaySetup = null;
             }
-
             if (m_relayClient != null)
-            {
-                Component.Destroy(m_relayClient);
+            {   Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
         }
