@@ -12,10 +12,10 @@ namespace LobbyRelaySample
     {
         None = 0,
         Connecting = 1, // User has joined a lobby but has not yet connected to Relay.
-        Lobby = 2, // User is in a lobby and connected to Relay.
-        Ready = 4, // User has selected the ready button, to ready for the "game" to start.
-        InGame = 8, // User is part of a "game" that has started.
-        Menu = 16 // User is not in a lobby, in one of the main menus.
+        Lobby = 2,      // User is in a lobby and connected to Relay.
+        Ready = 4,      // User has selected the ready button, to ready for the "game" to start.
+        InGame = 8,     // User is part of a "game" that has started.
+        Menu = 16       // User is not in a lobby, in one of the main menus.
     }
 
     /// <summary>
@@ -107,20 +107,6 @@ namespace LobbyRelaySample
             }
         }
 
-        public string ID
-        {
-            get => m_data.ID;
-            set
-            {
-                if (m_data.ID != value)
-                {
-                    m_data.ID = value;
-                    m_lastChanged = UserMembers.ID;
-                    OnChanged(this);
-                }
-            }
-        }
-
         public EmoteType Emote
         {
             get => m_data.Emote;
@@ -135,8 +121,21 @@ namespace LobbyRelaySample
             }
         }
 
-        UserStatus m_userStatus = UserStatus.Menu;
+        public string ID
+        {
+            get => m_data.ID;
+            set
+            {
+                if (m_data.ID != value)
+                {
+                    m_data.ID = value;
+                    m_lastChanged = UserMembers.ID;
+                    OnChanged(this);
+                }
+            }
+        }
 
+        UserStatus m_userStatus = UserStatus.Menu;
         public UserStatus UserStatus
         {
             get => m_userStatus;
@@ -169,12 +168,12 @@ namespace LobbyRelaySample
         {
             UserData data = observed.m_data;
             int lastChanged = // Set flags just for the members that will be changed.
-                (m_data.IsHost == data.IsHost ? 0 : (int)UserMembers.IsHost) |
+                (m_data.IsHost == data.IsHost ?           0 : (int)UserMembers.IsHost) |
                 (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
-                (m_data.ID == data.ID ? 0 : (int)UserMembers.ID) |
-                (m_data.Emote == data.Emote ? 0 : (int)UserMembers.Emote) |
-                (m_data.UserStatus == data.UserStatus ? 0 : (int)UserMembers.UserStatus) |
-                (m_data.HasVoice == data.HasVoice ? 0 : (int)UserMembers.HasVoice);
+                (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
+                (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
+                (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus) |
+                (m_data.HasVoice == data.HasVoice ?       0 : (int)UserMembers.HasVoice);
 
             if (lastChanged == 0) // Ensure something actually changed.
                 return;
