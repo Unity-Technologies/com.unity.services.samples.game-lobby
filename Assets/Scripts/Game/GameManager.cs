@@ -154,6 +154,10 @@ namespace LobbyRelaySample
                 m_localLobby.CountDownTime = 0;
                 SetUserLobbyState();
             }
+            else if (type == MessageType.SetPlayerSound)
+            {
+                var playerSound = (LobbyUserAudio)msg;
+            }
         }
 
         private void SetGameState(GameState state)
