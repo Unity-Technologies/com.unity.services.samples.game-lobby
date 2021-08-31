@@ -64,15 +64,7 @@ namespace LobbyRelaySample
         /// Used for limiting costly OnChanged actions to just the members which actually changed.
         /// </summary>
         [Flags]
-        public enum UserMembers
-        {
-            IsHost = 1,
-            DisplayName = 2,
-            Emote = 4,
-            ID = 8,
-            UserStatus = 16,
-            HasVoice = 32
-
+        public enum UserMembers{ IsHost = 1, DisplayName = 2, Emote = 4, ID = 8, UserStatus = 16, HasVoice = 32
             //TODO Add in lobbyUsers Voice Activity for animation?
         }
 
@@ -106,6 +98,20 @@ namespace LobbyRelaySample
                 }
             }
         }
+        
+        public EmoteType Emote
+        {
+            get => m_data.Emote;
+            set
+            {
+                if (m_data.Emote != value)
+                {
+                    m_data.Emote = value;
+                    m_lastChanged = UserMembers.Emote;
+                    OnChanged(this);
+                }
+            }
+        }
 
         public string ID
         {
@@ -116,20 +122,6 @@ namespace LobbyRelaySample
                 {
                     m_data.ID = value;
                     m_lastChanged = UserMembers.ID;
-                    OnChanged(this);
-                }
-            }
-        }
-
-        public EmoteType Emote
-        {
-            get => m_data.Emote;
-            set
-            {
-                if (m_data.Emote != value)
-                {
-                    m_data.Emote = value;
-                    m_lastChanged = UserMembers.Emote;
                     OnChanged(this);
                 }
             }
@@ -169,12 +161,12 @@ namespace LobbyRelaySample
         {
             UserData data = observed.m_data;
             int lastChanged = // Set flags just for the members that will be changed.
-                (m_data.IsHost == data.IsHost ? 0 : (int)UserMembers.IsHost) |
+                (m_data.IsHost == data.IsHost ?           0 : (int)UserMembers.IsHost) |
                 (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
-                (m_data.ID == data.ID ? 0 : (int)UserMembers.ID) |
-                (m_data.Emote == data.Emote ? 0 : (int)UserMembers.Emote) |
-                (m_data.UserStatus == data.UserStatus ? 0 : (int)UserMembers.UserStatus) |
-                (m_data.HasVoice == data.HasVoice ? 0 : (int)UserMembers.HasVoice);
+                (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
+                (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
+                (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus) |
+                (m_data.HasVoice == data.HasVoice ?       0 : (int)UserMembers.HasVoice);
 
             if (lastChanged == 0) // Ensure something actually changed.
                 return;

@@ -8,9 +8,9 @@ namespace LobbyRelaySample
     public class LobbyUserAudio
     {
         public string ID { get; private set; }
-        public bool HasVoice;
-        public bool Muted;
-        public float UserVolume;
+        public bool HasVoice { get; set; }
+        public bool Muted { get; set; }
+        public float UserVolume { get; set; }
 
         public LobbyUserAudio(string userID)
         {
