@@ -71,18 +71,22 @@ namespace LobbyRelaySample
         public enum RequestType
         {
             Query = 0,
-            Join
+            Join,
+            QuickJoin
         }
 
         public RateLimitCooldown GetRateLimit(RequestType type)
         {
             if (type == RequestType.Join)
                 return m_rateLimitJoin;
+            else if (type == RequestType.QuickJoin)
+                return m_rateLimitQuickJoin;
             return m_rateLimitQuery;
         }
 
         private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
         private RateLimitCooldown m_rateLimitJoin = new RateLimitCooldown(3f);
+        private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
 
         // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
 
@@ -144,6 +148,13 @@ namespace LobbyRelaySample
 
         public void QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None, Action<Lobby> onSuccess = null, Action onFailure = null)
         {
+            if (!m_rateLimitQuickJoin.CanCall())
+            {
+                onFailure?.Invoke();
+                m_rateLimitQuery.EnqueuePendingOperation(() => { QuickJoinLobbyAsync(localUser, limitToColor, onSuccess, onFailure); });
+                return;
+            }
+
             var filters = LobbyColorToFilters(limitToColor);
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.QuickJoinLobbyAsync(uasId, filters, CreateInitialPlayerData(localUser), OnLobbyJoined);

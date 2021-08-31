@@ -1296,7 +1296,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_target: {fileID: 1530269145881494601}
   m_alphaWhenHidden: 0.5
-  m_requestType: 0
+  m_requestType: 2
 --- !u!1 &2785142534214339697
 GameObject:
   m_ObjectHideFlags: 0

@@ -52,7 +52,7 @@ namespace LobbyRelaySample.lobby
             };
 
             var task = Lobbies.Instance.QuickJoinLobbyAsync(joinRequest);
-            AsyncRequest.DoRequest(task, onComplete);
+            AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         public static void LeaveLobbyAsync(string requesterUASId, string lobbyId, Action onComplete)
