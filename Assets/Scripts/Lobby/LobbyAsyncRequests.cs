@@ -31,6 +31,7 @@ namespace LobbyRelaySample
         }
 
         #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
+
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         private string m_currentLobbyId = null;
         private Lobby m_lastKnownLobby;
@@ -65,8 +66,14 @@ namespace LobbyRelaySample
         #endregion
 
         #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
+
         // Note that some APIs limit to 1 call per N seconds, while others limit to M calls per N seconds. We'll treat all APIs as though they limited to 1 call per N seconds.
-        public enum RequestType { Query = 0, Join }
+        public enum RequestType
+        {
+            Query = 0,
+            Join
+        }
+
         public RateLimitCooldown GetRateLimit(RequestType type)
         {
             if (type == RequestType.Join)
@@ -75,8 +82,10 @@ namespace LobbyRelaySample
         }
 
         private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
-        private RateLimitCooldown m_rateLimitJoin  = new RateLimitCooldown(3f);
+        private RateLimitCooldown m_rateLimitJoin = new RateLimitCooldown(3f);
+
         // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
+
         #endregion
 
         private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
@@ -113,6 +122,7 @@ namespace LobbyRelaySample
                 (lobbyId == null && lobbyCode == null))
             {
                 onFailure?.Invoke();
+
                 // TODO: Emit some failure message.
                 return;
             }
@@ -137,7 +147,7 @@ namespace LobbyRelaySample
             var filters = LobbyColorToFilters(limitToColor);
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.QuickJoinLobbyAsync(uasId, filters, CreateInitialPlayerData(localUser), OnLobbyJoined);
-            
+
             void OnLobbyJoined(Lobby response)
             {
                 if (response == null)
@@ -193,6 +203,7 @@ namespace LobbyRelaySample
                 onComplete?.Invoke(null);
                 return;
             }
+
             LobbyAPIInterface.GetLobbyAsync(lobbyId, OnGet);
 
             void OnGet(Lobby response)
@@ -278,9 +289,11 @@ namespace LobbyRelaySample
         private bool ShouldUpdateData(Action caller, Action onComplete, bool shouldRetryIfLobbyNull)
         {
             if (m_rateLimitQuery.IsInCooldown)
-            {   m_rateLimitQuery.EnqueuePendingOperation(caller);
+            {
+                m_rateLimitQuery.EnqueuePendingOperation(caller);
                 return false;
             }
+
             Lobby lobby = m_lastKnownLobby;
             if (lobby == null)
             {
@@ -289,6 +302,7 @@ namespace LobbyRelaySample
                 onComplete?.Invoke();
                 return false;
             }
+
             return true;
         }
 
@@ -322,12 +336,15 @@ namespace LobbyRelaySample
             }
 
             private bool m_isInCooldown = false;
+
             public bool IsInCooldown
             {
                 get => m_isInCooldown;
                 private set
-                {   if (m_isInCooldown != value)
-                    {   m_isInCooldown = value;
+                {
+                    if (m_isInCooldown != value)
+                    {
+                        m_isInCooldown = value;
                         OnChanged(this);
                     }
                 }
@@ -369,7 +386,9 @@ namespace LobbyRelaySample
                 }
             }
 
-            public override void CopyObserved(RateLimitCooldown oldObserved) { /* This behavior isn't needed; we're just here for the OnChanged event management. */ }
+            public override void CopyObserved(RateLimitCooldown oldObserved)
+            {
+                /* This behavior isn't needed; we're just here for the OnChanged event management. */
             }
         }
     }
