@@ -80,6 +80,11 @@ namespace LobbyRelaySample.UI
                 OnRefresh();
         }
 
+        public void OnQuickJoin()
+        {
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.QuickJoin, null);
+        }
+
         private bool CanDisplay(LocalLobby lobby)
         {
             return lobby.Data.State == LobbyState.Lobby && !lobby.Private;

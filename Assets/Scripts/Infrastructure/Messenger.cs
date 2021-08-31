@@ -71,6 +71,7 @@ namespace LobbyRelaySample
         StartCountdown = 9,
         CancelCountdown = 10,
         ConfirmInGameState = 11,
+        QuickJoin = 14
     }
 
     /// <summary>

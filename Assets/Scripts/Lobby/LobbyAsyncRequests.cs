@@ -132,6 +132,21 @@ namespace LobbyRelaySample
             }
         }
 
+        public void QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None, Action<Lobby> onSuccess = null, Action onFailure = null)
+        {
+            var filters = LobbyColorToFilters(limitToColor);
+            string uasId = AuthenticationService.Instance.PlayerId;
+            LobbyAPIInterface.QuickJoinLobbyAsync(uasId, filters, CreateInitialPlayerData(localUser), OnLobbyJoined);
+            
+            void OnLobbyJoined(Lobby response)
+            {
+                if (response == null)
+                    onFailure?.Invoke();
+                else
+                    onSuccess?.Invoke(response);
+            }
+        }
+
         /// <summary>
         /// Used for getting the list of all active lobbies, without needing full info for each.
         /// </summary>
@@ -145,13 +160,7 @@ namespace LobbyRelaySample
                 return;
             }
 
-            List<QueryFilter> filters = new List<QueryFilter>();
-            if (limitToColor == LobbyColor.Orange)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
-            else if (limitToColor == LobbyColor.Green)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
-            else if (limitToColor == LobbyColor.Blue)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+            var filters = LobbyColorToFilters(limitToColor);
 
             LobbyAPIInterface.QueryAllLobbiesAsync(filters, OnLobbyListRetrieved);
 
@@ -163,6 +172,19 @@ namespace LobbyRelaySample
                     onError?.Invoke(response);
             }
         }
+
+        private List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
+        {
+            List<QueryFilter> filters = new List<QueryFilter>();
+            if (limitToColor == LobbyColor.Orange)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Green)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Blue)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+            return filters;
+        }
+
         /// <param name="onComplete">If no lobby is retrieved, or if this call hits the rate limit, this is given null.</param>
         private void RetrieveLobbyAsync(string lobbyId, Action<Lobby> onComplete)
         {
@@ -348,6 +370,7 @@ namespace LobbyRelaySample
             }
 
             public override void CopyObserved(RateLimitCooldown oldObserved) { /* This behavior isn't needed; we're just here for the OnChanged event management. */ }
+            }
         }
     }
 }
