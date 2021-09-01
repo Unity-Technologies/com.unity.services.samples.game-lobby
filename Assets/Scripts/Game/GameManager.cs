@@ -10,11 +10,7 @@ namespace LobbyRelaySample
     /// </summary>
     public class GameManager : MonoBehaviour, IReceiveMessages
     {
-        /// <summary>
-        /// All these should be assigned the observers in the scene at the start.
-        /// </summary>
-
-        #region UI elements that observe the local state. These are 
+        #region UI elements that observe the local state. These should be assigned the observers in the scene during Start.
 
         [SerializeField]
         private List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
@@ -30,11 +26,15 @@ namespace LobbyRelaySample
         private LocalGameState m_localGameState = new LocalGameState();
         private LobbyUser m_localUser;
         private LocalLobby m_localLobby;
+
         private LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
+
         private vivox.VivoxSetup m_vivoxSetup = new vivox.VivoxSetup();
+        [SerializeField]
+        private List<vivox.VivoxUserHandler> m_vivoxUserHandlers;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
         public void SetLobbyColorFilter(int color)
@@ -71,8 +71,8 @@ namespace LobbyRelaySample
             Debug.Log("Signed in.");
             m_localUser.ID = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             m_localUser.DisplayName = NameGenerator.GetName(m_localUser.ID);
+            m_vivoxSetup.Initialize(m_vivoxUserHandlers); // Should be before AddPlayer, since that will attempt to set the Vivox ID based on the Auth ID.
             m_localLobby.AddPlayer(m_localUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
-            m_vivoxSetup.Initialize(null);
         }
 
         private void BeginObservers()
@@ -195,7 +195,7 @@ namespace LobbyRelaySample
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
             StartRelayConnection();
-            m_vivoxSetup.JoinLobbyChannel(m_localLobby.LobbyID);
+            m_vivoxSetup.JoinLobbyChannel(m_localLobby.LobbyID, null); // TODO: Retry on failure?
         }
 
         private void OnLeftLobby()

@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
+    // TODO: Necessary?
     public class LobbyUserVolumeUI : UIPanelBase
     {
         public void EnableVoice()

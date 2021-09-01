@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace LobbyRelaySample.UI
@@ -24,12 +23,7 @@ namespace LobbyRelaySample.UI
         Image m_HostIcon;
 
         [SerializeField]
-        MuteUI m_MuteUI;
-
-        [SerializeField]
-        LobbyUserVolumeUI m_lobbyUserVolumeUI;
-
-        LobbyUserAudio m_userAudio = new LobbyUserAudio("None");
+        vivox.VivoxUserHandler m_vivoxUserHandler;
 
         public bool IsAssigned => UserId != null;
 
@@ -43,7 +37,7 @@ namespace LobbyRelaySample.UI
                 m_observer = GetComponent<LobbyUserObserver>();
             m_observer.BeginObserving(myLobbyUser);
             UserId = myLobbyUser.ID;
-            m_userAudio = new LobbyUserAudio(UserId);
+            m_vivoxUserHandler.SetId(UserId);
         }
 
         public void OnUserLeft()
@@ -53,25 +47,13 @@ namespace LobbyRelaySample.UI
             m_observer.EndObserving();
         }
 
-        public void OnMuteToggled(bool muted)
-        {
-            m_userAudio.Muted = muted;
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.SetPlayerSound, m_userAudio);
-        }
-
-        public void OnVolumeSlide(float volume)
-        {
-            m_userAudio.UserVolume = volume;
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.SetPlayerSound, m_userAudio);
-        }
-
         public override void ObservedUpdated(LobbyUser observed)
         {
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
             m_EmoteText.SetText(observed.Emote.GetString());
             m_HostIcon.enabled = observed.IsHost;
-            SetAudioState(observed.HasVoice);
+            SetAudioState(true);
         }
 
         /// <summary>
@@ -79,16 +61,7 @@ namespace LobbyRelaySample.UI
         /// </summary>
         void SetAudioState(bool hasVoice)
         {
-            if (hasVoice)
-            {
-                m_MuteUI.EnableVoice();
-                m_lobbyUserVolumeUI.EnableVoice();
-            }
-            else
-            {
-                m_MuteUI.DisableVoice();
-                m_lobbyUserVolumeUI.DisableVoice();
-            }
+            // TODO: Disable if vivox is not available, per-user.
         }
 
         string SetStatusFancy(UserStatus status)
