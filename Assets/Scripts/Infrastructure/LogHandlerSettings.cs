@@ -1,32 +1,38 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
-    public class LogHandlerSettings : MonoBehaviour
+    /// <summary>
+    /// Acts as a buffer between receiving requests to display error messages to the player and running the pop-up UI to do so.
+    /// </summary>
+    public class LogHandlerSettings : MonoBehaviour, IReceiveMessages
     {
         [SerializeField]
         [Tooltip("Only logs of this level or higher will appear in the console.")]
         private LogMode m_editorLogVerbosity = LogMode.Critical;
 
         [SerializeField]
-        private PopUpUI m_popUpPrefab;
+        private PopUpUI m_popUp;
 
-        [SerializeField]
-        private ErrorReaction m_errorReaction;
-
-        void Awake()
+        private void Awake()
         {
             LogHandler.Get().mode = m_editorLogVerbosity;
-            LogHandler.Get().SetLogReactions(m_errorReaction);
+            Locator.Get.Messenger.Subscribe(this);
+        }
+        private void OnDestroy()
+        {
+            Locator.Get.Messenger.Unsubscribe(this);
         }
 
-        public void SpawnErrorPopup(string errorMessage)
+        public void OnReceiveMessage(MessageType type, object msg)
         {
-            var popupInstance = Instantiate(m_popUpPrefab, transform);
-            popupInstance.ShowPopup(errorMessage, Color.red);
+            if (type == MessageType.DisplayErrorPopup && msg != null)
+                SpawnErrorPopup((string)msg);
+        }
+
+        private void SpawnErrorPopup(string errorMessage)
+        {
+            m_popUp.ShowPopup(errorMessage);
         }
     }
 }

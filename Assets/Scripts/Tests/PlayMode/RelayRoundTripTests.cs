@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using LobbyRelaySample.relay;
 using NUnit.Framework;
-using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.TestTools;

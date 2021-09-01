@@ -125,7 +125,9 @@ namespace LobbyRelaySample.relay
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
-            Debug.LogError("Host disconnected! Leaving the lobby.");
+            string msg = "Host disconnected! Leaving the lobby.";
+            Debug.LogError(msg);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, msg);
             Leave();
             Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
         }
