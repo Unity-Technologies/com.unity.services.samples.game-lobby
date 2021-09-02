@@ -356,6 +356,7 @@ GameObject:
   - component: {fileID: 2974111728439300793}
   - component: {fileID: 2974111728439300794}
   - component: {fileID: 2974111728439300795}
+  - component: {fileID: 3559536739324575631}
   m_Layer: 5
   m_Name: ErrorExitButton
   m_TagString: Untagged
@@ -467,7 +468,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2974111728825125460}
         m_TargetAssemblyTypeName: LobbyRelaySample.PopUpUI, LobbyRelaySample
-        m_MethodName: Delete
+        m_MethodName: ClearPopup
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -477,6 +478,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!225 &3559536739324575631
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2974111728439300773}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2974111728825125462
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,10 +501,7 @@ GameObject:
   - component: {fileID: 2974111728825125461}
   - component: {fileID: 2974111728825125417}
   - component: {fileID: 2974111728825125418}
-  - component: {fileID: 2974111728825125419}
   - component: {fileID: 2974111728825125460}
-  - component: {fileID: 1969158100312030839}
-  - component: {fileID: 682510267401884749}
   m_Layer: 5
   m_Name: PopUpUI
   m_TagString: Untagged
@@ -540,7 +550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.2}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -557,18 +567,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!225 &2974111728825125419
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2974111728825125462}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!114 &2974111728825125460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -582,44 +580,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_popupText: {fileID: 1837149117904640813}
---- !u!223 &1969158100312030839
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2974111728825125462}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!114 &682510267401884749
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2974111728825125462}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 3
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  m_buttonVisibility: {fileID: 3559536739324575631}
 --- !u!1 &2974111728944057206
 GameObject:
   m_ObjectHideFlags: 0
