@@ -1,3 +1,0 @@
-[submodule "Tools/recipe-engine"]
-	path = Tools~/recipe-engine
-	url = ../recipe-engine.git

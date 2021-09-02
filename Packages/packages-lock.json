@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "com.unity.burst": {
-      "version": "1.5.3",
-      "depth": 2,
+      "version": "1.5.5",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.mathematics": "1.2.1"
@@ -19,11 +19,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collections": {
-      "version": "1.0.0-pre.3",
+      "version": "1.0.0-pre.5",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.burst": "1.5.3",
+        "com.unity.burst": "1.5.4",
         "com.unity.test-framework": "1.1.22"
       },
       "url": "https://packages.unity.com"
@@ -173,14 +173,15 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.transport": {
-      "version": "file:com.unity.transport",
+      "version": "1.0.0-pre.3",
       "depth": 0,
-      "source": "embedded",
+      "source": "registry",
       "dependencies": {
-        "com.unity.collections": "1.0.0-pre.3",
-        "com.unity.burst": "1.5.1",
+        "com.unity.collections": "1.0.0-pre.5",
+        "com.unity.burst": "1.5.5",
         "com.unity.mathematics": "1.2.1"
-      }
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.ugui": {
       "version": "1.0.0",

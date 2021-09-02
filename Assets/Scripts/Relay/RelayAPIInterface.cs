@@ -1,7 +1,7 @@
 using System;
-using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using RelayService = Unity.Services.Relay.Relay;
 
 namespace LobbyRelaySample.relay
 {
@@ -13,54 +13,53 @@ namespace LobbyRelaySample.relay
         /// <summary>
         /// A Relay Allocation represents a "server" for a new host.
         /// </summary>
-        public static async void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
+        public static void AllocateAsync(int maxConnections, Action<Allocation> onComplete)
         {
-            try
-            {
-                Allocation allocation = await Relay.Instance.CreateAllocationAsync(maxConnections);
+            var task = RelayService.Instance.CreateAllocationAsync(maxConnections);
+            AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
 
-                onComplete.Invoke(allocation);
-            }
-            catch (RelayServiceException ex)
+            void OnResponse(Allocation response)
             {
-                Debug.LogError($"Relay AllocateAsync returned a relay exception: {ex.Reason} - {ex.Message}");
-                throw;
-            }
+                if (response == null)
+                    Debug.LogError("Relay returned a null Allocation. This might occur if the Relay service has an outage, if your cloud project ID isn't linked, or if your Relay package version is outdated.");
+                else
+                    onComplete?.Invoke(response);
+            };
         }
 
         /// <summary>
         /// Only after an Allocation has been completed can a Relay join code be obtained. This code will be stored in the lobby's data as non-public
         /// such that players can retrieve the Relay join code only after connecting to the lobby.
         /// </summary>
-        public static async void GetJoinCodeAsync(Guid hostAllocationId, Action<string> onComplete)
+        public static void GetJoinCodeAsync(Guid hostAllocationId, Action<string> onComplete)
         {
-            try
+            var task = RelayService.Instance.GetJoinCodeAsync(hostAllocationId);
+            AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
+
+            void OnResponse(string response)
             {
-                string joinCode = await Relay.Instance.GetJoinCodeAsync(hostAllocationId);
-                onComplete.Invoke(joinCode);
+                if (response == null)
+                    Debug.LogError("Could not retrieve a Relay join code.");
+                else
+                    onComplete?.Invoke(response);
             }
-            catch (RelayServiceException ex)
-                {
-                 	Debug.LogError($"Relay GetJoinCodeAsync returned a relay exception: {ex.Reason} - {ex.Message}");
-                	throw;
-                }
         }
 
         /// <summary>
         /// Clients call this to retrieve the host's Allocation via a Relay join code.
         /// </summary>
-        public static async void JoinAsync(string joinCode, Action<JoinAllocation> onComplete)
+        public static void JoinAsync(string joinCode, Action<JoinAllocation> onComplete)
         {
-            try
+            var task = RelayService.Instance.JoinAllocationAsync(joinCode);
+            AsyncRequestRelay.Instance.DoRequest(task, OnResponse);
+
+            void OnResponse(JoinAllocation response)
             {
-                JoinAllocation joinAllocation = await Relay.Instance.JoinAllocationAsync(joinCode);
-                onComplete.Invoke(joinAllocation);
-            }
-            catch (RelayServiceException ex)
-            {
-              	Debug.LogError($"Relay JoinCodeAsync returned a relay exception: {ex.Reason} - {ex.Message}");
-                throw;
-            }
+                if (response == null)
+                    Debug.LogError("Could not join async with Relay join code " + joinCode);
+                else
+                    onComplete?.Invoke(response);
+            };
         }
     }
 }

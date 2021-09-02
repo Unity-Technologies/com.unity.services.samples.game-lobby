@@ -46,7 +46,9 @@ namespace LobbyRelaySample.relay
             RelayHMACKey        key                = ConvertHMACKeyBytes(hmacKeyBytes);
 
             m_endpointForServer = serverEndpoint;
-            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref hostConnectionData, ref key);
+            //TODO Implement DTLS 
+            bool isSecure = false;
+            var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref hostConnectionData, ref key, isSecure);
             relayServerData.ComputeNewNonce();
             var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
 
