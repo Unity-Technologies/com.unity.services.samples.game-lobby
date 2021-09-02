@@ -26,12 +26,24 @@ namespace LobbyRelaySample.vivox
             m_id = id;
             Account account = new Account(id);
             // Vivox appends additional info to the ID we provide, in order to associate it with a specific channel. We'll construct m_vivoxId to match the ID used by Vivox.
-            m_vivoxId = account.ToString(); //"sip:." + account.Issuer + "." + m_id + ".@" + account.Domain; 
-            
-            
-            // TODO: This doesn't end up matching the Participants keys, since there's something else appended between id and domain.
-
-
+            // FUTURE: This isn't yet available. When using Auth, the Vivox ID will match this format:
+            // m_vivoxId = $"sip:.{account.Issuer}.{m_id}.{environmentId}.@{account.Domain}";
+            // However, the environment ID from Auth is not exposed anywhere, and Vivox doesn't provide a way to retrieve the ID, either.
+            // Instead, when needed, we'll search for the Vivox ID containing this user's Auth ID, which is a GUID so collisions are extremely unlikely.
+            // In the future, remove FindVivoxId and pass the environment ID here instead.
+            m_vivoxId = null;
+        }
+        private void FindVivoxId()
+        {
+            if (m_vivoxId != null || m_channelSession == null)
+                return;
+            foreach (var participant in m_channelSession.Participants)
+            {
+                if (!participant.Key.Contains(m_id))
+                    continue;
+                m_vivoxId = participant.Key;
+                return;
+            }
         }
 
         public void OnChannelJoined(IChannelSession channelSession)
@@ -46,8 +58,10 @@ namespace LobbyRelaySample.vivox
 
         public void OnVolumeSlide(float volumeNormalized)
         {
+            FindVivoxId();
             if (m_channelSession == null || m_vivoxId == null) // Verify initialization, since SetId and OnChannelJoined are called at different times for local vs. remote clients.
                 return;
+
             int vol = (int)Mathf.Clamp(k_volumeMin + (k_volumeMax - k_volumeMin) * volumeNormalized, k_volumeMin, k_volumeMax); // Clamping as a precaution; if UserVolume somehow got above 1, listeners could be harmed.
             bool isSelf = m_channelSession.Participants[m_vivoxId].IsSelf;
             if (isSelf)
@@ -56,15 +70,16 @@ namespace LobbyRelaySample.vivox
             }
             else
             {
-                // TODO: Verify non-null things?
                 m_channelSession.Participants[m_vivoxId].LocalVolumeAdjustment = vol;
             }
         }
 
         public void OnMuteToggle(bool isMuted)
         {
+            FindVivoxId();
             if (m_channelSession == null || m_vivoxId == null)
                 return;
+
             bool isSelf = m_channelSession.Participants[m_vivoxId].IsSelf;
             if (isSelf)
             {
