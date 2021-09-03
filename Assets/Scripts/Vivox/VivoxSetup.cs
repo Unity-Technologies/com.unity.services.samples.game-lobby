@@ -33,7 +33,6 @@ namespace LobbyRelaySample.vivox
 
             m_loginSession.BeginLogin(m_loginSession.GetLoginToken(), SubscriptionMode.Accept, null, null, null, result =>
             {
-                // TODO: Is BeginLogin guaranteed to call this callback?
                 try
                 {
                     m_loginSession.EndLogin(result);
