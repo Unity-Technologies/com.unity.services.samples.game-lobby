@@ -72,6 +72,7 @@ namespace LobbyRelaySample
         CancelCountdown = 10,
         ConfirmInGameState = 11,
         DisplayErrorPopup = 12,
+        SetPlayerSound = 13,
     }
 
     /// <summary>
