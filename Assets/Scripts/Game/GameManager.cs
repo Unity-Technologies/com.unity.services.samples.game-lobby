@@ -154,11 +154,11 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.QuickJoin)
             {
-              LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
-              {   lobby.ToLocalLobby.Convert(r, m_localLobby);
-                  OnJoinedLobby();
-              },
-                  OnFailedJoin);
+                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                      OnJoinedLobby();
+                    },
+                    OnFailedJoin);
             }
         }
 

@@ -146,12 +146,14 @@ namespace LobbyRelaySample
             }
         }
 
+        /// <summary>
+        /// Will Attempt to join the first Lobby among the available lobbies that match the filter.(limitToColor)
+        /// </summary>
         public void QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None, Action<Lobby> onSuccess = null, Action onFailure = null)
         {
             if (!m_rateLimitQuickJoin.CanCall())
             {
                 onFailure?.Invoke();
-                m_rateLimitQuery.EnqueuePendingOperation(() => { QuickJoinLobbyAsync(localUser, limitToColor, onSuccess, onFailure); });
                 return;
             }
 
@@ -397,10 +399,7 @@ namespace LobbyRelaySample
                 }
             }
 
-            public override void CopyObserved(RateLimitCooldown oldObserved)
-            {
-                /* This behavior isn't needed; we're just here for the OnChanged event management. */
-            }
+            public override void CopyObserved(RateLimitCooldown oldObserved){/* This behavior isn't needed; we're just here for the OnChanged event management. */}
         }
     }
 }
