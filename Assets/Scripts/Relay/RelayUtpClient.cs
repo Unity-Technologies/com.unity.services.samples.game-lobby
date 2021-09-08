@@ -15,6 +15,7 @@ namespace LobbyRelaySample.relay
         protected LocalLobby m_localLobby;
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
+        protected bool m_IsRelayConnected { get { return m_localLobby.RelayServer != null; } }
 
         protected bool m_hasSentInitialMessage = false;
         private const float k_heartbeatPeriod = 5;
@@ -33,6 +34,7 @@ namespace LobbyRelaySample.relay
             m_localUser.onChanged -= OnLocalChange;
             Leave();
             Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
+            m_connections.Clear();
             m_networkDriver.Dispose();
         }
         public void OnDestroy()
@@ -56,6 +58,8 @@ namespace LobbyRelaySample.relay
         private void UpdateSlow(float dt)
         {
             // Clients need to send any data over UTP periodically, or else the connection will timeout.
+            if (!m_IsRelayConnected) // However, if disconnected from Relay for some reason, we want the connection to timeout.
+                return;
             foreach (NetworkConnection connection in m_connections)
                 WriteByte(m_networkDriver, connection, "0", MsgType.Ping, 0); // The ID doesn't matter here, so send a minimal number of bytes.
         }
@@ -125,7 +129,12 @@ namespace LobbyRelaySample.relay
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
-            string msg = "Host disconnected! Leaving the lobby.";
+            string msg;
+            if (m_IsRelayConnected)
+                msg = "Host disconnected! Leaving the lobby.";
+            else
+                msg = "Connection to host was lost. Leaving the lobby.";
+
             Debug.LogError(msg);
             Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, msg);
             Leave();
@@ -235,10 +244,10 @@ namespace LobbyRelaySample.relay
             }
         }
 
-        public void Leave()
+        public virtual void Leave()
         {
             foreach (NetworkConnection connection in m_connections)
-                connection.Disconnect(m_networkDriver);
+                WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.PlayerDisconnect, 0); // If the client breaks the connection, the host might still maintain it, so message instead.
             m_localLobby.RelayServer = null;
         }
     }
