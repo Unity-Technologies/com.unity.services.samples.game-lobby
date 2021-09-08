@@ -152,10 +152,18 @@ namespace LobbyRelaySample
                 m_localLobby.CountDownTime = 0;
                 SetUserLobbyState();
             }
+            else if (type == MessageType.QuickJoin)
+            {
+                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                      OnJoinedLobby();
+                    },
+                    OnFailedJoin);
+			}
             else if (type == MessageType.SetPlayerSound)
             {
                 var playerSound = (LobbyUserAudio)msg;
-            }
+        	}
         }
 
         private void SetGameState(GameState state)
