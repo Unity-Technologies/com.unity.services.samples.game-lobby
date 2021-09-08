@@ -186,7 +186,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 0
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!114 &3687075862038422248
 MonoBehaviour:
@@ -1428,10 +1428,6 @@ PrefabInstance:
     - target: {fileID: 1118541987231860827, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1757568212719955599, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
-      propertyPath: m_fontSize
-      value: 20.55
       objectReference: {fileID: 0}
     - target: {fileID: 6429120237646330959, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
       propertyPath: ShowThisWhen
