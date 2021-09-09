@@ -175,7 +175,7 @@ namespace LobbyRelaySample
 
             void OnGet(Lobby response)
             {
-                onComplete?.Invoke(response);
+                onComplete?.Invoke(response); // FUTURE: Consider passing in the exception code here (and elsewhere) to, e.g., specifically handle a 404 indicating a Relay auto-disconnect.
             }
         }
 

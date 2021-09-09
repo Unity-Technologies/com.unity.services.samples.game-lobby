@@ -244,6 +244,9 @@ namespace LobbyRelaySample.relay
             }
         }
 
+        /// <summary>
+        /// Disconnect from Relay, usually while leaving the lobby. (You can also call this elsewhere to see how Lobby will detect a Relay disconnect automatically.)
+        /// </summary>
         public virtual void Leave()
         {
             foreach (NetworkConnection connection in m_connections)
