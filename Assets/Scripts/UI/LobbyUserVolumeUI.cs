@@ -15,7 +15,7 @@ namespace LobbyRelaySample.UI
         private GameObject m_muteIcon;
         [SerializeField]
         [Tooltip("This is shown for the local player, to make it clearer that they are muting themselves.")]
-        private GameObject m_micIcon;
+        private GameObject m_micMuteIcon;
         public bool IsLocalPlayer { private get; set; }
 
         public void EnableVoice()
@@ -25,14 +25,14 @@ namespace LobbyRelaySample.UI
                 m_volumeSliderContainer.Hide(0);
                 m_muteButtonContainer.Show();
                 m_muteIcon.SetActive(false);
-                m_micIcon.SetActive(true);
+                m_micMuteIcon.SetActive(true);
             }
             else
             {
                 m_volumeSliderContainer.Show();
                 m_muteButtonContainer.Show();
                 m_muteIcon.SetActive(true);
-                m_micIcon.SetActive(false);
+                m_micMuteIcon.SetActive(false);
             }
         }
 
@@ -41,7 +41,7 @@ namespace LobbyRelaySample.UI
             m_volumeSliderContainer.Hide(0.4f);
             m_muteButtonContainer.Hide(0.4f);
             m_muteIcon.SetActive(true);
-            m_micIcon.SetActive(false);
+            m_micMuteIcon.SetActive(false);
         }
 
         /* TODO : If we can hook in the volume from a user, we can plug it in here.
