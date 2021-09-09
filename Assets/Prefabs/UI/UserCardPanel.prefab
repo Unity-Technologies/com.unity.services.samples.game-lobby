@@ -361,6 +361,7 @@ GameObject:
   - component: {fileID: 5235189765028238254}
   - component: {fileID: 788426075660952210}
   - component: {fileID: 7885056472121154813}
+  - component: {fileID: 4826507163535553981}
   m_Layer: 5
   m_Name: UserCardPanel
   m_TagString: Untagged
@@ -432,8 +433,7 @@ MonoBehaviour:
   m_StatusText: {fileID: 3667934756810823183}
   m_EmoteText: {fileID: 7097926522474954833}
   m_HostIcon: {fileID: 2063326445664711249}
-  m_MuteUI: {fileID: 5371667691979465528}
-  m_lobbyUserVolumeUI: {fileID: 7750493951695561362}
+  m_vivoxUserHandler: {fileID: 4826507163535553981}
 --- !u!114 &788426075660952210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,6 +487,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &4826507163535553981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767503274657767312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78d292f3bd9f1614cb744dcb4fe3ac12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_lobbyUserVolumeUI: {fileID: 7750493951695561362}
 --- !u!1 &3010031715874034773
 GameObject:
   m_ObjectHideFlags: 0
@@ -498,7 +511,7 @@ GameObject:
   - component: {fileID: 3081577339344251787}
   - component: {fileID: 7240929418107909207}
   - component: {fileID: 5467963549174563591}
-  - component: {fileID: 5371667691979465528}
+  - component: {fileID: 6569968321909521185}
   - component: {fileID: 5564390157418853622}
   m_Layer: 5
   m_Name: MuteArea
@@ -555,7 +568,7 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 3
---- !u!114 &5371667691979465528
+--- !u!114 &6569968321909521185
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -564,25 +577,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 3010031715874034773}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f722d3f4131ab52469d430cc5855ee83, type: 3}
+  m_Script: {fileID: 11500000, guid: ab355d5994635724dbde297a055fb586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_onVisibilityChange:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  m_voiceRings: {fileID: 1287953984161108202}
+      m_Calls: []
 --- !u!225 &5564390157418853622
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -592,8 +592,8 @@ CanvasGroup:
   m_GameObject: {fileID: 3010031715874034773}
   m_Enabled: 1
   m_Alpha: 1
-  m_Interactable: 0
-  m_BlocksRaycasts: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!1 &3079367817526768243
 GameObject:
@@ -755,9 +755,9 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5235189765028238254}
-        m_TargetAssemblyTypeName: LobbyRelaySample.UI.InLobbyUserUI, LobbyRelaySample
-        m_MethodName: OnMuteToggled
+      - m_Target: {fileID: 4826507163535553981}
+        m_TargetAssemblyTypeName: LobbyRelaySample.vivox.VivoxUserHandler, LobbyRelaySample
+        m_MethodName: OnMuteToggle
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -776,6 +776,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3518057056990530202}
   m_CullTransparentMesh: 1
+--- !u!1 &3906605741203742200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 853418489715471536}
+  - component: {fileID: 5399015282885967859}
+  - component: {fileID: 6714245214549863763}
+  m_Layer: 5
+  m_Name: UnmutedIcon_Mic
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &853418489715471536
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3906605741203742200}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4798292317257423901}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5399015282885967859
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3906605741203742200}
+  m_CullTransparentMesh: 1
+--- !u!114 &6714245214549863763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3906605741203742200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: d98c1d9f6f85f6e4cb4a0552d0452b48, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4250551697308330837
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,6 +881,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1122323841334202136}
+  - {fileID: 853418489715471536}
   - {fileID: 4530763983275839173}
   m_Father: {fileID: 5144918951328900891}
   m_RootOrder: 0
@@ -1171,6 +1247,7 @@ GameObject:
   - component: {fileID: 478472562358024413}
   - component: {fileID: 1918995816743806069}
   - component: {fileID: 7750493951695561362}
+  - component: {fileID: 6299655602247130973}
   - component: {fileID: 5190888420783209525}
   m_Layer: 5
   m_Name: VolumeArea
@@ -1222,7 +1299,7 @@ MonoBehaviour:
   m_IgnoreLayout: 0
   m_MinWidth: -1
   m_MinHeight: -1
-  m_PreferredWidth: 125
+  m_PreferredWidth: 100
   m_PreferredHeight: 40
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
@@ -1237,6 +1314,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a06ec4a4943ad514da7a222eacb66528, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_volumeSliderContainer: {fileID: 6299655602247130973}
+  m_muteButtonContainer: {fileID: 6569968321909521185}
+  m_muteIcon: {fileID: 41255065417622773}
+  m_micMuteIcon: {fileID: 3906605741203742200}
+--- !u!114 &6299655602247130973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4809966060551735762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab355d5994635724dbde297a055fb586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_onVisibilityChange:
@@ -1415,12 +1508,12 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 0.7142857
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5235189765028238254}
-        m_TargetAssemblyTypeName: LobbyRelaySample.UI.InLobbyUserUI, LobbyRelaySample
+      - m_Target: {fileID: 4826507163535553981}
+        m_TargetAssemblyTypeName: LobbyRelaySample.vivox.VivoxUserHandler, LobbyRelaySample
         m_MethodName: OnVolumeSlide
         m_Mode: 0
         m_Arguments:
@@ -1971,7 +2064,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4798292317257423901}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2006,7 +2099,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1e82decb13fc114438e0314bf6252451, type: 3}
+  m_Sprite: {fileID: 21300000, guid: bf5910b0ba2403a448a96cb6f77b611c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

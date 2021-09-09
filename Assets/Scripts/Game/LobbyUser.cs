@@ -11,11 +11,11 @@ namespace LobbyRelaySample
     public enum UserStatus
     {
         None = 0,
-        Connecting = 1,   // User has joined a lobby but has not yet connected to Relay.
-        Lobby = 2,        // User is in a lobby and connected to Relay.
-        Ready = 4,        // User has selected the ready button, to ready for the "game" to start.
-        InGame = 8,       // User is part of a "game" that has started.
-        Menu = 16         // User is not in a lobby, in one of the main menus.
+        Connecting = 1, // User has joined a lobby but has not yet connected to Relay.
+        Lobby = 2,      // User is in a lobby and connected to Relay.
+        Ready = 4,      // User has selected the ready button, to ready for the "game" to start.
+        InGame = 8,     // User is part of a "game" that has started.
+        Menu = 16       // User is not in a lobby, in one of the main menus.
     }
 
     /// <summary>
@@ -24,9 +24,9 @@ namespace LobbyRelaySample
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu, bool hasVoice = false)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu)
         {
-            m_data = new UserData(isHost, displayName, id, emote, userStatus, hasVoice);
+            m_data = new UserData(isHost, displayName, id, emote, userStatus);
         }
 
         #region Local UserData
@@ -38,16 +38,14 @@ namespace LobbyRelaySample
             public string ID { get; set; }
             public EmoteType Emote { get; set; }
             public UserStatus UserStatus { get; set; }
-            public bool HasVoice { get; set; }
 
-            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus, bool hasVoice)
+            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus)
             {
                 IsHost = isHost;
                 DisplayName = displayName;
                 ID = id;
                 Emote = emote;
                 UserStatus = userStatus;
-                HasVoice = hasVoice;
             }
         }
 
@@ -55,7 +53,7 @@ namespace LobbyRelaySample
 
         public void ResetState()
         {
-            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu, false); // ID and DisplayName should persist since this might be the local user.
+            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu); // ID and DisplayName should persist since this might be the local user.
         }
 
         #endregion
@@ -64,9 +62,14 @@ namespace LobbyRelaySample
         /// Used for limiting costly OnChanged actions to just the members which actually changed.
         /// </summary>
         [Flags]
-        public enum UserMembers{ IsHost = 1, DisplayName = 2, Emote = 4, ID = 8, UserStatus = 16, HasVoice = 32
-            //TODO Add in lobbyUsers Voice Activity for animation?
-        }
+        public enum UserMembers
+        {
+            IsHost = 1,
+            DisplayName = 2,
+            Emote = 4,
+            ID = 8,
+            UserStatus = 16
+		}
 
         private UserMembers m_lastChanged;
         public UserMembers LastChanged => m_lastChanged;
@@ -98,7 +101,7 @@ namespace LobbyRelaySample
                 }
             }
         }
-        
+
         public EmoteType Emote
         {
             get => m_data.Emote;
@@ -128,7 +131,6 @@ namespace LobbyRelaySample
         }
 
         UserStatus m_userStatus = UserStatus.Menu;
-
         public UserStatus UserStatus
         {
             get => m_userStatus;
@@ -143,20 +145,6 @@ namespace LobbyRelaySample
             }
         }
 
-        public bool HasVoice
-        {
-            get { return m_data.HasVoice; }
-            set
-            {
-                if (m_data.HasVoice != value)
-                {
-                    m_data.HasVoice = value;
-                    m_lastChanged = UserMembers.HasVoice;
-                    OnChanged(this);
-                }
-            }
-        }
-
         public override void CopyObserved(LobbyUser observed)
         {
             UserData data = observed.m_data;
@@ -165,8 +153,7 @@ namespace LobbyRelaySample
                 (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
                 (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
                 (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
-                (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus) |
-                (m_data.HasVoice == data.HasVoice ?       0 : (int)UserMembers.HasVoice);
+                (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus);
 
             if (lastChanged == 0) // Ensure something actually changed.
                 return;
