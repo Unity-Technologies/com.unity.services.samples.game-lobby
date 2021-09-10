@@ -31,7 +31,7 @@ namespace LobbyRelaySample.vivox
             m_loginSession = VivoxService.Instance.Client.GetLoginSession(account);
             string token = m_loginSession.GetLoginToken();
 
-            m_loginSession.BeginLogin(m_loginSession.GetLoginToken(), SubscriptionMode.Accept, null, null, null, result =>
+            m_loginSession.BeginLogin(token, SubscriptionMode.Accept, null, null, null, result =>
             {
                 try
                 {
@@ -63,7 +63,7 @@ namespace LobbyRelaySample.vivox
             m_channelSession = m_loginSession.GetChannelSession(channel);
             string token = m_channelSession.GetConnectToken();
 
-            m_channelSession.BeginConnect(true, false, true, m_channelSession.GetConnectToken(), result =>
+            m_channelSession.BeginConnect(true, false, true, token, result =>
             {
                 m_channelSession.EndConnect(result); // TODO: Error handling?
                 onComplete?.Invoke(true);
