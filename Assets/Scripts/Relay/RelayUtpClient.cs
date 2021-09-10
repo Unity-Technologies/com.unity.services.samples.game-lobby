@@ -55,10 +55,12 @@ namespace LobbyRelaySample.relay
             OnUpdate();
         }
 
+        /// <summary>
+        /// Clients need to send any data over UTP periodically, or else Relay will remove them from the allocation.
+        /// </summary>
         private void UpdateSlow(float dt)
         {
-            // Clients need to send any data over UTP periodically, or else the connection will timeout.
-            if (!m_IsRelayConnected) // However, if disconnected from Relay for some reason, we want the connection to timeout.
+            if (!m_IsRelayConnected) // If disconnected from Relay for some reason, we *want* this client to timeout.
                 return;
             foreach (NetworkConnection connection in m_connections)
                 WriteByte(m_networkDriver, connection, "0", MsgType.Ping, 0); // The ID doesn't matter here, so send a minimal number of bytes.
@@ -250,7 +252,8 @@ namespace LobbyRelaySample.relay
         public virtual void Leave()
         {
             foreach (NetworkConnection connection in m_connections)
-                WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.PlayerDisconnect, 0); // If the client breaks the connection, the host might still maintain it, so message instead.
+                // If the client calls Disconnect, the host might not become aware right away (depending on when the PubSub messages get pumped), so send a message over UTP instead.
+                WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.PlayerDisconnect, 0);
             m_localLobby.RelayServer = null;
         }
     }

@@ -24,7 +24,7 @@ namespace LobbyRelaySample.relay
 
         protected override void OnUpdate()
         {
-            if (!m_IsRelayConnected) // If Relay was disconnected somehow, stop taking actions that will keep the lobby alive.
+            if (!m_IsRelayConnected) // If Relay was disconnected somehow, stop taking actions that will keep the allocation alive.
                 return;
             base.OnUpdate();
             UpdateConnections();
@@ -154,7 +154,7 @@ namespace LobbyRelaySample.relay
         public override void Leave()
         {
             foreach (NetworkConnection connection in m_connections)
-                connection.Disconnect(m_networkDriver);
+                connection.Disconnect(m_networkDriver); // Note that Lobby won't receive the disconnect immediately, so its auto-disconnect takes 30-40s, if needed.
             m_localLobby.RelayServer = null;
         }
     }
