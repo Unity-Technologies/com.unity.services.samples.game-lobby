@@ -147,7 +147,7 @@ namespace LobbyRelaySample
         }
 
         /// <summary>
-        /// Will Attempt to join the first Lobby among the available lobbies that match the filter.(limitToColor)
+        /// Attempt to join the first lobby among the available lobbies that match the filtered limitToColor.
         /// </summary>
         public void QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None, Action<Lobby> onSuccess = null, Action onFailure = null)
         {
@@ -216,12 +216,11 @@ namespace LobbyRelaySample
                 onComplete?.Invoke(null);
                 return;
             }
-
             LobbyAPIInterface.GetLobbyAsync(lobbyId, OnGet);
 
             void OnGet(Lobby response)
             {
-                onComplete?.Invoke(response);
+                onComplete?.Invoke(response); // FUTURE: Consider passing in the exception code here (and elsewhere) to, e.g., specifically handle a 404 indicating a Relay auto-disconnect.
             }
         }
 

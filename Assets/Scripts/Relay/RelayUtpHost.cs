@@ -24,8 +24,10 @@ namespace LobbyRelaySample.relay
 
         protected override void OnUpdate()
         {
+            if (!m_IsRelayConnected) // If Relay was disconnected somehow, stop taking actions that will keep the allocation alive.
+                return;
             base.OnUpdate();
-            DoHeartbeat();
+            UpdateConnections();
         }
 
         /// <summary>
@@ -64,6 +66,12 @@ namespace LobbyRelaySample.relay
             }
             else if (msgType == MsgType.NewPlayer) // This ensures clients in builds are sent player state once they establish that they can send (and receive) events.
                 OnNewConnection(conn);
+            else if (msgType == MsgType.PlayerDisconnect) // Clients message the host when they intend to disconnect, or else the host ends up keeping the connection open.
+            {
+                conn.Disconnect(m_networkDriver);
+                UnityEngine.Debug.LogWarning("Disconnecting a client due to a disconnect message.");
+                return;
+            }
 
             // If a client has changed state, check if this changes whether all players have readied.
             if (msgType == MsgType.ReadyState)
@@ -126,7 +134,7 @@ namespace LobbyRelaySample.relay
         /// <summary>
         /// Clean out destroyed connections, and accept all new ones.
         /// </summary>
-        private void DoHeartbeat()
+        private void UpdateConnections()
         {
             for (int c = m_connections.Count - 1; c >= 0; c--)
             {
@@ -141,6 +149,13 @@ namespace LobbyRelaySample.relay
                 m_connections.Add(conn);
                 OnNewConnection(conn); // This ensures that clients in editors are sent player state once they establish a connection. The timing differs slightly from builds.
             }
+        }
+
+        public override void Leave()
+        {
+            foreach (NetworkConnection connection in m_connections)
+                connection.Disconnect(m_networkDriver); // Note that Lobby won't receive the disconnect immediately, so its auto-disconnect takes 30-40s, if needed.
+            m_localLobby.RelayServer = null;
         }
     }
 }
