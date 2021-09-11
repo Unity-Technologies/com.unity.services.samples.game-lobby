@@ -1317,9 +1317,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_volumeSliderContainer: {fileID: 6299655602247130973}
-  m_muteButtonContainer: {fileID: 6569968321909521185}
+  m_muteToggleContainer: {fileID: 6569968321909521185}
   m_muteIcon: {fileID: 41255065417622773}
   m_micMuteIcon: {fileID: 3906605741203742200}
+  m_volumeSlider: {fileID: 774196503220678520}
+  m_muteToggle: {fileID: 6442186483341508885}
 --- !u!114 &6299655602247130973
 MonoBehaviour:
   m_ObjectHideFlags: 0

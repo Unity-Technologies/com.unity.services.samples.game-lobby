@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LobbyRelaySample.UI
 {
@@ -9,7 +8,7 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         private UIPanelBase m_volumeSliderContainer;
         [SerializeField]
-        private UIPanelBase m_muteButtonContainer;
+        private UIPanelBase m_muteToggleContainer;
         [SerializeField]
         [Tooltip("This is shown for other players, to mute them.")]
         private GameObject m_muteIcon;
@@ -18,41 +17,53 @@ namespace LobbyRelaySample.UI
         private GameObject m_micMuteIcon;
         public bool IsLocalPlayer { private get; set; }
 
-        public void EnableVoice()
+        [SerializeField]
+        private Slider m_volumeSlider;
+        [SerializeField]
+        private Toggle m_muteToggle;
+
+        /// <param name="shouldResetUi">
+        /// When the user is being added, we want the UI to reset to the default values.
+        /// (We don't do this if the user is already in the lobby so that the previous values are retained. E.g. If they're too loud and volume was lowered, keep it lowered on reenable.)
+        /// </param>
+        public void EnableVoice(bool shouldResetUi)
         {
+            if (shouldResetUi)
+            {   m_volumeSlider.SetValueWithoutNotify(vivox.VivoxUserHandler.NormalizedVolumeDefault);
+                m_muteToggle.SetIsOnWithoutNotify(false);
+            }
+
             if (IsLocalPlayer)
             {
                 m_volumeSliderContainer.Hide(0);
-                m_muteButtonContainer.Show();
+                m_muteToggleContainer.Show();
                 m_muteIcon.SetActive(false);
                 m_micMuteIcon.SetActive(true);
             }
             else
             {
                 m_volumeSliderContainer.Show();
-                m_muteButtonContainer.Show();
+                m_muteToggleContainer.Show();
                 m_muteIcon.SetActive(true);
                 m_micMuteIcon.SetActive(false);
             }
         }
 
-        public void DisableVoice()
+        /// <param name="shouldResetUi">
+        /// When the user leaves the lobby (but not if they just lose voice access for some reason, e.g. device disconnect), reset state to the default values.
+        /// (We can't just do this during Enable since it could cause Vivox to have a state conflict during participant add.)
+        /// </param>
+        public void DisableVoice(bool shouldResetUi)
         {
+            if (shouldResetUi)
+            {   m_volumeSlider.value = vivox.VivoxUserHandler.NormalizedVolumeDefault;
+                m_muteToggle.isOn = false;
+            }
+
             m_volumeSliderContainer.Hide(0.4f);
-            m_muteButtonContainer.Hide(0.4f);
+            m_muteToggleContainer.Hide(0.4f);
             m_muteIcon.SetActive(true);
             m_micMuteIcon.SetActive(false);
         }
-
-        /* TODO : If we can hook in the volume from a user, we can plug it in here.
-              /// <summary>
-              /// Controls the visibility of the volume rings to show activity levels of the voice channel on this user.
-              /// </summary>
-              /// <param name="normalizedVolume"></param>
-              public void OnSoundDetected(float normalizedVolume)
-              {
-                  m_voiceRings.alpha = normalizedVolume;
-              }
-              */
     }
 }
