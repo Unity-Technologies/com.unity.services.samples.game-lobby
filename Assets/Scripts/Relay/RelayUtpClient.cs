@@ -206,7 +206,7 @@ namespace LobbyRelaySample.relay
             message.Add((byte)strBytes.Length);
             message.AddRange(strBytes);
 
-            if (driver.BeginSend(connection, out var dataStream) == 0) // Oh, should check this first?
+            if (driver.BeginSend(connection, out var dataStream) == 0)
             {
                 byte[] bytes = message.ToArray();
                 unsafe
@@ -232,7 +232,7 @@ namespace LobbyRelaySample.relay
             message.AddRange(idBytes);
             message.Add(value);
 
-            if (driver.BeginSend(connection, out var dataStream) == 0) // Oh, should check this first?
+            if (driver.BeginSend(connection, out var dataStream) == 0)
             {
                 byte[] bytes = message.ToArray();
                 unsafe

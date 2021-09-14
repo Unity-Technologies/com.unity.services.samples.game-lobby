@@ -41,9 +41,8 @@ namespace LobbyRelaySample.relay
         protected NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
         {
             #if ENABLE_MANAGED_UNITYTLS
-                for (int ep = endpoints.Count - 1; ep >= 0; ep--)
+                foreach (RelayServerEndpoint endpoint in endpoints)
                 {
-                    RelayServerEndpoint endpoint = endpoints[ep];
                     if (endpoint.Secure && endpoint.Network == RelayServerEndpoint.NetworkOptions.Udp)
                     {
                         isSecure = true;
