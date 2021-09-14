@@ -13,7 +13,7 @@ namespace LobbyRelaySample.UI
         private static readonly Color s_orangeColor = new Color(0.75f, 0.5f, 0.1f);
         private static readonly Color s_greenColor  = new Color(0.5f, 1, 0.7f);
         private static readonly Color s_blueColor   = new Color(0.75f, 0.7f, 1);
-        private static readonly Color[] s_colorsOrdered = new Color[] { Color.white, s_orangeColor, s_greenColor, s_blueColor };
+        private static readonly Color[] s_colorsOrdered = new Color[] { new Color(0.8f, 0.8f, 0.8f, 1), s_orangeColor, s_greenColor, s_blueColor };
 
         [SerializeField]
         private Graphic[] m_toRecolor;
