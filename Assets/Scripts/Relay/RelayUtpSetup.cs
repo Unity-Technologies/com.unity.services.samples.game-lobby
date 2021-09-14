@@ -213,7 +213,7 @@ namespace LobbyRelaySample.relay
             bool isSecure = false;
             m_endpointForServer = GetEndpointForAllocation(joinAllocation.ServerEndpoints, joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
             BindToAllocation(m_endpointForServer, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1, isSecure);
-            m_localLobby.RelayServer = new ServerAddress(m_endpointForServer.Address, m_endpointForServer.Port);
+            m_localLobby.RelayServer = new ServerAddress(m_endpointForServer.Address.Split(':')[0], m_endpointForServer.Port);
         }
 
         protected override void OnBindingComplete()
