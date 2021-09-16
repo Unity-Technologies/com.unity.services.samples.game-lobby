@@ -635,7 +635,7 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
-    Analytics: 0
+    Analytics: 1
     Build: 0
     Collab: 0
     Game Performance: 0
@@ -655,10 +655,10 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: 8f5c2a96-8802-441b-bcd9-cbe4e0e4ff1d
+  cloudProjectId: f9d8bd74-4fc8-4296-8a00-6a94bbc1407d
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Lobby Relay Sample
+  projectName: Lobby Relay Ninja
   organizationId: unity-evangelists
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
