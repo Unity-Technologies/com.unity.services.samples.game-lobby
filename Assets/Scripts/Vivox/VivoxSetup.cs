@@ -93,7 +93,7 @@ namespace LobbyRelaySample.vivox
             {
                 ChannelId id = m_channelSession.Channel;
                 m_channelSession?.Disconnect(
-                    (result) => { m_loginSession.DeleteChannelSession(id); m_channelSession = null; }); // TODO: What about if this is called while also trying to connect?
+                    (result) => { m_loginSession.DeleteChannelSession(id); m_channelSession = null; });
             }
             foreach (VivoxUserHandler userHandler in m_userHandlers)
                 userHandler.OnChannelLeft();
