@@ -30,7 +30,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8141644855275361747}
   m_RootOrder: 1
@@ -164,7 +163,6 @@ MonoBehaviour:
   m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
-  showing: 0
 --- !u!1 &3885698492068079262
 GameObject:
   m_ObjectHideFlags: 0
@@ -195,7 +193,6 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8141644855275361747}
   m_RootOrder: 0
@@ -233,7 +230,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7eb43e8205c10c846b4243bb963f4aa4, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 01210716645741846b16638f05846569, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -270,7 +267,6 @@ MonoBehaviour:
   m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
-  showing: 0
 --- !u!1 &5113050813143078450
 GameObject:
   m_ObjectHideFlags: 0
@@ -301,7 +297,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8141644855275361747}
   m_RootOrder: 2
@@ -435,7 +430,6 @@ MonoBehaviour:
   m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
-  showing: 0
 --- !u!1 &7144088886657378797
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,7 +461,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2952266133262597715}
   - {fileID: 8845592316474837655}
@@ -503,7 +496,6 @@ MonoBehaviour:
   m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
-  showing: 0
   errorText: {fileID: 7859013680193933450}
   spinnerImage: {fileID: 50617661778815274}
   noServerText: {fileID: 1576294672583716881}
