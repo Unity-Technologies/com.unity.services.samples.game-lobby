@@ -1600,10 +1600,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: JoinContent
       objectReference: {fileID: 0}
-    - target: {fileID: 785260762106121644, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 785260762106121647, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
