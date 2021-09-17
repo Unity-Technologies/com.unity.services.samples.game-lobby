@@ -99,7 +99,9 @@ namespace LobbyRelaySample.relay
                 MsgType msgType = (MsgType)msgContents[0];
                 int idLength = msgContents[1];
                 if (msgContents.Count < idLength + 2)
+                {   UnityEngine.Debug.LogWarning($"Relay client processed message of length {idLength}, but contents were of length {msgContents.Count}.");
                     return;
+                }
 
                 string id = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(2, idLength).ToArray());
                 if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // We don't need to hold onto messages if the ID is absent; users are initialized before they send events.
