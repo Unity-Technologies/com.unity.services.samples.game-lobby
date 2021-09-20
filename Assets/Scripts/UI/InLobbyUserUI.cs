@@ -53,15 +53,6 @@ namespace LobbyRelaySample.UI
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
             m_EmoteText.SetText(observed.Emote.GetString());
             m_HostIcon.enabled = observed.IsHost;
-            SetAudioState(true);
-        }
-
-        /// <summary>
-        ///  Disable or show the Volume Icons in sync with the package.
-        /// </summary>
-        void SetAudioState(bool hasVoice)
-        {
-            // TODO: Disable if vivox is not available, per-user.
         }
 
         string SetStatusFancy(UserStatus status)

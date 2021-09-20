@@ -1,4 +1,5 @@
 using LobbyRelaySample.relay;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -71,8 +72,8 @@ namespace LobbyRelaySample
             Debug.Log("Signed in.");
             m_localUser.ID = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             m_localUser.DisplayName = NameGenerator.GetName(m_localUser.ID);
-            m_vivoxSetup.Initialize(m_vivoxUserHandlers); // Should be before AddPlayer, since that will attempt to set the Vivox ID based on the Auth ID.
             m_localLobby.AddPlayer(m_localUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
+            StartVivoxLogin();
         }
 
         private void BeginObservers()
@@ -203,7 +204,7 @@ namespace LobbyRelaySample
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
             StartRelayConnection();
-            m_vivoxSetup.JoinLobbyChannel(m_localLobby.LobbyID, null); // TODO: Retry on failure?
+            StartVivoxJoin();
         }
 
         private void OnLeftLobby()
@@ -232,6 +233,34 @@ namespace LobbyRelaySample
             SetGameState(GameState.JoinMenu);
         }
 
+        private void StartVivoxLogin()
+        {
+            m_vivoxSetup.Initialize(m_vivoxUserHandlers, OnVivoxLoginComplete);
+
+            void OnVivoxLoginComplete(bool didSucceed)
+            {
+                if (!didSucceed)
+                {   Debug.LogError("Vivox login failed! Retrying in 5s...");
+                    StartCoroutine(RetryConnection(StartVivoxLogin, m_localLobby.LobbyID));
+                    return;
+                }
+            }
+        }
+
+        private void StartVivoxJoin()
+        {
+            m_vivoxSetup.JoinLobbyChannel(m_localLobby.LobbyID, OnVivoxJoinComplete);
+
+            void OnVivoxJoinComplete(bool didSucceed)
+            {
+                if (!didSucceed)
+                {   Debug.LogError("Vivox connection failed! Retrying in 5s...");
+                    StartCoroutine(RetryConnection(StartVivoxJoin, m_localLobby.LobbyID));
+                    return;
+                }
+            }
+        }
+
         private void StartRelayConnection()
         {
             if (m_localUser.IsHost)
@@ -240,28 +269,28 @@ namespace LobbyRelaySample
                 m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
             OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
             m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
-        }
 
-        private void OnRelayConnected(bool didSucceed, RelayUtpClient client)
-        {
-            Component.Destroy(m_relaySetup);
-            m_relaySetup = null;
-
-            if (!didSucceed)
+            void OnRelayConnected(bool didSucceed, RelayUtpClient client)
             {
-                Debug.LogError("Relay connection failed! Retrying in 5s...");
-                StartCoroutine(RetryRelayConnection());
-                return;
-            }
+                Component.Destroy(m_relaySetup);
+                m_relaySetup = null;
 
-            m_relayClient = client;
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+                if (!didSucceed)
+                {   Debug.LogError("Relay connection failed! Retrying in 5s...");
+                    StartCoroutine(RetryConnection(StartRelayConnection, m_localLobby.LobbyID));
+                    return;
+                }
+
+                m_relayClient = client;
+                OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+            }
         }
 
-        private IEnumerator RetryRelayConnection()
+        private IEnumerator RetryConnection(Action doConnection, string lobbyId)
         {
             yield return new WaitForSeconds(5);
-            StartRelayConnection();
+            if (m_localLobby != null && m_localLobby.LobbyID == lobbyId && !string.IsNullOrEmpty(lobbyId)) // Ensure we didn't leave the lobby during this waiting period.
+                doConnection?.Invoke();
         }
 
         private void BeginCountDown()
