@@ -19,7 +19,8 @@ namespace LobbyRelaySample.vivox
         /// <summary>
         /// Initialize the Vivox service, before actually joining any audio channels.
         /// </summary>
-        public void Initialize(List<VivoxUserHandler> userHandlers)
+        /// <param name="onComplete">Called whether the login succeeds or not.</param>
+        public void Initialize(List<VivoxUserHandler> userHandlers, Action<bool> onComplete)
         {
             if (m_isMidInitialize)
                 return;
@@ -31,12 +32,17 @@ namespace LobbyRelaySample.vivox
             m_loginSession = VivoxService.Instance.Client.GetLoginSession(account);
             string token = m_loginSession.GetLoginToken();
 
-            m_loginSession.BeginLogin(m_loginSession.GetLoginToken(), SubscriptionMode.Accept, null, null, null, result =>
+            m_loginSession.BeginLogin(token, SubscriptionMode.Accept, null, null, null, result =>
             {
                 try
                 {
                     m_loginSession.EndLogin(result);
                     m_hasInitialized = true;
+                    onComplete?.Invoke(true);
+                }
+                catch (Exception ex)
+                {   UnityEngine.Debug.LogWarning("Vivox failed to login: " + ex.Message);
+                    onComplete?.Invoke(false);
                 }
                 finally
                 {
@@ -63,25 +69,32 @@ namespace LobbyRelaySample.vivox
             m_channelSession = m_loginSession.GetChannelSession(channel);
             string token = m_channelSession.GetConnectToken();
 
-            m_channelSession.BeginConnect(true, false, true, m_channelSession.GetConnectToken(), result =>
+            m_channelSession.BeginConnect(true, false, true, token, result =>
             {
-                m_channelSession.EndConnect(result); // TODO: Error handling?
-                onComplete?.Invoke(true);
-                foreach (VivoxUserHandler userHandler in m_userHandlers)
-                    userHandler.OnChannelJoined(m_channelSession);
+                try
+                {   m_channelSession.EndConnect(result);
+                    onComplete?.Invoke(true);
+                    foreach (VivoxUserHandler userHandler in m_userHandlers)
+                        userHandler.OnChannelJoined(m_channelSession);
+                }
+                catch (Exception ex)
+                {   UnityEngine.Debug.LogWarning("Vivox failed to connect: " + ex.Message);
+                    onComplete?.Invoke(false);
+                }
             });
         }
-
-        // TODO: Reset slider and mute UI on lobby enter
 
         /// <summary>
         /// To be called when leaving a lobby.
         /// </summary>
         public void LeaveLobbyChannel()
         {
-            ChannelId id = m_channelSession.Channel;
-            m_channelSession?.Disconnect(
-                (result) => { m_loginSession.DeleteChannelSession(id); }); // TODO: What about if this is called while also trying to connect?
+            if (m_channelSession != null)
+            {
+                ChannelId id = m_channelSession.Channel;
+                m_channelSession?.Disconnect(
+                    (result) => { m_loginSession.DeleteChannelSession(id); m_channelSession = null; });
+            }
             foreach (VivoxUserHandler userHandler in m_userHandlers)
                 userHandler.OnChannelLeft();
         }
@@ -91,8 +104,6 @@ namespace LobbyRelaySample.vivox
         /// </summary>
         public void Uninitialize()
         {
-            // TODO: Also call LeaveLobbyChannel?
-
             if (!m_hasInitialized)
                 return;
             m_loginSession.Logout();
