@@ -90,6 +90,19 @@ namespace LobbyRelaySample
                 var prevState = m_localLobby.State;
                 lobby.ToLocalLobby.Convert(lobbyRemote, m_localLobby);
                 m_shouldPushData = prevShouldPush;
+
+                // If the host suddenly leaves, the Lobby service will automatically handle disconnects after about 30s, but we can try to do a disconnect sooner if we detect it.
+                if (!m_localUser.IsHost)
+                {
+                    foreach (var lobbyUser in m_localLobby.LobbyUsers)
+                    {
+                        if (lobbyUser.Value.IsHost)
+                            return;
+                    }
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Host left the lobby! Disconnecting...");
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+                }
             }
         }
 
