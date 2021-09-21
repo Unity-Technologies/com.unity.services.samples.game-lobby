@@ -16,5 +16,8 @@ namespace LobbyRelaySample.UI
                 Hide();
             }
         }
+        
+        
+        
     }
 }
