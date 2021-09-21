@@ -43,6 +43,18 @@ namespace LobbyRelaySample.lobby
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
+        public static void QuickJoinLobbyAsync(string requesterUASId, List<QueryFilter> filters, Dictionary<string, PlayerDataObject> localUserData, Action<Lobby> onComplete)
+        {
+            var joinRequest = new QuickJoinLobbyOptions
+            {
+                Filter = filters,
+                Player = new Player(id: requesterUASId, data: localUserData)
+            };
+
+            var task = Lobbies.Instance.QuickJoinLobbyAsync(joinRequest);
+            AsyncRequestLobby.Instance.DoRequest(task, onComplete);
+        }
+
         public static void LeaveLobbyAsync(string requesterUASId, string lobbyId, Action onComplete)
         {
             var task = Lobbies.Instance.RemovePlayerAsync(lobbyId, requesterUASId);

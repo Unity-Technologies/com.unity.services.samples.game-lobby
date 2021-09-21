@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace LobbyRelaySample
 {
@@ -10,11 +11,11 @@ namespace LobbyRelaySample
     public enum UserStatus
     {
         None = 0,
-        Connecting = 1,   // User has joined a lobby but has not yet connected to Relay.
-        Lobby = 2,        // User is in a lobby and connected to Relay.
-        Ready = 4,        // User has selected the ready button, to ready for the "game" to start.
-        InGame = 8,       // User is part of a "game" that has started.
-        Menu = 16         // User is not in a lobby, in one of the main menus.
+        Connecting = 1, // User has joined a lobby but has not yet connected to Relay.
+        Lobby = 2,      // User is in a lobby and connected to Relay.
+        Ready = 4,      // User has selected the ready button, to ready for the "game" to start.
+        InGame = 8,     // User is part of a "game" that has started.
+        Menu = 16       // User is not in a lobby, in one of the main menus.
     }
 
     /// <summary>
@@ -29,6 +30,7 @@ namespace LobbyRelaySample
         }
 
         #region Local UserData
+
         public struct UserData
         {
             public bool IsHost { get; set; }
@@ -48,17 +50,27 @@ namespace LobbyRelaySample
         }
 
         private UserData m_data;
+
         public void ResetState()
         {
             m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu); // ID and DisplayName should persist since this might be the local user.
         }
+
         #endregion
 
         /// <summary>
         /// Used for limiting costly OnChanged actions to just the members which actually changed.
         /// </summary>
         [Flags]
-        public enum UserMembers { IsHost = 1, DisplayName = 2, Emote = 4, ID = 8, UserStatus = 16 }
+        public enum UserMembers
+        {
+            IsHost = 1,
+            DisplayName = 2,
+            Emote = 4,
+            ID = 8,
+            UserStatus = 16
+		}
+
         private UserMembers m_lastChanged;
         public UserMembers LastChanged => m_lastChanged;
 
@@ -137,11 +149,12 @@ namespace LobbyRelaySample
         {
             UserData data = observed.m_data;
             int lastChanged = // Set flags just for the members that will be changed.
-                (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
-                (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
-                (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
                 (m_data.IsHost == data.IsHost ?           0 : (int)UserMembers.IsHost) |
+                (m_data.DisplayName == data.DisplayName ? 0 : (int)UserMembers.DisplayName) |
+                (m_data.ID == data.ID ?                   0 : (int)UserMembers.ID) |
+                (m_data.Emote == data.Emote ?             0 : (int)UserMembers.Emote) |
                 (m_data.UserStatus == data.UserStatus ?   0 : (int)UserMembers.UserStatus);
+
             if (lastChanged == 0) // Ensure something actually changed.
                 return;
 

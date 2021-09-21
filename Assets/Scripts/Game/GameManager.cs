@@ -1,4 +1,5 @@
 using LobbyRelaySample.relay;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,11 +11,7 @@ namespace LobbyRelaySample
     /// </summary>
     public class GameManager : MonoBehaviour, IReceiveMessages
     {
-        /// <summary>
-        /// All these should be assigned the observers in the scene at the start.
-        /// </summary>
-
-        #region UI elements that observe the local state. These are 
+        #region UI elements that observe the local state. These should be assigned the observers in the scene during Start.
 
         [SerializeField]
         private List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
@@ -30,10 +27,15 @@ namespace LobbyRelaySample
         private LocalGameState m_localGameState = new LocalGameState();
         private LobbyUser m_localUser;
         private LocalLobby m_localLobby;
+
         private LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
+
+        private vivox.VivoxSetup m_vivoxSetup = new vivox.VivoxSetup();
+        [SerializeField]
+        private List<vivox.VivoxUserHandler> m_vivoxUserHandlers;
 
         /// <summary>Rather than a setter, this is usable in-editor. It won't accept an enum, however.</summary>
         public void SetLobbyColorFilter(int color)
@@ -71,6 +73,7 @@ namespace LobbyRelaySample
             m_localUser.ID = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             m_localUser.DisplayName = NameGenerator.GetName(m_localUser.ID);
             m_localLobby.AddPlayer(m_localUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
+            StartVivoxLogin();
         }
 
         private void BeginObservers()
@@ -152,6 +155,18 @@ namespace LobbyRelaySample
                 m_localLobby.CountDownTime = 0;
                 SetUserLobbyState();
             }
+            else if (type == MessageType.QuickJoin)
+            {
+                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                      OnJoinedLobby();
+                    },
+                    OnFailedJoin);
+			}
+            else if (type == MessageType.SetPlayerSound)
+            {
+                var playerSound = (LobbyUserAudio)msg;
+        }
         }
 
         private void SetGameState(GameState state)
@@ -189,6 +204,7 @@ namespace LobbyRelaySample
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
             StartRelayConnection();
+            StartVivoxJoin();
         }
 
         private void OnLeftLobby()
@@ -197,16 +213,14 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
             m_lobbyContentHeartbeat.EndTracking();
             LobbyAsyncRequests.Instance.EndTracking();
+            m_vivoxSetup.LeaveLobbyChannel();
 
             if (m_relaySetup != null)
-            {
-                Component.Destroy(m_relaySetup);
+            {   Component.Destroy(m_relaySetup);
                 m_relaySetup = null;
             }
-
             if (m_relayClient != null)
-            {
-                Component.Destroy(m_relayClient);
+            {   Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
         }
@@ -219,6 +233,34 @@ namespace LobbyRelaySample
             SetGameState(GameState.JoinMenu);
         }
 
+        private void StartVivoxLogin()
+        {
+            m_vivoxSetup.Initialize(m_vivoxUserHandlers, OnVivoxLoginComplete);
+
+            void OnVivoxLoginComplete(bool didSucceed)
+            {
+                if (!didSucceed)
+                {   Debug.LogError("Vivox login failed! Retrying in 5s...");
+                    StartCoroutine(RetryConnection(StartVivoxLogin, m_localLobby.LobbyID));
+                    return;
+                }
+            }
+        }
+
+        private void StartVivoxJoin()
+        {
+            m_vivoxSetup.JoinLobbyChannel(m_localLobby.LobbyID, OnVivoxJoinComplete);
+
+            void OnVivoxJoinComplete(bool didSucceed)
+            {
+                if (!didSucceed)
+                {   Debug.LogError("Vivox connection failed! Retrying in 5s...");
+                    StartCoroutine(RetryConnection(StartVivoxJoin, m_localLobby.LobbyID));
+                    return;
+                }
+            }
+        }
+
         private void StartRelayConnection()
         {
             if (m_localUser.IsHost)
@@ -227,28 +269,28 @@ namespace LobbyRelaySample
                 m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
             OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
             m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
-        }
 
-        private void OnRelayConnected(bool didSucceed, RelayUtpClient client)
-        {
-            Component.Destroy(m_relaySetup);
-            m_relaySetup = null;
-
-            if (!didSucceed)
+            void OnRelayConnected(bool didSucceed, RelayUtpClient client)
             {
-                Debug.LogError("Relay connection failed! Retrying in 5s...");
-                StartCoroutine(RetryRelayConnection());
-                return;
-            }
+                Component.Destroy(m_relaySetup);
+                m_relaySetup = null;
 
-            m_relayClient = client;
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+                if (!didSucceed)
+                {   Debug.LogError("Relay connection failed! Retrying in 5s...");
+                    StartCoroutine(RetryConnection(StartRelayConnection, m_localLobby.LobbyID));
+                    return;
+                }
+
+                m_relayClient = client;
+                OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+            }
         }
 
-        private IEnumerator RetryRelayConnection()
+        private IEnumerator RetryConnection(Action doConnection, string lobbyId)
         {
             yield return new WaitForSeconds(5);
-            StartRelayConnection();
+            if (m_localLobby != null && m_localLobby.LobbyID == lobbyId && !string.IsNullOrEmpty(lobbyId)) // Ensure we didn't leave the lobby during this waiting period.
+                doConnection?.Invoke();
         }
 
         private void BeginCountDown()
