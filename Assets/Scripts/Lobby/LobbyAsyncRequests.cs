@@ -31,6 +31,7 @@ namespace LobbyRelaySample
         }
 
         #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
+
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         private string m_currentLobbyId = null;
         private Lobby m_lastKnownLobby;
@@ -65,18 +66,30 @@ namespace LobbyRelaySample
         #endregion
 
         #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
+
         // Note that some APIs limit to 1 call per N seconds, while others limit to M calls per N seconds. We'll treat all APIs as though they limited to 1 call per N seconds.
-        public enum RequestType { Query = 0, Join }
+        public enum RequestType
+        {
+            Query = 0,
+            Join,
+            QuickJoin
+        }
+
         public RateLimitCooldown GetRateLimit(RequestType type)
         {
             if (type == RequestType.Join)
                 return m_rateLimitJoin;
+            else if (type == RequestType.QuickJoin)
+                return m_rateLimitQuickJoin;
             return m_rateLimitQuery;
         }
 
         private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
-        private RateLimitCooldown m_rateLimitJoin  = new RateLimitCooldown(3f);
+        private RateLimitCooldown m_rateLimitJoin = new RateLimitCooldown(3f);
+        private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
+
         // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
+
         #endregion
 
         private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
@@ -113,6 +126,7 @@ namespace LobbyRelaySample
                 (lobbyId == null && lobbyCode == null))
             {
                 onFailure?.Invoke();
+
                 // TODO: Emit some failure message.
                 return;
             }
@@ -122,6 +136,30 @@ namespace LobbyRelaySample
                 LobbyAPIInterface.JoinLobbyAsync_ById(uasId, lobbyId, CreateInitialPlayerData(localUser), OnLobbyJoined);
             else
                 LobbyAPIInterface.JoinLobbyAsync_ByCode(uasId, lobbyCode, CreateInitialPlayerData(localUser), OnLobbyJoined);
+
+            void OnLobbyJoined(Lobby response)
+            {
+                if (response == null)
+                    onFailure?.Invoke();
+                else
+                    onSuccess?.Invoke(response);
+            }
+        }
+
+        /// <summary>
+        /// Attempt to join the first lobby among the available lobbies that match the filtered limitToColor.
+        /// </summary>
+        public void QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None, Action<Lobby> onSuccess = null, Action onFailure = null)
+        {
+            if (!m_rateLimitQuickJoin.CanCall())
+            {
+                onFailure?.Invoke();
+                return;
+            }
+
+            var filters = LobbyColorToFilters(limitToColor);
+            string uasId = AuthenticationService.Instance.PlayerId;
+            LobbyAPIInterface.QuickJoinLobbyAsync(uasId, filters, CreateInitialPlayerData(localUser), OnLobbyJoined);
 
             void OnLobbyJoined(Lobby response)
             {
@@ -145,13 +183,7 @@ namespace LobbyRelaySample
                 return;
             }
 
-            List<QueryFilter> filters = new List<QueryFilter>();
-            if (limitToColor == LobbyColor.Orange)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
-            else if (limitToColor == LobbyColor.Green)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
-            else if (limitToColor == LobbyColor.Blue)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+            var filters = LobbyColorToFilters(limitToColor);
 
             LobbyAPIInterface.QueryAllLobbiesAsync(filters, OnLobbyListRetrieved);
 
@@ -163,6 +195,19 @@ namespace LobbyRelaySample
                     onError?.Invoke(response);
             }
         }
+
+        private List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
+        {
+            List<QueryFilter> filters = new List<QueryFilter>();
+            if (limitToColor == LobbyColor.Orange)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Green)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(), QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Blue)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(), QueryFilter.OpOptions.EQ));
+            return filters;
+        }
+
         /// <param name="onComplete">If no lobby is retrieved, or if this call hits the rate limit, this is given null.</param>
         private void RetrieveLobbyAsync(string lobbyId, Action<Lobby> onComplete)
         {
@@ -175,7 +220,7 @@ namespace LobbyRelaySample
 
             void OnGet(Lobby response)
             {
-                onComplete?.Invoke(response);
+                onComplete?.Invoke(response); // FUTURE: Consider passing in the exception code here (and elsewhere) to, e.g., specifically handle a 404 indicating a Relay auto-disconnect.
             }
         }
 
@@ -256,9 +301,11 @@ namespace LobbyRelaySample
         private bool ShouldUpdateData(Action caller, Action onComplete, bool shouldRetryIfLobbyNull)
         {
             if (m_rateLimitQuery.IsInCooldown)
-            {   m_rateLimitQuery.EnqueuePendingOperation(caller);
+            {
+                m_rateLimitQuery.EnqueuePendingOperation(caller);
                 return false;
             }
+
             Lobby lobby = m_lastKnownLobby;
             if (lobby == null)
             {
@@ -267,6 +314,7 @@ namespace LobbyRelaySample
                 onComplete?.Invoke();
                 return false;
             }
+
             return true;
         }
 
@@ -300,12 +348,15 @@ namespace LobbyRelaySample
             }
 
             private bool m_isInCooldown = false;
+
             public bool IsInCooldown
             {
                 get => m_isInCooldown;
                 private set
-                {   if (m_isInCooldown != value)
-                    {   m_isInCooldown = value;
+                {
+                    if (m_isInCooldown != value)
+                    {
+                        m_isInCooldown = value;
                         OnChanged(this);
                     }
                 }
@@ -347,7 +398,7 @@ namespace LobbyRelaySample
                 }
             }
 
-            public override void CopyObserved(RateLimitCooldown oldObserved) { /* This behavior isn't needed; we're just here for the OnChanged event management. */ }
+            public override void CopyObserved(RateLimitCooldown oldObserved){/* This behavior isn't needed; we're just here for the OnChanged event management. */}
         }
     }
 }

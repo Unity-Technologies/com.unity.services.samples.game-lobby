@@ -22,7 +22,7 @@ namespace LobbyRelaySample.relay
         protected LobbyUser m_localUser;
         protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
-        public enum MsgType { Ping = 0, NewPlayer, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame }
+        public enum MsgType { Ping = 0, NewPlayer, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
 
         public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser, Action<bool, RelayUtpClient> onJoinComplete)
         {
