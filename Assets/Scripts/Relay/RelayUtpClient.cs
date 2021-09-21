@@ -92,24 +92,34 @@ namespace LobbyRelaySample.relay
         {
             if (cmd == NetworkEvent.Type.Data)
             {
-                MsgType msgType = (MsgType)strm.ReadByte();
-                string id = ReadLengthAndString(ref strm);
-                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // We don't hold onto messages, since an incoming user will be fully initialized before they send events.
+                List<byte> msgContents = new List<byte>(ReadMessageContents(ref strm));
+                if (msgContents.Count < 3) // We require at a minimum - Message type, the length of the user ID, and the user ID.
                     return;
+
+                MsgType msgType = (MsgType)msgContents[0];
+                int idLength = msgContents[1];
+                if (msgContents.Count < idLength + 2)
+                    return;
+
+                string id = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(2, idLength).ToArray());
+                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // We don't need to hold onto messages if the ID is absent; users are initialized before they send events.
+                    return;
+                msgContents.RemoveRange(0, 2 + idLength);
 
                 if (msgType == MsgType.PlayerName)
                 {
-                    string name = ReadLengthAndString(ref strm);
+                    int nameLength = msgContents[0];
+                    string name = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(1, nameLength).ToArray());
                     m_localLobby.LobbyUsers[id].DisplayName = name;
                 }
                 else if (msgType == MsgType.Emote)
                 {
-                    EmoteType emote = (EmoteType)strm.ReadByte();
+                    EmoteType emote = (EmoteType)msgContents[0];
                     m_localLobby.LobbyUsers[id].Emote = emote;
                 }
                 else if (msgType == MsgType.ReadyState)
                 {
-                    UserStatus status = (UserStatus)strm.ReadByte();
+                    UserStatus status = (UserStatus)msgContents[0];
                     m_localLobby.LobbyUsers[id].UserStatus = status;
                 }
                 else if (msgType == MsgType.StartCountdown)
@@ -146,15 +156,15 @@ namespace LobbyRelaySample.relay
         /// <summary>
         /// Relay uses raw pointers for efficiency. This converts them to byte arrays, assuming the stream contents are 1 byte for array length followed by contents.
         /// </summary>
-        unsafe private string ReadLengthAndString(ref DataStreamReader strm)
+        unsafe private byte[] ReadMessageContents(ref DataStreamReader strm)
         {
-            byte length = strm.ReadByte();
+            int length = strm.Length;
             byte[] bytes = new byte[length];
             fixed (byte* ptr = bytes)
             {
                 strm.ReadBytes(ptr, length);
             }
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            return bytes;
         }
 
         /// <summary>
@@ -206,7 +216,7 @@ namespace LobbyRelaySample.relay
             message.Add((byte)strBytes.Length);
             message.AddRange(strBytes);
 
-            if (driver.BeginSend(connection, out var dataStream) == 0) // Oh, should check this first?
+            if (driver.BeginSend(connection, out var dataStream) == 0)
             {
                 byte[] bytes = message.ToArray();
                 unsafe
@@ -232,7 +242,7 @@ namespace LobbyRelaySample.relay
             message.AddRange(idBytes);
             message.Add(value);
 
-            if (driver.BeginSend(connection, out var dataStream) == 0) // Oh, should check this first?
+            if (driver.BeginSend(connection, out var dataStream) == 0)
             {
                 byte[] bytes = message.ToArray();
                 unsafe
