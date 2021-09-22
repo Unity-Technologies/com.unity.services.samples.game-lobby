@@ -39,6 +39,7 @@ namespace LobbyRelaySample.UI
         public void OnJoinButtonPressed()
         {
             Locator.Get.Messenger.OnReceiveMessage(MessageType.JoinLobbyRequest, m_LocalLobbySelected);
+            m_LocalLobbySelected = default;
         }
 
         public void OnRefresh()

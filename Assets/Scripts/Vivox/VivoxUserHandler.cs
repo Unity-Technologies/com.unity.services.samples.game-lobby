@@ -37,7 +37,7 @@ namespace LobbyRelaySample.vivox
             // In the future, remove FindVivoxId and pass the environment ID here instead.
             m_vivoxId = null;
 
-            // SetID might be called after we've received the IChannelSession for remote players, which would mean after OnParticipant Added. So, duplicate the VivoxID work here.
+            // SetID might be called after we've received the IChannelSession for remote players, which would mean after OnParticipantAdded. So, duplicate the VivoxID work here.
             if (m_channelSession != null)
             {
                 foreach (var participant in m_channelSession.Participants)
