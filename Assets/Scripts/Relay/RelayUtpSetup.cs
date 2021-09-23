@@ -153,7 +153,7 @@ namespace LobbyRelaySample.relay
 
         private void CheckForComplete()
         {
-            if (m_joinState == (JoinState.Joined | JoinState.Bound))
+            if (m_joinState == (JoinState.Joined | JoinState.Bound) && this != null) // this will equal null (i.e. this component has been destroyed) if the host left the lobby during the Relay connection sequence.
             {
                 m_isRelayConnected = true;
                 RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
@@ -188,7 +188,7 @@ namespace LobbyRelaySample.relay
 
         private void OnJoin(JoinAllocation joinAllocation)
         {
-            if (joinAllocation == null)
+            if (joinAllocation == null || this == null) // The returned JoinAllocation is null if allocation failed. this would be destroyed already if you quit the lobby while Relay is connecting.
                 return;
             m_allocation = joinAllocation;
             BindToAllocation(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1);
@@ -214,7 +214,7 @@ namespace LobbyRelaySample.relay
                 Debug.LogError("Client failed to connect to server");
                 m_onJoinComplete(false, null);
             }
-            else
+            else if (this != null)
             {
                 m_isRelayConnected = true;
                 RelayUtpClient client = gameObject.AddComponent<RelayUtpClient>();
