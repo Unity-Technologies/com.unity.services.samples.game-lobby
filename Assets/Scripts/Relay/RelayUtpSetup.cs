@@ -9,7 +9,8 @@ using UnityEngine;
 namespace LobbyRelaySample.relay
 {
     /// <summary>
-    /// Responsible for setting up a connection with Relay using UTP, for the lobby host.
+    /// Responsible for setting up a connection with Relay using Unity Transport (UTP). A Relay Allocation is created by the host, and then all players
+    /// bind UTP to that Allocation in order to send data to each other.
     /// Must be a MonoBehaviour since the binding process doesn't have asynchronous callback options.
     /// </summary>
     public abstract class RelayUtpSetup : MonoBehaviour
@@ -34,7 +35,7 @@ namespace LobbyRelaySample.relay
         protected abstract void JoinRelay();
 
         /// <summary>
-        /// Shared behavior for binding to the Relay allocation, which is required for use.
+        /// Shared behavior for binding UTP to the Relay Allocation, which is required for use.
         /// Note that a host will send bytes from the Allocation it creates, whereas a client will send bytes from the JoinAllocation it receives using a relay code.
         /// </summary>
         protected void BindToAllocation(string ip, int port, byte[] allocationIdBytes, byte[] connectionDataBytes, byte[] hostConnectionDataBytes, byte[] hmacKeyBytes, int connectionCapacity)
@@ -140,12 +141,12 @@ namespace LobbyRelaySample.relay
         {
             if (m_networkDriver.Listen() != 0)
             {
-                Debug.LogError("Server failed to listen");
+                Debug.LogError("RelayUtpSetupHost failed to bind to the Relay Allocation.");
                 m_onJoinComplete(false, null);
             }
             else
             {
-                Debug.LogWarning("Server is now listening!");
+                Debug.Log("Relay host is bound.");
                 m_joinState |= JoinState.Bound;
                 CheckForComplete();
             }
@@ -211,7 +212,7 @@ namespace LobbyRelaySample.relay
             }
             if (m_networkDriver.GetConnectionState(m_connections[0]) != NetworkConnection.State.Connected)
             {
-                Debug.LogError("Client failed to connect to server");
+                Debug.LogError("RelayUtpSetupClient could not connect to the host.");
                 m_onJoinComplete(false, null);
             }
             else if (this != null)

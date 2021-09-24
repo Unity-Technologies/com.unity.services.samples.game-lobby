@@ -5,6 +5,7 @@ namespace LobbyRelaySample
     /// <summary>
     /// Something that exposes some data that, when changed, an observer would want to be notified about automatically.
     /// Used for UI elements and for keeping our local Lobby state synchronized with the remote Lobby service data.
+    /// (See http://gameprogrammingpatterns.com/observer.html to learn more.)
     /// 
     /// In your Observed child implementations, be sure to call OnChanged when setting the value of any property.
     /// </summary>

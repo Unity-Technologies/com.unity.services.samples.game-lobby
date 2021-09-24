@@ -68,11 +68,13 @@ namespace LobbyRelaySample
         #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
 
         // Note that some APIs limit to 1 call per N seconds, while others limit to M calls per N seconds. We'll treat all APIs as though they limited to 1 call per N seconds.
+        // Also, this is serialized by some MonoBehaviours, so don't reorder the values unless you know what that will affect.
         public enum RequestType
         {
             Query = 0,
             Join,
-            QuickJoin
+            QuickJoin,
+            Host
         }
 
         public RateLimitCooldown GetRateLimit(RequestType type)
@@ -81,12 +83,15 @@ namespace LobbyRelaySample
                 return m_rateLimitJoin;
             else if (type == RequestType.QuickJoin)
                 return m_rateLimitQuickJoin;
+            else if (type == RequestType.Host)
+                return m_rateLimitHost;
             return m_rateLimitQuery;
         }
 
         private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
         private RateLimitCooldown m_rateLimitJoin = new RateLimitCooldown(3f);
         private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
+        private RateLimitCooldown m_rateLimitHost = new RateLimitCooldown(3f);
 
         // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
 
@@ -105,6 +110,12 @@ namespace LobbyRelaySample
         /// </summary>
         public void CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, LobbyUser localUser, Action<Lobby> onSuccess, Action onFailure)
         {
+            if (!m_rateLimitHost.CanCall())
+            {
+                onFailure?.Invoke();
+                return;
+            }
+
             string uasId = AuthenticationService.Instance.PlayerId;
             LobbyAPIInterface.CreateLobbyAsync(uasId, lobbyName, maxPlayers, isPrivate, CreateInitialPlayerData(localUser), OnLobbyCreated);
 

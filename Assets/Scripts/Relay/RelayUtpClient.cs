@@ -131,13 +131,13 @@ namespace LobbyRelaySample.relay
                 else if (msgType == MsgType.EndInGame)
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
 
-                ProcessNetworkEventDataAdditional(conn, strm, msgType, id);
+                ProcessNetworkEventDataAdditional(conn, msgType, id);
             }
             else if (cmd == NetworkEvent.Type.Disconnect)
                 ProcessDisconnectEvent(conn, strm);
         }
 
-        protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id) { }
+        protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id) { }
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
@@ -154,9 +154,11 @@ namespace LobbyRelaySample.relay
         }
 
         /// <summary>
-        /// Relay uses raw pointers for efficiency. This converts them to byte arrays, assuming the stream contents are 1 byte for array length followed by contents.
+        /// UTP uses raw pointers for efficiency (i.e. C-style byte* instead of byte[]).
+        /// ReadMessageContents converts them back to byte arrays, assuming the stream contains 1 byte for array length followed by contents.
+        /// Any actual pointer manipulation and so forth happens service-side, so we simply need to convert back to a byte array here.
         /// </summary>
-        unsafe private byte[] ReadMessageContents(ref DataStreamReader strm)
+        unsafe private byte[] ReadMessageContents(ref DataStreamReader strm) // unsafe is required to access the pointer.
         {
             int length = strm.Length;
             byte[] bytes = new byte[length];
@@ -209,25 +211,13 @@ namespace LobbyRelaySample.relay
             byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(id);
             byte[] strBytes = System.Text.Encoding.UTF8.GetBytes(str);
 
-            List<byte> message = new List<byte>(idBytes.Length + strBytes.Length + 3);
+            List<byte> message = new List<byte>(idBytes.Length + strBytes.Length + 3); // Extra 3 bytes for the msgType plus the ID and message lengths.
             message.Add((byte)msgType);
             message.Add((byte)idBytes.Length);
             message.AddRange(idBytes);
             message.Add((byte)strBytes.Length);
             message.AddRange(strBytes);
-
-            if (driver.BeginSend(connection, out var dataStream) == 0)
-            {
-                byte[] bytes = message.ToArray();
-                unsafe
-                {
-                    fixed (byte* bytesPtr = bytes)
-                    {
-                        dataStream.WriteBytes(bytesPtr, message.Count);
-                        driver.EndSend(dataStream);
-                    }
-                }
-            }
+            SendMessageData(driver, connection, message);
         }
 
         /// <summary>
@@ -236,16 +226,20 @@ namespace LobbyRelaySample.relay
         protected void WriteByte(NetworkDriver driver, NetworkConnection connection, string id, MsgType msgType, byte value)
         {
             byte[] idBytes = System.Text.Encoding.UTF8.GetBytes(id);
-            List<byte> message = new List<byte>(idBytes.Length + 3);
+            List<byte> message = new List<byte>(idBytes.Length + 3); // Extra 3 bytes for the msgType, ID length, and the byte value.
             message.Add((byte)msgType);
             message.Add((byte)idBytes.Length);
             message.AddRange(idBytes);
             message.Add(value);
+            SendMessageData(driver, connection, message);
+        }
 
+        private void SendMessageData(NetworkDriver driver, NetworkConnection connection, List<byte> message)
+        {
             if (driver.BeginSend(connection, out var dataStream) == 0)
             {
                 byte[] bytes = message.ToArray();
-                unsafe
+                unsafe // Similarly to ReadMessageContents, our data must be converted to a pointer before being sent.
                 {
                     fixed (byte* bytesPtr = bytes)
                     {

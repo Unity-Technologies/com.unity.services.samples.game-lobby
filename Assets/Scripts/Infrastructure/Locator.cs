@@ -7,6 +7,7 @@ namespace LobbyRelaySample
     /// <summary>
     /// Anything which provides itself to a Locator can then be globally accessed. This should be a single access point for things that *want* to be singleton (that is,
     /// when they want to be available for use by arbitrary, unknown clients) but might not always be available or might need alternate flavors for tests, logging, etc.
+    /// (See http://gameprogrammingpatterns.com/service-locator.html to learn more.)
     /// </summary>
     public class Locator : LocatorBase
     {
