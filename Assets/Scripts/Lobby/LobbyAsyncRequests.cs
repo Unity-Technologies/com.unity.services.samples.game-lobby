@@ -68,7 +68,7 @@ namespace LobbyRelaySample
         #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
 
         // Note that some APIs limit to 1 call per N seconds, while others limit to M calls per N seconds. We'll treat all APIs as though they limited to 1 call per N seconds.
-        // Also, this is serialized by some MonoBehaviours, so don't reorder the values unless you know what that will affect.
+        // Also, this is seralized, so don't reorder the values unless you know what that will affect.
         public enum RequestType
         {
             Query = 0,
@@ -113,6 +113,7 @@ namespace LobbyRelaySample
             if (!m_rateLimitHost.CanCall())
             {
                 onFailure?.Invoke();
+                UnityEngine.Debug.LogWarning("Create Lobby hit the rate limit.");
                 return;
             }
 
@@ -137,8 +138,7 @@ namespace LobbyRelaySample
                 (lobbyId == null && lobbyCode == null))
             {
                 onFailure?.Invoke();
-
-                // TODO: Emit some failure message.
+                UnityEngine.Debug.LogWarning("Join Lobby hit the rate limit.");
                 return;
             }
 
@@ -165,6 +165,7 @@ namespace LobbyRelaySample
             if (!m_rateLimitQuickJoin.CanCall())
             {
                 onFailure?.Invoke();
+                UnityEngine.Debug.LogWarning("Quick Join Lobby hit the rate limit.");
                 return;
             }
 
@@ -191,6 +192,7 @@ namespace LobbyRelaySample
             {
                 onListRetrieved?.Invoke(null);
                 m_rateLimitQuery.EnqueuePendingOperation(() => { RetrieveLobbyListAsync(onListRetrieved, onError, limitToColor); });
+                UnityEngine.Debug.LogWarning("Retrieve Lobby list hit the rate limit. Will try again soon...");
                 return;
             }
 
@@ -225,6 +227,7 @@ namespace LobbyRelaySample
             if (!m_rateLimitQuery.CanCall())
             {
                 onComplete?.Invoke(null);
+                UnityEngine.Debug.LogWarning("Retrieve Lobby hit the rate limit.");
                 return;
             }
             LobbyAPIInterface.GetLobbyAsync(lobbyId, OnGet);

@@ -53,7 +53,7 @@ namespace LobbyRelaySample.vivox
             }
         }
 
-        public void OnChannelJoined(IChannelSession channelSession)
+        public void OnChannelJoined(IChannelSession channelSession) // Called after a connection is established, which begins once a lobby is joined.
         {
             m_channelSession = channelSession;
             m_channelSession.Participants.AfterKeyAdded += OnParticipantAdded;
@@ -61,12 +61,15 @@ namespace LobbyRelaySample.vivox
             m_channelSession.Participants.AfterValueUpdated += OnParticipantValueUpdated;
         }
 
-        public void OnChannelLeft()
+        public void OnChannelLeft() // Called when we leave the lobby.
         {
-            m_channelSession.Participants.AfterKeyAdded -= OnParticipantAdded;
-            m_channelSession.Participants.BeforeKeyRemoved -= BeforeParticipantRemoved;
-            m_channelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
-            m_channelSession = null;
+            if (m_channelSession != null) // It's possible we'll attempt to leave a channel that isn't joined, if we leave the lobby while Vivox is connecting.
+            {
+                m_channelSession.Participants.AfterKeyAdded -= OnParticipantAdded;
+                m_channelSession.Participants.BeforeKeyRemoved -= BeforeParticipantRemoved;
+                m_channelSession.Participants.AfterValueUpdated -= OnParticipantValueUpdated;
+                m_channelSession = null;
+            }
         }
 
         /// <summary>
@@ -113,7 +116,7 @@ namespace LobbyRelaySample.vivox
                     }
                     else
                     {   m_lobbyUserVolumeUI.EnableVoice(false);
-                        participant.SetIsMuteForAll(m_vivoxId, false, null);
+                        participant.SetIsMuteForAll(m_vivoxId, false, null); // Also note: This call is asynchronous, so it's possible to exit the lobby before this completes, resulting in a Vivox error.
                     }
                 }
                 else if (property == "IsMutedForAll")
