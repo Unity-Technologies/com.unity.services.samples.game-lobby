@@ -18,10 +18,11 @@ namespace LobbyRelaySample.vivox
         private string m_vivoxId;
 
         private const int k_volumeMin = -50, k_volumeMax = 20; // From the Vivox docs, the valid range is [-50, 50] but anything above 25 risks being painfully loud.
+        public static float NormalizedVolumeDefault { get { return (0f - k_volumeMin) / (k_volumeMax - k_volumeMin); } }
 
         public void Start()
         {
-            m_lobbyUserVolumeUI.DisableVoice();
+            m_lobbyUserVolumeUI.DisableVoice(true);
         }
 
         public void SetId(string id)
@@ -45,7 +46,7 @@ namespace LobbyRelaySample.vivox
                     {
                         m_vivoxId = participant.Key;
                         m_lobbyUserVolumeUI.IsLocalPlayer = participant.IsSelf;
-                        m_lobbyUserVolumeUI.EnableVoice();
+                        m_lobbyUserVolumeUI.EnableVoice(true);
                         break;
                     }
                 }
@@ -81,7 +82,7 @@ namespace LobbyRelaySample.vivox
             if (isThisUser)
             {   m_vivoxId = keyEventArg.Key; // Since we couldn't construct the Vivox ID earlier, retrieve it here.
                 m_lobbyUserVolumeUI.IsLocalPlayer = participant.IsSelf;
-                m_lobbyUserVolumeUI.EnableVoice();
+                m_lobbyUserVolumeUI.EnableVoice(true);
             }
         }
         private void BeforeParticipantRemoved(object sender, KeyEventArg<string> keyEventArg)
@@ -92,7 +93,7 @@ namespace LobbyRelaySample.vivox
 
             bool isThisUser = username == m_id;
             if (isThisUser)
-            {   m_lobbyUserVolumeUI.DisableVoice();
+            {   m_lobbyUserVolumeUI.DisableVoice(true);
             }
         }
         private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
@@ -107,20 +108,20 @@ namespace LobbyRelaySample.vivox
                 if (property == "UnavailableCaptureDevice")
                 {
                     if (participant.UnavailableCaptureDevice)
-                    {   m_lobbyUserVolumeUI.DisableVoice();
+                    {   m_lobbyUserVolumeUI.DisableVoice(false);
                         participant.SetIsMuteForAll(m_vivoxId, true, null); // Note: If you add more places where a player might be globally muted, a state machine might be required for accurate logic.
                     }
                     else
-                    {   m_lobbyUserVolumeUI.EnableVoice();
+                    {   m_lobbyUserVolumeUI.EnableVoice(false);
                         participant.SetIsMuteForAll(m_vivoxId, false, null);
                     }
                 }
                 else if (property == "IsMutedForAll")
                 {
                     if (participant.IsMutedForAll)
-                        m_lobbyUserVolumeUI.DisableVoice();
+                        m_lobbyUserVolumeUI.DisableVoice(false);
                     else
-                        m_lobbyUserVolumeUI.EnableVoice();
+                        m_lobbyUserVolumeUI.EnableVoice(false);
                 }
             }
         }
