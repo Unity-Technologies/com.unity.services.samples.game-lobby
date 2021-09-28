@@ -24,6 +24,14 @@ namespace LobbyRelaySample
             Locator.Get.Messenger.Unsubscribe(this);
         }
 
+        /// <summary>
+        /// For convenience while in the Editor, update the log verbosity when its value is changed in the Inspector.
+        /// </summary>
+        public void OnValidate()
+        {
+            LogHandler.Get().mode = m_editorLogVerbosity;
+        }
+
         public void OnReceiveMessage(MessageType type, object msg)
         {
             if (type == MessageType.DisplayErrorPopup && msg != null)

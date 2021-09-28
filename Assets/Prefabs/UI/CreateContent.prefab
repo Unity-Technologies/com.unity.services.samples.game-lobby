@@ -1355,6 +1355,9 @@ GameObject:
   - component: {fileID: 5377961148241680866}
   - component: {fileID: 1079176168591545865}
   - component: {fileID: 5149602142760426050}
+  - component: {fileID: 7339923225503164155}
+  - component: {fileID: 6735354375166727125}
+  - component: {fileID: 7555225420414765091}
   m_Layer: 5
   m_Name: CreateButton
   m_TagString: Untagged
@@ -1496,6 +1499,48 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!225 &7339923225503164155
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8424691209185600525}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &6735354375166727125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8424691209185600525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab355d5994635724dbde297a055fb586, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &7555225420414765091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8424691209185600525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 771ddda4ce2ee2a4dad57866ecc1170d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_target: {fileID: 6735354375166727125}
+  m_alphaWhenHidden: 0.5
+  m_requestType: 3
 --- !u!1 &8821530958799360497
 GameObject:
   m_ObjectHideFlags: 0

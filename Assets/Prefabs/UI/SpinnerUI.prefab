@@ -496,10 +496,11 @@ MonoBehaviour:
   m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
-  errorText: {fileID: 7859013680193933450}
-  spinnerImage: {fileID: 50617661778815274}
-  noServerText: {fileID: 1576294672583716881}
-  errorTextVisibility: {fileID: 8041986936720407558}
+  m_errorText: {fileID: 7859013680193933450}
+  m_spinnerImage: {fileID: 50617661778815274}
+  m_noServerText: {fileID: 1576294672583716881}
+  m_errorTextVisibility: {fileID: 8041986936720407558}
+  m_raycastBlocker: {fileID: 0}
 --- !u!114 &2592976293271768794
 MonoBehaviour:
   m_ObjectHideFlags: 0

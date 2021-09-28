@@ -7,6 +7,7 @@ namespace LobbyRelaySample.relay
 {
     /// <summary>
     /// Wrapper for all the interaction with the Relay API.
+    /// Relay acts as an intermediary between hosts and clients for privacy. Each player will connect to an obfuscated IP address provided by Relay as though connecting directly to other players.
     /// </summary>
     public static class RelayAPIInterface
     {
@@ -29,7 +30,7 @@ namespace LobbyRelaySample.relay
 
         /// <summary>
         /// Only after an Allocation has been completed can a Relay join code be obtained. This code will be stored in the lobby's data as non-public
-        /// such that players can retrieve the Relay join code only after connecting to the lobby.
+        /// such that players can retrieve the Relay join code only after connecting to the lobby. (Note that this is not the same as the lobby code.)
         /// </summary>
         public static void GetJoinCodeAsync(Guid hostAllocationId, Action<string> onComplete)
         {

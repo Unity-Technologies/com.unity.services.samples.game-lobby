@@ -39,10 +39,8 @@ namespace LobbyRelaySample.relay
                 ForceFullUserUpdate(m_networkDriver, conn, user.Value);
         }
 
-        protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, DataStreamReader strm, MsgType msgType, string id)
+        protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id)
         {
-            // Note that the strm contents might have already been consumed, depending on the msgType.
-
             // Forward messages from clients to other clients.
             if (msgType == MsgType.PlayerName)
             {
