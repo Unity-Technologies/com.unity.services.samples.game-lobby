@@ -203,8 +203,19 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.BeginTracking(m_localLobby.LobbyID);
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
-            StartRelayConnection();
-            StartVivoxJoin();
+
+            // The host has the opportunity to reject incoming players, but to do so the player needs to connect to Relay without having game logic available.
+            // In particular, we should prevent players from joining voice chat until they are approved.
+            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
+            if (m_localUser.IsHost)
+            {
+                StartRelayConnection();
+                StartVivoxJoin();
+            }
+            else
+            {
+                // TODO: Implement
+            }
         }
 
         private void OnLeftLobby()
@@ -267,7 +278,6 @@ namespace LobbyRelaySample
                 m_relaySetup = gameObject.AddComponent<RelayUtpSetupHost>();
             else
                 m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
             m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
 
             void OnRelayConnected(bool didSucceed, RelayUtpClient client)

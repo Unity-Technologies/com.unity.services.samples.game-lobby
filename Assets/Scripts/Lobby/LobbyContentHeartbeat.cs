@@ -13,6 +13,9 @@ namespace LobbyRelaySample
         private bool m_isAwaitingQuery = false;
         private bool m_shouldPushData = false;
 
+        private const float k_approvalMaxTime = 10; // Used for determining if a user should timeout if they are unable to connect.
+        private float m_lifetime = 0;
+
         public void BeginTracking(LocalLobby lobby, LobbyUser localUser)
         {
             m_localLobby = lobby;
@@ -20,6 +23,7 @@ namespace LobbyRelaySample
             Locator.Get.UpdateSlow.Subscribe(OnUpdate, 1.5f);
             m_localLobby.onChanged += OnLocalLobbyChanged;
             m_shouldPushData = true; // Ensure the initial presence of a new player is pushed to the lobby; otherwise, when a non-host joins, the LocalLobby never receives their data until they push something new.
+            m_lifetime = 0;
         }
 
         public void EndTracking()
@@ -45,10 +49,18 @@ namespace LobbyRelaySample
         /// </summary>
         private void OnUpdate(float dt)
         {
+            m_lifetime += dt;
             if (m_isAwaitingQuery || m_localLobby == null)
                 return;
             if (m_localUser.IsHost)
                 LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
+
+            if (!m_localUser.IsApproved && m_lifetime > k_approvalMaxTime)
+            {
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Connection attempt timed out!");
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+            }
+
             m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
             if (m_shouldPushData)
                 PushDataToLobby();
