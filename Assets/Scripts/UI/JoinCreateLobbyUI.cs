@@ -9,7 +9,7 @@ namespace LobbyRelaySample.UI
         {
             if (observed.State == GameState.JoinMenu)
             {
-                Show();
+                Show(false);
             }
             else
             {
