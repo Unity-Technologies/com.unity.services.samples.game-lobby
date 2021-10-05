@@ -160,6 +160,7 @@ namespace LobbyRelaySample
                     m_data.IsApproved = value;
                     m_lastChanged = UserMembers.IsApproved;
                     OnChanged(this);
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ClientUserApproved, null);
                 }
             }
         }

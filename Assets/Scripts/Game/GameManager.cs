@@ -132,6 +132,9 @@ namespace LobbyRelaySample
             else if (type == MessageType.ChangeGameState)
             {   SetGameState((GameState)msg);
             }
+            else if (type == MessageType.ClientUserApproved)
+            {   ConfirmApproval();
+            }
             else if (type == MessageType.UserSetEmote)
             {   EmoteType emote = (EmoteType)msg;
                 m_localUser.Emote = emote;
@@ -214,7 +217,7 @@ namespace LobbyRelaySample
             }
             else
             {
-                // TODO: Implement
+                StartRelayConnection();
             }
         }
 
@@ -292,7 +295,10 @@ namespace LobbyRelaySample
                 }
 
                 m_relayClient = client;
-                OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+                if (m_localUser.IsHost)
+                    CompleteRelayConnection();
+                else
+                    Debug.Log("Client is now waiting for approval...");
             }
         }
 
@@ -301,6 +307,20 @@ namespace LobbyRelaySample
             yield return new WaitForSeconds(5);
             if (m_localLobby != null && m_localLobby.LobbyID == lobbyId && !string.IsNullOrEmpty(lobbyId)) // Ensure we didn't leave the lobby during this waiting period.
                 doConnection?.Invoke();
+        }
+
+        private void ConfirmApproval()
+        {
+            if (!m_localUser.IsHost && m_localUser.IsApproved)
+            {
+                CompleteRelayConnection();
+                StartVivoxJoin();
+            }
+        }
+
+        private void CompleteRelayConnection()
+        {
+            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }
 
         private void BeginCountDown()

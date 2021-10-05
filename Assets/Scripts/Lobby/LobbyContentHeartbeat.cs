@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
 namespace LobbyRelaySample
@@ -6,7 +7,7 @@ namespace LobbyRelaySample
     /// <summary>
     /// Keep updated on changes to a joined lobby, at a speed compliant with Lobby's rate limiting.
     /// </summary>
-    public class LobbyContentHeartbeat
+    public class LobbyContentHeartbeat : IReceiveMessages
     {
         private LocalLobby m_localLobby;
         private LobbyUser m_localUser;
@@ -21,6 +22,7 @@ namespace LobbyRelaySample
             m_localLobby = lobby;
             m_localUser = localUser;
             Locator.Get.UpdateSlow.Subscribe(OnUpdate, 1.5f);
+            Locator.Get.Messenger.Subscribe(this);
             m_localLobby.onChanged += OnLocalLobbyChanged;
             m_shouldPushData = true; // Ensure the initial presence of a new player is pushed to the lobby; otherwise, when a non-host joins, the LocalLobby never receives their data until they push something new.
             m_lifetime = 0;
@@ -30,6 +32,7 @@ namespace LobbyRelaySample
         {
             m_shouldPushData = false;
             Locator.Get.UpdateSlow.Unsubscribe(OnUpdate);
+            Locator.Get.Messenger.Unsubscribe(this);
             if (m_localLobby != null)
                 m_localLobby.onChanged -= OnLocalLobbyChanged;
             m_localLobby = null;
@@ -41,6 +44,16 @@ namespace LobbyRelaySample
             if (string.IsNullOrEmpty(changed.LobbyID)) // When the player leaves, their LocalLobby is cleared out but maintained.
                 EndTracking();
             m_shouldPushData = true;
+        }
+
+        public void OnReceiveMessage(MessageType type, object msg)
+        {
+            if (type == MessageType.ClientUserSeekingDisapproval)
+            {
+                bool shouldDisapprove = m_localLobby.State != LobbyState.Lobby; // By not refreshing, it's possible to have a lobby in the lobby list UI after its countdown starts and then try joining.
+                if (shouldDisapprove)
+                    (msg as Action<relay.Approval>)?.Invoke(relay.Approval.GameAlreadyStarted);
+            }
         }
 
         /// <summary>

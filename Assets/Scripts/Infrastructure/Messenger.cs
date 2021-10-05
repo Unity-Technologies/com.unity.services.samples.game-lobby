@@ -73,7 +73,9 @@ namespace LobbyRelaySample
         ConfirmInGameState = 11,
         DisplayErrorPopup = 12,
         SetPlayerSound = 13,
-        QuickJoin = 14
+        QuickJoin = 14,
+        ClientUserApproved = 15,
+        ClientUserSeekingDisapproval = 16,
     }
 
     /// <summary>

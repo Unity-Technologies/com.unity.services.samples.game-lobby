@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Unity.Networking.Transport;
-using MsgType = LobbyRelaySample.relay.RelayUtpSetup.MsgType;
 
 namespace LobbyRelaySample.relay
 {
@@ -31,12 +30,34 @@ namespace LobbyRelaySample.relay
         }
 
         /// <summary>
-        /// When a new client connects, they need to be updated with the current state of everyone else.
+        /// When a new client connects, first determine if they are allowed to do so.
+        /// If so, they need to be updated with the current state of everyone else.
+        /// If not, they should be informed and rejected.
         /// </summary>
-        private void OnNewConnection(NetworkConnection conn)
+        private void OnNewConnection(NetworkConnection conn, string id)
         {
-            foreach (var user in m_localLobby.LobbyUsers) // The host includes itself here since we don't necessarily have an ID available, but it will ignore its own messages on arrival.
-                ForceFullUserUpdate(m_networkDriver, conn, user.Value);
+            new RelayPendingApproval(conn, NewConnectionApprovalResult, id);
+        }
+
+        private void NewConnectionApprovalResult(NetworkConnection conn, Approval result)
+        {
+            WriteByte(m_networkDriver, conn, m_localUser.ID, MsgType.PlayerApprovalState, (byte)result);
+            if (result == Approval.OK && conn.IsCreated)
+            {
+                foreach (var user in m_localLobby.LobbyUsers)
+                    ForceFullUserUpdate(m_networkDriver, conn, user.Value);
+                m_connections.Add(conn);
+            }
+            else
+            {
+                conn.Disconnect(m_networkDriver);
+            }
+        }
+
+        protected override bool CanProcessDataEventFor(NetworkConnection conn, MsgType type, string id)
+        {
+            // Don't send through data from one client to everyone else if they haven't been approved yet. (They should also not be sending data if not approved, so this is a backup.)
+            return base.CanProcessDataEventFor(conn, type, id) && (m_connections.Contains(conn) || type == MsgType.NewPlayer);
         }
 
         protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id)
@@ -62,8 +83,8 @@ namespace LobbyRelaySample.relay
                     WriteByte(m_networkDriver, otherConn, id, msgType, value);
                 }
             }
-            else if (msgType == MsgType.NewPlayer) // This ensures clients in builds are sent player state once they establish that they can send (and receive) events.
-                OnNewConnection(conn);
+            else if (msgType == MsgType.NewPlayer)
+                OnNewConnection(conn, id);
             else if (msgType == MsgType.PlayerDisconnect) // Clients message the host when they intend to disconnect, or else the host ends up keeping the connection open.
             {
                 conn.Disconnect(m_networkDriver);
@@ -144,8 +165,7 @@ namespace LobbyRelaySample.relay
                 var conn = m_networkDriver.Accept(); // Note that since we pumped the event queue earlier in Update, m_networkDriver has been updated already this frame.
                 if (!conn.IsCreated) // "Nothing more to accept" is signalled by returning an invalid connection from Accept.
                     break;
-                m_connections.Add(conn);
-                OnNewConnection(conn); // This ensures that clients in editors are sent player state once they establish a connection. The timing differs slightly from builds.
+                // Although the connection is created (i.e. Accepted), we still need to approve it, which will trigger when receiving the NewPlayer message from that client.
             }
         }
 
@@ -153,6 +173,7 @@ namespace LobbyRelaySample.relay
         {
             foreach (NetworkConnection connection in m_connections)
                 connection.Disconnect(m_networkDriver); // Note that Lobby won't receive the disconnect immediately, so its auto-disconnect takes 30-40s, if needed.
+            m_connections.Clear();
             m_localLobby.RelayServer = null;
         }
     }
