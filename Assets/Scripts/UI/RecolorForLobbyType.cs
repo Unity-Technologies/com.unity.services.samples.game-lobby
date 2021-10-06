@@ -10,9 +10,9 @@ namespace LobbyRelaySample.UI
     [RequireComponent(typeof(LocalLobbyObserver))]
     public class RecolorForLobbyType : MonoBehaviour
     {
-        private static readonly Color s_orangeColor = new Color(1f, 0.7f, 0.25f);
-        private static readonly Color s_greenColor  = new Color(0.1f, 1, 0.4f);
-        private static readonly Color s_blueColor   = new Color(0.0f, 0.4f, 1f);
+        private static readonly Color s_orangeColor = new Color(0.8352942f, 0.3686275f, 0);
+        private static readonly Color s_greenColor  = new Color(0, 0.6196079f, 0.4509804f);
+        private static readonly Color s_blueColor   = new Color(0.0f, 0.4470589f, 0.6980392f);
         private static readonly Color[] s_colorsOrdered = new Color[] { new Color(0.8f, 0.8f, 0.8f, 0.5f), s_orangeColor, s_greenColor, s_blueColor };
 
         [SerializeField]
