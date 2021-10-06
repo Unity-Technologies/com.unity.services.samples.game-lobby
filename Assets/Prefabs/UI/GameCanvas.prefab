@@ -526,6 +526,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PopUpUI
       objectReference: {fileID: 0}
+    - target: {fileID: 2974111728825125462, guid: 79d6084439b78bb4eaf5232cb953fd87, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2974111728944057204, guid: 79d6084439b78bb4eaf5232cb953fd87, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -917,7 +921,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1547097153480224112, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
       propertyPath: m_fontSize
-      value: 55.65
+      value: 55.7
       objectReference: {fileID: 0}
     - target: {fileID: 1547097153480224112, guid: 65b3782fa4600fa4385f4eea3edd9865, type: 3}
       propertyPath: m_fontStyle
@@ -1755,7 +1759,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5434623004655309427, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_Alpha
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5434623004655309427, guid: 247f79ab5aefc6d40bcbdade4d9467b7, type: 3}
       propertyPath: m_Interactable
@@ -2449,7 +2453,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3638764283281205412, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_Size
-      value: 0.9999674
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3675426980811071808, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2637,6 +2641,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5919863887503833647, guid: 404728f5cffe43940b290121bd31f601, type: 3}
       propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6102798993520257211, guid: 404728f5cffe43940b290121bd31f601, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6102798993520257211, guid: 404728f5cffe43940b290121bd31f601, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6102798993520257211, guid: 404728f5cffe43940b290121bd31f601, type: 3}
+      propertyPath: m_BlocksRaycasts
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6742761257817967520, guid: 404728f5cffe43940b290121bd31f601, type: 3}
