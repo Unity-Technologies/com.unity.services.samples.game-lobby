@@ -327,10 +327,10 @@ MonoBehaviour:
   m_HostIcon: {fileID: 2063326445664711249}
   m_EmoteImage: {fileID: 2400017729973504110}
   m_EmoteIcons:
-  - {fileID: 21300000, guid: c69bdb0cc3263be4ebe95af9e3247c0a, type: 3}
-  - {fileID: 21300000, guid: 2b7990726fdc5d64abd491eaf2c07d6a, type: 3}
-  - {fileID: 21300000, guid: 98fb5f987bfe9ef47a24d2321f004d8e, type: 3}
-  - {fileID: 21300000, guid: 29e15e60dac5f4e4484fba28fd37a46e, type: 3}
+  - {fileID: 21300000, guid: 7236d49fc9649dc44a67849a94ab3969, type: 3}
+  - {fileID: 21300000, guid: bc8c0e2bc04ce93488efe4ea898047a9, type: 3}
+  - {fileID: 21300000, guid: f18a89c12a346a8488ed507a0bd79d2e, type: 3}
+  - {fileID: 21300000, guid: 0fca28892f34375439c32b1ee1c8d655, type: 3}
   m_vivoxUserHandler: {fileID: 4826507163535553981}
 --- !u!114 &788426075660952210
 MonoBehaviour:
@@ -919,7 +919,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26
+  m_fontSize: 38.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
