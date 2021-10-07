@@ -154,7 +154,7 @@ namespace LobbyRelaySample.relay
         {
             // Don't react to our own messages. Also, don't need to hold onto messages if the ID is absent; clients should be initialized and in the lobby before they send events.
             // (Note that this enforces lobby membership before processing any events besides an approval request, so a client is unable to fully use Relay unless they're in the lobby.)
-            return id != m_localUser.ID && m_localLobby.LobbyUsers.ContainsKey(id) && (m_localUser.IsApproved || type == MsgType.PlayerApprovalState);
+            return id != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LobbyUsers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
         }
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id) { }
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)

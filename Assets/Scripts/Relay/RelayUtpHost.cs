@@ -57,7 +57,7 @@ namespace LobbyRelaySample.relay
         protected override bool CanProcessDataEventFor(NetworkConnection conn, MsgType type, string id)
         {
             // Don't send through data from one client to everyone else if they haven't been approved yet. (They should also not be sending data if not approved, so this is a backup.)
-            return base.CanProcessDataEventFor(conn, type, id) && (m_connections.Contains(conn) || type == MsgType.NewPlayer);
+            return id != m_localUser.ID && (m_localLobby.LobbyUsers.ContainsKey(id) && m_connections.Contains(conn) || type == MsgType.NewPlayer);
         }
 
         protected override void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id)
