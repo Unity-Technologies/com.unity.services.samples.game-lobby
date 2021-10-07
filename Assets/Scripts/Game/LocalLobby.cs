@@ -67,18 +67,6 @@ namespace LobbyRelaySample
             get { return new LobbyData(m_data); }
         }
 
-        float m_CountDownTime;
-
-        public float CountDownTime
-        {
-            get { return m_CountDownTime; }
-            set
-            {
-                m_CountDownTime = value;
-                OnChanged(this);
-            }
-        }
-
         ServerAddress m_relayServer;
 
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>

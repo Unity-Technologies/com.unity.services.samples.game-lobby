@@ -76,6 +76,7 @@ namespace LobbyRelaySample
         QuickJoin = 14,
         ClientUserApproved = 15,
         ClientUserSeekingDisapproval = 16,
+        CompleteCountdown = 17,
     }
 
     /// <summary>
