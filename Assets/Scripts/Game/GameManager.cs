@@ -95,10 +95,7 @@ namespace LobbyRelaySample
         /// </summary>
         public void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.RenameRequest)
-            {   m_localUser.DisplayName = (string)msg;
-            }
-            else if (type == MessageType.CreateLobbyRequest)
+            if (type == MessageType.CreateLobbyRequest)
             {
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
@@ -129,8 +126,17 @@ namespace LobbyRelaySample
                     },
                     m_lobbyColorFilter);
             }
-            else if (type == MessageType.ChangeGameState)
-            {   SetGameState((GameState)msg);
+            else if (type == MessageType.QuickJoin)
+            {
+                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                        OnJoinedLobby();
+                    },
+                    OnFailedJoin);
+            }
+
+            else if (type == MessageType.RenameRequest)
+            {   m_localUser.DisplayName = (string)msg;
             }
             else if (type == MessageType.ClientUserApproved)
             {   ConfirmApproval();
@@ -142,6 +148,7 @@ namespace LobbyRelaySample
             else if (type == MessageType.LobbyUserStatus)
             {   m_localUser.UserStatus = (UserStatus)msg;
             }
+
             else if (type == MessageType.StartCountdown)
             {   m_localLobby.State = LobbyState.CountDown;
             }
@@ -152,6 +159,10 @@ namespace LobbyRelaySample
             {   if (m_relayClient is RelayUtpHost)
                     (m_relayClient as RelayUtpHost).SendInGameState();
             }
+
+            else if (type == MessageType.ChangeGameState)
+            {   SetGameState((GameState)msg);
+            }
             else if (type == MessageType.ConfirmInGameState)
             {   m_localUser.UserStatus = UserStatus.InGame;
                 m_localLobby.State = LobbyState.InGame;
@@ -159,18 +170,6 @@ namespace LobbyRelaySample
             else if (type == MessageType.EndGame)
             {   m_localLobby.State = LobbyState.Lobby;
                 SetUserLobbyState();
-            }
-            else if (type == MessageType.QuickJoin)
-            {
-                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
-                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
-                      OnJoinedLobby();
-                    },
-                    OnFailedJoin);
-			}
-            else if (type == MessageType.SetPlayerSound)
-            {
-                var playerSound = (LobbyUserAudio)msg;
             }
         }
 

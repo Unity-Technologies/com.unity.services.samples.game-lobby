@@ -64,19 +64,21 @@ namespace LobbyRelaySample
         JoinLobbyRequest = 2,
         CreateLobbyRequest = 3,
         QueryLobbies = 4,
-        ChangeGameState = 5,
-        LobbyUserStatus = 6,
-        UserSetEmote = 7,
-        EndGame = 8,
-        StartCountdown = 9,
-        CancelCountdown = 10,
-        ConfirmInGameState = 11,
-        DisplayErrorPopup = 12,
-        SetPlayerSound = 13,
-        QuickJoin = 14,
-        ClientUserApproved = 15,
-        ClientUserSeekingDisapproval = 16,
-        CompleteCountdown = 17,
+        QuickJoin = 5,
+
+        ChangeGameState = 100,
+        ConfirmInGameState = 101,
+        LobbyUserStatus = 102,
+        UserSetEmote = 103,
+        ClientUserApproved = 104,
+        ClientUserSeekingDisapproval = 105,
+        EndGame = 106,
+
+        StartCountdown = 200,
+        CancelCountdown = 201,
+        CompleteCountdown = 202,
+
+        DisplayErrorPopup = 300,
     }
 
     /// <summary>
