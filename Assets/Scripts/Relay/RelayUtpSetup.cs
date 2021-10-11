@@ -9,7 +9,8 @@ using UnityEngine;
 namespace LobbyRelaySample.relay
 {
     /// <summary>
-    /// Responsible for setting up a connection with Relay using UTP, for the lobby host.
+    /// Responsible for setting up a connection with Relay using Unity Transport (UTP). A Relay Allocation is created by the host, and then all players
+    /// bind UTP to that Allocation in order to send data to each other.
     /// Must be a MonoBehaviour since the binding process doesn't have asynchronous callback options.
     /// </summary>
     public abstract class RelayUtpSetup : MonoBehaviour
@@ -33,23 +34,40 @@ namespace LobbyRelaySample.relay
         }
         protected abstract void JoinRelay();
 
+
+        /// <summary>
+        /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
+        /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
+        /// </summary>
+        protected NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
+        {
+            #if ENABLE_MANAGED_UNITYTLS
+                foreach (RelayServerEndpoint endpoint in endpoints)
+                {
+                    if (endpoint.Secure && endpoint.Network == RelayServerEndpoint.NetworkOptions.Udp)
+                    {
+                        isSecure = true;
+                        return NetworkEndPoint.Parse(endpoint.Host, (ushort)endpoint.Port);
+                    }
+                }
+            #endif
+            isSecure = false;
+            return NetworkEndPoint.Parse(ip, (ushort)port);
+        }
+
         /// <summary>
         /// Shared behavior for binding to the Relay allocation, which is required for use.
         /// Note that a host will send bytes from the Allocation it creates, whereas a client will send bytes from the JoinAllocation it receives using a relay code.
         /// </summary>
-        protected void BindToAllocation(string ip, int port, byte[] allocationIdBytes, byte[] connectionDataBytes, byte[] hostConnectionDataBytes, byte[] hmacKeyBytes, int connectionCapacity)
+        protected void BindToAllocation(NetworkEndPoint serverEndpoint, byte[] allocationIdBytes, byte[] connectionDataBytes, byte[] hostConnectionDataBytes, byte[] hmacKeyBytes, int connectionCapacity, bool isSecure)
         {
-            NetworkEndPoint     serverEndpoint     = NetworkEndPoint.Parse(ip, (ushort)port);
             RelayAllocationId   allocationId       = ConvertAllocationIdBytes(allocationIdBytes);
             RelayConnectionData connectionData     = ConvertConnectionDataBytes(connectionDataBytes);
             RelayConnectionData hostConnectionData = ConvertConnectionDataBytes(hostConnectionDataBytes);
             RelayHMACKey        key                = ConvertHMACKeyBytes(hmacKeyBytes);
 
-            m_endpointForServer = serverEndpoint;
-            //TODO Implement DTLS 
-            bool isSecure = false;
             var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref hostConnectionData, ref key, isSecure);
-            relayServerData.ComputeNewNonce();
+            relayServerData.ComputeNewNonce(); // For security, the nonce value sent when authenticating the allocation must be increased.
             var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
 
             m_networkDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
@@ -125,13 +143,15 @@ namespace LobbyRelaySample.relay
         {
             m_allocation = allocation;
             RelayAPIInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
-            BindToAllocation(allocation.RelayServer.IpV4, allocation.RelayServer.Port, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16);
+            bool isSecure = false;
+            m_endpointForServer = GetEndpointForAllocation(allocation.ServerEndpoints, allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
+            BindToAllocation(m_endpointForServer, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16, isSecure);
         }
 
         private void OnRelayCode(string relayCode)
         {
             m_localLobby.RelayCode = relayCode;
-            m_localLobby.RelayServer = new ServerAddress(m_allocation.RelayServer.IpV4, m_allocation.RelayServer.Port);
+            m_localLobby.RelayServer = new ServerAddress(m_endpointForServer.Address.Split(':')[0], m_endpointForServer.Port);
             m_joinState |= JoinState.Joined;
             CheckForComplete();
         }
@@ -140,12 +160,12 @@ namespace LobbyRelaySample.relay
         {
             if (m_networkDriver.Listen() != 0)
             {
-                Debug.LogError("Server failed to listen");
+                Debug.LogError("RelayUtpSetupHost failed to bind to the Relay Allocation.");
                 m_onJoinComplete(false, null);
             }
             else
             {
-                Debug.LogWarning("Server is now listening!");
+                Debug.Log("Relay host is bound.");
                 m_joinState |= JoinState.Bound;
                 CheckForComplete();
             }
@@ -153,7 +173,7 @@ namespace LobbyRelaySample.relay
 
         private void CheckForComplete()
         {
-            if (m_joinState == (JoinState.Joined | JoinState.Bound))
+            if (m_joinState == (JoinState.Joined | JoinState.Bound) && this != null) // this will equal null (i.e. this component has been destroyed) if the host left the lobby during the Relay connection sequence.
             {
                 m_isRelayConnected = true;
                 RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
@@ -188,11 +208,13 @@ namespace LobbyRelaySample.relay
 
         private void OnJoin(JoinAllocation joinAllocation)
         {
-            if (joinAllocation == null)
+            if (joinAllocation == null || this == null) // The returned JoinAllocation is null if allocation failed. this would be destroyed already if you quit the lobby while Relay is connecting.
                 return;
             m_allocation = joinAllocation;
-            BindToAllocation(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1);
-            m_localLobby.RelayServer = new ServerAddress(joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port);
+            bool isSecure = false;
+            m_endpointForServer = GetEndpointForAllocation(joinAllocation.ServerEndpoints, joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
+            BindToAllocation(m_endpointForServer, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1, isSecure);
+            m_localLobby.RelayServer = new ServerAddress(m_endpointForServer.Address.Split(':')[0], m_endpointForServer.Port);
         }
 
         protected override void OnBindingComplete()
@@ -211,10 +233,10 @@ namespace LobbyRelaySample.relay
             }
             if (m_networkDriver.GetConnectionState(m_connections[0]) != NetworkConnection.State.Connected)
             {
-                Debug.LogError("Client failed to connect to server");
+                Debug.LogError("RelayUtpSetupClient could not connect to the host.");
                 m_onJoinComplete(false, null);
             }
-            else
+            else if (this != null)
             {
                 m_isRelayConnected = true;
                 RelayUtpClient client = gameObject.AddComponent<RelayUtpClient>();
