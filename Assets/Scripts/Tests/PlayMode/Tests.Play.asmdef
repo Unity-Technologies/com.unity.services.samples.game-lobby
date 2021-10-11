@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "LobbyRelaySample",
         "Unity.Services.Lobbies",
-        "Unity.Services.Relay"
+        "Unity.Services.Relay",
+        "Unity.Networking.Transport"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

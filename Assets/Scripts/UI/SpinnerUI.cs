@@ -1,5 +1,6 @@
 using System.Text;
 using TMPro;
+using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
@@ -8,38 +9,43 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class SpinnerUI : ObserverPanel<LobbyServiceData>
     {
-        public TMP_Text errorText;
-        public UIPanelBase spinnerImage;
-        public UIPanelBase noServerText;
-        public UIPanelBase errorTextVisibility;
+        [SerializeField] private TMP_Text m_errorText;
+        [SerializeField] private UIPanelBase m_spinnerImage;
+        [SerializeField] private UIPanelBase m_noServerText;
+        [SerializeField] private UIPanelBase m_errorTextVisibility;
+        [Tooltip("This prevents selecting a lobby or Joining while the spinner is visible.")]
+        [SerializeField] private UIPanelBase m_raycastBlocker;
 
         public override void ObservedUpdated(LobbyServiceData observed)
         {
             if (observed.State == LobbyQueryState.Fetching)
             {
                 Show();
-                spinnerImage.Show();
-                noServerText.Hide();
-                errorTextVisibility.Hide();
+                m_spinnerImage.Show();
+                m_raycastBlocker.Show();
+                m_noServerText.Hide();
+                m_errorTextVisibility.Hide();
             }
             else if (observed.State == LobbyQueryState.Error)
             {
-                spinnerImage.Hide();
-                errorTextVisibility.Show();
-                errorText.SetText("Error. See Unity Console log for details.");
+                m_spinnerImage.Hide();
+                m_raycastBlocker.Hide();
+                m_errorTextVisibility.Show();
+                m_errorText.SetText("Error. See Unity Console log for details.");
             }
             else if (observed.State == LobbyQueryState.Fetched)
             {
                 if (observed.CurrentLobbies.Count < 1)
                 {
-                    noServerText.Show();
+                    m_noServerText.Show();
                 }
                 else
                 {
-                    noServerText.Hide();
+                    m_noServerText.Hide();
                 }
 
-                spinnerImage.Hide();
+                m_spinnerImage.Hide();
+                m_raycastBlocker.Hide();
             }
         }
     }

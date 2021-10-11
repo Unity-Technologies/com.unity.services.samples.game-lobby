@@ -10,6 +10,11 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         LocalLobby m_ServerRequestData = new LocalLobby { LobbyName = "New Lobby", MaxPlayerCount = 4 };
 
+        public override void Start()
+        {
+            base.Start();
+            Hide();
+        }
         public void SetServerName(string serverName)
         {
             m_ServerRequestData.LobbyName = serverName;

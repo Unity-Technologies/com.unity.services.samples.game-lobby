@@ -212,8 +212,10 @@ namespace LobbyRelaySample
             get => m_data.Color;
             set
             {
-                m_data.Color = value;
-                OnChanged(this);
+                if (m_data.Color != value)
+                {   m_data.Color = value;
+                    OnChanged(this);
+                }
             }
         }
 
