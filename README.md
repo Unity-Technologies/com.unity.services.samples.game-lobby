@@ -1,14 +1,15 @@
+
 # Game Lobby Sample
 
 _Tested with Unity 2020.3 for PC and Mac._
 
-This sample demonstrates how to use the Lobby and Relay packages to create a typical game lobby experience. Players can host lobbies that other players can join using a public lobby list or lobby code, and then connect with Relay to use Unity Transport ("UTP") for basic real-time communication between them. Relay allows players to securely communicate with each other while maintaining connection anonymity.
-
+This sample demonstrates how to use the Lobby and Relay packages to create a typical game lobby experience. It also includes Vivox Voice chat. Players can host lobbies that other players can join using a public lobby list or lobby code, and then connect with Relay to use Unity Transport ("UTP") for basic real-time communication between them. Relay allows players to securely communicate with each other while maintaining connection anonymity. Connecting to the lobby will also connect to Vivox to enable voice chat as long as an audio input device is available.
 
 **Note**: This is not a “drag-and-drop” solution; the Game Lobby Sample is not a minimal code sample intended to be completely copied into a full-scale project. Rather, it demonstrates how to use multiple services in a vertical slice with some basic game logic and infrastructure. Use it as a reference and starting point to learn how Lobby and Relay work together and how to integrate them into your project.
 
 
 #### Features:
+
 
 
 * **Anonymous Auth login**: Track player credentials without a persistent account.
@@ -17,6 +18,7 @@ This sample demonstrates how to use the Lobby and Relay packages to create a typ
 * **Relay obfuscation**: Players in a lobby are connected through an anonymous IP.
 * **UTP communication**: Players transmit basic data to lobby members in real time.
 * **Lobby + Relay connection management**: Together, the services automatically handle new connections and disconnections.
+* **Vivox Voice**: Create a voice channel for the lobby to allow for voice communication, with per-user volume control and muting.
 
 
 ### Service organization setup
@@ -55,10 +57,20 @@ The Relay service can be managed in the Unity Dashboard:
 
 [https://dashboard.unity3d.com/relay](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
 
-In this sample, once players are connected to a lobby, they are connected through Relay to set up real-time data transfer over UTP. Lobby and Relay both depend on Auth for credentials. This sample uses Auth’s anonymous login feature to create semi-permanent credentials that are unique to each player but do not require developers to maintain a persistent account for them.
+In this sample, once players are connected to a lobby, they are connected through Relay to set up real-time data transfer over UTP. Lobby and Relay both depend on Auth for credentials. This sample uses Auth’s anonymous login feature to create semi-permanent credentials that are unique to each player but do not require developers to maintain a persistent account for them. \
+
+**Vivox**
+The Vivox Service provides player voice and text chat rooms for in-app communication. It also sports useful features like spatial audio and chat transcription.
+ 
+The Vivox Documentation contains code samples and additional information about the service. It includes comprehensive details for using Vivox along with additional code samples, and it might help you better understand the Game Lobby Sample: 
+[https://docs.vivox.com/v5/general/unity/5_15_0/en-us/Default.htm](https://docs.vivox.com/v5/general/unity/5_15_0/en-us/Default.htm)
+
+ 
+Vivox can be managed in the Unity Dashboard: 
+[https://dashboard.unity3d.com/vivox](https://dashboard.unity3d.com/vivox)
 
 
-#### **Setup**
+#### **Setup **
 
 The Lobby and Relay sections of the Unity Dashboard contain their own setup instructions. Select **About & Support **>** Get Started** and follow the provided steps to integrate the services into your project.
 
@@ -74,20 +86,21 @@ You will need two “players” to demonstrate the full sample functionality. Cr
 
 ![alt_text](~Documentation/Images/1_lobby_list.PNG "Lobby List")
 
+
 The Lobby Join menu contains the lobby list UI, which acts as a hub for players to connect to each other using the public lobby list or lobby code.
 
 
 
-1. **Public lobby list**: Shows all lobbies not set to private. Lobbies contain developer-defined data which can be set to public and non-public visibility. The Lobby service cleans up any “zombie” rooms so they don’t appear in this list. For this sample, lobby names and player counts are shown, and lobbies in the “in-game” state are not shown. You can select a lobby and then select **Join**.
-2. **Refresh icon**: Refreshes the Lobby List. The Lobby service imposes rate limits on all API calls to prevent spamming. Refresh attempts within the rate limit will do nothing (approximately every 1.5 seconds, see [Lobby documentation](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service) for details).
-3. **Lobby Code field**: Enter a lobby code for an existing lobby. In addition to the public lobby list, all lobbies can be joined using their codes. This allows players to privately share access to lobbies.
-4. **Filters**: Sets the Lobby List to only show servers of a certain color. The Lobby service can filter any queries by data set to public visibility. For this sample, players can optionally filter by color, which hosts set for their lobbies.
-5. **Join**:** **Requests to join by public lobby list selection or lobby code. Failed requests are also rate limited to prevent spam, if the player presses the button repeatedly.
-6. **Create**: Allows creation of a new lobby. Players select a lobby name and whether to make a private lobby, and they then connect to the new lobby as its host.
-7. **Player name**: Displays the player name and allows renaming. By default, players are assigned a name based on their anonymous Auth credentials, but name changes follow their credentials so that all players see the new name.
+A. **Public lobby list**: Shows all lobbies not set to private. Lobbies contain developer-defined data which can be set to public and non-public visibility. The Lobby service cleans up any “zombie” rooms so they don’t appear in this list. For this sample, lobby names and player counts are shown, and lobbies in the “in-game” state are not shown. You can select a lobby and then select **Join**.
+B. **Refresh icon**: Refreshes the Lobby List. The Lobby service imposes rate limits on all API calls to prevent spamming. Refresh attempts within the rate limit will do nothing (approximately every 1.5 seconds, see [Lobby documentation](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service) for details).
+C. **Filters**: Sets the Lobby List to only show servers of a certain color. The Lobby service can filter any queries by data set to public visibility. For this sample, players can optionally filter by color, which hosts set for their lobbies.
+D. **Quick Join button: **Join the first available lobby in the list that matches your filters.
+E. **Lobby Code field**: Enter a lobby code for an existing lobby. In addition to the public lobby list, all lobbies can be joined using their codes. This allows players to privately share access to lobbies.
+F. **Join**:** **Requests to join by public lobby list selection or lobby code. Failed requests are also rate limited to prevent spam, if the player presses the button repeatedly.
+G. **Create**: Allows creation of a new lobby. Players select a lobby name and whether to make a private lobby, and they then connect to the new lobby as its host.
+H. **Player name**: Displays the player name and allows renaming. By default, players are assigned a name based on their anonymous Auth credentials, but name changes follow their credentials so that all players see the new name.
 
-
-#### **Lobby View**
+**Lobby View**
 
 ![alt_text](~Documentation/Images/2_lobby.PNG "Lobby")
 
@@ -96,14 +109,16 @@ The Lobby View UI displays information from Lobby and Relay for all players in a
 
 
 
-1. **Lobby name**: Set when the lobby was created and cannot be changed.
-2. **Lobby Code**: Shareable code generated by the Lobby service. This may be provided externally to other players to allow them to join this lobby.
-3. **Lobby user**: A player in the lobby. The player’s name, state, and emote are displayed; this data is synchronized through Relay + UTP, so any changes that a player makes will appear immediately for all connected players. Incoming players will be sent the current data once they have connected.
-4. **Relay IP**:** **The anonymous server IP that Relay generates. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.
-5. **Relay Code**: An internal join code generated by Relay that is used during Relay connection. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.
-6. **Emote icons**: Sets the player’s emote and is synchronized using UTP.
-7. **Lobby color**: (Host only) Sets the lobby color for filtering in the Lobby List. This is synchronized through Lobby, so changes won’t appear immediately for all players because Lobby queries are rate limited. See Rate Limits.
-8. **Ready button**: Sets a ready state on the player. When all players are ready, the host initiates a countdown to an “in-game” state, and the lobby becomes hidden from the public lobby list.
+A. **Lobby name**: Set when the lobby was created and cannot be changed.
+B. **Lobby code**: Shareable code generated by the Lobby service. This may be provided externally to other players to allow them to join this lobby.
+C. **Lobby user**: A player in the lobby. The player’s name, state, and emote are displayed; this data is synchronized through Relay + UTP, so any changes that a player makes will appear immediately for all connected players. Incoming players will be sent the current data once they have connected.
+D. **Emotes**: Shows the player’s Emote, as well as controls for voice chat if the user has a mic connected. 
+E. **Vivox Voice Controls: **Clicking the audio icon will mute/unmute that user.
+F. **Relay IP**:** **The anonymous server IP that Relay generates. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.
+G. **Relay Code**: An internal join code generated by Relay that is used during Relay connection. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.
+H. **Emote buttons:**: Sets the player’s emote and is synchronized using UTP.
+I. **Lobby color**: (Host only) Sets the lobby color for filtering in the Lobby List. This is synchronized through Lobby, so changes won’t appear immediately for all players because Lobby queries are rate limited. See Rate Limits.
+J. **Ready button**: Sets a ready state on the player. When all players are ready, the host initiates a countdown to an “in-game” state, and the lobby becomes hidden from the public lobby list.
 
 
 ### Architecture
@@ -125,7 +140,7 @@ The Game Lobby Sample is designed as a vertical slice of a multiplayer lobby, so
 * The **UI **directory strictly contains logic for the sample’s UI and observing relevant data. Viewing these files should not be necessary to understand how to use the services themselves, though they do demonstrate the use of the Observer pattern.
     * Several files exist with classes that simply implement **ObserverBehaviour**. This is because Unity requires **MonoBehaviours** to exist in files of the same names.
     * Note that much of the UI is driven by **CanvasGroup** alpha for visibility, which means that some behaviors continue to run even when invisible to the player.
-* Multiple **Tests** directories are included to demonstrate core behavior and edge cases for some of the code. In particular, the Play mode tests for Lobby and Relay can be used to ensure your connection to the services is functioning correctly.
+* Multiple **Tests** directories are included to demonstrate core behavior and edge cases for some of the code. In particular, the Play mode tests for Lobby and Relay can be used to ensure your connection to the services is functioning correctly. (Run tests using the Test Runner, accessible under **Window > General > Test Runner**.)
 * In the Editor, the project assets are broken into nested prefabs for convenience when making changes during sample development. Their details should not be considered vital, although there are UI elements that depend on event handlers that are serialized.
 
 
