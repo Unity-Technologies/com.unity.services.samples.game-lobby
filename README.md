@@ -68,7 +68,7 @@ Vivox can be managed in the Unity Dashboard:
 [https://dashboard.unity3d.com/vivox](https://dashboard.unity3d.com/vivox)
 
 
-#### **Setup **
+#### **Setup**
 
 The Lobby and Relay sections of the Unity Dashboard contain their own setup instructions. Select **About & Support **>** Get Started** and follow the provided steps to integrate the services into your project.
 
@@ -131,10 +131,10 @@ The Game Lobby Sample is designed as a vertical slice of a multiplayer lobby, so
     * **GameManager** has all the core logic for running the sample. It sets up the services and UI, manages game states, and fields messages from other components.
     * Various other classes exist here to maintain the states of multiple components of the sample and to interface between our sample’s needs for Lobby and Relay data and the structure of that data remotely in the services.
 * The **Infrastructure** directory contains classes used for essential tasks related to overall function but not specifically to any service.
-    * **Locator **mimics a Service Locator pattern, allowing for behaviors that might otherwise be Singletons to easily be swapped in and out.
-    * **Messenger **creates a simple messaging system used to keep unrelated classes decoupled, letting them instead message arbitrary listeners when interesting things happen. For example, a lobby is updated, or a player disconnects from a relay.
-    * An** Observer** pattern is used for all UI elements and for local copies of remote Lobby and Relay data. An Observer is alerted whenever its observed data changes, and the owner of that data doesn’t need to know who is observing.
-* The **UI **directory strictly contains logic for the sample’s UI and observing relevant data. Viewing these files should not be necessary to understand how to use the services themselves, though they do demonstrate the use of the Observer pattern.
+    * **Locator** mimics a Service Locator pattern, allowing for behaviors that might otherwise be Singletons to easily be swapped in and out.
+    * **Messenger** creates a simple messaging system used to keep unrelated classes decoupled, letting them instead message arbitrary listeners when interesting things happen. For example, a lobby is updated, or a player disconnects from a relay.
+    * An **Observer** pattern is used for all UI elements and for local copies of remote Lobby and Relay data. An Observer is alerted whenever its observed data changes, and the owner of that data doesn’t need to know who is observing.
+* The **UI** directory strictly contains logic for the sample’s UI and observing relevant data. Viewing these files should not be necessary to understand how to use the services themselves, though they do demonstrate the use of the Observer pattern.
     * Several files exist with classes that simply implement **ObserverBehaviour**. This is because Unity requires **MonoBehaviours** to exist in files of the same names.
     * Note that much of the UI is driven by **CanvasGroup** alpha for visibility, which means that some behaviors continue to run even when invisible to the player.
 * Multiple **Tests** directories are included to demonstrate core behavior and edge cases for some of the code. In particular, the Play mode tests for Lobby and Relay can be used to ensure your connection to the services is functioning correctly. (Run tests using the Test Runner, accessible under **Window > General > Test Runner**.)
