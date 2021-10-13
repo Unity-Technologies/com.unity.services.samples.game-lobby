@@ -272,7 +272,11 @@ namespace LobbyRelaySample
                     dataCurr.Add(dataNew.Key, dataObj);
             }
 
-            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, dataCurr, (r) => { onComplete?.Invoke(); }, null, null);
+            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, dataCurr, (result) => {
+                if (result != null)
+                    m_lastKnownLobby = result; // Store the most up-to-date lobby now since we have it, instead of waiting for the next heartbeat.
+                onComplete?.Invoke();
+            }, null, null);
         }
 
         /// <summary>
@@ -305,7 +309,11 @@ namespace LobbyRelaySample
                     dataCurr.Add(dataNew.Key, dataObj);
             }
 
-            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (r) => { onComplete?.Invoke(); });
+            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (result) => {
+                if (result != null)
+                    m_lastKnownLobby = result;
+                onComplete?.Invoke();
+            });
         }
 
         /// <summary>
