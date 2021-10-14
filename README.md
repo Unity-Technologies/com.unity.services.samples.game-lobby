@@ -10,8 +10,6 @@ This sample demonstrates how to use the Lobby and Relay packages to create a typ
 
 #### Features:
 
-
-
 * **Anonymous Auth login**: Track player credentials without a persistent account.
 * **Lobby creation**: Players host lobbies for others to join.
 * **Lobby query**: Find a list of lobbies with filters, or use lobby codes.
@@ -70,7 +68,7 @@ Vivox can be managed in the Unity Dashboard:
 [https://dashboard.unity3d.com/vivox](https://dashboard.unity3d.com/vivox)
 
 
-#### **Setup **
+#### **Setup**
 
 The Lobby and Relay sections of the Unity Dashboard contain their own setup instructions. Select **About & Support **>** Get Started** and follow the provided steps to integrate the services into your project.
 
@@ -90,15 +88,14 @@ You will need two “players” to demonstrate the full sample functionality. Cr
 The Lobby Join menu contains the lobby list UI, which acts as a hub for players to connect to each other using the public lobby list or lobby code.
 
 
-
-A. **Public lobby list**: Shows all lobbies not set to private. Lobbies contain developer-defined data which can be set to public and non-public visibility. The Lobby service cleans up any “zombie” rooms so they don’t appear in this list. For this sample, lobby names and player counts are shown, and lobbies in the “in-game” state are not shown. You can select a lobby and then select **Join**.
-B. **Refresh icon**: Refreshes the Lobby List. The Lobby service imposes rate limits on all API calls to prevent spamming. Refresh attempts within the rate limit will do nothing (approximately every 1.5 seconds, see [Lobby documentation](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service) for details).
-C. **Filters**: Sets the Lobby List to only show servers of a certain color. The Lobby service can filter any queries by data set to public visibility. For this sample, players can optionally filter by color, which hosts set for their lobbies.
-D. **Quick Join button: **Join the first available lobby in the list that matches your filters.
-E. **Lobby Code field**: Enter a lobby code for an existing lobby. In addition to the public lobby list, all lobbies can be joined using their codes. This allows players to privately share access to lobbies.
-F. **Join**:** **Requests to join by public lobby list selection or lobby code. Failed requests are also rate limited to prevent spam, if the player presses the button repeatedly.
-G. **Create**: Allows creation of a new lobby. Players select a lobby name and whether to make a private lobby, and they then connect to the new lobby as its host.
-H. **Player name**: Displays the player name and allows renaming. By default, players are assigned a name based on their anonymous Auth credentials, but name changes follow their credentials so that all players see the new name.
+&nbsp;&nbsp;&nbsp;&nbsp;**A**. &nbsp;&nbsp; **Public lobby list**: Shows all lobbies not set to private. Lobbies contain developer-defined data which can be set to public and non-public visibility. The Lobby service cleans up any “zombie” rooms so they don’t appear in this list. For this sample, lobby names and player counts are shown, and lobbies in the “in-game” state are not shown. You can select a lobby and then select **Join**.\
+&nbsp;&nbsp;&nbsp;&nbsp;**B**. &nbsp;&nbsp;  **Refresh icon**: Refreshes the Lobby List. The Lobby service imposes rate limits on all API calls to prevent spamming. Refresh attempts within the rate limit will do nothing (approximately every 1.5 seconds, see [Lobby documentation](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service) for details).\
+&nbsp;&nbsp;&nbsp;&nbsp;**C**. &nbsp;&nbsp; **Filters**: Sets the Lobby List to only show servers of a certain color. The Lobby service can filter any queries by data set to public visibility. For this sample, players can optionally filter by color, which hosts set for their lobbies.\
+&nbsp;&nbsp;&nbsp;&nbsp;**D**. &nbsp;&nbsp; **Quick Join button** :Join the first available lobby in the list that matches your filters.\
+&nbsp;&nbsp;&nbsp;&nbsp;**E**. &nbsp;&nbsp; **Lobby Code field**: Enter a lobby code for an existing lobby. In addition to the public lobby list, all lobbies can be joined using their codes. This allows players to privately share access to lobbies.\
+&nbsp;&nbsp;&nbsp;&nbsp;**F**. &nbsp;&nbsp; **Join**: Requests to join by public lobby list selection or lobby code. Failed requests are also rate limited to prevent spam, if the player presses the button repeatedly.\
+&nbsp;&nbsp;&nbsp;&nbsp;**G**. &nbsp;&nbsp; **Create**: Allows creation of a new lobby. Players select a lobby name and whether to make a private lobby, and they then connect to the new lobby as its host.\
+&nbsp;&nbsp;&nbsp;&nbsp;**H**. &nbsp;&nbsp; **Player name**: Displays the player name and allows renaming. By default, players are assigned a name based on their anonymous Auth credentials, but name changes follow their credentials so that all players see the new name.
 
 **Lobby View**
 
@@ -109,17 +106,17 @@ The Lobby View UI displays information from Lobby and Relay for all players in a
 
 
 
-A. **Lobby name**: Set when the lobby was created and cannot be changed.
-B. **Lobby code**: Shareable code generated by the Lobby service. This may be provided externally to other players to allow them to join this lobby.
-C. **Lobby user**: A player in the lobby. The player’s name, state, and emote are displayed; this data is synchronized through Relay + UTP, so any changes that a player makes will appear immediately for all connected players. Incoming players will be sent the current data once they have connected.
-D. **Emotes**: Shows the player’s Emote, as well as controls for voice chat if the user has a mic connected. 
-E. **Vivox Voice Controls: **Clicking the audio icon will mute/unmute that user.
-F. **Relay IP**:** **The anonymous server IP that Relay generates. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.
-G. **Relay Code**: An internal join code generated by Relay that is used during Relay connection. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.
-H. **Emote buttons:**: Sets the player’s emote and is synchronized using UTP.
-I. **Lobby color**: (Host only) Sets the lobby color for filtering in the Lobby List. This is synchronized through Lobby, so changes won’t appear immediately for all players because Lobby queries are rate limited. See Rate Limits.
-J. **Ready button**: Sets a ready state on the player. When all players are ready, the host initiates a countdown to an “in-game” state, and the lobby becomes hidden from the public lobby list.
-
+&nbsp;&nbsp;&nbsp;&nbsp;**A**. &nbsp;&nbsp; **Lobby name**: Set when the lobby was created and cannot be changed.\
+&nbsp;&nbsp;&nbsp;&nbsp;**B**. &nbsp;&nbsp; **Lobby code**: Shareable code generated by the Lobby service. This may be provided externally to other players to allow them to join this lobby.\
+&nbsp;&nbsp;&nbsp;&nbsp;**C**. &nbsp;&nbsp; **Lobby user**: A player in the lobby. The player’s name, state, and emote are displayed; this data is synchronized through Relay + UTP, so any changes that a player makes will appear immediately for all connected players. Incoming players will be sent the current data once they have connected.\
+&nbsp;&nbsp;&nbsp;&nbsp;**D**. &nbsp;&nbsp; **Emotes**: Shows the player’s Emote, as well as controls for voice chat if the user has a mic connected. \
+&nbsp;&nbsp;&nbsp;&nbsp;**E**. &nbsp;&nbsp; **Vivox Voice Controls**: Clicking the audio icon will mute/unmute that user.\
+&nbsp;&nbsp;&nbsp;&nbsp;**F**. &nbsp;&nbsp; **Relay IP** :The anonymous server IP that Relay generates. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.\
+&nbsp;&nbsp;&nbsp;&nbsp;**G**. &nbsp;&nbsp; **Relay Code**: An internal join code generated by Relay that is used during Relay connection. This does not need to be shown to players and is displayed here simply to indicate that Relay is functioning.\
+&nbsp;&nbsp;&nbsp;&nbsp;**H**. &nbsp;&nbsp; **Emote buttons:**: Sets the player’s emote and is synchronized using UTP.\
+&nbsp;&nbsp;&nbsp;&nbsp;**I**. &nbsp;&nbsp; **Lobby color**: (Host only) Sets the lobby color for filtering in the Lobby List. This is synchronized through Lobby, so changes won’t appear immediately for all players because Lobby queries are rate limited. See Rate Limits.\
+&nbsp;&nbsp;&nbsp;&nbsp;**J**. &nbsp;&nbsp; **Ready button**: Sets a ready state on the player. When all players are ready, the host initiates a countdown to an “in-game” state, and the lobby becomes hidden from the public lobby list.\
+&nbsp;&nbsp;&nbsp;&nbsp;**K**. &nbsp;&nbsp; **????**
 
 ### Architecture
 
@@ -134,10 +131,10 @@ The Game Lobby Sample is designed as a vertical slice of a multiplayer lobby, so
     * **GameManager** has all the core logic for running the sample. It sets up the services and UI, manages game states, and fields messages from other components.
     * Various other classes exist here to maintain the states of multiple components of the sample and to interface between our sample’s needs for Lobby and Relay data and the structure of that data remotely in the services.
 * The **Infrastructure** directory contains classes used for essential tasks related to overall function but not specifically to any service.
-    * **Locator **mimics a Service Locator pattern, allowing for behaviors that might otherwise be Singletons to easily be swapped in and out.
-    * **Messenger **creates a simple messaging system used to keep unrelated classes decoupled, letting them instead message arbitrary listeners when interesting things happen. For example, a lobby is updated, or a player disconnects from a relay.
-    * An** Observer** pattern is used for all UI elements and for local copies of remote Lobby and Relay data. An Observer is alerted whenever its observed data changes, and the owner of that data doesn’t need to know who is observing.
-* The **UI **directory strictly contains logic for the sample’s UI and observing relevant data. Viewing these files should not be necessary to understand how to use the services themselves, though they do demonstrate the use of the Observer pattern.
+    * **Locator** mimics a Service Locator pattern, allowing for behaviors that might otherwise be Singletons to easily be swapped in and out.
+    * **Messenger** creates a simple messaging system used to keep unrelated classes decoupled, letting them instead message arbitrary listeners when interesting things happen. For example, a lobby is updated, or a player disconnects from a relay.
+    * An **Observer** pattern is used for all UI elements and for local copies of remote Lobby and Relay data. An Observer is alerted whenever its observed data changes, and the owner of that data doesn’t need to know who is observing.
+* The **UI** directory strictly contains logic for the sample’s UI and observing relevant data. Viewing these files should not be necessary to understand how to use the services themselves, though they do demonstrate the use of the Observer pattern.
     * Several files exist with classes that simply implement **ObserverBehaviour**. This is because Unity requires **MonoBehaviours** to exist in files of the same names.
     * Note that much of the UI is driven by **CanvasGroup** alpha for visibility, which means that some behaviors continue to run even when invisible to the player.
 * Multiple **Tests** directories are included to demonstrate core behavior and edge cases for some of the code. In particular, the Play mode tests for Lobby and Relay can be used to ensure your connection to the services is functioning correctly. (Run tests using the Test Runner, accessible under **Window > General > Test Runner**.)
