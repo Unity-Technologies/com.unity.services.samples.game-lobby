@@ -98,7 +98,7 @@ namespace LobbyRelaySample
             if (type == MessageType.RenameRequest)
             {
                 string name = (string)msg;
-                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrWhiteSpace(name))
                 {
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Empty Name not allowed."); // Lobby error type, then HTTP error type.
                     return;

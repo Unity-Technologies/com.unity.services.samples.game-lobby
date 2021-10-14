@@ -84,9 +84,9 @@ namespace LobbyRelaySample.UI
             {
                 m_JoinCodeField.text = "";
                 OnRefresh();
-            }              
+            }
         }
-		
+
         public void OnQuickJoin()
         {
             Locator.Get.Messenger.OnReceiveMessage(MessageType.QuickJoin, null);
