@@ -95,10 +95,7 @@ namespace LobbyRelaySample
         /// </summary>
         public void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.RenameRequest)
-            {   m_localUser.DisplayName = (string)msg;
-            }
-            else if (type == MessageType.CreateLobbyRequest)
+            if (type == MessageType.CreateLobbyRequest)
             {
                 var createLobbyData = (LocalLobby)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
@@ -129,8 +126,20 @@ namespace LobbyRelaySample
                     },
                     m_lobbyColorFilter);
             }
-            else if (type == MessageType.ChangeGameState)
-            {   SetGameState((GameState)msg);
+            else if (type == MessageType.QuickJoin)
+            {
+                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
+                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
+                        OnJoinedLobby();
+                    },
+                    OnFailedJoin);
+            }
+
+            else if (type == MessageType.RenameRequest)
+            {   m_localUser.DisplayName = (string)msg;
+            }
+            else if (type == MessageType.ClientUserApproved)
+            {   ConfirmApproval();
             }
             else if (type == MessageType.UserSetEmote)
             {   EmoteType emote = (EmoteType)msg;
@@ -139,12 +148,20 @@ namespace LobbyRelaySample
             else if (type == MessageType.LobbyUserStatus)
             {   m_localUser.UserStatus = (UserStatus)msg;
             }
+
             else if (type == MessageType.StartCountdown)
-            {   BeginCountDown();
+            {   m_localLobby.State = LobbyState.CountDown;
             }
             else if (type == MessageType.CancelCountdown)
             {   m_localLobby.State = LobbyState.Lobby;
-                m_localLobby.CountDownTime = 0;
+            }
+            else if (type == MessageType.CompleteCountdown)
+            {   if (m_relayClient is RelayUtpHost)
+                    (m_relayClient as RelayUtpHost).SendInGameState();
+            }
+
+            else if (type == MessageType.ChangeGameState)
+            {   SetGameState((GameState)msg);
             }
             else if (type == MessageType.ConfirmInGameState)
             {   m_localUser.UserStatus = UserStatus.InGame;
@@ -152,21 +169,8 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.EndGame)
             {   m_localLobby.State = LobbyState.Lobby;
-                m_localLobby.CountDownTime = 0;
                 SetUserLobbyState();
             }
-            else if (type == MessageType.QuickJoin)
-            {
-                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
-                    {   lobby.ToLocalLobby.Convert(r, m_localLobby);
-                      OnJoinedLobby();
-                    },
-                    OnFailedJoin);
-			}
-            else if (type == MessageType.SetPlayerSound)
-            {
-                var playerSound = (LobbyUserAudio)msg;
-        }
         }
 
         private void SetGameState(GameState state)
@@ -203,8 +207,19 @@ namespace LobbyRelaySample
             LobbyAsyncRequests.Instance.BeginTracking(m_localLobby.LobbyID);
             m_lobbyContentHeartbeat.BeginTracking(m_localLobby, m_localUser);
             SetUserLobbyState();
-            StartRelayConnection();
-            StartVivoxJoin();
+
+            // The host has the opportunity to reject incoming players, but to do so the player needs to connect to Relay without having game logic available.
+            // In particular, we should prevent players from joining voice chat until they are approved.
+            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
+            if (m_localUser.IsHost)
+            {
+                StartRelayConnection();
+                StartVivoxJoin();
+            }
+            else
+            {
+                StartRelayConnection();
+            }
         }
 
         private void OnLeftLobby()
@@ -267,7 +282,6 @@ namespace LobbyRelaySample
                 m_relaySetup = gameObject.AddComponent<RelayUtpSetupHost>();
             else
                 m_relaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Connecting);
             m_relaySetup.BeginRelayJoin(m_localLobby, m_localUser, OnRelayConnected);
 
             void OnRelayConnected(bool didSucceed, RelayUtpClient client)
@@ -282,7 +296,10 @@ namespace LobbyRelaySample
                 }
 
                 m_relayClient = client;
-                OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+                if (m_localUser.IsHost)
+                    CompleteRelayConnection();
+                else
+                    Debug.Log("Client is now waiting for approval...");
             }
         }
 
@@ -293,30 +310,18 @@ namespace LobbyRelaySample
                 doConnection?.Invoke();
         }
 
-        private void BeginCountDown()
+        private void ConfirmApproval()
         {
-            if (m_localLobby.State == LobbyState.CountDown)
-                return;
-            m_localLobby.CountDownTime = 4;
-            m_localLobby.State = LobbyState.CountDown;
-            StartCoroutine(CountDown());
+            if (!m_localUser.IsHost && m_localUser.IsApproved)
+            {
+                CompleteRelayConnection();
+                StartVivoxJoin();
+            }
         }
 
-        /// <summary>
-        /// The CountdownUI will pick up on changes to the lobby's countdown timer. This can be interrupted if the lobby leaves the countdown state (via a CancelCountdown message).
-        /// </summary>
-        private IEnumerator CountDown()
+        private void CompleteRelayConnection()
         {
-            while (m_localLobby.CountDownTime > 0)
-            {
-                yield return null;
-                if (m_localLobby.State != LobbyState.CountDown)
-                    yield break;
-                m_localLobby.CountDownTime -= Time.deltaTime;
-            }
-
-            if (m_relayClient is RelayUtpHost)
-                (m_relayClient as RelayUtpHost).SendInGameState();
+            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }
 
         private void SetUserLobbyState()
@@ -329,7 +334,6 @@ namespace LobbyRelaySample
         {
             m_localLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LobbyUser>());
             m_localLobby.AddPlayer(m_localUser); // As before, the local player will need to be plugged into UI before the lobby join actually happens.
-            m_localLobby.CountDownTime = 0;
             m_localLobby.RelayServer = null;
         }
 

@@ -24,9 +24,9 @@ namespace LobbyRelaySample
     [Serializable]
     public class LobbyUser : Observed<LobbyUser>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu)
+        public LobbyUser(bool isHost = false, string displayName = null, string id = null, EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu, bool isApproved = false)
         {
-            m_data = new UserData(isHost, displayName, id, emote, userStatus);
+            m_data = new UserData(isHost, displayName, id, emote, userStatus, isApproved);
         }
 
         #region Local UserData
@@ -38,14 +38,16 @@ namespace LobbyRelaySample
             public string ID { get; set; }
             public EmoteType Emote { get; set; }
             public UserStatus UserStatus { get; set; }
+            public bool IsApproved { get; set; }
 
-            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus)
+            public UserData(bool isHost, string displayName, string id, EmoteType emote, UserStatus userStatus, bool isApproved)
             {
                 IsHost = isHost;
                 DisplayName = displayName;
                 ID = id;
                 Emote = emote;
                 UserStatus = userStatus;
+                IsApproved = isApproved;
             }
         }
 
@@ -53,7 +55,7 @@ namespace LobbyRelaySample
 
         public void ResetState()
         {
-            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu); // ID and DisplayName should persist since this might be the local user.
+            m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu, false); // ID and DisplayName should persist since this might be the local user.
         }
 
         #endregion
@@ -68,8 +70,9 @@ namespace LobbyRelaySample
             DisplayName = 2,
             Emote = 4,
             ID = 8,
-            UserStatus = 16
-		}
+            UserStatus = 16,
+            IsApproved = 32
+        }
 
         private UserMembers m_lastChanged;
         public UserMembers LastChanged => m_lastChanged;
@@ -84,6 +87,8 @@ namespace LobbyRelaySample
                     m_data.IsHost = value;
                     m_lastChanged = UserMembers.IsHost;
                     OnChanged(this);
+                    if (value)
+                        IsApproved = true;
                 }
             }
         }
@@ -141,6 +146,21 @@ namespace LobbyRelaySample
                     m_userStatus = value;
                     m_lastChanged = UserMembers.UserStatus;
                     OnChanged(this);
+                }
+            }
+        }
+
+        public bool IsApproved // Clients joining the lobby should be approved by the host before they can interact.
+        {
+            get => m_data.IsApproved;
+            set
+            {
+                if (!m_data.IsApproved && value) // Don't be un-approved except by a call to ResetState.
+                {
+                    m_data.IsApproved = value;
+                    m_lastChanged = UserMembers.IsApproved;
+                    OnChanged(this);
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ClientUserApproved, null);
                 }
             }
         }
