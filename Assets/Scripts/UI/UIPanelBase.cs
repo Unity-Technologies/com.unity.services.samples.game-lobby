@@ -17,7 +17,7 @@ namespace LobbyRelaySample.UI
         CanvasGroup m_canvasGroup;
         List<UIPanelBase> m_uiPanelsInChildren = new List<UIPanelBase>(); // Otherwise, when this Shows/Hides, the children won't know to update their own visibility.
 
-        public void Start()
+        public virtual void Start()
         {
             var children = GetComponentsInChildren<UIPanelBase>(true); // Note that this won't detect children in GameObjects added during gameplay, if there were any.
             foreach (var child in children)
@@ -42,13 +42,21 @@ namespace LobbyRelaySample.UI
                 Show();
         }
 
+
         public void Show()
+        {
+            Show(true);
+        }
+        
+        public void Show(bool propagateToChildren)
         {
             MyCanvasGroup.alpha = 1;
             MyCanvasGroup.interactable = true;
             MyCanvasGroup.blocksRaycasts = true;
             showing = true;
             m_onVisibilityChange?.Invoke(true);
+            if (!propagateToChildren)
+                return;
             foreach (UIPanelBase child in m_uiPanelsInChildren)
                 child.m_onVisibilityChange?.Invoke(true);
         }
