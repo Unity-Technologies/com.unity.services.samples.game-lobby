@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
 namespace LobbyRelaySample
@@ -6,26 +7,32 @@ namespace LobbyRelaySample
     /// <summary>
     /// Keep updated on changes to a joined lobby, at a speed compliant with Lobby's rate limiting.
     /// </summary>
-    public class LobbyContentHeartbeat
+    public class LobbyContentHeartbeat : IReceiveMessages
     {
         private LocalLobby m_localLobby;
         private LobbyUser m_localUser;
-        private bool m_isAwaitingQuery = false;
+        private int m_awaitingQueryCount = 0;
         private bool m_shouldPushData = false;
+
+        private const float k_approvalMaxTime = 10; // Used for determining if a user should timeout if they are unable to connect.
+        private float m_lifetime = 0;
 
         public void BeginTracking(LocalLobby lobby, LobbyUser localUser)
         {
             m_localLobby = lobby;
             m_localUser = localUser;
             Locator.Get.UpdateSlow.Subscribe(OnUpdate, 1.5f);
+            Locator.Get.Messenger.Subscribe(this);
             m_localLobby.onChanged += OnLocalLobbyChanged;
             m_shouldPushData = true; // Ensure the initial presence of a new player is pushed to the lobby; otherwise, when a non-host joins, the LocalLobby never receives their data until they push something new.
+            m_lifetime = 0;
         }
 
         public void EndTracking()
         {
             m_shouldPushData = false;
             Locator.Get.UpdateSlow.Unsubscribe(OnUpdate);
+            Locator.Get.Messenger.Unsubscribe(this);
             if (m_localLobby != null)
                 m_localLobby.onChanged -= OnLocalLobbyChanged;
             m_localLobby = null;
@@ -39,17 +46,34 @@ namespace LobbyRelaySample
             m_shouldPushData = true;
         }
 
+        public void OnReceiveMessage(MessageType type, object msg)
+        {
+            if (type == MessageType.ClientUserSeekingDisapproval)
+            {
+                bool shouldDisapprove = m_localLobby.State != LobbyState.Lobby; // By not refreshing, it's possible to have a lobby in the lobby list UI after its countdown starts and then try joining.
+                if (shouldDisapprove)
+                    (msg as Action<relay.Approval>)?.Invoke(relay.Approval.GameAlreadyStarted);
+            }
+        }
+
         /// <summary>
         /// If there have been any data changes since the last update, push them to Lobby. Regardless, pull for the most recent data.
         /// (Unless we're already awaiting a query, in which case continue waiting.)
         /// </summary>
         private void OnUpdate(float dt)
         {
-            if (m_isAwaitingQuery || m_localLobby == null)
+            m_lifetime += dt;
+            if (m_awaitingQueryCount > 0 || m_localLobby == null)
                 return;
             if (m_localUser.IsHost)
                 LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
-            m_isAwaitingQuery = true; // Note that because we make async calls, if one of them fails and doesn't call our callback, this will never be reset to false.
+
+            if (!m_localUser.IsApproved && m_lifetime > k_approvalMaxTime)
+            {
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Connection attempt timed out!");
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+            }
+
             if (m_shouldPushData)
                 PushDataToLobby();
             else
@@ -58,32 +82,29 @@ namespace LobbyRelaySample
 
             void PushDataToLobby()
             {
-                if (m_localUser == null)
-                {
-                    m_isAwaitingQuery = false;
-                    return; // Don't revert m_shouldPushData yet, so that we can retry.
-                }
                 m_shouldPushData = false;
 
                 if (m_localUser.IsHost)
+                {
+                    m_awaitingQueryCount++;
                     DoLobbyDataPush();
-                else
-                    DoPlayerDataPush();
+                }
+                m_awaitingQueryCount++;
+                DoPlayerDataPush();
             }
 
             void DoLobbyDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(RetrieveLobbyData(m_localLobby), () => { DoPlayerDataPush(); });
+                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(RetrieveLobbyData(m_localLobby), () => { if (--m_awaitingQueryCount <= 0) OnRetrieve(); });
             }
 
             void DoPlayerDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(RetrieveUserData(m_localUser), () => { m_isAwaitingQuery = false; });
+                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(RetrieveUserData(m_localUser), () => { if (--m_awaitingQueryCount <= 0) OnRetrieve(); });
             }
 
             void OnRetrieve()
             {
-                m_isAwaitingQuery = false;
                 LobbyRemote lobbyRemote = LobbyAsyncRequests.Instance.CurrentLobby;
                 if (lobbyRemote == null) return;
                 bool prevShouldPush = m_shouldPushData;
@@ -112,6 +133,8 @@ namespace LobbyRelaySample
             data.Add("RelayCode", lobby.RelayCode);
             data.Add("State", ((int)lobby.State).ToString()); // Using an int is smaller than using the enum state's name.
             data.Add("Color", ((int)lobby.Color).ToString());
+            data.Add("State_LastEdit", lobby.Data.State_LastEdit.ToString());
+            data.Add("Color_LastEdit", lobby.Data.Color_LastEdit.ToString());
             return data;
         }
 

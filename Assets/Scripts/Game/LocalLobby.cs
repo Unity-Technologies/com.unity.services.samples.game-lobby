@@ -35,6 +35,8 @@ namespace LobbyRelaySample
             public int MaxPlayerCount { get; set; }
             public LobbyState State { get; set; }
             public LobbyColor Color { get; set; }
+            public long State_LastEdit { get; set; }
+            public long Color_LastEdit { get; set; }
 
             public LobbyData(LobbyData existing)
             {
@@ -46,6 +48,8 @@ namespace LobbyRelaySample
                 MaxPlayerCount = existing.MaxPlayerCount;
                 State = existing.State;
                 Color = existing.Color;
+                State_LastEdit = existing.State_LastEdit;
+                Color_LastEdit = existing.Color_LastEdit;
             }
 
             public LobbyData(string lobbyCode)
@@ -58,6 +62,8 @@ namespace LobbyRelaySample
                 MaxPlayerCount = -1;
                 State = LobbyState.Lobby;
                 Color = LobbyColor.None;
+                State_LastEdit = 0;
+                Color_LastEdit = 0;
             }
         }
 
@@ -65,18 +71,6 @@ namespace LobbyRelaySample
         public LobbyData Data
         {
             get { return new LobbyData(m_data); }
-        }
-
-        float m_CountDownTime;
-
-        public float CountDownTime
-        {
-            get { return m_CountDownTime; }
-            set
-            {
-                m_CountDownTime = value;
-                OnChanged(this);
-            }
         }
 
         ServerAddress m_relayServer;
@@ -181,6 +175,7 @@ namespace LobbyRelaySample
             set
             {
                 m_data.State = value;
+                m_data.State_LastEdit = DateTime.Now.Ticks;
                 OnChanged(this);
             }
         }
@@ -214,6 +209,7 @@ namespace LobbyRelaySample
             {
                 if (m_data.Color != value)
                 {   m_data.Color = value;
+                    m_data.Color_LastEdit = DateTime.Now.Ticks;
                     OnChanged(this);
                 }
             }
@@ -221,7 +217,18 @@ namespace LobbyRelaySample
 
         public void CopyObserved(LobbyData data, Dictionary<string, LobbyUser> currUsers)
         {
+            // It's possible for the host to edit the lobby in between the time they last pushed lobby data and the time their pull for new lobby data completes.
+            // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
+            var pendingState = data.State;
+            var pendingColor = data.Color;
+            if (m_data.State_LastEdit > data.State_LastEdit)
+                pendingState = m_data.State;
+            if (m_data.Color_LastEdit > data.Color_LastEdit)
+                pendingColor = m_data.Color;
             m_data = data;
+            m_data.State = pendingState;
+            m_data.Color = pendingColor;
+
             if (currUsers == null)
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();
             else

@@ -163,6 +163,7 @@ GameObject:
   - component: {fileID: 4155147274821193738}
   - component: {fileID: 4969504009400302254}
   - component: {fileID: 8388542991005336197}
+  - component: {fileID: 1918870058264573867}
   m_Layer: 5
   m_Name: CountDownUI
   m_TagString: Untagged
@@ -225,6 +226,18 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!114 &1918870058264573867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 580481917308754637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d125c6cac111c6442ac5b07a1f313fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &609596107351326384
 GameObject:
   m_ObjectHideFlags: 0
