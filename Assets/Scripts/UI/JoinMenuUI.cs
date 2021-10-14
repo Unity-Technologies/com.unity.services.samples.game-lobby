@@ -16,6 +16,9 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         RectTransform m_LobbyButtonParent;
 
+        [SerializeField]
+        TMP_InputField m_JoinCodeField;
+
         /// <summary>
         /// Key: Lobby ID, Value Lobby UI
         /// </summary>
@@ -78,7 +81,10 @@ namespace LobbyRelaySample.UI
         public void JoinMenuChangedVisibility(bool show)
         {
             if (show)
+            {
+                m_JoinCodeField.text = "";
                 OnRefresh();
+            }
         }
 
         public void OnQuickJoin()
