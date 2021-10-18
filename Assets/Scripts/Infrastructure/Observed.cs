@@ -30,7 +30,7 @@ namespace LobbyRelaySample
             onChanged?.Invoke(observed);
         }
 
-        protected void OnDestroy(T observed)
+        protected void OnDestroyed(T observed)
         {
             onDestroyed?.Invoke(observed);
         }
