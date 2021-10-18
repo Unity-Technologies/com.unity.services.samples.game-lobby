@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using Unity.Networking.Transport;
 using UnityEngine;
-using MsgType = LobbyRelaySample.relay.RelayUtpSetup.MsgType;
 
 namespace LobbyRelaySample.relay
 {
+    public enum Approval { OK = 0, GameAlreadyStarted }
+
     /// <summary>
     /// This observes the local player and updates remote players over Relay when there are local changes, demonstrating basic data transfer over the Unity Transport (UTP).
     /// Created after the connection to Relay has been confirmed.
@@ -19,6 +20,8 @@ namespace LobbyRelaySample.relay
 
         protected bool m_hasSentInitialMessage = false;
         private const float k_heartbeatPeriod = 5;
+
+        protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
 
         public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
         {
@@ -104,11 +107,19 @@ namespace LobbyRelaySample.relay
                 }
 
                 string id = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(2, idLength).ToArray());
-                if (id == m_localUser.ID || !m_localLobby.LobbyUsers.ContainsKey(id)) // We don't need to hold onto messages if the ID is absent; users are initialized before they send events.
+                if (!CanProcessDataEventFor(conn, msgType, id))
                     return;
                 msgContents.RemoveRange(0, 2 + idLength);
 
-                if (msgType == MsgType.PlayerName)
+                if (msgType == MsgType.PlayerApprovalState)
+                {
+                    Approval approval = (Approval)msgContents[0];
+                    if (approval == Approval.OK && !m_localUser.IsApproved)
+                        OnApproved(m_networkDriver, conn);
+                    else if (approval == Approval.GameAlreadyStarted)
+                        Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Rejected: Game has already started.");
+                }
+                else if (msgType == MsgType.PlayerName)
                 {
                     int nameLength = msgContents[0];
                     string name = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(1, nameLength).ToArray());
@@ -139,6 +150,12 @@ namespace LobbyRelaySample.relay
                 ProcessDisconnectEvent(conn, strm);
         }
 
+        protected virtual bool CanProcessDataEventFor(NetworkConnection conn, MsgType type, string id)
+        {
+            // Don't react to our own messages. Also, don't need to hold onto messages if the ID is absent; clients should be initialized and in the lobby before they send events.
+            // (Note that this enforces lobby membership before processing any events besides an approval request, so a client is unable to fully use Relay unless they're in the lobby.)
+            return id != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LobbyUsers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
+        }
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id) { }
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
@@ -177,8 +194,12 @@ namespace LobbyRelaySample.relay
         private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
         {
             WriteByte(driver, connection, m_localUser.ID, MsgType.NewPlayer, 0);
-            ForceFullUserUpdate(driver, connection, m_localUser); // Assuming this is only created after the Relay connection is successful.
             m_hasSentInitialMessage = true;
+        }
+        private void OnApproved(NetworkDriver driver, NetworkConnection connection)
+        {
+            m_localUser.IsApproved = true;
+            ForceFullUserUpdate(driver, connection, m_localUser);
         }
 
         /// <summary>

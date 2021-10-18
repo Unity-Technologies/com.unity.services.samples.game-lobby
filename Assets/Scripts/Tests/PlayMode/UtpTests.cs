@@ -35,6 +35,7 @@ namespace Test
         }
 
         private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
+        //Only used when testing DTLS
         private bool m_didSigninComplete = false;
         GameObject m_dummy;
 
