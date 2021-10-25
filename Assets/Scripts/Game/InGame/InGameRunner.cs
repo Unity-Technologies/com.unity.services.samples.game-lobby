@@ -23,6 +23,7 @@ namespace LobbyRelaySample.inGame
         [SerializeField] private NetworkObject m_symbolObjectPrefab;
 
         private NetworkList<ulong> m_connectedPlayerIds;
+        private ulong m_localClientId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount)
         {
@@ -35,7 +36,8 @@ namespace LobbyRelaySample.inGame
         {
             if (IsHost)
                 FinishInitialize();
-            VerifyConnection_ServerRpc(OwnerClientId);
+            m_localClientId = NetworkManager.Singleton.LocalClientId;
+            VerifyConnection_ServerRpc(m_localClientId);
         }
 
         public override void OnNetworkDespawn()
@@ -78,8 +80,8 @@ namespace LobbyRelaySample.inGame
         [ClientRpc]
         private void VerifyConnection_ClientRpc(ulong clientId)
         {
-            if (clientId == OwnerClientId)
-                VerifyConnectionConfirm_ServerRpc(OwnerClientId);
+            if (clientId == m_localClientId)
+                VerifyConnectionConfirm_ServerRpc(m_localClientId);
         }
         /// <summary>
         /// Once the connection is confirmed, check if all players have connected.
@@ -87,6 +89,10 @@ namespace LobbyRelaySample.inGame
         [ServerRpc(RequireOwnership = false)]
         private void VerifyConnectionConfirm_ServerRpc(ulong clientId)
         {
+            NetworkObject playerCursor = NetworkObject.Instantiate(m_playerCursorPrefab);
+            playerCursor.SpawnWithOwnership(clientId);
+            playerCursor.name += clientId;
+
             if (!m_connectedPlayerIds.Contains(clientId))
                 m_connectedPlayerIds.Add(clientId);
             bool areAllPlayersConnected = m_connectedPlayerIds.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
@@ -95,7 +101,7 @@ namespace LobbyRelaySample.inGame
         [ClientRpc]
         private void VerifyConnectionConfirm_ClientRpc(ulong clientId, bool shouldStartImmediately)
         {
-            if (clientId == OwnerClientId)
+            if (clientId == m_localClientId)
                 m_onConnectionVerified?.Invoke();
             if (shouldStartImmediately)
                 Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
@@ -117,6 +123,7 @@ namespace LobbyRelaySample.inGame
                     Vector3 pendingPos = m_pendingSymbolPositions.Dequeue();
                     NetworkObject symbolObj = NetworkObject.Instantiate(m_symbolObjectPrefab);
                     symbolObj.Spawn();
+                    symbolObj.name = "Symbol" + (k_symbolCount - m_pendingSymbolPositions.Count);
                     symbolObj.TrySetParent(m_symbolContainerInstance, false);
                     symbolObj.transform.localPosition = pendingPos;
                 }

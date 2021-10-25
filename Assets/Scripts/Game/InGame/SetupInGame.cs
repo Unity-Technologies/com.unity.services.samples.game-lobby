@@ -16,7 +16,6 @@ namespace LobbyRelaySample.inGame
 
         private GameObject m_inGameManagerObj;
         private NetworkManager m_networkManager;
-        private InGameObjectSpawner m_objectSpawner;
         private InGameRunner m_inGameRunner;
         private int m_playerCount; // The server will need to know this.
 
@@ -63,7 +62,6 @@ namespace LobbyRelaySample.inGame
         {
             m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
             m_networkManager = m_inGameManagerObj.GetComponentInChildren<NetworkManager>();
-            m_objectSpawner = m_inGameManagerObj.GetComponentInChildren<InGameObjectSpawner>();
             m_inGameRunner = m_inGameManagerObj.GetComponentInChildren<InGameRunner>();
             m_inGameRunner.Initialize(OnConnectionVerified, m_playerCount);
 
