@@ -116,7 +116,7 @@ The Lobby View UI displays information from Lobby and Relay for all players in a
 &nbsp;&nbsp;&nbsp;&nbsp;**H**. &nbsp;&nbsp; **Emote buttons:**: Sets the player’s emote and is synchronized using UTP.\
 &nbsp;&nbsp;&nbsp;&nbsp;**I**. &nbsp;&nbsp; **Lobby color**: (Host only) Sets the lobby color for filtering in the Lobby List. This is synchronized through Lobby, so changes won’t appear immediately for all players because Lobby queries are rate limited. See Rate Limits.\
 &nbsp;&nbsp;&nbsp;&nbsp;**J**. &nbsp;&nbsp; **Ready button**: Sets a ready state on the player. When all players are ready, the host initiates a countdown to an “in-game” state, and the lobby becomes hidden from the public lobby list.\
-&nbsp;&nbsp;&nbsp;&nbsp;**K**. &nbsp;&nbsp; **????**
+
 
 ### Architecture
 
