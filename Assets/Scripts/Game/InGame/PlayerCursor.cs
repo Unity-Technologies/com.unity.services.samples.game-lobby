@@ -11,6 +11,7 @@ namespace LobbyRelaySample.inGame
     {
         private Camera m_mainCamera;
         private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero);
+        private ulong m_localId;
 
         // The host is responsible for determining if a player has successfully selected a symbol object, since collisions should be handled serverside.
         private List<SymbolObject> m_currentlyCollidingSymbols;
@@ -23,6 +24,7 @@ namespace LobbyRelaySample.inGame
             m_mainCamera = GameObject.Find("InGameCamera").GetComponent<Camera>();
             if (IsHost)
                 m_currentlyCollidingSymbols = new List<SymbolObject>();
+            m_localId = NetworkManager.Singleton.LocalClientId;
         }
 
         // Don't love having the input here, but it doesn't need to be anywhere else.
@@ -40,7 +42,7 @@ namespace LobbyRelaySample.inGame
             Vector3 targetPos = (Vector2)m_mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -m_mainCamera.transform.position.z));
             SetPosition_ServerRpc(targetPos); // Client can't set a network variable value.
             if (IsSelectInputHit())
-                SendInput_ServerRpc();
+                SendInput_ServerRpc(m_localId);
         }
 
         [ServerRpc] // Leave RequireOwnership = true for these so that only the player whose cursor this is can make updates.
@@ -50,13 +52,13 @@ namespace LobbyRelaySample.inGame
         }
 
         [ServerRpc]
-        private void SendInput_ServerRpc()
+        private void SendInput_ServerRpc(ulong id)
         {
             if (m_currentlyCollidingSymbols.Count > 0)
             {
                 SymbolObject symbol = m_currentlyCollidingSymbols[0];
                 m_currentlyCollidingSymbols.RemoveAt(0);
-                symbol.OnSelect();
+                symbol.OnSelect_ClientRpc(id);
             }
         }
 
