@@ -21,6 +21,7 @@ namespace LobbyRelaySample.inGame
 
         private bool m_isHost;
         private bool m_doesNeedCleanup = false;
+        private bool m_hasConnectedViaNGO = false;
 
         // TEMP? Relay stuff
         private ServerAddress m_serverAddress;
@@ -34,7 +35,7 @@ namespace LobbyRelaySample.inGame
          * --- Need to make RelayUtpClient not an MB so I can freely disable the menus? It is on the GameManager, as it happens, but...
          * x Spawn the object with the NetworkManager and allow that to connect.
          * - Wait for all players to connect, or boot a player after a few seconds (via Relay) if they did not connect.
-         * - While waiting, server selects the target sequence, spawns the symbol container, and starts pooling/spawning the symbol objects.
+         * x While waiting, server selects the target sequence, spawns the symbol container, and starts pooling/spawning the symbol objects.
          * - Once all players are in, show the target sequence and instructions, and then the server starts moving the symbol container and listening to click events.
          * - After the symbols are all passed (I guess tracking the symbol container position or a timeout), finish the game (set the winner flag).
          * x Clients clean up and return to the lobby screen. Host sets the lobby back to the regular state.
@@ -82,7 +83,7 @@ namespace LobbyRelaySample.inGame
 
         private void OnConnectionVerified()
         {
-            // TODO: Anything here?
+            m_hasConnectedViaNGO = true;
         }
 
         public void SetRelayAddress(LocalLobby changed)
@@ -111,10 +112,13 @@ namespace LobbyRelaySample.inGame
 
             else if (type == MessageType.GameBeginning)
             {
-                // If this player hasn't successfully connected via NGO, get booted.
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
-                // TODO: Need to handle both failing to connect and connecting but failing to initialize.
-                // I.e. cleaning up networked objects *might* be necessary.
+                if (!m_hasConnectedViaNGO)
+                {
+                    // If this player hasn't successfully connected via NGO, get booted.
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
+                    // TODO: Need to handle both failing to connect and connecting but failing to initialize.
+                    // I.e. cleaning up networked objects *might* be necessary.
+                }
             }
 
             else if (type == MessageType.ChangeGameState)

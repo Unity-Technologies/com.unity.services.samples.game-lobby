@@ -17,13 +17,12 @@ namespace LobbyRelaySample.inGame
         private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();
         private float m_symbolSpawnTimer = 0.5f; // Initial time buffer to ensure connectivity before loading objects.
 
-        [SerializeField] private NetworkObject m_playerCursorPrefab;
-        [SerializeField] private NetworkObject m_symbolContainerPrefab;
+        [SerializeField] private NetworkObject m_playerCursorPrefab = default;
+        [SerializeField] private NetworkObject m_symbolContainerPrefab = default;
         private Transform m_symbolContainerInstance;
-        [SerializeField] private NetworkObject m_symbolObjectPrefab;
-        [SerializeField] private SequenceSelector m_sequenceSelector;
+        [SerializeField] private NetworkObject m_symbolObjectPrefab = default;
+        [SerializeField] private SequenceSelector m_sequenceSelector = default;
 
-        private NetworkList<ulong> m_connectedPlayerIds;
         private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount)
@@ -50,10 +49,6 @@ namespace LobbyRelaySample.inGame
 
         private void FinishInitialize()
         {
-            if (m_connectedPlayerIds != null)
-                m_connectedPlayerIds.Clear();
-            else
-                m_connectedPlayerIds = new NetworkList<ulong>();
             m_symbolContainerInstance = NetworkObject.Instantiate(m_symbolContainerPrefab).transform;
             ResetPendingSymbolPositions();
         }
@@ -95,9 +90,7 @@ namespace LobbyRelaySample.inGame
             playerCursor.SpawnWithOwnership(clientId);
             playerCursor.name += clientId;
 
-            if (!m_connectedPlayerIds.Contains(clientId))
-                m_connectedPlayerIds.Add(clientId);
-            bool areAllPlayersConnected = m_connectedPlayerIds.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
+            bool areAllPlayersConnected = NetworkManager.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
             VerifyConnectionConfirm_ClientRpc(clientId, areAllPlayersConnected);
         }
         [ClientRpc]
