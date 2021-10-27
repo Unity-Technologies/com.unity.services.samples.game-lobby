@@ -20,6 +20,18 @@
         },
         {
             "m_Id": "dd90520bbe6e4e24842f348823e8ebc1"
+        },
+        {
+            "m_Id": "5bb9bdfa693641f7b92fae693d9cb4cc"
+        },
+        {
+            "m_Id": "453ce7803f5d49ec8f383b660c58a29f"
+        },
+        {
+            "m_Id": "b819451f2bd24b93b66c1f0dfcc2cb84"
+        },
+        {
+            "m_Id": "9c491bf0d3eb42c9aab59541c76cf68f"
         }
     ],
     "m_Keywords": [],
@@ -1785,6 +1797,29 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "453ce7803f5d49ec8f383b660c58a29f",
+    "m_Guid": {
+        "m_GuidSerialized": "e2ccb5fa-830a-441e-9736-572957b502e3"
+    },
+    "m_Name": "WobbleSize",
+    "m_DefaultReferenceName": "Vector1_453ce7803f5d49ec8f383b660c58a29f",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 4.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "45d72deb00664080b104cf15632f6733",
@@ -1893,6 +1928,29 @@
         "y": 0.0
     },
     "m_Labels": []
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "5bb9bdfa693641f7b92fae693d9cb4cc",
+    "m_Guid": {
+        "m_GuidSerialized": "8a371c71-8a45-402d-bbd6-587e15bc78a2"
+    },
+    "m_Name": "WobbleSpeed",
+    "m_DefaultReferenceName": "Vector1_5bb9bdfa693641f7b92fae693d9cb4cc",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 1.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
 }
 
 {
@@ -2550,6 +2608,29 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "9c491bf0d3eb42c9aab59541c76cf68f",
+    "m_Guid": {
+        "m_GuidSerialized": "2914a100-5ca5-4191-8f5f-14a4e1622387"
+    },
+    "m_Name": "WobbleDistance",
+    "m_DefaultReferenceName": "Vector1_9c491bf0d3eb42c9aab59541c76cf68f",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 1.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BlockNode",
     "m_ObjectId": "9e2e7acd70834fb9ba8521e6dd1f7155",
@@ -2773,6 +2854,29 @@
     "m_Value": 0.0,
     "m_DefaultValue": 0.0,
     "m_Labels": []
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "b819451f2bd24b93b66c1f0dfcc2cb84",
+    "m_Guid": {
+        "m_GuidSerialized": "bacd3416-959f-4016-9bd2-4ed5116cead3"
+    },
+    "m_Name": "TwirlStrength",
+    "m_DefaultReferenceName": "Vector1_b819451f2bd24b93b66c1f0dfcc2cb84",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 5.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
 }
 
 {
