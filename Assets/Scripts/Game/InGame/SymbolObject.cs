@@ -29,24 +29,16 @@ namespace LobbyRelaySample.inGame
         }
 
         /// <summary>
-        /// The host has detected a player clicking on this symbol, but it also needs to check if this symbol is next in that player's target sequence.
+        /// The host has confirmed this symbol as a valid selection (this player's cursor collides with it and it's also next in their target sequence), so handle any visual feedback.
         /// </summary>
         [ClientRpc]
-        public void OnSelect_ClientRpc(ulong id)
+        public void OnSelectConfirmed_ClientRpc()
         {
-            if (m_localId == id)
-                Locator.Get.InGameInputHandler.OnPlayerInput(this);
-        }
-        /// <summary>
-        /// The host has confirmed this symbol as a valid selection, so handle any visual feedback.
-        /// </summary>
-        public void OnSelectConfirmed()
-        {
-            Destroy_ServerRpc();
+            // TODO: Visual effects here.
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void Destroy_ServerRpc()
+        [ServerRpc]
+        public void Destroy_ServerRpc()
         {
             // Actually destroying the symbol objects can cause garbage collection and other delays that might lead to desyncs.
             // Instead, just deactivate the object, and it will be cleaned up once the NetworkManager is destroyed.

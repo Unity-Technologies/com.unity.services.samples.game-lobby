@@ -22,6 +22,7 @@ namespace LobbyRelaySample.inGame
         private Transform m_symbolContainerInstance;
         [SerializeField] private NetworkObject m_symbolObjectPrefab = default;
         [SerializeField] private SequenceSelector m_sequenceSelector = default;
+        [SerializeField] private Scorer m_scorer = default;
 
         private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
@@ -135,10 +136,18 @@ namespace LobbyRelaySample.inGame
             }
         }
 
-        public void OnPlayerInput(SymbolObject selectedSymbol)
+        /// <summary>
+        /// Called while on the host to determine if incoming input has scored or not.
+        /// </summary>
+        public void OnPlayerInput(ulong id, SymbolObject selectedSymbol)
         {
-            if (m_sequenceSelector.ConfirmSymbolCorrect(selectedSymbol.symbolIndex.Value))
-                selectedSymbol.OnSelectConfirmed();
+            if (m_sequenceSelector.ConfirmSymbolCorrect(id, selectedSymbol.symbolIndex.Value))
+            {   selectedSymbol.OnSelectConfirmed_ClientRpc();
+                selectedSymbol.Destroy_ServerRpc();
+                m_scorer.ScoreSuccess(id);
+            }
+            else
+                m_scorer.ScoreFailure(id);
         }
 
         public void OnReProvided(IInGameInputHandler previousProvider) { /*No-op*/ }

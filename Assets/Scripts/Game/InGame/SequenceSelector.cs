@@ -15,9 +15,12 @@ namespace LobbyRelaySample.inGame
         [SerializeField] private SymbolData m_symbolData = default;
         [SerializeField] private RawImage[] m_targetSequenceOutput = default;
         public const int k_symbolCount = 100;
+        private bool m_hasReceivedTargetSequence = false; // TODO: Perhaps split up members by client vs. host?
+        private ulong m_localId;
+
         private List<int> m_fullSequence = new List<int>(); // This is owned by the host, and each index is assigned as a NetworkVariable to each SymbolObject.
         private NetworkList<int> m_targetSequence; // This is owned by the host but needs to be available to all clients, so it's a NetworkedList here.
-        private int m_targetSequenceCurrentIndex = -1;
+        private Dictionary<ulong, int> m_targetSequenceIndexPerPlayer = new Dictionary<ulong, int>(); // Also owned by the host, indexed by client ID.
 
         public void Awake()
         {
@@ -58,6 +61,14 @@ namespace LobbyRelaySample.inGame
                     }
                 }
             }
+            m_localId = NetworkManager.Singleton.LocalClientId;
+            AddClient_ServerRpc(m_localId);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void AddClient_ServerRpc(ulong id)
+        {
+            m_targetSequenceIndexPerPlayer.Add(id, 0);
         }
 
         // Very simple random selection. Duplicates are allowed.
@@ -72,32 +83,41 @@ namespace LobbyRelaySample.inGame
         public void Update()
         {
             // We can't guarantee timing with the host's selection of the target sequence, so retrieve it once it's available.
-            if (m_targetSequenceCurrentIndex < 0 && m_targetSequence.Count > 0)
+            if (!m_hasReceivedTargetSequence && m_targetSequence.Count > 0)
             {
                 for (int n = 0; n < m_targetSequence.Count; n++)
                     m_targetSequenceOutput[n].texture = m_symbolData.GetSymbolForIndex(m_targetSequence[n]).texture;
-                m_targetSequenceCurrentIndex = 0;
-                ScaleTargetUi();
+                m_hasReceivedTargetSequence = true;
+                ScaleTargetUi(m_localId, 0);
             }
         }
 
         /// <summary>
         /// If the index is correct, this will advance the current sequence index.
         /// </summary>
-        public bool ConfirmSymbolCorrect(int symbolIndex)
+        public bool ConfirmSymbolCorrect(ulong id, int symbolIndex)
         {
-            if (symbolIndex != m_targetSequence[m_targetSequenceCurrentIndex])
+            int index = m_targetSequenceIndexPerPlayer[id];
+            if (symbolIndex != m_targetSequence[index])
                 return false;
-            if (++m_targetSequenceCurrentIndex >= m_targetSequence.Count)
-                m_targetSequenceCurrentIndex = 0;
-            
-            ScaleTargetUi();
+            if (++index >= m_targetSequence.Count)
+                index = 0;
+            m_targetSequenceIndexPerPlayer[id] = index;
+
+            ScaleTargetUi_ClientRpc(id, index);
             return true;
         }
-        private void ScaleTargetUi()
+
+        [ClientRpc]
+        private void ScaleTargetUi_ClientRpc(ulong id, int sequenceIndex)
         {
-            for (int i = 0; i < m_targetSequenceOutput.Length; i++)
-                m_targetSequenceOutput[i].transform.localScale = Vector3.one * (m_targetSequenceCurrentIndex == i ? 1 : 0.7f);
+            ScaleTargetUi(id, sequenceIndex);
+        }
+        private void ScaleTargetUi(ulong id, int sequenceIndex)
+        {
+            if (NetworkManager.Singleton.LocalClientId == id)
+                for (int i = 0; i < m_targetSequenceOutput.Length; i++)
+                    m_targetSequenceOutput[i].transform.localScale = Vector3.one * (sequenceIndex == i ? 1 : 0.7f);
         }
 
         public int GetNextSymbol(int symbolObjectIndex)
