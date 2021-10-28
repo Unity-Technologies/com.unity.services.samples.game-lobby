@@ -47,3 +47,6 @@ TagManager:
   - name: game_icon
     uniqueID: 4041165301
     locked: 0
+  - name: game_effects
+    uniqueID: 2257983969
+    locked: 0
