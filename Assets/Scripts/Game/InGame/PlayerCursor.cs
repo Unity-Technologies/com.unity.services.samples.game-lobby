@@ -7,6 +7,7 @@ namespace LobbyRelaySample.inGame
     /// <summary>
     /// Each player's cursor needs to be controlled by them and visible to the other players.
     /// </summary>
+    [RequireComponent(typeof(Collider))]
     public class PlayerCursor : NetworkBehaviour
     {
         private Camera m_mainCamera;

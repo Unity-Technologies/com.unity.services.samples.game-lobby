@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,26 +12,29 @@ namespace LobbyRelaySample.inGame
     /// </summary>
     public class InGameRunner : NetworkBehaviour, IInGameInputHandler
     {
-        private Action m_onConnectionVerified;
+        private Action m_onConnectionVerified, m_onGameEnd;
         private int m_expectedPlayerCount; // Used by the host, but we can't call the RPC until the network connection completes.
-        private bool m_canSpawnInGameObjects;
+        private bool? m_canSpawnInGameObjects;
         private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();
         private float m_symbolSpawnTimer = 0.5f; // Initial time buffer to ensure connectivity before loading objects.
+        private int m_remainingSymbolCount = 0; // Only used by the host.
 
-        [SerializeField] private NetworkObject m_playerCursorPrefab = default;
-        [SerializeField] private NetworkObject m_symbolContainerPrefab = default;
-        private Transform m_symbolContainerInstance;
-        [SerializeField] private NetworkObject m_symbolObjectPrefab = default;
+        [SerializeField] private NetworkObject    m_playerCursorPrefab = default;
+        [SerializeField] private NetworkObject    m_symbolContainerPrefab = default;
+        [SerializeField] private NetworkObject    m_symbolObjectPrefab = default;
         [SerializeField] private SequenceSelector m_sequenceSelector = default;
-        [SerializeField] private Scorer m_scorer = default;
+        [SerializeField] private Scorer           m_scorer = default;
+        [SerializeField] private SymbolKillVolume m_killVolume = default;
+        private Transform m_symbolContainerInstance;
 
         private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
-        public void Initialize(Action onConnectionVerified, int expectedPlayerCount)
+        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd)
         {
             m_onConnectionVerified = onConnectionVerified;
             m_expectedPlayerCount = expectedPlayerCount;
-            m_canSpawnInGameObjects = false;
+            m_onGameEnd = onGameEnd;
+            m_canSpawnInGameObjects = null;
             Locator.Get.Provide(this); // Simplifies access since some networked objects can't easily communicate locally (e.g. the host might call a ClientRpc without that client knowing where the call originated).
         }
 
@@ -44,14 +48,14 @@ namespace LobbyRelaySample.inGame
 
         public override void OnNetworkDespawn()
         {
-            // This will be where to do full clean up?
-            UnityEngine.Debug.LogError("InGameRunner despawn");
+            m_onGameEnd(); // As a backup to ensure in-game objects get cleaned up, if this is disconnected unexpectedly.
         }
 
         private void FinishInitialize()
         {
             m_symbolContainerInstance = NetworkObject.Instantiate(m_symbolContainerPrefab).transform;
             ResetPendingSymbolPositions();
+            m_killVolume.Initialize(OnSymbolDeactivated);
         }
 
         private void ResetPendingSymbolPositions()
@@ -72,7 +76,7 @@ namespace LobbyRelaySample.inGame
         {
             VerifyConnection_ClientRpc(clientId);
 
-            // If not spawning things in the background, start that.
+            // If not spawning things in the background, start doing so.
             m_canSpawnInGameObjects = true;
         }
         [ClientRpc]
@@ -111,15 +115,17 @@ namespace LobbyRelaySample.inGame
             // TODO: Remove the timer to test for packet loss.
             void CheckIfCanSpawnNewSymbol()
             {
-                if (!m_canSpawnInGameObjects || m_symbolContainerInstance?.childCount >= SequenceSelector.k_symbolCount || !IsHost)
+                if (!m_canSpawnInGameObjects.GetValueOrDefault() || m_remainingSymbolCount >= SequenceSelector.k_symbolCount || !IsHost)
                     return;
                 if (m_pendingSymbolPositions.Count > 0)
                 {
                     m_symbolSpawnTimer -= Time.deltaTime;
                     if (m_symbolSpawnTimer < 0)
                     {
-                        m_symbolSpawnTimer = 0.04f; // Space out the object spawning a little to reduce the load. It will happen in the background, so we have time.
+                        m_symbolSpawnTimer = 0.02f; // Space out the object spawning a little to prevent a lag spike.
                         SpawnNewSymbol();
+                        if (m_remainingSymbolCount >= SequenceSelector.k_symbolCount)
+                            m_canSpawnInGameObjects = false;
                     }
                 }
             }
@@ -133,6 +139,7 @@ namespace LobbyRelaySample.inGame
                 symbolObj.TrySetParent(m_symbolContainerInstance, false);
                 symbolObj.transform.localPosition = pendingPos;
                 symbolObj.GetComponent<SymbolObject>().symbolIndex.Value = m_sequenceSelector.GetNextSymbol(index);
+                m_remainingSymbolCount++;
             }
         }
 
@@ -142,12 +149,46 @@ namespace LobbyRelaySample.inGame
         public void OnPlayerInput(ulong id, SymbolObject selectedSymbol)
         {
             if (m_sequenceSelector.ConfirmSymbolCorrect(id, selectedSymbol.symbolIndex.Value))
-            {   selectedSymbol.OnSelectConfirmed_ClientRpc();
+            {
+                selectedSymbol.OnSelectConfirmed_ClientRpc();
                 selectedSymbol.Destroy_ServerRpc();
                 m_scorer.ScoreSuccess(id);
+                OnSymbolDeactivated();
             }
             else
                 m_scorer.ScoreFailure(id);
+        }
+
+        public void OnSymbolDeactivated()
+        {
+            if (--m_remainingSymbolCount <= 0)
+                EndGame_ServerRpc();
+        }
+
+        /// <summary>
+        /// The server determines when the game should end. Once it does, it needs to inform the clients to clean up their networked objects first,
+        /// since disconnecting before that happens will prevent them from doing so (since they can't receive despawn events from the disconnected server).
+        /// </summary>
+        [ServerRpc]
+        private void EndGame_ServerRpc()
+        {
+            // TODO: Display results
+            this.StartCoroutine(EndGame());
+        }
+
+        private IEnumerator EndGame()
+        {
+            EndGame_ClientRpc();
+            yield return null;
+            m_onGameEnd();
+        }
+
+        [ClientRpc]
+        private void EndGame_ClientRpc()
+        {
+            if (IsHost)
+                return;
+            m_onGameEnd();
         }
 
         public void OnReProvided(IInGameInputHandler previousProvider) { /*No-op*/ }

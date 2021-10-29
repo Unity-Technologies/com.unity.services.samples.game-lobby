@@ -64,7 +64,7 @@ namespace LobbyRelaySample.inGame
             m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
             m_networkManager = m_inGameManagerObj.GetComponentInChildren<NetworkManager>();
             m_inGameRunner = m_inGameManagerObj.GetComponentInChildren<InGameRunner>();
-            m_inGameRunner.Initialize(OnConnectionVerified, m_playerCount);
+            m_inGameRunner.Initialize(OnConnectionVerified, m_playerCount, OnGameEnd);
 
             // TODO: I'll need this when we switch to the Relay Unity Transport option.
             //UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
@@ -124,12 +124,17 @@ namespace LobbyRelaySample.inGame
             else if (type == MessageType.ChangeGameState)
             {
                 // Once we're in-game, any state change reflects the player leaving the game, so we should clean up.
-                if (m_doesNeedCleanup)
-                {
-                    GameObject.Destroy(m_inGameManagerObj); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
-                    SetMenuVisibility(true);
-                    m_doesNeedCleanup = false;
-                }
+                OnGameEnd();
+            }
+        }
+
+        private void OnGameEnd()
+        {
+            if (m_doesNeedCleanup)
+            {
+                GameObject.Destroy(m_inGameManagerObj); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
+                SetMenuVisibility(true);
+                m_doesNeedCleanup = false;
             }
         }
     }
