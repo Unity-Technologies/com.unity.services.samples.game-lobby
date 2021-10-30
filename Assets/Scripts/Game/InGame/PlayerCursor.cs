@@ -10,6 +10,8 @@ namespace LobbyRelaySample.inGame
     [RequireComponent(typeof(Collider))]
     public class PlayerCursor : NetworkBehaviour
     {
+        [SerializeField] private SpriteRenderer m_renderer = default;
+        [SerializeField] private ParticleSystem m_onClickParticles = default;
         private Camera m_mainCamera;
         private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero);
         private ulong m_localId;
@@ -26,6 +28,13 @@ namespace LobbyRelaySample.inGame
             if (IsHost)
                 m_currentlyCollidingSymbols = new List<SymbolObject>();
             m_localId = NetworkManager.Singleton.LocalClientId;
+            // Other players' cursors should be less prominent than the local player's cursor.
+            if (OwnerClientId != m_localId)
+            {   m_renderer.transform.localScale *= 0.75f;
+                m_renderer.color = new Color(1, 1, 1, 0.5f);
+                var trails = m_onClickParticles.trails;
+                trails.colorOverLifetime = new ParticleSystem.MinMaxGradient(Color.grey);
+            }
         }
 
         // Don't love having the input here, but it doesn't need to be anywhere else.
@@ -61,6 +70,14 @@ namespace LobbyRelaySample.inGame
                 m_currentlyCollidingSymbols.RemoveAt(0);
                 Locator.Get.InGameInputHandler.OnPlayerInput(id, symbol);
             }
+            OnInputVisuals_ClientRpc();
+        }
+
+        [ClientRpc]
+        private void OnInputVisuals_ClientRpc()
+        {
+            m_onClickParticles.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+            m_onClickParticles.Play();
         }
 
         public void OnTriggerEnter(Collider other)

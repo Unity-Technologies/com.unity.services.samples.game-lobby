@@ -13,7 +13,7 @@ namespace LobbyRelaySample.inGame
     public class SequenceSelector : NetworkBehaviour
     {
         [SerializeField] private SymbolData m_symbolData = default;
-        [SerializeField] private RawImage[] m_targetSequenceOutput = default;
+        [SerializeField] private Image[] m_targetSequenceOutput = default;
         public const int k_symbolCount = 100;
         private bool m_hasReceivedTargetSequence = false; // TODO: Perhaps split up members by client vs. host?
         private ulong m_localId;
@@ -86,7 +86,7 @@ namespace LobbyRelaySample.inGame
             if (!m_hasReceivedTargetSequence && m_targetSequence.Count > 0)
             {
                 for (int n = 0; n < m_targetSequence.Count; n++)
-                    m_targetSequenceOutput[n].texture = m_symbolData.GetSymbolForIndex(m_targetSequence[n]).texture;
+                    m_targetSequenceOutput[n].sprite = m_symbolData.GetSymbolForIndex(m_targetSequence[n]);
                 m_hasReceivedTargetSequence = true;
                 ScaleTargetUi(m_localId, 0);
             }
