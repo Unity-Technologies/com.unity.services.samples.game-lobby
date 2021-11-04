@@ -29,6 +29,8 @@ namespace LobbyRelaySample.inGame
 
         private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
+        private float m_timeout = 10;
+
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd)
         {
             m_onConnectionVerified = onConnectionVerified;
@@ -104,12 +106,21 @@ namespace LobbyRelaySample.inGame
             if (clientId == m_localId)
                 m_onConnectionVerified?.Invoke();
             if (shouldStartImmediately)
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
+            {
+                m_timeout = -1;
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null); // TODO: Might need to delay this a frame to ensure the client finished initializing (since I sometimes hit the "failed to join" message even when joining).
+            }
         }
 
         public void Update()
         {
             CheckIfCanSpawnNewSymbol();
+            if (m_timeout >= 0)
+            {
+                m_timeout -= Time.deltaTime;
+                if (m_timeout < 0)
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
+            }
 
             // TODO: BSP for choosing symbol spawn positions?
             // TODO: Remove the timer to test for packet loss.

@@ -113,6 +113,11 @@ namespace LobbyRelaySample.relay
                 foreach (NetworkConnection connection in m_connections)
                     WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.EndInGame, 0);
             }
+            else if (type == MessageType.NGORelayCode)
+            {
+                foreach (NetworkConnection connection in m_connections)
+                    WriteString(m_networkDriver, connection, m_localUser.ID, MsgType.NGORelayCode, (string)msg);
+            }
         }
 
         private void CheckIfAllUsersReady()

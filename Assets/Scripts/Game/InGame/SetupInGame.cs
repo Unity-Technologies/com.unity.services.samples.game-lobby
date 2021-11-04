@@ -11,21 +11,19 @@ namespace LobbyRelaySample.inGame
     public class SetupInGame : MonoBehaviour, IReceiveMessages
     {
         [SerializeField] private GameObject m_prefabNetworkManager = default;
-        [SerializeField] private LocalLobbyObserver m_lobbyObserver = default;
         [SerializeField] private GameObject[] m_disableWhileInGame = default;
 
         private GameObject m_inGameManagerObj;
         private NetworkManager m_networkManager;
         private InGameRunner m_inGameRunner;
-        private int m_playerCount; // The server will need to know this.
 
         private bool m_isHost;
         private bool m_doesNeedCleanup = false;
         private bool m_hasConnectedViaNGO = false;
 
         // TEMP? Relay stuff
-        private ServerAddress m_serverAddress;
         private Action<UnityTransport> m_initializeTransport;
+        private LocalLobby m_lobby;
 
 
         /*
@@ -45,12 +43,10 @@ namespace LobbyRelaySample.inGame
         public void Start()
         {
             Locator.Get.Messenger.Subscribe(this);
-            m_lobbyObserver.OnObservedUpdated.AddListener(UpdatePlayerCount);
         }
         public void OnDestroy()
         {
             Locator.Get.Messenger.Unsubscribe(this);
-            m_lobbyObserver.OnObservedUpdated.RemoveListener(UpdatePlayerCount);
         }
 
         private void SetMenuVisibility(bool areVisible)
@@ -64,33 +60,26 @@ namespace LobbyRelaySample.inGame
             m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
             m_networkManager = m_inGameManagerObj.GetComponentInChildren<NetworkManager>();
             m_inGameRunner = m_inGameManagerObj.GetComponentInChildren<InGameRunner>();
-            m_inGameRunner.Initialize(OnConnectionVerified, m_playerCount, OnGameEnd);
+            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd);
 
-            // TODO: I'll need this when we switch to the Relay Unity Transport option.
-            //UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
-            //transport.SetConnectionData(m_serverAddress.IP, (ushort)m_serverAddress.Port);
-            //m_initializeTransport(transport);
+            UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
 
             if (m_isHost)
-                m_networkManager.StartHost();
+                m_inGameManagerObj.AddComponent<relay.RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
             else
-                m_networkManager.StartClient();
+                m_inGameManagerObj.AddComponent<relay.RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
         }
 
-        private void UpdatePlayerCount(LocalLobby lobby)
-        {   m_playerCount = lobby.PlayerCount;
-        }
 
         private void OnConnectionVerified()
         {
             m_hasConnectedViaNGO = true;
         }
 
-        public void SetRelayAddress(LocalLobby changed)
+        public void OnLobbyChange(LocalLobby lobby)
         {
-            m_serverAddress = changed.RelayServer; // Note that this could be null.
+            m_lobby = lobby; // Most of the time this is redundant, but we need to get multiple members of the lobby to the Relay setup components, so might as well just hold onto the whole thing.
         }
-
         public void OnLocalUserChange(LobbyUser user)
         {
             m_isHost = user.IsHost;
@@ -118,6 +107,7 @@ namespace LobbyRelaySample.inGame
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
                     // TODO: Need to handle both failing to connect and connecting but failing to initialize.
                     // I.e. cleaning up networked objects *might* be necessary.
+                    OnGameEnd(); // TODO: This returns to the lobby. I think that's desirable?
                 }
             }
 

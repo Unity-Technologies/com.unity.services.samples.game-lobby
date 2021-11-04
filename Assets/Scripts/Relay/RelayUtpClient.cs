@@ -21,7 +21,7 @@ namespace LobbyRelaySample.relay
         protected bool m_hasSentInitialMessage = false;
         private const float k_heartbeatPeriod = 5;
 
-        protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
+        protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect, NGORelayCode }
 
         public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
         {
@@ -134,6 +134,12 @@ namespace LobbyRelaySample.relay
                 {
                     UserStatus status = (UserStatus)msgContents[0];
                     m_localLobby.LobbyUsers[id].UserStatus = status;
+                }
+                else if (msgType == MsgType.NGORelayCode)
+                {
+                    int codeLength = msgContents[0];
+                    string code = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(1, codeLength).ToArray());
+                    m_localLobby.RelayNGOCode = code;
                 }
                 else if (msgType == MsgType.StartCountdown)
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
