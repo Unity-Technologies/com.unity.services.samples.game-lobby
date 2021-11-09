@@ -6,7 +6,7 @@ namespace LobbyRelaySample.inGame
     [RequireComponent(typeof(Rigidbody))]
     public class SymbolContainer : NetworkBehaviour, IReceiveMessages
     {
-        private Rigidbody m_rb;
+        [SerializeField] private Rigidbody m_rb = default;
         private bool m_isConnected = false;
         private bool m_hasGameStarted = false;
         private void OnGameStarted()
@@ -16,14 +16,17 @@ namespace LobbyRelaySample.inGame
                 BeginMotion();
         }
 
+        public void Awake() // If there's just one player, Start would occur after the GameBeginning message is sent, so use Awake/OnEnable instead.
+        {
+            Locator.Get.Messenger.Subscribe(this);
+        }
+
         public void Start()
         {
             if (!IsHost)
             {   this.enabled = false; // Just disabling this script.
                 return;
             }
-            m_rb = this.GetComponent<Rigidbody>();
-            Locator.Get.Messenger.Subscribe(this);
             GetComponent<NetworkObject>().Spawn();
         }
 

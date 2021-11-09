@@ -67,7 +67,6 @@ namespace LobbyRelaySample.inGame
             if (m_currentlyCollidingSymbols.Count > 0)
             {
                 SymbolObject symbol = m_currentlyCollidingSymbols[0];
-                m_currentlyCollidingSymbols.RemoveAt(0);
                 Locator.Get.InGameInputHandler.OnPlayerInput(id, symbol);
             }
             OnInputVisuals_ClientRpc();
