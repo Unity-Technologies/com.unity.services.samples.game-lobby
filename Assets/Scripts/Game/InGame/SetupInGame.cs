@@ -124,6 +124,7 @@ namespace LobbyRelaySample.inGame
             {
                 GameObject.Destroy(m_inGameManagerObj); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
                 SetMenuVisibility(true);
+                m_lobby.RelayNGOCode = null;
                 m_doesNeedCleanup = false;
             }
         }

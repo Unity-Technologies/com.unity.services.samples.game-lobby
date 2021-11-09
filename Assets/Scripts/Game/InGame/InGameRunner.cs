@@ -77,9 +77,8 @@ namespace LobbyRelaySample.inGame
         private void VerifyConnection_ServerRpc(ulong clientId)
         {
             VerifyConnection_ClientRpc(clientId);
-
-            // If not spawning things in the background, start doing so.
-            m_canSpawnInGameObjects = true;
+            // While we could start pooling symbol objects now, incoming clients would be flooded with the Spawn calls.
+            // This could lead to dropped packets (which would mean data loss), so wait until connections have completed.
         }
         [ClientRpc]
         private void VerifyConnection_ClientRpc(ulong clientId)
@@ -108,8 +107,14 @@ namespace LobbyRelaySample.inGame
             if (shouldStartImmediately)
             {
                 m_timeout = -1;
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null); // TODO: Might need to delay this a frame to ensure the client finished initializing (since I sometimes hit the "failed to join" message even when joining).
+                BeginGame();
             }
+        }
+
+        private void BeginGame()
+        {
+            m_canSpawnInGameObjects = true;
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null); // TODO: Might need to delay this a frame to ensure the client finished initializing (since I sometimes hit the "failed to join" message even when joining).
         }
 
         public void Update()
@@ -119,7 +124,7 @@ namespace LobbyRelaySample.inGame
             {
                 m_timeout -= Time.deltaTime;
                 if (m_timeout < 0)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
+                    BeginGame();
             }
 
             // TODO: BSP for choosing symbol spawn positions?

@@ -290,7 +290,6 @@ namespace LobbyRelaySample.relay
 
         private void OnRelayCode(string relayCode)
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.NGORelayCode, relayCode);
             m_localLobby.RelayNGOCode = relayCode;
         }
 
