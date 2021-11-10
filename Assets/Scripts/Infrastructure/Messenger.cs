@@ -78,6 +78,7 @@ namespace LobbyRelaySample
         CancelCountdown = 201,
         CompleteCountdown = 202,
         GameBeginning = 203,
+        InstructionsShown = 204,
 
         DisplayErrorPopup = 300,
     }

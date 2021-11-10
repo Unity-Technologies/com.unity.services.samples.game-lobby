@@ -25,6 +25,7 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private SequenceSelector m_sequenceSelector = default;
         [SerializeField] private Scorer           m_scorer = default;
         [SerializeField] private SymbolKillVolume m_killVolume = default;
+        [SerializeField] private IntroOutroRunner m_introOutroRunner = default;
         private Transform m_symbolContainerInstance;
 
         private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
@@ -115,6 +116,7 @@ namespace LobbyRelaySample.ngo
         {
             m_canSpawnInGameObjects = true;
             Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null); // TODO: Might need to delay this a frame to ensure the client finished initializing (since I sometimes hit the "failed to join" message even when joining).
+            m_introOutroRunner.DoIntro();
         }
 
         public void Update()

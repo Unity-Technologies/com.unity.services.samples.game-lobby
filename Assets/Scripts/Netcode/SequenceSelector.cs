@@ -10,13 +10,14 @@ namespace LobbyRelaySample.ngo
     /// Handles selecting the randomized sequence of symbols to spawn. This also selects a subset of the selected symbols to be the target
     /// sequence that each player needs to select in order.
     /// </summary>
-    public class SequenceSelector : NetworkBehaviour
+    public class SequenceSelector : NetworkBehaviour, IReceiveMessages
     {
         [SerializeField] private SymbolData m_symbolData = default;
         [SerializeField] private Image[] m_targetSequenceOutput = default;
         public const int k_symbolCount = 100;
         private bool m_hasReceivedTargetSequence = false; // TODO: Perhaps split up members by client vs. host?
         private ulong m_localId;
+        private bool m_canAnimateTargets = false;
 
         private List<int> m_fullSequence = new List<int>(); // This is owned by the host, and each index is assigned as a NetworkVariable to each SymbolObject.
         private NetworkList<int> m_targetSequence; // This is owned by the host but needs to be available to all clients, so it's a NetworkedList here.
@@ -25,6 +26,12 @@ namespace LobbyRelaySample.ngo
         public void Awake()
         {
             m_targetSequence = new NetworkList<int>();
+            Locator.Get.Messenger.Subscribe(this);
+        }
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            Locator.Get.Messenger.Unsubscribe(this);
         }
 
         public override void OnNetworkSpawn()
@@ -117,12 +124,21 @@ namespace LobbyRelaySample.ngo
         {
             if (NetworkManager.Singleton.LocalClientId == id)
                 for (int i = 0; i < m_targetSequenceOutput.Length; i++)
-                    m_targetSequenceOutput[i].transform.localScale = Vector3.one * (sequenceIndex == i ? 1 : 0.7f);
+                    m_targetSequenceOutput[i].transform.localScale = Vector3.one * (sequenceIndex == i || !m_canAnimateTargets ? 1 : 0.7f);
         }
 
         public int GetNextSymbol(int symbolObjectIndex)
         {
             return m_fullSequence[symbolObjectIndex];
+        }
+
+        public void OnReceiveMessage(MessageType type, object msg)
+        {
+            if (type == MessageType.InstructionsShown)
+            {
+                m_canAnimateTargets = true;
+                ScaleTargetUi(m_localId, 0);
+            }
         }
     }
 }

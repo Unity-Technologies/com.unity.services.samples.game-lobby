@@ -57,7 +57,7 @@ namespace LobbyRelaySample.ngo
 
         public void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.GameBeginning)
+            if (type == MessageType.InstructionsShown)
             {   Locator.Get.Messenger.Unsubscribe(this);
                 OnGameStarted();
             }
