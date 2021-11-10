@@ -4,7 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Handles selecting the randomized sequence of symbols to spawn. This also selects a subset of the selected symbols to be the target

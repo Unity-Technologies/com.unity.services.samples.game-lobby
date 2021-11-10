@@ -1,7 +1,7 @@
 ﻿using Unity.Netcode;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     // Note: The SymbolObjects, which will be children of this object, need their NetworkTransforms to have IsLocalSpace set to true. Otherwise, they might get desynced.
     // (This would manifest as packet loss errors.)

@@ -2,7 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Each player's cursor needs to be controlled by them and visible to the other players.

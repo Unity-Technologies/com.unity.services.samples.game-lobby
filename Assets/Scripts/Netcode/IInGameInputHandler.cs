@@ -1,4 +1,4 @@
-﻿namespace LobbyRelaySample.inGame
+﻿namespace LobbyRelaySample.ngo
 {
     public interface IInGameInputHandler : IProvidable<IInGameInputHandler>
     {

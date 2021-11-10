@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Once the NetworkManager has been spawned, we need something to manage the game state and setup other in-game objects

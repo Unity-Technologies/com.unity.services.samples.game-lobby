@@ -2,7 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Once the local player is in a lobby and that lobby has entered the In-Game state, this will load in whatever is necessary to actually run the game part.
@@ -47,9 +47,9 @@ namespace LobbyRelaySample.inGame
 
             UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
             if (m_isHost)
-                m_inGameManagerObj.AddComponent<inGame.RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
+                m_inGameManagerObj.AddComponent<RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
             else
-                m_inGameManagerObj.AddComponent<inGame.RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
+                m_inGameManagerObj.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
         }
 
 

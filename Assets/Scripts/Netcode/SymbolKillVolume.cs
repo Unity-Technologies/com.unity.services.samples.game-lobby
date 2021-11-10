@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Used by the host to deactivate symbol objects once they're off-screen.

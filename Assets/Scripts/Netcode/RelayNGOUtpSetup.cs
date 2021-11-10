@@ -3,7 +3,7 @@ using Unity.Services.Relay.Models;
 using UnityEngine;
 using LobbyRelaySample.relay;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /*
      * When using the Relay adapter for UTP to connect the NetworkManager for Netcode for GameObjects (NGO), we need to provide the Allocation info without manually binding to it.
@@ -16,11 +16,11 @@ namespace LobbyRelaySample.inGame
     /// </summary>
     public class RelayUtpNGOSetupHost : MonoBehaviour // If this is a MonoBehaviour, it can be added to the InGameRunner object for easier cleanup on game end.
     {
-        private inGame.SetupInGame m_setupInGame;
+        private SetupInGame m_setupInGame;
         private LocalLobby m_localLobby;
         private Action m_onJoin;
 
-        public void Initialize(inGame.SetupInGame setupInGame, LocalLobby lobby, Action onJoin)
+        public void Initialize(SetupInGame setupInGame, LocalLobby lobby, Action onJoin)
         {
             m_setupInGame = setupInGame;
             m_localLobby = lobby;
@@ -49,11 +49,11 @@ namespace LobbyRelaySample.inGame
     /// </summary>
     public class RelayUtpNGOSetupClient : MonoBehaviour // This is also a MonoBehaviour for access to OnDestroy, to ensure unsubscription from the local lobby on game end.
     {
-        private inGame.SetupInGame m_setupInGame;
+        private SetupInGame m_setupInGame;
         private LocalLobby m_localLobby;
         private Action m_onJoin;
 
-        public void Initialize(inGame.SetupInGame setupInGame, LocalLobby lobby, Action onJoin)
+        public void Initialize(SetupInGame setupInGame, LocalLobby lobby, Action onJoin)
         {
             m_setupInGame = setupInGame;
             m_localLobby = lobby;
