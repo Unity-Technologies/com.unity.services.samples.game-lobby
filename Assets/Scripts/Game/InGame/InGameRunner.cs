@@ -78,7 +78,7 @@ namespace LobbyRelaySample.inGame
         {
             VerifyConnection_ClientRpc(clientId);
             // While we could start pooling symbol objects now, incoming clients would be flooded with the Spawn calls.
-            // This could lead to dropped packets (which would mean data loss), so wait until connections have completed.
+            // This could lead to dropped packets such that the InGameRunner's Spawn call fails to occur, so we'll wait until all players join.
         }
         [ClientRpc]
         private void VerifyConnection_ClientRpc(ulong clientId)

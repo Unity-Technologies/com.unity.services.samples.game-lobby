@@ -3,6 +3,15 @@ using UnityEngine;
 
 namespace LobbyRelaySample.inGame
 {
+    // Note: The SymbolObjects, which will be children of this object, need their NetworkTransforms to have IsLocalSpace set to true. Otherwise, they might get desynced.
+    // (This would manifest as packet loss errors.)
+    // Also note: The initial position of the SymbolObject prefab is set to be outside the camera view in the Z-direction, so that it doesn't interpolate past the actual
+    // position when it spawns on a client (as opposed to in the Y-direction, since this SymbolContainer is also moving downward).
+
+    /// <summary>
+    /// Rather than track movement data for every symbol object, the symbols will all be parented under one container that will move.
+    /// It will not begin that movement until it both has been Spawned on the network and it has been informed that the game has started.
+    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class SymbolContainer : NetworkBehaviour, IReceiveMessages
     {
@@ -24,7 +33,7 @@ namespace LobbyRelaySample.inGame
         public void Start()
         {
             if (!IsHost)
-            {   this.enabled = false; // Just disabling this script.
+            {   this.enabled = false; // Just disabling this script, not the whole GameObject.
                 return;
             }
             GetComponent<NetworkObject>().Spawn();
@@ -43,10 +52,6 @@ namespace LobbyRelaySample.inGame
 
         private void BeginMotion()
         {
-            // Note: The SymbolObjects, which will be children of this object, need their NetworkTransforms to have IsLocalSpace set to true. Otherwise, they might get desynced.
-            // (This would manifest as packet loss errors.)
-            // Also note: The initial position of the SymbolObject prefab is set to be outside the camera view in the Z-direction, so that it doesn't interpolate past the actual
-            // position when it spawns on a client (as opposed to in the Y-direction, since this SymbolContainer is also moving downward).
             m_rb.velocity = Vector3.down;
         }
 

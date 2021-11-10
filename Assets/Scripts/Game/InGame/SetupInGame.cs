@@ -21,32 +21,15 @@ namespace LobbyRelaySample.inGame
         private bool m_doesNeedCleanup = false;
         private bool m_hasConnectedViaNGO = false;
 
-        // TEMP? Relay stuff
         private Action<UnityTransport> m_initializeTransport;
         private LocalLobby m_lobby;
 
 
-        /*
-         * Things to do:
-         *
-         * x Disable whatever menu behaviors. Maintain a back button with additional RPC calls?
-         * --- Need to make RelayUtpClient not an MB so I can freely disable the menus? It is on the GameManager, as it happens, but...
-         * x Spawn the object with the NetworkManager and allow that to connect.
-         * - Wait for all players to connect, or boot a player after a few seconds (via Relay) if they did not connect.
-         * x While waiting, server selects the target sequence, spawns the symbol container, and starts pooling/spawning the symbol objects.
-         * - Once all players are in, show the target sequence and instructions, and then the server starts moving the symbol container and listening to click events.
-         * - After the symbols are all passed (I guess tracking the symbol container position or a timeout), finish the game (set the winner flag).
-         * x Clients clean up and return to the lobby screen. Host sets the lobby back to the regular state.
-         * 
-         */
-
         public void Start()
-        {
-            Locator.Get.Messenger.Subscribe(this);
+        {   Locator.Get.Messenger.Subscribe(this);
         }
         public void OnDestroy()
-        {
-            Locator.Get.Messenger.Unsubscribe(this);
+        {   Locator.Get.Messenger.Unsubscribe(this);
         }
 
         private void SetMenuVisibility(bool areVisible)
@@ -63,26 +46,23 @@ namespace LobbyRelaySample.inGame
             m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd);
 
             UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
-
             if (m_isHost)
-                m_inGameManagerObj.AddComponent<relay.RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
+                m_inGameManagerObj.AddComponent<inGame.RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
             else
-                m_inGameManagerObj.AddComponent<relay.RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
+                m_inGameManagerObj.AddComponent<inGame.RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
         }
 
 
         private void OnConnectionVerified()
-        {
-            m_hasConnectedViaNGO = true;
+        {   m_hasConnectedViaNGO = true;
         }
 
+        // These are public for use in the Inspector.
         public void OnLobbyChange(LocalLobby lobby)
-        {
-            m_lobby = lobby; // Most of the time this is redundant, but we need to get multiple members of the lobby to the Relay setup components, so might as well just hold onto the whole thing.
+        {   m_lobby = lobby; // Most of the time this is redundant, but we need to get multiple members of the lobby to the Relay setup components, so might as well just hold onto the whole thing.
         }
         public void OnLocalUserChange(LobbyUser user)
-        {
-            m_isHost = user.IsHost;
+        {   m_isHost = user.IsHost;
         }
 
         public void SetRelayServerData(string address, int port, byte[] allocationBytes, byte[] key, byte[] connectionData, byte[] hostConnectionData, bool isSecure)
@@ -107,7 +87,7 @@ namespace LobbyRelaySample.inGame
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
                     // TODO: Need to handle both failing to connect and connecting but failing to initialize.
                     // I.e. cleaning up networked objects *might* be necessary.
-                    OnGameEnd(); // TODO: This returns to the lobby. I think that's desirable?
+                    OnGameEnd();
                 }
             }
 
@@ -118,6 +98,9 @@ namespace LobbyRelaySample.inGame
             }
         }
 
+        /// <summary>
+        /// Return to the lobby after the game, whether due to the game ending or due to a failed connection.
+        /// </summary>
         private void OnGameEnd()
         {
             if (m_doesNeedCleanup)

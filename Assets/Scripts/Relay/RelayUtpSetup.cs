@@ -23,7 +23,7 @@ namespace LobbyRelaySample.relay
         protected LobbyUser m_localUser;
         protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
-        protected static string AddressFromEndpoint(NetworkEndPoint endpoint)
+        public static string AddressFromEndpoint(NetworkEndPoint endpoint)
         {
             return endpoint.Address.Split(':')[0];
         }
@@ -42,7 +42,7 @@ namespace LobbyRelaySample.relay
         /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
         /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
         /// </summary>
-        protected NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
+        public static NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
         {
             #if ENABLE_MANAGED_UNITYTLS
                 foreach (RelayServerEndpoint endpoint in endpoints)
@@ -248,91 +248,5 @@ namespace LobbyRelaySample.relay
                 LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
             }
         }
-    }
-
-    // TODO: These don't need to be children of RelayUtpSetup, right? Since the binding step isn't used
-
-    /*
-     * When using the Relay adapter for UTP to connect the NetworkManager for Netcode for GameObjects (NGO), we need to provide the Allocation info without manually binding to it.
-     * In actual use, if you are using NGO for your game's networking, you would not also use the RelayUtpSetupHost/RelayUtpSetupClient at all, since their direct data transmission would be unnecessary.
-     * We keep both versions for this sample to demonstrate how each is set up, whether you want to just use Lobby + Relay or use NGO as well.
-     */
-
-    /// <summary>
-    /// Host logic: Request a new Allocation, and then pass its info to the UTP adapter for NGO.
-    /// </summary>
-    public class RelayUtpNGOSetupHost : RelayUtpSetup
-    {
-        private inGame.SetupInGame m_setupInGame;
-        private Action m_onJoin;
-
-        public void Initialize(inGame.SetupInGame setupInGame, LocalLobby lobby, Action onJoin)
-        {
-            m_setupInGame = setupInGame;
-            m_localLobby = lobby;
-            m_onJoin = onJoin;
-            JoinRelay();
-        }
-
-        protected override void JoinRelay()
-        {
-            RelayAPIInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnAllocation);
-        }
-
-        private void OnAllocation(Allocation allocation)
-        {
-            RelayAPIInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
-            bool isSecure = false;
-            m_endpointForServer = GetEndpointForAllocation(allocation.ServerEndpoints, allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
-            m_setupInGame.SetRelayServerData(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port, allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, allocation.ConnectionData, isSecure);
-            m_onJoin?.Invoke();
-        }
-
-        private void OnRelayCode(string relayCode)
-        {
-            m_localLobby.RelayNGOCode = relayCode;
-        }
-
-        protected override void OnBindingComplete() { /*No-op*/ }
-    }
-
-    public class RelayUtpNGOSetupClient : RelayUtpSetup
-    {
-        private inGame.SetupInGame m_setupInGame;
-        private Action m_onJoin;
-
-        public void Initialize(inGame.SetupInGame setupInGame, LocalLobby lobby, Action onJoin)
-        {
-            m_setupInGame = setupInGame;
-            m_localLobby = lobby;
-            m_onJoin = onJoin;
-            JoinRelay();
-        }
-
-        protected override void JoinRelay()
-        {
-            m_localLobby.onChanged += OnLobbyChange; // need to unregister to be destroyed
-        }
-
-        private void OnLobbyChange(LocalLobby lobby)
-        {
-            if (m_localLobby.RelayNGOCode != null)
-            {
-                RelayAPIInterface.JoinAsync(m_localLobby.RelayNGOCode, OnJoin);
-                m_localLobby.onChanged -= OnLobbyChange;
-            }
-        }
-
-        private void OnJoin(JoinAllocation joinAllocation)
-        {
-            if (joinAllocation == null || this == null) // The returned JoinAllocation is null if allocation failed. this would be destroyed already if you quit the lobby while Relay is connecting.
-                return;
-            bool isSecure = false;
-            m_endpointForServer = GetEndpointForAllocation(joinAllocation.ServerEndpoints, joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
-            m_setupInGame.SetRelayServerData(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port, joinAllocation.AllocationIdBytes, joinAllocation.Key, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
-            m_onJoin?.Invoke();
-        }
-
-        protected override void OnBindingComplete() { /*No-op*/ }
     }
 }
