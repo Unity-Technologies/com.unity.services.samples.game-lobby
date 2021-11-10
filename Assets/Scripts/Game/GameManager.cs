@@ -97,7 +97,7 @@ namespace LobbyRelaySample
         {
             if (type == MessageType.CreateLobbyRequest)
             {
-                var createLobbyData = (LocalLobby)msg;
+                LocalLobby.LobbyData createLobbyData = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
                     {   lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnCreatedLobby();

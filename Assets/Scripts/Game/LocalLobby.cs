@@ -30,6 +30,7 @@ namespace LobbyRelaySample
             public string LobbyID { get; set; }
             public string LobbyCode { get; set; }
             public string RelayCode { get; set; }
+            public string RelayNGOCode { get; set; }
             public string LobbyName { get; set; }
             public bool Private { get; set; }
             public int MaxPlayerCount { get; set; }
@@ -43,6 +44,7 @@ namespace LobbyRelaySample
                 LobbyID = existing.LobbyID;
                 LobbyCode = existing.LobbyCode;
                 RelayCode = existing.RelayCode;
+                RelayNGOCode = existing.RelayNGOCode;
                 LobbyName = existing.LobbyName;
                 Private = existing.Private;
                 MaxPlayerCount = existing.MaxPlayerCount;
@@ -57,6 +59,7 @@ namespace LobbyRelaySample
                 LobbyID = null;
                 LobbyCode = lobbyCode;
                 RelayCode = null;
+                RelayNGOCode = null;
                 LobbyName = null;
                 Private = false;
                 MaxPlayerCount = -1;
@@ -155,6 +158,16 @@ namespace LobbyRelaySample
             set
             {
                 m_data.RelayCode = value;
+                OnChanged(this);
+            }
+        }
+
+        public string RelayNGOCode
+        {
+            get => m_data.RelayNGOCode;
+            set
+            {
+                m_data.RelayNGOCode = value;
                 OnChanged(this);
             }
         }

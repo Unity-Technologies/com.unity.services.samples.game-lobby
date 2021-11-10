@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Once the NetworkManager has been spawned, we need something to manage the game state and setup other in-game objects
@@ -28,6 +28,8 @@ namespace LobbyRelaySample.inGame
         private Transform m_symbolContainerInstance;
 
         private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
+
+        private float m_timeout = 10;
 
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd)
         {
@@ -75,9 +77,8 @@ namespace LobbyRelaySample.inGame
         private void VerifyConnection_ServerRpc(ulong clientId)
         {
             VerifyConnection_ClientRpc(clientId);
-
-            // If not spawning things in the background, start doing so.
-            m_canSpawnInGameObjects = true;
+            // While we could start pooling symbol objects now, incoming clients would be flooded with the Spawn calls.
+            // This could lead to dropped packets such that the InGameRunner's Spawn call fails to occur, so we'll wait until all players join.
         }
         [ClientRpc]
         private void VerifyConnection_ClientRpc(ulong clientId)
@@ -104,12 +105,27 @@ namespace LobbyRelaySample.inGame
             if (clientId == m_localId)
                 m_onConnectionVerified?.Invoke();
             if (shouldStartImmediately)
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
+            {
+                m_timeout = -1;
+                BeginGame();
+            }
+        }
+
+        private void BeginGame()
+        {
+            m_canSpawnInGameObjects = true;
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null); // TODO: Might need to delay this a frame to ensure the client finished initializing (since I sometimes hit the "failed to join" message even when joining).
         }
 
         public void Update()
         {
             CheckIfCanSpawnNewSymbol();
+            if (m_timeout >= 0)
+            {
+                m_timeout -= Time.deltaTime;
+                if (m_timeout < 0)
+                    BeginGame();
+            }
 
             // TODO: BSP for choosing symbol spawn positions?
             // TODO: Remove the timer to test for packet loss.

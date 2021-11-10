@@ -23,6 +23,11 @@ namespace LobbyRelaySample.relay
         protected LobbyUser m_localUser;
         protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
+        public static string AddressFromEndpoint(NetworkEndPoint endpoint)
+        {
+            return endpoint.Address.Split(':')[0];
+        }
+
         public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser, Action<bool, RelayUtpClient> onJoinComplete)
         {
             m_localLobby = localLobby;
@@ -37,7 +42,7 @@ namespace LobbyRelaySample.relay
         /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
         /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
         /// </summary>
-        protected NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
+        public static NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
         {
             #if ENABLE_MANAGED_UNITYTLS
                 foreach (RelayServerEndpoint endpoint in endpoints)
@@ -149,7 +154,7 @@ namespace LobbyRelaySample.relay
         private void OnRelayCode(string relayCode)
         {
             m_localLobby.RelayCode = relayCode;
-            m_localLobby.RelayServer = new ServerAddress(m_endpointForServer.Address.Split(':')[0], m_endpointForServer.Port);
+            m_localLobby.RelayServer = new ServerAddress(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port);
             m_joinState |= JoinState.Joined;
             CheckForComplete();
         }
@@ -212,7 +217,7 @@ namespace LobbyRelaySample.relay
             bool isSecure = false;
             m_endpointForServer = GetEndpointForAllocation(joinAllocation.ServerEndpoints, joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
             BindToAllocation(m_endpointForServer, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1, isSecure);
-            m_localLobby.RelayServer = new ServerAddress(m_endpointForServer.Address.Split(':')[0], m_endpointForServer.Port);
+            m_localLobby.RelayServer = new ServerAddress(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port);
         }
 
         protected override void OnBindingComplete()

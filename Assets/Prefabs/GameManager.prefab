@@ -46,7 +46,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_prefabNetworkManager: {fileID: 238192747445020667, guid: 73173c97c128d614aa2a1167a2eaea68, type: 3}
-  m_lobbyObserver: {fileID: 5235782363599194820}
   m_disableWhileInGame: []
 --- !u!114 &5235782363599194820
 MonoBehaviour:
@@ -65,7 +64,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6265861362966661484}
         m_TargetAssemblyTypeName: LobbyRelaySample.inGame.SetupInGame, LobbyRelaySample
-        m_MethodName: SetRelayAddress
+        m_MethodName: OnLobbyChange
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

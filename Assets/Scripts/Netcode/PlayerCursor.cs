@@ -2,7 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace LobbyRelaySample.inGame
+namespace LobbyRelaySample.ngo
 {
     /// <summary>
     /// Each player's cursor needs to be controlled by them and visible to the other players.
@@ -67,7 +67,6 @@ namespace LobbyRelaySample.inGame
             if (m_currentlyCollidingSymbols.Count > 0)
             {
                 SymbolObject symbol = m_currentlyCollidingSymbols[0];
-                m_currentlyCollidingSymbols.RemoveAt(0);
                 Locator.Get.InGameInputHandler.OnPlayerInput(id, symbol);
             }
             OnInputVisuals_ClientRpc();

@@ -54,7 +54,7 @@ namespace LobbyRelaySample
             Provide(new Messenger());
             Provide(new UpdateSlowNoop());
             Provide(new IdentityNoop());
-            Provide(new inGame.InGameInputHandlerNoop());
+            Provide(new ngo.InGameInputHandlerNoop());
 
             FinishConstruction();
         }
@@ -98,8 +98,8 @@ namespace LobbyRelaySample
         public IIdentity Identity => Locate<IIdentity>();
         public void Provide(IIdentity identity) { ProvideAny(identity); }
 
-        public inGame.IInGameInputHandler InGameInputHandler => Locate<inGame.IInGameInputHandler>();
-        public void Provide(inGame.IInGameInputHandler inputHandler) { ProvideAny(inputHandler); }
+        public ngo.IInGameInputHandler InGameInputHandler => Locate<ngo.IInGameInputHandler>();
+        public void Provide(ngo.IInGameInputHandler inputHandler) { ProvideAny(inputHandler); }
 
         // As you add more Provided types, be sure their default implementations are included in the constructor.
     }

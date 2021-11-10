@@ -7,8 +7,7 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class CreateMenuUI : UIPanelBase
     {
-        [SerializeField]
-        LocalLobby m_ServerRequestData = new LocalLobby { LobbyName = "New Lobby", MaxPlayerCount = 4 };
+        private LocalLobby.LobbyData m_ServerRequestData = new LocalLobby.LobbyData{ LobbyName = "New Lobby", MaxPlayerCount = 4 };
 
         public override void Start()
         {
