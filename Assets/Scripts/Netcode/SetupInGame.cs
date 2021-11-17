@@ -17,12 +17,12 @@ namespace LobbyRelaySample.ngo
         private NetworkManager m_networkManager;
         private InGameRunner m_inGameRunner;
 
-        private bool m_isHost;
         private bool m_doesNeedCleanup = false;
         private bool m_hasConnectedViaNGO = false;
 
         private Action<UnityTransport> m_initializeTransport;
         private LocalLobby m_lobby;
+        private LobbyUser m_localUser;
 
 
         public void Start()
@@ -43,10 +43,10 @@ namespace LobbyRelaySample.ngo
             m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
             m_networkManager = m_inGameManagerObj.GetComponentInChildren<NetworkManager>();
             m_inGameRunner = m_inGameManagerObj.GetComponentInChildren<InGameRunner>();
-            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd);
+            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, m_localUser);
 
             UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
-            if (m_isHost)
+            if (m_localUser.IsHost)
                 m_inGameManagerObj.AddComponent<RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
             else
                 m_inGameManagerObj.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
@@ -62,7 +62,7 @@ namespace LobbyRelaySample.ngo
         {   m_lobby = lobby; // Most of the time this is redundant, but we need to get multiple members of the lobby to the Relay setup components, so might as well just hold onto the whole thing.
         }
         public void OnLocalUserChange(LobbyUser user)
-        {   m_isHost = user.IsHost;
+        {   m_localUser = user; // Same, regarding redundancy.
         }
 
         public void SetRelayServerData(string address, int port, byte[] allocationBytes, byte[] key, byte[] connectionData, byte[] hostConnectionData, bool isSecure)

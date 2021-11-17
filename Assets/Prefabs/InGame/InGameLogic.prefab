@@ -440,6 +440,7 @@ GameObject:
   - component: {fileID: 6673480979101889538}
   - component: {fileID: 6829526275642584874}
   - component: {fileID: 2250928641321586401}
+  - component: {fileID: 2257191875943382526}
   m_Layer: 0
   m_Name: InGameRunner
   m_TagString: Untagged
@@ -496,6 +497,7 @@ MonoBehaviour:
   m_scorer: {fileID: 2250928641321586401}
   m_killVolume: {fileID: 3287911880781162359}
   m_introOutroRunner: {fileID: 6828649701235740815}
+  m_dataStore: {fileID: 2257191875943382526}
 --- !u!114 &6829526275642584874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -526,6 +528,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_scoreOutputText: {fileID: 4345563381811920084}
+--- !u!114 &2257191875943382526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1306704497370578788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a054eb742dd9f748afc05982dc263b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1912141680601921478
 GameObject:
   m_ObjectHideFlags: 0

@@ -32,7 +32,7 @@ namespace LobbyRelaySample.ngo
 
         public void ScoreSuccess(ulong id)
         {
-            m_scoresByClientId[id] += 5;
+            m_scoresByClientId[id] += 2;
             UpdateScoreOutput_ClientRpc(id, m_scoresByClientId[id]);
         }
 

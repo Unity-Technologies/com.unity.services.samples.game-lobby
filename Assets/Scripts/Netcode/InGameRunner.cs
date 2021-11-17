@@ -18,26 +18,27 @@ namespace LobbyRelaySample.ngo
         private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();
         private float m_symbolSpawnTimer = 0.5f; // Initial time buffer to ensure connectivity before loading objects.
         private int m_remainingSymbolCount = 0; // Only used by the host.
-
-        [SerializeField] private NetworkObject    m_playerCursorPrefab = default;
-        [SerializeField] private NetworkObject    m_symbolContainerPrefab = default;
-        [SerializeField] private NetworkObject    m_symbolObjectPrefab = default;
-        [SerializeField] private SequenceSelector m_sequenceSelector = default;
-        [SerializeField] private Scorer           m_scorer = default;
-        [SerializeField] private SymbolKillVolume m_killVolume = default;
-        [SerializeField] private IntroOutroRunner m_introOutroRunner = default;
-        private Transform m_symbolContainerInstance;
-
-        private ulong m_localId; // This is not necessarily the same as the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
-
         private float m_timeout = 10;
 
-        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd)
+        [SerializeField] private NetworkObject      m_playerCursorPrefab = default;
+        [SerializeField] private NetworkObject      m_symbolContainerPrefab = default;
+        [SerializeField] private NetworkObject      m_symbolObjectPrefab = default;
+        [SerializeField] private SequenceSelector   m_sequenceSelector = default;
+        [SerializeField] private Scorer             m_scorer = default;
+        [SerializeField] private SymbolKillVolume   m_killVolume = default;
+        [SerializeField] private IntroOutroRunner   m_introOutroRunner = default;
+        [SerializeField] private NetworkedDataStore m_dataStore = default;
+        private Transform m_symbolContainerInstance;
+
+        private LobbyUserData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
+
+        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LobbyUser localUser)
         {
             m_onConnectionVerified = onConnectionVerified;
             m_expectedPlayerCount = expectedPlayerCount;
             m_onGameEnd = onGameEnd;
             m_canSpawnInGameObjects = null;
+            m_localUserData = new LobbyUserData(localUser.DisplayName, 0);
             Locator.Get.Provide(this); // Simplifies access since some networked objects can't easily communicate locally (e.g. the host might call a ClientRpc without that client knowing where the call originated).
         }
 
@@ -45,8 +46,8 @@ namespace LobbyRelaySample.ngo
         {
             if (IsHost)
                 FinishInitialize();
-            m_localId = NetworkManager.Singleton.LocalClientId;
-            VerifyConnection_ServerRpc(m_localId);
+            m_localUserData = new LobbyUserData(m_localUserData.name, NetworkManager.Singleton.LocalClientId);
+            VerifyConnection_ServerRpc(m_localUserData.id);
         }
 
         public override void OnNetworkDespawn()
@@ -84,26 +85,27 @@ namespace LobbyRelaySample.ngo
         [ClientRpc]
         private void VerifyConnection_ClientRpc(ulong clientId)
         {
-            if (clientId == m_localId)
-                VerifyConnectionConfirm_ServerRpc(m_localId);
+            if (clientId == m_localUserData.id)
+                VerifyConnectionConfirm_ServerRpc(m_localUserData);
         }
         /// <summary>
         /// Once the connection is confirmed, check if all players have connected.
         /// </summary>
         [ServerRpc(RequireOwnership = false)]
-        private void VerifyConnectionConfirm_ServerRpc(ulong clientId)
+        private void VerifyConnectionConfirm_ServerRpc(LobbyUserData clientData)
         {
             NetworkObject playerCursor = NetworkObject.Instantiate(m_playerCursorPrefab);
-            playerCursor.SpawnWithOwnership(clientId);
-            playerCursor.name += clientId;
+            playerCursor.SpawnWithOwnership(clientData.id);
+            playerCursor.name += clientData.name;
+            m_dataStore.AddPlayer(clientData.id, clientData.name);
 
             bool areAllPlayersConnected = NetworkManager.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
-            VerifyConnectionConfirm_ClientRpc(clientId, areAllPlayersConnected);
+            VerifyConnectionConfirm_ClientRpc(clientData.id, areAllPlayersConnected);
         }
         [ClientRpc]
         private void VerifyConnectionConfirm_ClientRpc(ulong clientId, bool shouldStartImmediately)
         {
-            if (clientId == m_localId)
+            if (clientId == m_localUserData.id)
                 m_onConnectionVerified?.Invoke();
             if (shouldStartImmediately)
             {
@@ -115,7 +117,7 @@ namespace LobbyRelaySample.ngo
         private void BeginGame()
         {
             m_canSpawnInGameObjects = true;
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null); // TODO: Might need to delay this a frame to ensure the client finished initializing (since I sometimes hit the "failed to join" message even when joining).
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
             m_introOutroRunner.DoIntro();
         }
 
