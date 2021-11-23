@@ -6,7 +6,7 @@
             {
                 "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "isEnvironmentCustom",
-                "value": "{\"m_Value\":false}"
+                "value": "{\"m_Value\":true}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
@@ -16,17 +16,17 @@
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "server",
-                "value": "{\"m_Value\":\"https://unity.vivox.com/appconfig/0bf04-com_u-76576-test\"}"
+                "value": "{\"m_Value\":\"https://unity.vivox.com/appconfig/13746-com_u-21128-test\"}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "tokenIssuer",
-                "value": "{\"m_Value\":\"0bf04-com_u-76576-test\"}"
+                "value": "{\"m_Value\":\"13746-com_u-21128-test\"}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "tokenKey",
-                "value": "{\"m_Value\":\"jQr72GjGtoB2lpdtK1GmV1BgtOsFUzK6\"}"
+                "value": "{\"m_Value\":\"FDIlna7382W91CMCoztXRWK12KcxJRZu\"}"
             },
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",

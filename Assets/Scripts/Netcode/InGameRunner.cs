@@ -117,7 +117,7 @@ namespace LobbyRelaySample.ngo
         private void BeginGame()
         {
             m_canSpawnInGameObjects = true;
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.GameBeginning, null);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.MinigameBeginning, null);
             m_introOutroRunner.DoIntro();
         }
 
@@ -192,12 +192,15 @@ namespace LobbyRelaySample.ngo
         [ServerRpc]
         private void EndGame_ServerRpc()
         {
-            // TODO: Display results
+            m_scorer.OnGameEnd();
             this.StartCoroutine(EndGame());
         }
 
         private IEnumerator EndGame()
         {
+            // TODO: Something better.
+            yield return new WaitForSeconds(6);
+
             EndGame_ClientRpc();
             yield return null;
             m_onGameEnd();

@@ -17,7 +17,7 @@ namespace LobbyRelaySample.ngo
         private Camera m_mainCamera;
         private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero);
         private ulong m_localId;
-        private Action<ulong, Action<string>> m_retrieveName;
+        private Action<ulong, Action<LobbyUserData>> m_retrieveName;
 
         // The host is responsible for determining if a player has successfully selected a symbol object, since collisions should be handled serverside.
         private List<SymbolObject> m_currentlyCollidingSymbols;
@@ -32,7 +32,7 @@ namespace LobbyRelaySample.ngo
         // I guess I'd just have a "singleton" to hold the references?
         public override void OnNetworkSpawn()
         {
-            m_retrieveName = NetworkedDataStore.Instance.GetPlayerName;
+            m_retrieveName = NetworkedDataStore.Instance.GetPlayerData;
             m_mainCamera = GameObject.Find("InGameCamera").GetComponent<Camera>();
             if (IsHost)
                 m_currentlyCollidingSymbols = new List<SymbolObject>();
@@ -47,10 +47,10 @@ namespace LobbyRelaySample.ngo
         }
 
         [ClientRpc]
-        private void SetName_ClientRpc(string name)
+        private void SetName_ClientRpc(LobbyUserData data)
         {
             if (!IsOwner)
-                m_nameOutput.text = name;
+                m_nameOutput.text = data.name;
         }
 
         // Don't love having the input here, but it doesn't need to be anywhere else.
@@ -119,7 +119,7 @@ namespace LobbyRelaySample.ngo
 
         public void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.GameBeginning)
+            if (type == MessageType.MinigameBeginning)
             {
                 m_retrieveName.Invoke(OwnerClientId, SetName_ClientRpc);
                 Locator.Get.Messenger.Unsubscribe(this);

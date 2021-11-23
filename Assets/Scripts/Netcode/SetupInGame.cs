@@ -79,14 +79,12 @@ namespace LobbyRelaySample.ngo
                 CreateNetworkManager();
             }
 
-            else if (type == MessageType.GameBeginning)
+            else if (type == MessageType.MinigameBeginning)
             {
                 if (!m_hasConnectedViaNGO)
                 {
                     // If this player hasn't successfully connected via NGO, get booted.
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
-                    // TODO: Need to handle both failing to connect and connecting but failing to initialize.
-                    // I.e. cleaning up networked objects *might* be necessary.
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game."); // TODO: I do still need the quick pause...
                     OnGameEnd();
                 }
             }

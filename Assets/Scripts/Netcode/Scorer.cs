@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace LobbyRelaySample.ngo
 {
-    // TODO: I'm using host and server interchangeably...
+    // TODO: I'm using host and server interchangeably...which in part I have to since it's ServerRpc but I think IsHost vs. IsServer yield different results in some places?
 
     /// <summary>
     /// Used by the host to actually track scores for all players, and by each client to monitor for updates to their own score.
@@ -13,33 +16,29 @@ namespace LobbyRelaySample.ngo
     public class Scorer : NetworkBehaviour
     {
         // TODO: Most of the ints could be bytes?
-        private Dictionary<ulong, int> m_scoresByClientId = new Dictionary<ulong, int>();
+        [SerializeField] private NetworkedDataStore m_dataStore = default;
         private ulong m_localId;
         [SerializeField] private TMP_Text m_scoreOutputText = default;
+
+        [Tooltip("When the game ends, this will be provided the results in order of rank (1st-place first, and so on).")]
+        [SerializeField] private UnityEvent<LobbyUserData> m_onGameEnd = default;
 
         public override void OnNetworkSpawn()
         {
             m_localId = NetworkManager.Singleton.LocalClientId;
-            AddClient_ServerRpc(m_localId);
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void AddClient_ServerRpc(ulong id)
-        {
-            if (!m_scoresByClientId.ContainsKey(id))
-                m_scoresByClientId.Add(id, 0);
-        }
-
+        // Called on the host.
         public void ScoreSuccess(ulong id)
         {
-            m_scoresByClientId[id] += 2;
-            UpdateScoreOutput_ClientRpc(id, m_scoresByClientId[id]);
+            int newScore = m_dataStore.UpdateScore(id, 2);
+            UpdateScoreOutput_ClientRpc(id, newScore);
         }
 
         public void ScoreFailure(ulong id)
         {
-            m_scoresByClientId[id] -= 1;
-            UpdateScoreOutput_ClientRpc(id, m_scoresByClientId[id]);
+            int newScore = m_dataStore.UpdateScore(id, -1);
+            UpdateScoreOutput_ClientRpc(id, newScore);
         }
 
         [ClientRpc]
@@ -47,6 +46,17 @@ namespace LobbyRelaySample.ngo
         {
             if (m_localId == id)
                 m_scoreOutputText.text = score.ToString("00");
+        }
+
+        public void OnGameEnd()
+        {
+            OnGameEnd_ClientRpc();
+        }
+
+        [ClientRpc]
+        public void OnGameEnd_ClientRpc()
+        {
+            m_dataStore.GetAllPlayerData(m_onGameEnd);
         }
     }
 }
