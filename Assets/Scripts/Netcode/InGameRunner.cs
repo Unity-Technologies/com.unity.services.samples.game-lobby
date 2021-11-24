@@ -65,11 +65,9 @@ namespace LobbyRelaySample.ngo
         private void ResetPendingSymbolPositions()
         {
             m_pendingSymbolPositions.Clear();
-            for (int n = 0; n < SequenceSelector.k_symbolCount; n++)
-            {
-                // TEMP we need to do a BSP or some such to mix up the positions.
-                m_pendingSymbolPositions.Enqueue(new Vector2(-9 + (n % 10) * 2, n / 10 * 3));
-            }
+            IList<Vector2> points = m_sequenceSelector.GenerateRandomSpawnPoints(new Rect(-15, 0, 30, 120), 2);
+            foreach (Vector2 point in points)
+                m_pendingSymbolPositions.Enqueue(point);
         }
 
         /// <summary>

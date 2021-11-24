@@ -16,6 +16,7 @@ namespace LobbyRelaySample.ngo
     public class SymbolContainer : NetworkBehaviour, IReceiveMessages
     {
         [SerializeField] private Rigidbody m_rb = default;
+        [SerializeField] private float m_speed = 1;
         private bool m_isConnected = false;
         private bool m_hasGameStarted = false;
         private void OnGameStarted()
@@ -52,7 +53,7 @@ namespace LobbyRelaySample.ngo
 
         private void BeginMotion()
         {
-            m_rb.velocity = Vector3.down;
+            m_rb.velocity = Vector3.down * m_speed;
         }
 
         public void OnReceiveMessage(MessageType type, object msg)
