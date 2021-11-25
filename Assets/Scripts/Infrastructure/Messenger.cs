@@ -17,6 +17,7 @@ namespace LobbyRelaySample
 
         // We need to handle subscribers who modify the receiver list, e.g. a subscriber who unsubscribes in their OnReceiveMessage.
         private Queue<Action> m_pendingReceivers = new Queue<Action>();
+        private int m_recurseCount = 0;
 
         /// <summary>
         /// Assume that you won't receive messages in a specific order.
@@ -48,9 +49,16 @@ namespace LobbyRelaySample
         /// <param name="msg">If there's some data relevant to the recipient, include it here.</param>
         public virtual void OnReceiveMessage(MessageType type, object msg)
         {
-            while (m_pendingReceivers.Count > 0)
-                m_pendingReceivers.Dequeue()?.Invoke();
+            if (m_recurseCount > 5)
+            {   Debug.LogError("OnReceiveMessage recursion detected! Is something calling OnReceiveMessage when it receives a message?");
+                return;
+            }
 
+            if (m_recurseCount == 0) // This will increment if a new or existing subscriber calls OnReceiveMessage while handling a message. This is expected occasionally but shouldn't go too deep.
+                while (m_pendingReceivers.Count > 0)
+                    m_pendingReceivers.Dequeue()?.Invoke();
+
+            m_recurseCount++;
             Stopwatch stopwatch = new Stopwatch();
             foreach (IReceiveMessages receiver in m_receivers)
             {
@@ -60,6 +68,7 @@ namespace LobbyRelaySample
                 if (stopwatch.ElapsedMilliseconds > k_durationToleranceMs)
                     Debug.LogWarning($"Message recipient \"{receiver}\" took too long to process message \"{msg}\" of type {type}");
             }
+            m_recurseCount--;
         }
 
         public void OnReProvided(IMessenger previousProvider)
