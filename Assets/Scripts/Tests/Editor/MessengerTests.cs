@@ -205,6 +205,60 @@ namespace Test
         }
 
         /// <summary>
+        /// If a subscriber is added/removed during an OnReceiveMessage call and it immediately sends its own message, we must ensure that we don't process the change in the subscriber list.
+        /// (During a foreach loop, this is the "Collection was modified" error.)
+        /// </summary>
+        [Test]
+        [Timeout(100)] // These recursion tests could recurse infinitely, so time out (in ms) just in case. (We should see a StackOverflowException before then, though.)
+        public void RecurseWithinOnReceiveMessageDontModifyCollection()
+        {
+            Messenger messenger = new Messenger();
+            int msgCount = 0;
+            SubscriberArgs sub = new SubscriberArgs(Recurse);
+
+            messenger.Subscribe(sub);
+            LogAssert.Expect(UnityEngine.LogType.Error, new Regex(".*OnReceiveMessage recursion detected.*"));
+            messenger.OnReceiveMessage(MessageType.None, null);
+            Assert.AreEqual(6, msgCount, "Expected to break out of recursion and not allow subscriber list modification while recursing.");
+
+            LogAssert.ignoreFailingMessages = true; // The "recursion detected" error will appear multiple times.
+            messenger.OnReceiveMessage(MessageType.None, null);
+            LogAssert.ignoreFailingMessages = false;
+            Assert.Less(12, msgCount, "Subscribers added during recursion should be given messages afterward.");
+
+            void Recurse(MessageType type, object msg)
+            {
+                msgCount++;
+                if (type == MessageType.None) // This is just to prevent an exponential explosion of new subscribers. The exact type used is arbitrary.
+                {   SubscriberArgs newSub = new SubscriberArgs(Recurse);
+                    messenger.Subscribe(newSub);
+                }
+                messenger.OnReceiveMessage(MessageType.RenameRequest, null);
+            }
+        }
+
+        [Test]
+        [Timeout(100)]
+        public void RecurseWithinOnReceiveMessageBreakout()
+        {
+            Messenger messenger = new Messenger();
+            int msgCount = 0;
+            Subscriber sub = new Subscriber(Recurse);
+
+            messenger.Subscribe(sub);
+            messenger.OnReceiveMessage(MessageType.None, null);
+            Assert.Pass("Should have broken out of a recursion loop if too deep.");
+
+            void Recurse()
+            {
+                msgCount++;
+                Subscriber newSub = new Subscriber(Recurse);
+                messenger.Subscribe(newSub);
+                messenger.OnReceiveMessage(MessageType.None, null);
+            }
+        }
+
+        /// <summary>
         /// If a message recipient takes a long time to process a message, we want to be made aware.
         /// </summary>
         [Test]
