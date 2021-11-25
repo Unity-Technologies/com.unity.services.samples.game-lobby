@@ -180,25 +180,26 @@ namespace LobbyRelaySample.ngo
         public void OnSymbolDeactivated()
         {
             if (--m_remainingSymbolCount <= 0)
-                EndGame_ServerRpc();
+                WaitForEndingSequence();
         }
 
         /// <summary>
         /// The server determines when the game should end. Once it does, it needs to inform the clients to clean up their networked objects first,
         /// since disconnecting before that happens will prevent them from doing so (since they can't receive despawn events from the disconnected server).
         /// </summary>
-        [ServerRpc]
-        private void EndGame_ServerRpc()
+        private void WaitForEndingSequence()
         {
             m_scorer.OnGameEnd();
-            this.StartCoroutine(EndGame());
+            m_introOutroRunner.DoOutro(EndGame);
         }
 
-        private IEnumerator EndGame()
+        private void EndGame()
         {
-            // TODO: Something better.
-            yield return new WaitForSeconds(6);
+            StartCoroutine(EndGame_ClientsFirst());
+        }
 
+        private IEnumerator EndGame_ClientsFirst()
+        {
             EndGame_ClientRpc();
             yield return null;
             m_onGameEnd();

@@ -31,7 +31,7 @@ namespace LobbyRelaySample.ngo
         // Called on the host.
         public void ScoreSuccess(ulong id)
         {
-            int newScore = m_dataStore.UpdateScore(id, 2);
+            int newScore = m_dataStore.UpdateScore(id, 1);
             UpdateScoreOutput_ClientRpc(id, newScore);
         }
 

@@ -49,10 +49,10 @@ TextureImporter:
     second: 14_moon
   - first:
       213: -431797579490579562
-    second: 15_god
+    second: 15_good
   - first:
       213: -5893568625793066583
-    second: 16_devil
+    second: 16_evil
   - first:
       213: -2657090017763772448
     second: 17_elemental
@@ -463,7 +463,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 15_god
+      name: 15_good
       rect:
         serializedVersion: 2
         x: 0
@@ -484,7 +484,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 16_devil
+      name: 16_evil
       rect:
         serializedVersion: 2
         x: 588

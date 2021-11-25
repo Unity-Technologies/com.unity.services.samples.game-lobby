@@ -96,6 +96,7 @@ namespace LobbyRelaySample
         CompleteCountdown = 202,
         MinigameBeginning = 203,
         InstructionsShown = 204,
+        MinigameEnding = 205,
 
         DisplayErrorPopup = 300,
     }

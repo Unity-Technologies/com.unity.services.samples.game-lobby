@@ -76,7 +76,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: TargetSequence/Target0
+    path: ScoreAndTargetPanel/TargetSequence/Target0
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -146,7 +146,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: TargetSequence/Target1
+    path: ScoreAndTargetPanel/TargetSequence/Target1
   - curve:
       serializedVersion: 2
       m_Curve:
@@ -216,7 +216,7 @@ AnimationClip:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    path: TargetSequence/Target2
+    path: ScoreAndTargetPanel/TargetSequence/Target2
   m_FloatCurves:
   - curve:
       serializedVersion: 2
@@ -320,21 +320,21 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - serializedVersion: 2
-      path: 3070526428
+      path: 8702374
       attribute: 3
       script: {fileID: 0}
       typeID: 4
       customType: 0
       isPPtrCurve: 0
     - serializedVersion: 2
-      path: 3221467978
+      path: 2005137712
       attribute: 3
       script: {fileID: 0}
       typeID: 4
       customType: 0
       isPPtrCurve: 0
     - serializedVersion: 2
-      path: 1493885680
+      path: 4002064522
       attribute: 3
       script: {fileID: 0}
       typeID: 4
@@ -537,7 +537,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.x
-    path: TargetSequence/Target0
+    path: ScoreAndTargetPanel/TargetSequence/Target0
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -601,7 +601,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.y
-    path: TargetSequence/Target0
+    path: ScoreAndTargetPanel/TargetSequence/Target0
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -665,7 +665,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.z
-    path: TargetSequence/Target0
+    path: ScoreAndTargetPanel/TargetSequence/Target0
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -738,7 +738,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.x
-    path: TargetSequence/Target1
+    path: ScoreAndTargetPanel/TargetSequence/Target1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -811,7 +811,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.y
-    path: TargetSequence/Target1
+    path: ScoreAndTargetPanel/TargetSequence/Target1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -884,7 +884,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.z
-    path: TargetSequence/Target1
+    path: ScoreAndTargetPanel/TargetSequence/Target1
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -957,7 +957,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.x
-    path: TargetSequence/Target2
+    path: ScoreAndTargetPanel/TargetSequence/Target2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1030,7 +1030,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.y
-    path: TargetSequence/Target2
+    path: ScoreAndTargetPanel/TargetSequence/Target2
     classID: 224
     script: {fileID: 0}
   - curve:
@@ -1103,7 +1103,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalScale.z
-    path: TargetSequence/Target2
+    path: ScoreAndTargetPanel/TargetSequence/Target2
     classID: 224
     script: {fileID: 0}
   m_EulerEditorCurves: []
