@@ -84,7 +84,7 @@ namespace LobbyRelaySample.ngo
                 if (!m_hasConnectedViaNGO)
                 {
                     // If this player hasn't successfully connected via NGO, get booted.
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game."); // TODO: I do still need the quick pause...
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
                     OnGameEnd();
                 }
             }

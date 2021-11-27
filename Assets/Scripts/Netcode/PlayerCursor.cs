@@ -17,7 +17,7 @@ namespace LobbyRelaySample.ngo
         private Camera m_mainCamera;
         private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero);
         private ulong m_localId;
-        private Action<ulong, Action<LobbyUserData>> m_retrieveName;
+        private Action<ulong, Action<PlayerData>> m_retrieveName;
 
         // The host is responsible for determining if a player has successfully selected a symbol object, since collisions should be handled serverside.
         private List<SymbolObject> m_currentlyCollidingSymbols;
@@ -47,7 +47,7 @@ namespace LobbyRelaySample.ngo
         }
 
         [ClientRpc]
-        private void SetName_ClientRpc(LobbyUserData data)
+        private void SetName_ClientRpc(PlayerData data)
         {
             if (!IsOwner)
                 m_nameOutput.text = data.name;
@@ -59,7 +59,7 @@ namespace LobbyRelaySample.ngo
             return Input.GetMouseButtonDown(0);
         }
 
-        public void Update() // TODO: FixedUpdate?
+        public void Update()
         {
             transform.position = m_position.Value;
             if (m_mainCamera == null || !IsOwner)

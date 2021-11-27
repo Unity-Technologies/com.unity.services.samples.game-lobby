@@ -21,7 +21,7 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private TMP_Text m_scoreOutputText = default;
 
         [Tooltip("When the game ends, this will be provided the results in order of rank (1st-place first, and so on).")]
-        [SerializeField] private UnityEvent<LobbyUserData> m_onGameEnd = default;
+        [SerializeField] private UnityEvent<PlayerData> m_onGameEnd = default;
 
         public override void OnNetworkSpawn()
         {

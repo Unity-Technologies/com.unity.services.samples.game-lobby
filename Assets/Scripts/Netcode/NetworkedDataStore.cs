@@ -14,12 +14,12 @@ namespace LobbyRelaySample.ngo
         // Using a singleton here since we need spawned PlayerCursors to be able to find it, but we don't need the flexibility offered by the Locator.
         public static NetworkedDataStore Instance;
 
-        private Dictionary<ulong, LobbyUserData> m_playerData = new Dictionary<ulong, LobbyUserData>();
+        private Dictionary<ulong, PlayerData> m_playerData = new Dictionary<ulong, PlayerData>();
         private ulong m_localId;
 
         // Clients will need to retrieve the host's player data since it isn't synchronized. During that process, they will supply these callbacks
-        private Action<LobbyUserData> m_onGetCurrentCallback;
-        private UnityEvent<LobbyUserData> m_onEachPlayerCallback;
+        private Action<PlayerData> m_onGetCurrentCallback;
+        private UnityEvent<PlayerData> m_onEachPlayerCallback;
 
         public void Awake()
         {
@@ -43,9 +43,9 @@ namespace LobbyRelaySample.ngo
                 return;
 
             if (!m_playerData.ContainsKey(id))
-                m_playerData.Add(id, new LobbyUserData(name, id, 0));
+                m_playerData.Add(id, new PlayerData(name, id, 0));
             else
-                m_playerData[id] = new LobbyUserData(name, id, 0);
+                m_playerData[id] = new PlayerData(name, id, 0);
         }
 
         /// <returns>The updated score for the player matching the id after adding the delta, or int.MinValue otherwise.</returns>
@@ -65,7 +65,7 @@ namespace LobbyRelaySample.ngo
         /// <summary>
         /// Retrieve the data for all players from 1st to last place, calling onEachPlayer for each.
         /// </summary>
-        public void GetAllPlayerData(UnityEvent<LobbyUserData> onEachPlayer)
+        public void GetAllPlayerData(UnityEvent<PlayerData> onEachPlayer)
         {
             m_onEachPlayerCallback = onEachPlayer;
             GetAllPlayerData_ServerRpc(m_localId);
@@ -79,7 +79,7 @@ namespace LobbyRelaySample.ngo
         }
 
         [ClientRpc]
-        private void GetAllPlayerData_ClientRpc(ulong callerId, LobbyUserData[] sortedData)
+        private void GetAllPlayerData_ClientRpc(ulong callerId, PlayerData[] sortedData)
         {
             if (callerId != m_localId)
                 return;
@@ -96,7 +96,7 @@ namespace LobbyRelaySample.ngo
         /// <summary>
         /// Retreive the data for one player, passing it to the onGet callback.
         /// </summary>
-        public void GetPlayerData(ulong targetId, Action<LobbyUserData> onGet)
+        public void GetPlayerData(ulong targetId, Action<PlayerData> onGet)
         {
             m_onGetCurrentCallback = onGet;
             GetPlayerData_ServerRpc(targetId, m_localId);
@@ -108,11 +108,11 @@ namespace LobbyRelaySample.ngo
             if (m_playerData.ContainsKey(id))
                 GetPlayerData_ClientRpc(callerId, m_playerData[id]);
             else
-                GetPlayerData_ClientRpc(callerId, new LobbyUserData(null, 0));
+                GetPlayerData_ClientRpc(callerId, new PlayerData(null, 0));
         }
 
         [ClientRpc]
-        public void GetPlayerData_ClientRpc(ulong callerId, LobbyUserData data)
+        public void GetPlayerData_ClientRpc(ulong callerId, PlayerData data)
         {
             if (callerId == m_localId)
             {   m_onGetCurrentCallback?.Invoke(data);

@@ -6,7 +6,6 @@ namespace LobbyRelaySample.ngo
     /// <summary>
     /// Displays the results for all players after the NGO minigame.
     /// </summary>
-    [RequireComponent(typeof(NetworkObject))] // TODO: Include elsewhere?
     public class ResultsUserUI : NetworkBehaviour
     {
         [Tooltip("The containers for the player data outputs, in order, to be hidden until the game ends.")]
@@ -24,7 +23,7 @@ namespace LobbyRelaySample.ngo
         }
 
         // Assigned to an event in the Inspector.
-        public void ReceiveScoreInOrder(LobbyUserData data)
+        public void ReceiveScoreInOrder(PlayerData data)
         {
             m_containers[m_index].alpha = 1;
             m_playerNameOutputs[m_index].text = data.name;

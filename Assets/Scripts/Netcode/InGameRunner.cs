@@ -19,6 +19,7 @@ namespace LobbyRelaySample.ngo
         private float m_symbolSpawnTimer = 0.5f; // Initial time buffer to ensure connectivity before loading objects.
         private int m_remainingSymbolCount = 0; // Only used by the host.
         private float m_timeout = 10;
+        private bool m_hasConnected = false;
 
         [SerializeField] private NetworkObject      m_playerCursorPrefab = default;
         [SerializeField] private NetworkObject      m_symbolContainerPrefab = default;
@@ -30,7 +31,7 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private NetworkedDataStore m_dataStore = default;
         private Transform m_symbolContainerInstance;
 
-        private LobbyUserData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
+        private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LobbyUser localUser)
         {
@@ -38,7 +39,7 @@ namespace LobbyRelaySample.ngo
             m_expectedPlayerCount = expectedPlayerCount;
             m_onGameEnd = onGameEnd;
             m_canSpawnInGameObjects = null;
-            m_localUserData = new LobbyUserData(localUser.DisplayName, 0);
+            m_localUserData = new PlayerData(localUser.DisplayName, 0);
             Locator.Get.Provide(this); // Simplifies access since some networked objects can't easily communicate locally (e.g. the host might call a ClientRpc without that client knowing where the call originated).
         }
 
@@ -46,7 +47,7 @@ namespace LobbyRelaySample.ngo
         {
             if (IsHost)
                 FinishInitialize();
-            m_localUserData = new LobbyUserData(m_localUserData.name, NetworkManager.Singleton.LocalClientId);
+            m_localUserData = new PlayerData(m_localUserData.name, NetworkManager.Singleton.LocalClientId);
             VerifyConnection_ServerRpc(m_localUserData.id);
         }
 
@@ -90,7 +91,7 @@ namespace LobbyRelaySample.ngo
         /// Once the connection is confirmed, check if all players have connected.
         /// </summary>
         [ServerRpc(RequireOwnership = false)]
-        private void VerifyConnectionConfirm_ServerRpc(LobbyUserData clientData)
+        private void VerifyConnectionConfirm_ServerRpc(PlayerData clientData)
         {
             NetworkObject playerCursor = NetworkObject.Instantiate(m_playerCursorPrefab);
             playerCursor.SpawnWithOwnership(clientData.id);
@@ -101,11 +102,14 @@ namespace LobbyRelaySample.ngo
             VerifyConnectionConfirm_ClientRpc(clientData.id, areAllPlayersConnected);
         }
         [ClientRpc]
-        private void VerifyConnectionConfirm_ClientRpc(ulong clientId, bool shouldStartImmediately)
+        private void VerifyConnectionConfirm_ClientRpc(ulong clientId, bool canBeginGame)
         {
             if (clientId == m_localUserData.id)
+            {
                 m_onConnectionVerified?.Invoke();
-            if (shouldStartImmediately)
+                m_hasConnected = true;
+            }
+            if (canBeginGame && m_hasConnected)
             {
                 m_timeout = -1;
                 BeginGame();
@@ -129,8 +133,6 @@ namespace LobbyRelaySample.ngo
                     BeginGame();
             }
 
-            // TODO: BSP for choosing symbol spawn positions?
-            // TODO: Remove the timer to test for packet loss.
             void CheckIfCanSpawnNewSymbol()
             {
                 if (!m_canSpawnInGameObjects.GetValueOrDefault() || m_remainingSymbolCount >= SequenceSelector.k_symbolCount || !IsHost)
@@ -168,7 +170,6 @@ namespace LobbyRelaySample.ngo
         {
             if (m_sequenceSelector.ConfirmSymbolCorrect(id, selectedSymbol.symbolIndex.Value))
             {
-                selectedSymbol.OnSelectConfirmed_ClientRpc();
                 selectedSymbol.Destroy_ServerRpc();
                 m_scorer.ScoreSuccess(id);
                 OnSymbolDeactivated();
@@ -202,7 +203,7 @@ namespace LobbyRelaySample.ngo
         {
             EndGame_ClientRpc();
             yield return null;
-            m_onGameEnd();
+            SendEndGameSignal();
         }
 
         [ClientRpc]
@@ -210,6 +211,12 @@ namespace LobbyRelaySample.ngo
         {
             if (IsHost)
                 return;
+            SendEndGameSignal();
+        }
+
+        private void SendEndGameSignal()
+        {
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null); // We only send this message if the game completes, since the player remains in the lobby. If the player leaves with the back button, that instead sends them to the menu.
             m_onGameEnd();
         }
 
