@@ -516,7 +516,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.1
+  m_fontSize: 33.25
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -901,7 +901,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.1
+  m_fontSize: 40
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1681,6 +1681,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7501121940441885946, guid: 328b912adedf1bc41a44f60a12723cc0, type: 3}
+      propertyPath: m_fontSize
+      value: 21.3
+      objectReference: {fileID: 0}
     - target: {fileID: 8319084566339912016, guid: 328b912adedf1bc41a44f60a12723cc0, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1850,6 +1854,10 @@ PrefabInstance:
       propertyPath: m_JoinCodeField
       value: 
       objectReference: {fileID: 2465479314273514634}
+    - target: {fileID: 1462126939442648229, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
+      propertyPath: m_onVisibilityChange.m_PersistentCalls.m_Calls.Array.size
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1462126939442648229, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_onVisibilityChange.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
       value: 0
