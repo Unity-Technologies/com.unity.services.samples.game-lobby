@@ -50,12 +50,6 @@ namespace LobbyRelaySample.ngo
 
         public void OnGameEnd()
         {
-            OnGameEnd_ClientRpc();
-        }
-
-        [ClientRpc]
-        public void OnGameEnd_ClientRpc()
-        {
             m_dataStore.GetAllPlayerData(m_onGameEnd);
         }
     }
