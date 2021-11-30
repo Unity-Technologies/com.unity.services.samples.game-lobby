@@ -308,8 +308,11 @@ namespace LobbyRelaySample
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
             }
-
-            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (result) => {
+            //Special Use: Get the state of the Local Lobby so we can lock it from appearing in queries if it's not in the "Lobby" State
+            Enum.TryParse(data["State"], out LobbyState lobbyState);
+            
+            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr,lobbyState!=LobbyState.Lobby ,(result) =>
+            {
                 if (result != null)
                     m_lastKnownLobby = result;
                 onComplete?.Invoke();
@@ -421,6 +424,6 @@ namespace LobbyRelaySample
             }
 
             public override void CopyObserved(RateLimitCooldown oldObserved){/* This behavior isn't needed; we're just here for the OnChanged event management. */}
+            }
         }
     }
-}
