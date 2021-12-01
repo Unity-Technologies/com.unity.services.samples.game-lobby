@@ -239,7 +239,9 @@ namespace LobbyRelaySample
                 m_relaySetup = null;
             }
             if (m_relayClient != null)
-            {   Component.Destroy(m_relayClient);
+            {
+                m_relayClient.Dispose();
+                Component.Destroy(m_relayClient);
                 m_relayClient = null;
             }
         }

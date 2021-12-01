@@ -19,6 +19,7 @@ namespace LobbyRelaySample.relay
         {
             base.Uninitialize();
             Locator.Get.Messenger.Unsubscribe(this);
+            m_networkDriver.Dispose();
         }
 
         protected override void OnUpdate()
