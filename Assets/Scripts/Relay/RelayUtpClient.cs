@@ -173,7 +173,7 @@ namespace LobbyRelaySample.relay
             // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
             string msg;
             if (m_IsRelayConnected)
-                msg = "Host disconnected! Leaving the lobby.";
+                msg = "The host disconnected! Leaving the lobby.";
             else
                 msg = "Connection to host was lost. Leaving the lobby.";
 
