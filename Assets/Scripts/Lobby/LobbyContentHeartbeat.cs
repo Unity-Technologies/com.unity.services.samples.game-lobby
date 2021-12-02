@@ -136,6 +136,7 @@ namespace LobbyRelaySample
             data.Add("Color", ((int)lobby.Color).ToString());
             data.Add("State_LastEdit", lobby.Data.State_LastEdit.ToString());
             data.Add("Color_LastEdit", lobby.Data.Color_LastEdit.ToString());
+            data.Add("RelayNGOCode_LastEdit", lobby.Data.RelayNGOCode_LastEdit.ToString());
             return data;
         }
 
