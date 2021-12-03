@@ -298,6 +298,8 @@ namespace LobbyRelaySample
 
             Lobby lobby = m_lastKnownLobby;
             Dictionary<string, DataObject> dataCurr = lobby.Data ?? new Dictionary<string, DataObject>();
+
+			var shouldLock = false;
             foreach (var dataNew in data)
             {
                 // Special case: We want to be able to filter on our color data, so we need to supply an arbitrary index to retrieve later. Uses N# for numerics, instead of S# for strings.
@@ -307,11 +309,16 @@ namespace LobbyRelaySample
                     dataCurr[dataNew.Key] = dataObj;
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
-            }
-            //Special Use: Get the state of the Local Lobby so we can lock it from appearing in queries if it's not in the "Lobby" State
-            Enum.TryParse(data["State"], out LobbyState lobbyState);
-            
-            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr,lobbyState!=LobbyState.Lobby ,(result) =>
+                
+                //Special Use: Get the state of the Local lobby so we can lock it from appearing in queries if it's not in the "Lobby" State
+                if (dataNew.Key == "State")
+                {
+                    Enum.TryParse(dataNew.Value, out LobbyState lobbyState);
+                    shouldLock = lobbyState != LobbyState.Lobby;
+                }
+            }         
+
+            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, shouldLock, (result) =>
             {
                 if (result != null)
                     m_lastKnownLobby = result;
@@ -423,7 +430,10 @@ namespace LobbyRelaySample
                 }
             }
 
-            public override void CopyObserved(RateLimitCooldown oldObserved){/* This behavior isn't needed; we're just here for the OnChanged event management. */}
+            public override void CopyObserved(RateLimitCooldown oldObserved)
+            {
+                /* This behavior isn't needed; we're just here for the OnChanged event management. */
             }
         }
     }
+}
