@@ -35,9 +35,11 @@ namespace Test
         }
 
         private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
-        //Only used when testing DTLS
-        private bool m_didSigninComplete = false;
         GameObject m_dummy;
+        //Only used when testing DTLS
+        #pragma warning disable CS0414 // This is the "assigned but its value is never used" warning, which will otherwise appear when DTLS is unavailable.
+        private bool m_didSigninComplete = false;
+        #pragma warning restore CS0414
 
         [OneTimeSetUp]
         public void Setup()
