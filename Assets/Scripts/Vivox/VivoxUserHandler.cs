@@ -55,6 +55,8 @@ namespace LobbyRelaySample.vivox
 
         public void OnChannelJoined(IChannelSession channelSession) // Called after a connection is established, which begins once a lobby is joined.
         {
+            //Check if we are muted or not
+
             m_channelSession = channelSession;
             m_channelSession.Participants.AfterKeyAdded += OnParticipantAdded;
             m_channelSession.Participants.BeforeKeyRemoved += BeforeParticipantRemoved;
@@ -85,9 +87,21 @@ namespace LobbyRelaySample.vivox
             if (isThisUser)
             {   m_vivoxId = keyEventArg.Key; // Since we couldn't construct the Vivox ID earlier, retrieve it here.
                 m_lobbyUserVolumeUI.IsLocalPlayer = participant.IsSelf;
-                m_lobbyUserVolumeUI.EnableVoice(true);
+
+                if(!participant.IsMutedForAll)
+                    m_lobbyUserVolumeUI.EnableVoice(false);//Should check if user is muted or not.
+                else
+                    m_lobbyUserVolumeUI.DisableVoice(false);
+            }
+            else
+            {
+                if(!participant.LocalMute)
+                    m_lobbyUserVolumeUI.EnableVoice(false);//Should check if user is muted or not.
+                else
+                    m_lobbyUserVolumeUI.DisableVoice(false);
             }
         }
+
         private void BeforeParticipantRemoved(object sender, KeyEventArg<string> keyEventArg)
         {
             var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;

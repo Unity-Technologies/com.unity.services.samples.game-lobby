@@ -19,6 +19,7 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         TMP_InputField m_JoinCodeField;
 
+        public JoinCreateLobbyUI m_JoinCreateLobbyUI;
         /// <summary>
         /// Key: Lobby ID, Value Lobby UI
         /// </summary>
@@ -27,6 +28,24 @@ namespace LobbyRelaySample.UI
 
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
         LocalLobby.LobbyData m_LocalLobbySelected;
+
+        public override void Start()
+        {
+            base.Start();
+            m_JoinCreateLobbyUI.m_OnTabChanged.AddListener(OnTabChanged);
+        }
+
+        void OnTabChanged(JoinCreateTabs tabState)
+        {
+            if (tabState == JoinCreateTabs.Join)
+            {
+                Show();
+            }
+            else
+            {
+                Hide();
+            }
+        }
 
         public void LobbyButtonSelected(LocalLobby lobby)
         {
