@@ -8,14 +8,11 @@ using UnityEngine.Events;
 
 namespace LobbyRelaySample.ngo
 {
-    // TODO: I'm using host and server interchangeably...which in part I have to since it's ServerRpc but I think IsHost vs. IsServer yield different results in some places?
-
     /// <summary>
     /// Used by the host to actually track scores for all players, and by each client to monitor for updates to their own score.
     /// </summary>
     public class Scorer : NetworkBehaviour
     {
-        // TODO: Most of the ints could be bytes?
         [SerializeField] private NetworkedDataStore m_dataStore = default;
         private ulong m_localId;
         [SerializeField] private TMP_Text m_scoreOutputText = default;

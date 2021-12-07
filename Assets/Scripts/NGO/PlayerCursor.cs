@@ -44,6 +44,9 @@ namespace LobbyRelaySample.ngo
                 var trails = m_onClickParticles.trails;
                 trails.colorOverLifetime = new ParticleSystem.MinMaxGradient(Color.grey);
             }
+            else
+            {   m_renderer.enabled = false; // The local player should see their cursor instead of the simulated cursor object, since the object will appear laggy.
+            }
         }
 
         [ClientRpc]
