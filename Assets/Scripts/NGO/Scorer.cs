@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using TMPro;
+﻿using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,7 +14,7 @@ namespace LobbyRelaySample.ngo
         private ulong m_localId;
         [SerializeField] private TMP_Text m_scoreOutputText = default;
 
-        [Tooltip("When the game ends, this will be provided the results in order of rank (1st-place first, and so on).")]
+        [Tooltip("When the game ends, this will be called once for each player in order of rank (1st-place first, and so on).")]
         [SerializeField] private UnityEvent<PlayerData> m_onGameEnd = default;
 
         public override void OnNetworkSpawn()
@@ -31,7 +28,6 @@ namespace LobbyRelaySample.ngo
             int newScore = m_dataStore.UpdateScore(id, 1);
             UpdateScoreOutput_ClientRpc(id, newScore);
         }
-
         public void ScoreFailure(ulong id)
         {
             int newScore = m_dataStore.UpdateScore(id, -1);
