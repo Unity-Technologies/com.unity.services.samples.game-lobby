@@ -7,13 +7,27 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class CreateMenuUI : UIPanelBase
     {
-        private LocalLobby.LobbyData m_ServerRequestData = new LocalLobby.LobbyData{ LobbyName = "New Lobby", MaxPlayerCount = 4 };
+        public JoinCreateLobbyUI m_JoinCreateLobbyUI;
+        private LocalLobby.LobbyData m_ServerRequestData = new LocalLobby.LobbyData { LobbyName = "New Lobby", MaxPlayerCount = 4 };
 
         public override void Start()
         {
             base.Start();
-            Hide();
+            m_JoinCreateLobbyUI.m_OnTabChanged.AddListener(OnTabChanged);
         }
+
+        void OnTabChanged(JoinCreateTabs tabState)
+        {
+            if (tabState == JoinCreateTabs.Create)
+            {
+                Show();
+            }
+            else
+            {
+                Hide();
+            }
+        }
+
         public void SetServerName(string serverName)
         {
             m_ServerRequestData.LobbyName = serverName;
