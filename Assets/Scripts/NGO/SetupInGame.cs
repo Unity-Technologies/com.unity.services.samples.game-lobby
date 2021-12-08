@@ -38,6 +38,10 @@ namespace LobbyRelaySample.ngo
                 go.SetActive(areVisible);
         }
 
+        /// <summary>
+        /// The prefab with the NetworkManager contains all of the assets and logic needed to set up the NGO minigame.
+        /// The UnityTransport needs to also be set up with a new Allocation from Relay.
+        /// </summary>
         private void CreateNetworkManager()
         {
             m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
@@ -52,7 +56,6 @@ namespace LobbyRelaySample.ngo
                 m_inGameManagerObj.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
         }
 
-
         private void OnConnectionVerified()
         {   m_hasConnectedViaNGO = true;
         }
@@ -65,6 +68,9 @@ namespace LobbyRelaySample.ngo
         {   m_localUser = user; // Same, regarding redundancy.
         }
 
+        /// <summary>
+        /// Once the Relay Allocation is created, this passes its data to the UnityTransport.
+        /// </summary>
         public void SetRelayServerData(string address, int port, byte[] allocationBytes, byte[] key, byte[] connectionData, byte[] hostConnectionData, bool isSecure)
         {
             m_initializeTransport = (transport) => { transport.SetRelayServerData(address, (ushort)port, allocationBytes, key, connectionData, hostConnectionData, isSecure); };
@@ -83,7 +89,7 @@ namespace LobbyRelaySample.ngo
             {
                 if (!m_hasConnectedViaNGO)
                 {
-                    // If this player hasn't successfully connected via NGO, get booted.
+                    // If this player hasn't successfully connected via NGO, forcibly exit the minigame.
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
                     OnGameEnd();
                 }

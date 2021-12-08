@@ -93,8 +93,6 @@ namespace LobbyRelaySample
         private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
         private RateLimitCooldown m_rateLimitHost = new RateLimitCooldown(3f);
 
-        // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
-
         #endregion
 
         private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)

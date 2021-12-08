@@ -7,7 +7,7 @@ using UnityEngine.Events;
 namespace LobbyRelaySample.ngo
 {
     /// <summary>
-    /// A place to store data needed by networked behaviors. Each client has an instance, but the server's instance stores the actual data.
+    /// A place to store data needed by networked behaviors. Each client has an instance so they can retrieve data, but the server's instance stores the actual data.
     /// </summary>
     public class NetworkedDataStore : NetworkBehaviour
     {
@@ -17,7 +17,9 @@ namespace LobbyRelaySample.ngo
         private Dictionary<ulong, PlayerData> m_playerData = new Dictionary<ulong, PlayerData>();
         private ulong m_localId;
 
-        // Clients will need to retrieve the host's player data since it isn't synchronized. During that process, they will supply these callbacks
+        // Clients will need to retrieve the host's player data since it isn't synchronized. During that process, they will supply these callbacks.
+        // Since we use RPC calls to retrieve data, these callbacks need to be retained (since the scope of the method that the client calls to request
+        // data will be left in order to make the server RPC call).
         private Action<PlayerData> m_onGetCurrentCallback;
         private UnityEvent<PlayerData> m_onEachPlayerCallback;
 
@@ -63,7 +65,7 @@ namespace LobbyRelaySample.ngo
         }
 
         /// <summary>
-        /// Retrieve the data for all players from 1st to last place, calling onEachPlayer for each.
+        /// Retrieve the data for all players in order from 1st to last place, calling onEachPlayer for each.
         /// </summary>
         public void GetAllPlayerData(UnityEvent<PlayerData> onEachPlayer)
         {
