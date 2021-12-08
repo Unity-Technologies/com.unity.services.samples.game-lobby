@@ -71,9 +71,9 @@ namespace LobbyRelaySample.relay
 
             var relayServerData = new RelayServerData(ref serverEndpoint, 0, ref allocationId, ref connectionData, ref hostConnectionData, ref key, isSecure);
             relayServerData.ComputeNewNonce(); // For security, the nonce value sent when authenticating the allocation must be increased.
-            var relayNetworkParameter = new RelayNetworkParameter { ServerData = relayServerData };
+            var networkSettings = new NetworkSettings();
 
-            m_networkDriver = NetworkDriver.Create(new INetworkParameter[] { relayNetworkParameter });
+            m_networkDriver = NetworkDriver.Create(networkSettings.WithRelayParameters(ref relayServerData));
             m_connections = new List<NetworkConnection>(connectionCapacity);
 
             if (m_networkDriver.Bind(NetworkEndPoint.AnyIpv4) != 0)

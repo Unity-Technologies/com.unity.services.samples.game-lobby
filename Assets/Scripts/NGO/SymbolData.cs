@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace LobbyRelaySample.ngo
 {
+    /// <summary>
+    /// Associates a symbol index with the sprite to display for symbol objects matching the index.
+    /// </summary>
     public class SymbolData : ScriptableObject
     {
         [SerializeField] public List<Sprite> m_availableSymbols;
