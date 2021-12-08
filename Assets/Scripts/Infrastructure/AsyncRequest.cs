@@ -18,8 +18,8 @@ namespace LobbyRelaySample
             catch (Exception e)
             {
                 ParseServiceException(e);
-                Exception eFull = new Exception($"Call stack before async call:\n{currentTrace}\n", e); // TODO: Are we still missing Relay exceptions after the update?
-                throw eFull;
+                UnityEngine.Debug.LogError($"AsyncRequest threw an exception. Call stack before async call:\n{currentTrace}\n"); // Note that we log here instead of creating a new Exception in case of a change in calling context during the async call. E.g. Relay has its own exception handling that would intercept this call stack.
+                throw;
             }
             finally
             {   onComplete?.Invoke();
@@ -35,8 +35,8 @@ namespace LobbyRelaySample
             catch (Exception e)
             {
                 ParseServiceException(e);
-                Exception eFull = new Exception($"Call stack before async call:\n{currentTrace}\n", e);
-                throw eFull;
+                UnityEngine.Debug.LogError($"AsyncRequest threw an exception. Call stack before async call:\n{currentTrace}\n");
+                throw;
             }
             finally
             {   onComplete?.Invoke(result);

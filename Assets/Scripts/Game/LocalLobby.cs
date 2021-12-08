@@ -38,6 +38,7 @@ namespace LobbyRelaySample
             public LobbyColor Color { get; set; }
             public long State_LastEdit { get; set; }
             public long Color_LastEdit { get; set; }
+            public long RelayNGOCode_LastEdit { get; set; }
 
             public LobbyData(LobbyData existing)
             {
@@ -52,6 +53,7 @@ namespace LobbyRelaySample
                 Color = existing.Color;
                 State_LastEdit = existing.State_LastEdit;
                 Color_LastEdit = existing.Color_LastEdit;
+                RelayNGOCode_LastEdit = existing.RelayNGOCode_LastEdit;
             }
 
             public LobbyData(string lobbyCode)
@@ -67,6 +69,7 @@ namespace LobbyRelaySample
                 Color = LobbyColor.None;
                 State_LastEdit = 0;
                 Color_LastEdit = 0;
+                RelayNGOCode_LastEdit = 0;
             }
         }
 
@@ -168,6 +171,7 @@ namespace LobbyRelaySample
             set
             {
                 m_data.RelayNGOCode = value;
+                m_data.RelayNGOCode_LastEdit = DateTime.Now.Ticks;
                 OnChanged(this);
             }
         }
@@ -234,13 +238,17 @@ namespace LobbyRelaySample
             // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
             var pendingState = data.State;
             var pendingColor = data.Color;
+            var pendingNgoCode = data.RelayNGOCode;
             if (m_data.State_LastEdit > data.State_LastEdit)
                 pendingState = m_data.State;
             if (m_data.Color_LastEdit > data.Color_LastEdit)
                 pendingColor = m_data.Color;
+            if (m_data.RelayNGOCode_LastEdit > data.RelayNGOCode_LastEdit)
+                pendingNgoCode = m_data.RelayNGOCode;
             m_data = data;
             m_data.State = pendingState;
             m_data.Color = pendingColor;
+            m_data.RelayNGOCode = pendingNgoCode;
 
             if (currUsers == null)
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();

@@ -148,8 +148,7 @@ namespace LobbyRelaySample.relay
         }
 
         /// <summary>
-        /// In an actual game, after the countdown, there would be some step here where the host and all clients sync up on game state, load assets, etc.
-        /// Here, we will instead just signal an "in-game" state that can be ended by the host.
+        /// After the countdown, the host and all clients need to be alerted to sync up on game state, load assets, etc.
         /// </summary>
         public void SendInGameState()
         {
