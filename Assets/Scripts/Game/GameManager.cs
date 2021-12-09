@@ -241,8 +241,15 @@ namespace LobbyRelaySample
             if (m_relayClient != null)
             {
                 m_relayClient.Dispose();
-                Component.Destroy(m_relayClient);
-                m_relayClient = null;
+                StartCoroutine(FinishCleanup());
+
+                // We need to delay slightly to give the disconnect message sent during Dispose time to reach the host, so that we don't destroy the connection without it being flushed first.
+                IEnumerator FinishCleanup()
+                {
+                    yield return null;
+                    Component.Destroy(m_relayClient);
+                    m_relayClient = null;
+                }
             }
         }
 
