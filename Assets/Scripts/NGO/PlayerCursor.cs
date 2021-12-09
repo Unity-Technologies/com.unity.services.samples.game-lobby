@@ -6,7 +6,8 @@ using UnityEngine;
 namespace LobbyRelaySample.ngo
 {
     /// <summary>
-    /// Each player's cursor needs to be controlled by them and visible to the other players.
+    /// This cursor object will follow the owning player's mouse cursor and be visible to the other players.
+    /// The host will use this object's movement for detecting collision with symbol objects.
     /// </summary>
     [RequireComponent(typeof(Collider))]
     public class PlayerCursor : NetworkBehaviour, IReceiveMessages
@@ -15,8 +16,10 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private ParticleSystem m_onClickParticles = default;
         [SerializeField] private TMPro.TMP_Text m_nameOutput = default;
         private Camera m_mainCamera;
-        private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero);
+        private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero); // (Using a NetworkTransform to sync position would also work.)
         private ulong m_localId;
+
+        // If the local player cursor spawns before this cursor's owner, the owner's data won't be available yet. This is used to retrieve the data later.
         private Action<ulong, Action<PlayerData>> m_retrieveName;
 
         // The host is responsible for determining if a player has successfully selected a symbol object, since collisions should be handled serverside.
@@ -27,9 +30,12 @@ namespace LobbyRelaySample.ngo
             Locator.Get.Messenger.Subscribe(this);
         }
 
-        // We can't pass object references as RPC calls by default, and we don't have a different convenient way to, I think,
-        // get the object spawned on the server to assign some member on the client, so instead let's retrieve dynamically what we need.
-        // I guess I'd just have a "singleton" to hold the references?
+        /// <summary>
+        /// This cursor is spawned in dynamically but needs references to some scene objects. Pushing full object references over RPC calls
+        /// is an option if we create custom data for each and ensure they're all spawned on the host correctly, but it's simpler to do
+        /// some one-time retrieval here instead.
+        /// This also sets up the visuals to make remote player cursors appear distinct from the local player's cursor.
+        /// </summary>
         public override void OnNetworkSpawn()
         {
             m_retrieveName = NetworkedDataStore.Instance.GetPlayerData;
@@ -56,7 +62,7 @@ namespace LobbyRelaySample.ngo
                 m_nameOutput.text = data.name;
         }
 
-        // Don't love having the input here, but it doesn't need to be anywhere else.
+        // It'd be better to have a separate input handler, but we don't need the mouse input anywhere else, so keep it simple.
         private bool IsSelectInputHit()
         {
             return Input.GetMouseButtonDown(0);
@@ -74,7 +80,7 @@ namespace LobbyRelaySample.ngo
                 SendInput_ServerRpc(m_localId);
         }
 
-        [ServerRpc] // Leave RequireOwnership = true for these so that only the player whose cursor this is can make updates.
+        [ServerRpc] // Leave (RequireOwnership = true) for these so that only the player whose cursor this is can make updates.
         private void SetPosition_ServerRpc(Vector3 position)
         {
             m_position.Value = position;

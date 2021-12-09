@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace LobbyRelaySample.ngo
 {
-    // Note: The SymbolObjects, which will be children of this object, need their NetworkTransforms to have IsLocalSpace set to true. Otherwise, they might get desynced.
-    // (This would manifest as packet loss errors.)
-    // Also note: The initial position of the SymbolObject prefab is set to be outside the camera view in the Z-direction, so that it doesn't interpolate past the actual
-    // position when it spawns on a client (as opposed to in the Y-direction, since this SymbolContainer is also moving downward).
-
     /// <summary>
     /// Rather than track movement data for every symbol object, the symbols will all be parented under one container that will move.
     /// It will not begin that movement until it both has been Spawned on the network and it has been informed that the game has started.
@@ -19,6 +14,9 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private float m_speed = 1;
         private bool m_isConnected = false;
         private bool m_hasGameStarted = false;
+        /// <summary>
+        /// Verify both that the game has started and that the network connection is working before moving the symbols.
+        /// </summary>
         private void OnGameStarted()
         {
             m_hasGameStarted = true;

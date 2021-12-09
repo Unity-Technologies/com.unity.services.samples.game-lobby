@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,8 +7,8 @@ using Random = UnityEngine.Random;
 namespace LobbyRelaySample.ngo
 {
     /// <summary>
-    /// Handles selecting the randomized sequence of symbols to spawn. This also selects a subset of the selected symbols to be the target
-    /// sequence that each player needs to select in order.
+    /// Handles selecting the randomized sequence of symbols to spawn, choosing a subset to be the ordered target sequence that each player needs to select.
+    /// This also handles selecting randomized positions for the symbols, and it sets up the target sequence animation for the instruction sequence.
     /// </summary>
     public class SequenceSelector : NetworkBehaviour, IReceiveMessages
     {
@@ -22,7 +21,7 @@ namespace LobbyRelaySample.ngo
 
         private List<int> m_fullSequence = new List<int>(); // This is owned by the host, and each index is assigned as a NetworkVariable to each SymbolObject.
         private NetworkList<int> m_targetSequence; // This is owned by the host but needs to be available to all clients, so it's a NetworkedList here.
-        private Dictionary<ulong, int> m_targetSequenceIndexPerPlayer = new Dictionary<ulong, int>(); // Also owned by the host, indexed by client ID.
+        private Dictionary<ulong, int> m_targetSequenceIndexPerPlayer = new Dictionary<ulong, int>(); // Each player's current target. Also owned by the host, indexed by client ID.
 
         public void Awake()
         {
@@ -38,39 +37,42 @@ namespace LobbyRelaySample.ngo
         public override void OnNetworkSpawn()
         {
             if (IsHost)
-            {
-                // Choose some subset of the list of symbols to be present in this game, along with a target sequence.
-                List<int> symbolsForThisGame = SelectSymbols(m_symbolData.m_availableSymbols.Count, 8);
-                m_targetSequence.Add(symbolsForThisGame[0]);
-                m_targetSequence.Add(symbolsForThisGame[1]);
-                m_targetSequence.Add(symbolsForThisGame[2]);
-
-                // Then, ensure that the target sequence is present in order throughout most of the full set of symbols to spawn.
-                int numTargetSequences = (int)(k_symbolCount * 2/3f) / 3; // About 2/3 of the symbols will be definitely part of the target sequence.
-                for (; numTargetSequences >= 0; numTargetSequences--)
-                {   m_fullSequence.Add(m_targetSequence[2]); // We want a List instead of a Queue or Stack for faster insertion, but we will remove indices backwards so as to not reshift other entries.
-                    m_fullSequence.Add(m_targetSequence[1]);
-                    m_fullSequence.Add(m_targetSequence[0]);
-                }
-                // Then, fill in with a good mix of the remaining symbols.
-                AddHalfRemaining(3, 2);
-                AddHalfRemaining(4, 2);
-                AddHalfRemaining(5, 2);
-                AddHalfRemaining(6, 2);
-                AddHalfRemaining(7, 1);
-
-                void AddHalfRemaining(int symbolIndex, int divider)
-                {
-                    int remaining = k_symbolCount - m_fullSequence.Count;
-                    for (int n = 0; n < remaining / divider; n++)
-                    {
-                        int randomIndex = UnityEngine.Random.Range(0, m_fullSequence.Count);
-                        m_fullSequence.Insert(randomIndex, symbolsForThisGame[symbolIndex]);
-                    }
-                }
-            }
+                ChooseSymbols();
             m_localId = NetworkManager.Singleton.LocalClientId;
             AddClient_ServerRpc(m_localId);
+        }
+
+        private void ChooseSymbols()
+        {
+            // Choose some subset of the list of symbols to be present in this game, along with a target sequence.
+            int numSymbolTypes = 8;
+            List<int> symbolsForThisGame = SelectSymbols(m_symbolData.m_availableSymbols.Count, numSymbolTypes);
+            m_targetSequence.Add(symbolsForThisGame[0]);
+            m_targetSequence.Add(symbolsForThisGame[1]);
+            m_targetSequence.Add(symbolsForThisGame[2]);
+
+            // Then, ensure that the target sequence is present in order throughout most of the full set of symbols to spawn.
+            int numTargetSequences = (int)(k_symbolCount * 2 / 3f) / 3; // About 2/3 of the symbols will be definitely part of the target sequence.
+            for (; numTargetSequences >= 0; numTargetSequences--)
+            {
+                m_fullSequence.Add(m_targetSequence[2]); // We want a List instead of a Queue or Stack for faster insertion, but we will remove indices backwards so as to not resize other entries.
+                m_fullSequence.Add(m_targetSequence[1]);
+                m_fullSequence.Add(m_targetSequence[0]);
+            }
+            // Then, fill in with a good mix of the remaining symbols.
+            for (int n = 3; n < numSymbolTypes - 1; n++)
+                AddHalfRemaining(n, 2);
+            AddHalfRemaining(numSymbolTypes - 1, 1); // 1 as the divider ensures all remaining symbols get an index.
+
+            void AddHalfRemaining(int symbolIndex, int divider)
+            {
+                int remaining = k_symbolCount - m_fullSequence.Count;
+                for (int n = 0; n < remaining / divider; n++)
+                {
+                    int randomIndex = UnityEngine.Random.Range(0, m_fullSequence.Count);
+                    m_fullSequence.Insert(randomIndex, symbolsForThisGame[symbolIndex]);
+                }
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -90,7 +92,7 @@ namespace LobbyRelaySample.ngo
 
         public void Update()
         {
-            // We can't guarantee timing with the host's selection of the target sequence, so retrieve it once it's available.
+            // A client can't guarantee timing with the host's selection of the target sequence, so retrieve it once it's available.
             if (!m_hasReceivedTargetSequence && m_targetSequence.Count > 0)
             {
                 for (int n = 0; n < m_targetSequence.Count; n++)
@@ -103,6 +105,7 @@ namespace LobbyRelaySample.ngo
         /// <summary>
         /// If the index is correct, this will advance the current sequence index.
         /// </summary>
+        /// <returns>True if the correct symbol index was chosen, false otherwise.</returns>
         public bool ConfirmSymbolCorrect(ulong id, int symbolIndex)
         {
             int index = m_targetSequenceIndexPerPlayer[id];
@@ -143,7 +146,8 @@ namespace LobbyRelaySample.ngo
         }
 
         /// <summary>
-        /// Used for the binary space partition (BSP) algorithm, which makes alternating "cuts" to subdivide rectangles.
+        /// Used for the binary space partition (BSP) algorithm, which makes alternating "cuts" to subdivide rectangles while maintaining a buffer of space between them.
+        /// This ensures all symbols will be randomly (though not uniformly) distributed without overlapping each other.
         /// </summary>
         private struct RectCut
         {
@@ -177,8 +181,7 @@ namespace LobbyRelaySample.ngo
                 points.Clear();
                 rects.Enqueue(new RectCut(bounds, -1)); // Start with an extra horizontal cut since the space is so tall.
 
-                // For each rect, subdivide it with an alternating cut, and then enqueue for recursion until enough points are chosen or the rects are all too small.
-                // This ensures a reasonable distribution of points which won't cause overlaps, though it will not necessarily be uniform.
+                // For each rect, subdivide it with an alternating cut, and then enqueue the two smaller rects for recursion until enough points are chosen or the rects are all too small.
                 while (rects.Count + points.Count < count && rects.Count > 0)
                 {
                     RectCut currRect = rects.Dequeue();

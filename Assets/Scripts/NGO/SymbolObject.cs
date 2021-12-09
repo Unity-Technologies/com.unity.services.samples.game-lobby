@@ -31,7 +31,7 @@ namespace LobbyRelaySample.ngo
         {
             // Actually destroying the symbol objects can cause garbage collection and other delays that might lead to desyncs.
             // Disabling the networked object can also cause issues, so instead, just move the object, and it will be cleaned up once the NetworkManager is destroyed.
-            // (If object pooling, this is where to instead return it to the pool.)
+            // (If we used object pooling, this is where we would instead return it to the pool.)
             this.transform.localPosition += Vector3.forward * 500;
         }
     }

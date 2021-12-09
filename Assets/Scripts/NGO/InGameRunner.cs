@@ -74,15 +74,15 @@ namespace LobbyRelaySample.ngo
         }
 
         /// <summary>
-        /// To verify the connection, invoke a server RPC call that then invokes a client RPC call.
+        /// To verify the connection, invoke a server RPC call that then invokes a client RPC call. After this, the actual setup occurs.
         /// </summary>
         [ServerRpc(RequireOwnership = false)]
         private void VerifyConnection_ServerRpc(ulong clientId)
         {
             VerifyConnection_ClientRpc(clientId);
-
             // While we could start pooling symbol objects now, incoming clients would be flooded with the Spawn calls.
             // This could lead to dropped packets such that the InGameRunner's Spawn call fails to occur, so we'll wait until all players join.
+            // (Besides, we will need to display instructions, which has downtime during which symbol objects can be spawned.)
         }
 
         [ClientRpc]
@@ -91,14 +91,13 @@ namespace LobbyRelaySample.ngo
             if (clientId == m_localUserData.id)
                 VerifyConnectionConfirm_ServerRpc(m_localUserData);
         }
-
         /// <summary>
-        /// Once the connection is confirmed, check if all players have connected.
+        /// Once the connection is confirmed, spawn a player cursor and check if all players have connected.
         /// </summary>
         [ServerRpc(RequireOwnership = false)]
         private void VerifyConnectionConfirm_ServerRpc(PlayerData clientData)
         {
-            NetworkObject playerCursor = NetworkObject.Instantiate(m_playerCursorPrefab);
+            NetworkObject playerCursor = NetworkObject.Instantiate(m_playerCursorPrefab); // Note that the client will not receive the cursor object reference, so the cursor must handle initializing itself.
             playerCursor.SpawnWithOwnership(clientData.id);
             playerCursor.name += clientData.name;
             m_dataStore.AddPlayer(clientData.id, clientData.name);
@@ -123,6 +122,9 @@ namespace LobbyRelaySample.ngo
             }
         }
 
+        /// <summary>
+        /// The game will begin either when all players have connected successfully or after a timeout.
+        /// </summary>
         private void BeginGame()
         {
             m_canSpawnInGameObjects = true;
@@ -212,7 +214,7 @@ namespace LobbyRelaySample.ngo
         {
             EndGame_ClientRpc();
             yield return null;
-            SendEndGameSignal();
+            SendLocalEndGameSignal();
         }
 
         [ClientRpc]
@@ -220,12 +222,12 @@ namespace LobbyRelaySample.ngo
         {
             if (IsHost)
                 return;
-            SendEndGameSignal();
+            SendLocalEndGameSignal();
         }
 
-        private void SendEndGameSignal()
+        private void SendLocalEndGameSignal()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null); // We only send this message if the game completes, since the player remains in the lobby. If the player leaves with the back button, that instead sends them to the menu.
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null); // We only send this message if the game completes, since the player remains in the lobby in that case. If the player leaves with the back button, that instead sends them to the menu.
             m_onGameEnd();
         }
 
