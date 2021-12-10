@@ -29,9 +29,9 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private SymbolKillVolume   m_killVolume = default;
         [SerializeField] private IntroOutroRunner   m_introOutroRunner = default;
         [SerializeField] private NetworkedDataStore m_dataStore = default;
-		[SerializeField] private BoxCollider        m_collider;
-        private Transform m_symbolContainerInstance;
+        [SerializeField] private BoxCollider        m_collider;
 
+        private Transform m_symbolContainerInstance;
         private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LobbyUser localUser)
@@ -232,6 +232,5 @@ namespace LobbyRelaySample.ngo
         }
 
         public void OnReProvided(IInGameInputHandler previousProvider) { /*No-op*/ }
-        }
     }
 }

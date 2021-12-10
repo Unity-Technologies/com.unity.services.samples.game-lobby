@@ -10,6 +10,8 @@ namespace LobbyRelaySample.ngo
     {
         [SerializeField] private SymbolData m_symbolData;
         [SerializeField] private SpriteRenderer m_renderer;
+        [SerializeField] private Animator m_animator;
+
         [HideInInspector] public NetworkVariable<int> symbolIndex; // The index into SymbolData, not the index of this object.
 
         public override void OnNetworkSpawn()
@@ -28,6 +30,12 @@ namespace LobbyRelaySample.ngo
 
         [ServerRpc]
         public void Destroy_ServerRpc()
+        {
+            //The animation calls RemoveSymbol
+            m_animator.SetBool("dead", true);
+        }
+
+        public void RemoveSymbol()
         {
             // Actually destroying the symbol objects can cause garbage collection and other delays that might lead to desyncs.
             // Disabling the networked object can also cause issues, so instead, just move the object, and it will be cleaned up once the NetworkManager is destroyed.
