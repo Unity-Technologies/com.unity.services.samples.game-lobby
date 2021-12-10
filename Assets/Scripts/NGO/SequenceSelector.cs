@@ -14,7 +14,7 @@ namespace LobbyRelaySample.ngo
     {
         [SerializeField] private SymbolData m_symbolData = default;
         [SerializeField] private Image[] m_targetSequenceOutput = default;
-        public const int k_symbolCount = 200;
+        public const int k_symbolCount = 140;
         private bool m_hasReceivedTargetSequence = false;
         private ulong m_localId;
         private bool m_canAnimateTargets = false;

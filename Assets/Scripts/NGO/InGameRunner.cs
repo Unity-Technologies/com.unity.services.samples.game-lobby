@@ -29,8 +29,9 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private SymbolKillVolume   m_killVolume = default;
         [SerializeField] private IntroOutroRunner   m_introOutroRunner = default;
         [SerializeField] private NetworkedDataStore m_dataStore = default;
-        private Transform m_symbolContainerInstance;
+        [SerializeField] private BoxCollider        m_collider;
 
+        private Transform m_symbolContainerInstance;
         private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
         public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LobbyUser localUser)
@@ -66,7 +67,8 @@ namespace LobbyRelaySample.ngo
         private void ResetPendingSymbolPositions()
         {
             m_pendingSymbolPositions.Clear();
-            IList<Vector2> points = m_sequenceSelector.GenerateRandomSpawnPoints(new Rect(-15, 0, 30, 120), 2);
+            Rect boxRext = new Rect(m_collider.bounds.min.x, m_collider.bounds.min.y, m_collider.bounds.size.x, m_collider.bounds.size.y);
+            IList<Vector2> points = m_sequenceSelector.GenerateRandomSpawnPoints(boxRext, 2);
             foreach (Vector2 point in points)
                 m_pendingSymbolPositions.Enqueue(point);
         }
@@ -82,6 +84,7 @@ namespace LobbyRelaySample.ngo
             // This could lead to dropped packets such that the InGameRunner's Spawn call fails to occur, so we'll wait until all players join.
             // (Besides, we will need to display instructions, which has downtime during which symbol objects can be spawned.)
         }
+
         [ClientRpc]
         private void VerifyConnection_ClientRpc(ulong clientId)
         {
@@ -102,6 +105,7 @@ namespace LobbyRelaySample.ngo
             bool areAllPlayersConnected = NetworkManager.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
             VerifyConnectionConfirm_ClientRpc(clientData.id, areAllPlayersConnected);
         }
+
         [ClientRpc]
         private void VerifyConnectionConfirm_ClientRpc(ulong clientId, bool canBeginGame)
         {
@@ -110,6 +114,7 @@ namespace LobbyRelaySample.ngo
                 m_onConnectionVerified?.Invoke();
                 m_hasConnected = true;
             }
+
             if (canBeginGame && m_hasConnected)
             {
                 m_timeout = -1;
