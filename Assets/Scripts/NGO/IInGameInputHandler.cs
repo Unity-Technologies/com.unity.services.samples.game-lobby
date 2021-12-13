@@ -5,12 +5,12 @@
     /// </summary>
     public interface IInGameInputHandler : IProvidable<IInGameInputHandler>
     {
-        void OnPlayerInput(ulong id, SymbolObject selectedSymbol);
+        void OnPlayerInput(ulong playerId, SymbolObject selectedSymbol);
     }
 
     public class InGameInputHandlerNoop : IInGameInputHandler
     {
-        public void OnPlayerInput(ulong id, SymbolObject selectedSymbol) { }
+        public void OnPlayerInput(ulong playerId, SymbolObject selectedSymbol) { }
         public void OnReProvided(IInGameInputHandler previousProvider) { }
     }
 }
