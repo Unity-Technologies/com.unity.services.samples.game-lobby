@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Networking.Transport;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace LobbyRelaySample.relay
     /// This observes the local player and updates remote players over Relay when there are local changes, demonstrating basic data transfer over the Unity Transport (UTP).
     /// Created after the connection to Relay has been confirmed.
     /// </summary>
-    public class RelayUtpClient : MonoBehaviour // This is a MonoBehaviour merely to have access to Update.
+    public class RelayUtpClient : MonoBehaviour, IDisposable // This is a MonoBehaviour merely to have access to Update.
     {
         protected LobbyUser m_localUser;
         protected LocalLobby m_localLobby;
@@ -20,6 +21,7 @@ namespace LobbyRelaySample.relay
 
         protected bool m_hasSentInitialMessage = false;
         private const float k_heartbeatPeriod = 5;
+        private bool m_hasDisposed = false;
 
         protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
 
@@ -37,12 +39,21 @@ namespace LobbyRelaySample.relay
             m_localUser.onChanged -= OnLocalChange;
             Leave();
             Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
-            m_connections.Clear();
-            m_networkDriver.Dispose();
+            // Don't clean up the NetworkDriver here, or else our disconnect message won't get through to the host. The host will handle cleaning up the connection.
         }
+
+        public void Dispose()
+        {
+            if (!m_hasDisposed)
+            {
+                Uninitialize();
+                m_hasDisposed = true;
+            }
+        }
+
         public void OnDestroy()
         {
-            Uninitialize();
+            Dispose();
         }
 
         private void OnLocalChange(LobbyUser localUser)
@@ -162,7 +173,7 @@ namespace LobbyRelaySample.relay
             // The host disconnected, and Relay does not support host migration. So, all clients should disconnect.
             string msg;
             if (m_IsRelayConnected)
-                msg = "Host disconnected! Leaving the lobby.";
+                msg = "The host disconnected! Leaving the lobby.";
             else
                 msg = "Connection to host was lost. Leaving the lobby.";
 

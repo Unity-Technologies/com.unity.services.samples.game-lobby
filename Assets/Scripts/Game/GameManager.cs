@@ -97,7 +97,7 @@ namespace LobbyRelaySample
         {
             if (type == MessageType.CreateLobbyRequest)
             {
-                var createLobbyData = (LocalLobby)msg;
+                LocalLobby.LobbyData createLobbyData = (LocalLobby.LobbyData)msg;
                 LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
                     {   lobby.ToLocalLobby.Convert(r, m_localLobby);
                         OnCreatedLobby();
@@ -239,8 +239,17 @@ namespace LobbyRelaySample
                 m_relaySetup = null;
             }
             if (m_relayClient != null)
-            {   Component.Destroy(m_relayClient);
-                m_relayClient = null;
+            {
+                m_relayClient.Dispose();
+                StartCoroutine(FinishCleanup());
+
+                // We need to delay slightly to give the disconnect message sent during Dispose time to reach the host, so that we don't destroy the connection without it being flushed first.
+                IEnumerator FinishCleanup()
+                {
+                    yield return null;
+                    Component.Destroy(m_relayClient);
+                    m_relayClient = null;
+                }
             }
         }
 

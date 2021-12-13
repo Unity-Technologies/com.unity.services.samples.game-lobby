@@ -19,6 +19,7 @@ namespace LobbyRelaySample.relay
         {
             base.Uninitialize();
             Locator.Get.Messenger.Unsubscribe(this);
+            m_networkDriver.Dispose();
         }
 
         protected override void OnUpdate()
@@ -87,9 +88,17 @@ namespace LobbyRelaySample.relay
                 OnNewConnection(conn, id);
             else if (msgType == MsgType.PlayerDisconnect) // Clients message the host when they intend to disconnect, or else the host ends up keeping the connection open.
             {
-                conn.Disconnect(m_networkDriver);
                 UnityEngine.Debug.LogWarning("Disconnecting a client due to a disconnect message.");
+                conn.Disconnect(m_networkDriver);
+                m_connections.Remove(conn);
+                LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query).EnqueuePendingOperation(WaitToCheckForUsers);
                 return;
+
+                // The user ready status lives in the lobby data, which won't update immediately, but we need to use it to identify if all remaining players have readied.
+                // So, we'll wait two lobby update loops before we check remaining players to ensure the lobby has received the disconnect message.
+                void WaitToCheckForUsers()
+                {   LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query).EnqueuePendingOperation(CheckIfAllUsersReady);
+                }
             }
 
             // If a client has changed state, check if this changes whether all players have readied.
@@ -100,8 +109,7 @@ namespace LobbyRelaySample.relay
         protected override void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
         {
             // When a disconnect from the host occurs, no additional action is required. This override just prevents the base behavior from occurring.
-            // TODO: If a client disconnects, see if remaining players are all already ready.
-            UnityEngine.Debug.LogError("Client disconnected!");
+            // We rely on the PlayerDisconnect message instead of this disconnect message since this message might not arrive for a long time after the disconnect actually occurs.
         }
 
         public void OnReceiveMessage(MessageType type, object msg)
@@ -140,8 +148,7 @@ namespace LobbyRelaySample.relay
         }
 
         /// <summary>
-        /// In an actual game, after the countdown, there would be some step here where the host and all clients sync up on game state, load assets, etc.
-        /// Here, we will instead just signal an "in-game" state that can be ended by the host.
+        /// After the countdown, the host and all clients need to be alerted to sync up on game state, load assets, etc.
         /// </summary>
         public void SendInGameState()
         {

@@ -93,8 +93,6 @@ namespace LobbyRelaySample
         private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
         private RateLimitCooldown m_rateLimitHost = new RateLimitCooldown(3f);
 
-        // TODO: Shift to using this to do rate limiting for all API calls? E.g. the lobby data pushing is on its own loop.
-
         #endregion
 
         private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
@@ -298,6 +296,8 @@ namespace LobbyRelaySample
 
             Lobby lobby = m_lastKnownLobby;
             Dictionary<string, DataObject> dataCurr = lobby.Data ?? new Dictionary<string, DataObject>();
+
+			var shouldLock = false;
             foreach (var dataNew in data)
             {
                 // Special case: We want to be able to filter on our color data, so we need to supply an arbitrary index to retrieve later. Uses N# for numerics, instead of S# for strings.
@@ -307,9 +307,17 @@ namespace LobbyRelaySample
                     dataCurr[dataNew.Key] = dataObj;
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
-            }
+                
+                //Special Use: Get the state of the Local lobby so we can lock it from appearing in queries if it's not in the "Lobby" State
+                if (dataNew.Key == "State")
+                {
+                    Enum.TryParse(dataNew.Value, out LobbyState lobbyState);
+                    shouldLock = lobbyState != LobbyState.Lobby;
+                }
+            }         
 
-            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, (result) => {
+            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, shouldLock, (result) =>
+            {
                 if (result != null)
                     m_lastKnownLobby = result;
                 onComplete?.Invoke();
@@ -361,12 +369,10 @@ namespace LobbyRelaySample
             private float m_timeSinceLastCall = float.MaxValue;
             private readonly float m_cooldownTime;
             private Queue<Action> m_pendingOperations = new Queue<Action>();
-            private bool m_isHandlingPending = false; // Just in case a pending operation tries to enqueue itself again.
 
             public void EnqueuePendingOperation(Action action)
             {
-                if (!m_isHandlingPending)
-                    m_pendingOperations.Enqueue(action);
+                m_pendingOperations.Enqueue(action);
             }
 
             private bool m_isInCooldown = false;
@@ -405,22 +411,23 @@ namespace LobbyRelaySample
             private void OnUpdate(float dt)
             {
                 m_timeSinceLastCall += dt;
-                m_isHandlingPending = false; // (Backup in case a pending operation hit an exception.)
                 if (m_timeSinceLastCall >= m_cooldownTime)
                 {
                     IsInCooldown = false;
                     if (!m_isInCooldown) // It's possible that by setting IsInCooldown, something called CanCall immediately, in which case we want to stay on UpdateSlow.
                     {
                         Locator.Get.UpdateSlow.Unsubscribe(OnUpdate); // Note that this is after IsInCooldown is set, to prevent an Observer from kicking off CanCall again immediately.
-                        m_isHandlingPending = true;
-                        while (m_pendingOperations.Count > 0)
+                        int numPending = m_pendingOperations.Count; // It's possible a pending operation will re-enqueue itself or new operations, which should wait until the next loop.
+                        for (; numPending > 0; numPending--)
                             m_pendingOperations.Dequeue()?.Invoke(); // Note: If this ends up enqueuing many operations, we might need to batch them and/or ensure they don't all execute at once.
-                        m_isHandlingPending = false;
                     }
                 }
             }
 
-            public override void CopyObserved(RateLimitCooldown oldObserved){/* This behavior isn't needed; we're just here for the OnChanged event management. */}
+            public override void CopyObserved(RateLimitCooldown oldObserved)
+            {
+                /* This behavior isn't needed; we're just here for the OnChanged event management. */
+            }
         }
     }
 }

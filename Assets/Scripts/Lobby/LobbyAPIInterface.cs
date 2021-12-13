@@ -78,9 +78,9 @@ namespace LobbyRelaySample.lobby
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
-        public static void UpdateLobbyAsync(string lobbyId, Dictionary<string, DataObject> data, Action<Lobby> onComplete)
+        public static void UpdateLobbyAsync(string lobbyId, Dictionary<string, DataObject> data, bool shouldLock, Action<Lobby> onComplete)
         {
-            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = data };
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = data , IsLocked = shouldLock};
             var task = Lobbies.Instance.UpdateLobbyAsync(lobbyId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }

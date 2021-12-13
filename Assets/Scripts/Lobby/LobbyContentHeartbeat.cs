@@ -131,10 +131,12 @@ namespace LobbyRelaySample
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add("RelayCode", lobby.RelayCode);
+            data.Add("RelayNGOCode", lobby.RelayNGOCode);
             data.Add("State", ((int)lobby.State).ToString()); // Using an int is smaller than using the enum state's name.
             data.Add("Color", ((int)lobby.Color).ToString());
             data.Add("State_LastEdit", lobby.Data.State_LastEdit.ToString());
             data.Add("Color_LastEdit", lobby.Data.Color_LastEdit.ToString());
+            data.Add("RelayNGOCode_LastEdit", lobby.Data.RelayNGOCode_LastEdit.ToString());
             return data;
         }
 

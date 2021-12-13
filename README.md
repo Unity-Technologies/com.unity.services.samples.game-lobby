@@ -25,7 +25,10 @@ To use Unity’s multiplayer services, you need a cloud organization ID for your
 
 [https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-](https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-)
 
-Once you have an ID, link it to your project under **Edit **>** Project Settings **>** Services** and use the Unity Dashboard to manage your project’s services.
+Once you have an ID, link it to your project under **Edit **>** Project Settings **>** Services** and use the Unity Dashboard to manage your project’s services.\
+
+
+
 
 
 ### Service overview
@@ -152,6 +155,7 @@ While the Game Lobby Sample represents more than just a minimal implementation o
 * The sample sets up heartbeat pings with Lobby and Relay to keep the connections alive, but they do not impose any limitations on a lobby’s duration. Consider a maximum duration in actual use, such as a maximum game length.
 * HTTP errors will appear in the console. These are returned by Lobby and Relay API calls for various reasons. In general, they do not impact the sample’s execution, though they might result in unexpected behavior for a player since the sample doesn’t provide any explanatory UI when these errors occur.
     * **List of HTTP errors:**
+		* **403 ("Forbidden") errors ** occurs if the project is not properly onboarded onto the lobby or relay services, or hooked up in-project, refer to the onboarding guide for the respective services for details.
         * **404 (“Not Found”) errors** might occur when the Lobby service handles multiple incoming API calls in an arbitrary order, usually when leaving a lobby. They will also occur if trying to join an invalid lobby, such as one that has been deleted but still appears in the lobby list before refreshing.
         * **429 (“Too Many Requests”) errors** occur if rate limited operations happen too quickly. In particular, refreshing the lobby list too quickly results in 429 errors from the **QueryLobbiesAsync** call. Consult the Lobby documentation for details.
         * **401 (“Unauthorized”) errors** occur if the user enters the lobby menu before Auth sign-in completes, since all Lobby and Relay operations require Auth credentials.
@@ -160,3 +164,4 @@ While the Game Lobby Sample represents more than just a minimal implementation o
             * Open this project in a second Editor.
             * Under **Edit **>** Project Settings **>** Player**, modify the **Product Name**. This causes the duplicate project to have a new registry entry, so Auth will assign new credentials.
             * Verify that running the sample in either Play mode or a standalone build assigns a different default player name than the original. This indicates different Auth credentials, preventing the 409 errors.
+* The Glyph Game's purpose is mainly to show transitions from Lobby views to Game Views, and is not the focus of this sample (To learn Lobby and Relay). That said we welcome feedback on the game itself.

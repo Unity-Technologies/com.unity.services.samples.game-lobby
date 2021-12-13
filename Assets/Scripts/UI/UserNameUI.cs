@@ -6,7 +6,7 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Displays the player's name.
     /// </summary>
-    public class PlayerNameUI : ObserverPanel<LobbyUser>
+    public class UserNameUI : ObserverPanel<LobbyUser>
     {
         [SerializeField]
         TMP_Text m_TextField;
