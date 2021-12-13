@@ -8,6 +8,9 @@ namespace LobbyRelaySample
         string m_IP;
         int m_Port;
 
+        public string IP => m_IP;
+        public int Port => m_Port;
+
         public ServerAddress(string ip, int port)
         {
             m_IP = ip;

@@ -152,19 +152,21 @@ namespace Test
         [UnityTest]
         public IEnumerator OnCompletesOnFailure()
         {
-            LogAssert.Expect(LogType.Exception, new Regex(".*400 Bad Request.*"));
             if (!m_didSigninComplete)
                 yield return new WaitForSeconds(3);
             if (!m_didSigninComplete)
                 Assert.Fail("Did not sign in.");
 
             bool? didComplete = null;
+            LogAssert.ignoreFailingMessages = true; // Multiple errors will appears for the exception.
             LobbyAPIInterface.CreateLobbyAsync("ThisStringIsInvalidHere", "lobby name", 123, false, m_mockUserData, (r) => { didComplete = (r == null); });
             float timeout = 5;
             while (didComplete == null && timeout > 0)
             {   yield return new WaitForSeconds(0.25f);
                 timeout -= 0.25f;
             }
+            LogAssert.ignoreFailingMessages = false;
+
             Assert.Greater(timeout, 0, "Timeout check");
             Assert.NotNull(didComplete, "Should have called onComplete, even if the async request failed.");
             Assert.True(didComplete, "The returned object will be null, so expect to need to handle it.");
