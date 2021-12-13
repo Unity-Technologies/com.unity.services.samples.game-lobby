@@ -21,15 +21,24 @@ namespace LobbyRelaySample.ngo
         private float m_timeout = 10;
         private bool m_hasConnected = false;
 
-        [SerializeField] private NetworkObject      m_playerCursorPrefab = default;
-        [SerializeField] private NetworkObject      m_symbolContainerPrefab = default;
-        [SerializeField] private NetworkObject      m_symbolObjectPrefab = default;
-        [SerializeField] private SequenceSelector   m_sequenceSelector = default;
-        [SerializeField] private Scorer             m_scorer = default;
-        [SerializeField] private SymbolKillVolume   m_killVolume = default;
-        [SerializeField] private IntroOutroRunner   m_introOutroRunner = default;
-        [SerializeField] private NetworkedDataStore m_dataStore = default;
-        [SerializeField] private BoxCollider        m_collider;
+        [SerializeField]
+        private NetworkObject m_playerCursorPrefab = default;
+        [SerializeField]
+        private NetworkObject m_symbolContainerPrefab = default;
+        [SerializeField]
+        private NetworkObject m_symbolObjectPrefab = default;
+        [SerializeField]
+        private SequenceSelector m_sequenceSelector = default;
+        [SerializeField]
+        private Scorer m_scorer = default;
+        [SerializeField]
+        private SymbolKillVolume m_killVolume = default;
+        [SerializeField]
+        private IntroOutroRunner m_introOutroRunner = default;
+        [SerializeField]
+        private NetworkedDataStore m_dataStore = default;
+        [SerializeField]
+        private BoxCollider m_collider;
 
         private Transform m_symbolContainerInstance;
         private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
@@ -80,6 +89,7 @@ namespace LobbyRelaySample.ngo
         private void VerifyConnection_ServerRpc(ulong clientId)
         {
             VerifyConnection_ClientRpc(clientId);
+
             // While we could start pooling symbol objects now, incoming clients would be flooded with the Spawn calls.
             // This could lead to dropped packets such that the InGameRunner's Spawn call fails to occur, so we'll wait until all players join.
             // (Besides, we will need to display instructions, which has downtime during which symbol objects can be spawned.)
@@ -91,6 +101,7 @@ namespace LobbyRelaySample.ngo
             if (clientId == m_localUserData.id)
                 VerifyConnectionConfirm_ServerRpc(m_localUserData);
         }
+
         /// <summary>
         /// Once the connection is confirmed, spawn a player cursor and check if all players have connected.
         /// </summary>
@@ -158,6 +169,7 @@ namespace LobbyRelaySample.ngo
                     }
                 }
             }
+
             void SpawnNewSymbol()
             {
                 int index = SequenceSelector.k_symbolCount - m_pendingSymbolPositions.Count;
@@ -175,16 +187,19 @@ namespace LobbyRelaySample.ngo
         /// <summary>
         /// Called while on the host to determine if incoming input has scored or not.
         /// </summary>
-        public void OnPlayerInput(ulong id, SymbolObject selectedSymbol)
+        public void OnPlayerInput(ulong playerId, SymbolObject selectedSymbol)
         {
-            if (m_sequenceSelector.ConfirmSymbolCorrect(id, selectedSymbol.symbolIndex.Value))
+            if (selectedSymbol.Clicked)
+                return;
+
+            if (m_sequenceSelector.ConfirmSymbolCorrect(playerId, selectedSymbol.symbolIndex.Value))
             {
-                selectedSymbol.Destroy_ServerRpc();
-                m_scorer.ScoreSuccess(id);
+                selectedSymbol.ClickedSequence_ServerRpc(playerId);
+                m_scorer.ScoreSuccess(playerId);
                 OnSymbolDeactivated();
             }
             else
-                m_scorer.ScoreFailure(id);
+                m_scorer.ScoreFailure(playerId);
         }
 
         public void OnSymbolDeactivated()
@@ -231,6 +246,9 @@ namespace LobbyRelaySample.ngo
             m_onGameEnd();
         }
 
-        public void OnReProvided(IInGameInputHandler previousProvider) { /*No-op*/ }
+        public void OnReProvided(IInGameInputHandler previousProvider)
+        {
+            /*No-op*/
+        }
     }
 }

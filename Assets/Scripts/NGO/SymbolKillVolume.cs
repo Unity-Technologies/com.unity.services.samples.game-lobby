@@ -26,7 +26,7 @@ namespace LobbyRelaySample.ngo
             SymbolObject symbolObj = other.GetComponent<SymbolObject>();
             if (symbolObj != null)
             {
-                symbolObj.Destroy_ServerRpc();
+                symbolObj.HideSymbol_ServerRpc();
                 m_onSymbolCollided?.Invoke();
             }
         }
