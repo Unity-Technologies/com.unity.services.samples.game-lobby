@@ -85,13 +85,12 @@ namespace LobbyRelaySample.lobby
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
-        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Lobby> onComplete, string allocationId, string connectionInfo)
+        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Lobby> onComplete, string allocationId)
         {
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
                 Data = data,
-                AllocationId = allocationId,
-                ConnectionInfo = connectionInfo
+                AllocationId = allocationId
             };
             var task = Lobbies.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
