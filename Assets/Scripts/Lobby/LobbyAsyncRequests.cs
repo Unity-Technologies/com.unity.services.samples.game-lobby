@@ -274,18 +274,18 @@ namespace LobbyRelaySample
                 if (result != null)
                     m_lastKnownLobby = result; // Store the most up-to-date lobby now since we have it, instead of waiting for the next heartbeat.
                 onComplete?.Invoke();
-            }, null, null);
+            }, null);
         }
 
         /// <summary>
         /// Lobby can be provided info about Relay (or any other remote allocation) so it can add automatic disconnect handling.
         /// </summary>
-        public void UpdatePlayerRelayInfoAsync(string allocationId, string connectionInfo, Action onComplete)
+        public void UpdatePlayerRelayInfoAsync(string allocationId, Action onComplete)
         {
-            if (!ShouldUpdateData(() => { UpdatePlayerRelayInfoAsync(allocationId, connectionInfo, onComplete); }, onComplete, true)) // Do retry here since the RelayUtpSetup that called this might be destroyed right after this.
+            if (!ShouldUpdateData(() => { UpdatePlayerRelayInfoAsync(allocationId, onComplete); }, onComplete, true)) // Do retry here since the RelayUtpSetup that called this might be destroyed right after this.
                 return;
             string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
-            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, new Dictionary<string, PlayerDataObject>(), (r) => { onComplete?.Invoke(); }, allocationId, connectionInfo);
+            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, new Dictionary<string, PlayerDataObject>(), (r) => { onComplete?.Invoke(); }, allocationId);
         }
 
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
