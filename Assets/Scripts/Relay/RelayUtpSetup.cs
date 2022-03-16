@@ -182,7 +182,7 @@ namespace LobbyRelaySample.relay
                 RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
                 host.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
                 m_onJoinComplete(true, host);
-                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
+                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), null);
             }
         }
     }
@@ -245,7 +245,7 @@ namespace LobbyRelaySample.relay
                 RelayUtpClient client = gameObject.AddComponent<RelayUtpClient>();
                 client.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
                 m_onJoinComplete(true, client);
-                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
+                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), null);
             }
         }
     }
