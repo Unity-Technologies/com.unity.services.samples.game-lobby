@@ -26,7 +26,7 @@ namespace LobbyRelaySample.ngo
         [SerializeField]
         private NetworkObject m_symbolContainerPrefab = default;
         [SerializeField]
-        private NetworkObject m_symbolObjectPrefab = default;
+        private SymbolObject m_symbolObjectPrefab = default;
         [SerializeField]
         private SequenceSelector m_sequenceSelector = default;
         [SerializeField]
@@ -174,11 +174,11 @@ namespace LobbyRelaySample.ngo
             {
                 int index = SequenceSelector.k_symbolCount - m_pendingSymbolPositions.Count;
                 Vector3 pendingPos = m_pendingSymbolPositions.Dequeue();
-                NetworkObject symbolObj = NetworkObject.Instantiate(m_symbolObjectPrefab);
-                symbolObj.Spawn();
+                var symbolObj = Instantiate(m_symbolObjectPrefab);
+                symbolObj.NetworkObject.Spawn();
                 symbolObj.name = "Symbol" + index;
-                symbolObj.TrySetParent(m_symbolContainerInstance, false);
-                symbolObj.transform.localPosition = pendingPos;
+                symbolObj.NetworkObject.TrySetParent(m_symbolContainerInstance, false);
+                symbolObj.SetPosition_Server(pendingPos);
                 symbolObj.GetComponent<SymbolObject>().symbolIndex.Value = m_sequenceSelector.GetNextSymbol(index);
                 m_remainingSymbolCount++;
             }
