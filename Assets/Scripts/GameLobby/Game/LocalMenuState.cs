@@ -18,7 +18,7 @@ namespace LobbyRelaySample
     /// Awaits player input to change the local game data.
     /// </summary>
     [System.Serializable]
-    public class LocalGameState : Observed<LocalGameState>
+    public class LocalMenuState : Observed<LocalMenuState>
     {
         GameState m_State = GameState.Menu;
 
@@ -35,7 +35,7 @@ namespace LobbyRelaySample
             }
         }
 
-        public override void CopyObserved(LocalGameState oldObserved)
+        public override void CopyObserved(LocalMenuState oldObserved)
         {
             if (m_State == oldObserved.State)
                 return;

@@ -9,7 +9,7 @@ namespace LobbyRelaySample
     {
         public void ToJoinMenu()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
         }
     }
 }

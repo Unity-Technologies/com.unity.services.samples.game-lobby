@@ -92,7 +92,7 @@ namespace LobbyRelaySample
         QueryLobbies = 4,
         QuickJoin = 5,
 
-        ChangeGameState = 100,
+        ChangeMenuState = 100,
         ConfirmInGameState = 101,
         LobbyUserStatus = 102,
         UserSetEmote = 103,

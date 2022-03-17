@@ -95,7 +95,7 @@ namespace LobbyRelaySample.ngo
                 }
             }
 
-            else if (type == MessageType.ChangeGameState)
+            else if (type == MessageType.ChangeMenuState)
             {
                 // Once we're in-game, any state change reflects the player leaving the game, so we should clean up.
                 OnGameEnd();

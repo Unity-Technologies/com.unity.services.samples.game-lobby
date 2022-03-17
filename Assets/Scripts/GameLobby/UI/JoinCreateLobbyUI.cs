@@ -13,7 +13,7 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// The panel that holds the lobby joining and creation panels.
     /// </summary>
-    public class JoinCreateLobbyUI : ObserverPanel<LocalGameState>
+    public class JoinCreateLobbyUI : ObserverPanel<LocalMenuState>
     {
         public UnityEvent<JoinCreateTabs> m_OnTabChanged;
 
@@ -40,7 +40,7 @@ namespace LobbyRelaySample.UI
             CurrentTab = JoinCreateTabs.Create;
         }
 
-        public override void ObservedUpdated(LocalGameState observed)
+        public override void ObservedUpdated(LocalMenuState observed)
         {
             if (observed.State == GameState.JoinMenu)
             {

@@ -9,12 +9,12 @@ namespace LobbyRelaySample.UI
     {
         public void ToJoinMenu()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
         }
 
         public void ToMenu()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.Menu);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.Menu);
         }
     }
 }

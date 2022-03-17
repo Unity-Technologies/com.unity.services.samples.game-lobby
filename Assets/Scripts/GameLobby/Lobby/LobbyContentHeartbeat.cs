@@ -71,7 +71,7 @@ namespace LobbyRelaySample
             if (!m_localUser.IsApproved && m_lifetime > k_approvalMaxTime)
             {
                 Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Connection attempt timed out!");
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
             }
 
             if (m_shouldPushData)
@@ -122,7 +122,7 @@ namespace LobbyRelaySample
                     }
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Host left the lobby! Disconnecting...");
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
                 }
             }
         }
