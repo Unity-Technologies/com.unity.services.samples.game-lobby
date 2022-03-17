@@ -10,12 +10,12 @@
     "com.unity.netcode.gameobjects": "1.0.0-pre.2",
     "com.unity.nuget.newtonsoft-json": "2.0.0",
     "com.unity.render-pipelines.universal": "10.6.0",
-    "com.unity.services.authentication": "1.0.0-pre.73",
-    "com.unity.services.core": "1.2.1-pre.6",
+    "com.unity.services.authentication": "1.0.0-pre.37",
+    "com.unity.services.core": "1.2.0",
     "com.unity.services.lobby": "1.0.0-pre.7",
-    "com.unity.services.relay": "1.0.1-pre.6",
+    "com.unity.services.relay": "1.0.1-pre.3",
     "com.unity.services.vivox": "15.1.170000-pre.1",
-    "com.unity.services.wire": "1.0.0-preview.19",
+    "com.unity.services.wire": "1.0.0-preview.20",
     "com.unity.sysroot.linux-x86_64": "0.1.15-preview",
     "com.unity.test-framework": "1.1.29",
     "com.unity.textmeshpro": "3.0.6",
@@ -59,11 +59,9 @@
       "name": "Internal Candidates Registry",
       "url": "https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates",
       "scopes": [
-        "com.unity.services",
+        "com.unity.services.wire",
         "com.unity.services.lobby",
-        "com.unity.services.authentication",
-        "com.unity.services.core",
-        "com.unity.services.wire"
+        "com.unity.services.authentication"
       ]
     }
   ]
