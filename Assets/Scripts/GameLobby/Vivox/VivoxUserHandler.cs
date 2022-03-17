@@ -18,7 +18,11 @@ namespace LobbyRelaySample.vivox
         private string m_vivoxId;
 
         private const int k_volumeMin = -50, k_volumeMax = 20; // From the Vivox docs, the valid range is [-50, 50] but anything above 25 risks being painfully loud.
-        public static float NormalizedVolumeDefault { get { return (0f - k_volumeMin) / (k_volumeMax - k_volumeMin); } }
+
+        public static float NormalizedVolumeDefault
+        {
+            get { return (0f - k_volumeMin) / (k_volumeMax - k_volumeMin); }
+        }
 
         public void Start()
         {
@@ -28,6 +32,7 @@ namespace LobbyRelaySample.vivox
         public void SetId(string id)
         {
             m_id = id;
+
             // Vivox appends additional info to the ID we provide, in order to associate it with a specific channel. We'll construct m_vivoxId to match the ID used by Vivox.
             // FUTURE: This isn't yet available. When using Auth, the Vivox ID will match this format:
             // Account account = new Account(id);
@@ -85,18 +90,19 @@ namespace LobbyRelaySample.vivox
 
             bool isThisUser = username == m_id;
             if (isThisUser)
-            {   m_vivoxId = keyEventArg.Key; // Since we couldn't construct the Vivox ID earlier, retrieve it here.
+            {
+                m_vivoxId = keyEventArg.Key; // Since we couldn't construct the Vivox ID earlier, retrieve it here.
                 m_lobbyUserVolumeUI.IsLocalPlayer = participant.IsSelf;
 
-                if(!participant.IsMutedForAll)
-                    m_lobbyUserVolumeUI.EnableVoice(false);//Should check if user is muted or not.
+                if (!participant.IsMutedForAll)
+                    m_lobbyUserVolumeUI.EnableVoice(false); //Should check if user is muted or not.
                 else
                     m_lobbyUserVolumeUI.DisableVoice(false);
             }
             else
             {
-                if(!participant.LocalMute)
-                    m_lobbyUserVolumeUI.EnableVoice(false);//Should check if user is muted or not.
+                if (!participant.LocalMute)
+                    m_lobbyUserVolumeUI.EnableVoice(false); //Should check if user is muted or not.
                 else
                     m_lobbyUserVolumeUI.DisableVoice(false);
             }
@@ -110,9 +116,11 @@ namespace LobbyRelaySample.vivox
 
             bool isThisUser = username == m_id;
             if (isThisUser)
-            {   m_lobbyUserVolumeUI.DisableVoice(true);
+            {
+                m_lobbyUserVolumeUI.DisableVoice(true);
             }
         }
+
         private void OnParticipantValueUpdated(object sender, ValueEventArg<string, IParticipant> valueEventArg)
         {
             var source = (VivoxUnity.IReadOnlyDictionary<string, IParticipant>)sender;
@@ -125,12 +133,14 @@ namespace LobbyRelaySample.vivox
                 if (property == "UnavailableCaptureDevice")
                 {
                     if (participant.UnavailableCaptureDevice)
-                    {   m_lobbyUserVolumeUI.DisableVoice(false);
-                        participant.SetIsMuteForAll(m_vivoxId, true, null); // Note: If you add more places where a player might be globally muted, a state machine might be required for accurate logic.
+                    {
+                        m_lobbyUserVolumeUI.DisableVoice(false);
+                        participant.SetIsMuteForAll(true, null); // Note: If you add more places where a player might be globally muted, a state machine might be required for accurate logic.
                     }
                     else
-                    {   m_lobbyUserVolumeUI.EnableVoice(false);
-                        participant.SetIsMuteForAll(m_vivoxId, false, null); // Also note: This call is asynchronous, so it's possible to exit the lobby before this completes, resulting in a Vivox error.
+                    {
+                        m_lobbyUserVolumeUI.EnableVoice(false);
+                        participant.SetIsMuteForAll(false, null); // Also note: This call is asynchronous, so it's possible to exit the lobby before this completes, resulting in a Vivox error.
                     }
                 }
                 else if (property == "IsMutedForAll")

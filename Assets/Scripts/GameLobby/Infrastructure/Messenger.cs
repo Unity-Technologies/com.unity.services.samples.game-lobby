@@ -13,7 +13,7 @@ namespace LobbyRelaySample
     public class Messenger : IMessenger
     {
         private List<IReceiveMessages> m_receivers = new List<IReceiveMessages>();
-        private const float k_durationToleranceMs = 10;
+        private const float k_durationToleranceMs = 15;
 
         // We need to handle subscribers who modify the receiver list, e.g. a subscriber who unsubscribes in their OnReceiveMessage.
         private Queue<Action> m_pendingReceivers = new Queue<Action>();
