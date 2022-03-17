@@ -1,5 +1,7 @@
-﻿using Unity.Netcode;
+﻿using System;
+using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode.Components;
 
 namespace LobbyRelaySample.ngo
 {
@@ -7,13 +9,14 @@ namespace LobbyRelaySample.ngo
     /// Rather than track movement data for every symbol object, the symbols will all be parented under one container that will move.
     /// It will not begin that movement until it both has been Spawned on the network and it has been informed that the game has started.
     /// </summary>
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(NetworkTransform))]
     public class SymbolContainer : NetworkBehaviour, IReceiveMessages
     {
-        [SerializeField] private Rigidbody m_rb = default;
-        [SerializeField] private float m_speed = 1;
+        [SerializeField]
+        private float m_speed = 1;
         private bool m_isConnected = false;
         private bool m_hasGameStarted = false;
+
         /// <summary>
         /// Verify both that the game has started and that the network connection is working before moving the symbols.
         /// </summary>
@@ -32,9 +35,11 @@ namespace LobbyRelaySample.ngo
         public void Start()
         {
             if (!IsHost)
-            {   this.enabled = false; // Just disabling this script, not the whole GameObject.
+            {
+                this.enabled = false; // Just disabling this script, not the whole GameObject.
                 return;
             }
+
             GetComponent<NetworkObject>().Spawn();
         }
 
@@ -43,21 +48,29 @@ namespace LobbyRelaySample.ngo
             if (IsHost)
             {
                 m_isConnected = true;
-                m_rb.MovePosition(Vector3.up * 10);
-                if (m_hasGameStarted)
-                    BeginMotion();
+                transform.position = Vector3.up * 10;
             }
+        }
+
+        void Update()
+        {
+            if (!IsHost)
+                return;
+            if (!m_hasGameStarted)
+                return;
+            BeginMotion();
         }
 
         private void BeginMotion()
         {
-            m_rb.velocity = Vector3.down * m_speed;
+            transform.position += Time.deltaTime * m_speed*Vector3.down;
         }
 
         public void OnReceiveMessage(MessageType type, object msg)
         {
             if (type == MessageType.InstructionsShown)
-            {   Locator.Get.Messenger.Unsubscribe(this);
+            {
+                Locator.Get.Messenger.Unsubscribe(this);
                 OnGameStarted();
             }
         }
