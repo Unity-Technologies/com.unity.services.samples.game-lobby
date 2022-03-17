@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using VivoxUnity;
 
 namespace LobbyRelaySample.ngo
 {
@@ -29,6 +31,18 @@ namespace LobbyRelaySample.ngo
             m_renderer.sprite = m_symbolData.GetSymbolForIndex(symbolIndex.Value);
             symbolIndex.OnValueChanged -= OnSymbolIndexSet;
         }
+
+        public void SetPosition_Server(Vector3 newPosition)
+        {
+            SetPosition_ClientRpc(newPosition);
+        }
+
+        [ClientRpc]
+        void SetPosition_ClientRpc(Vector3 newPosition)
+        {
+            transform.localPosition = newPosition;
+        }
+
 
         [ServerRpc]
         public void ClickedSequence_ServerRpc(ulong clickerPlayerId)

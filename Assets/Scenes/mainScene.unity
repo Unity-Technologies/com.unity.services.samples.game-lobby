@@ -545,10 +545,6 @@ PrefabInstance:
       propertyPath: m_popUp
       value: 
       objectReference: {fileID: 2637199315837045700}
-    - target: {fileID: 8425041362224744845, guid: 35249394896e31643ba0641c2a6f8e8d, type: 3}
-      propertyPath: m_editorLogVerbosity
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 8425041362224744849, guid: 35249394896e31643ba0641c2a6f8e8d, type: 3}
       propertyPath: m_Pivot.x
       value: 0

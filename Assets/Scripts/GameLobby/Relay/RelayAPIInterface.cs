@@ -1,7 +1,7 @@
 using System;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using Unity.Services.Relay;
+using RelayService = Unity.Services.Relay.Relay;
 
 namespace LobbyRelaySample.relay
 {
@@ -26,6 +26,8 @@ namespace LobbyRelaySample.relay
                 else
                     onComplete?.Invoke(response);
             }
+
+            ;
         }
 
         /// <summary>
