@@ -10,6 +10,7 @@ namespace LobbyRelaySample.relay
     /// <summary>
     /// This observes the local player and updates remote players over Relay when there are local changes, demonstrating basic data transfer over the Unity Transport (UTP).
     /// Created after the connection to Relay has been confirmed.
+    /// If you are using the Unity Networking Package, you can use their Relay instead of building your own packets.
     /// </summary>
     public class RelayUtpClient : MonoBehaviour, IDisposable // This is a MonoBehaviour merely to have access to Update.
     {
@@ -180,7 +181,7 @@ namespace LobbyRelaySample.relay
             Debug.LogError(msg);
             Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, msg);
             Leave();
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeGameState, GameState.JoinMenu);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
         }
 
         /// <summary>

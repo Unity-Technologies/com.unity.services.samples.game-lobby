@@ -78,6 +78,10 @@ namespace LobbyRelaySample.lobby
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
+        /// <summary>
+        /// Uupdates custom data to the lobby, for all to see.
+        /// </summary>
+
         public static void UpdateLobbyAsync(string lobbyId, Dictionary<string, DataObject> data, bool shouldLock, Action<Lobby> onComplete)
         {
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = data , IsLocked = shouldLock};
@@ -85,12 +89,13 @@ namespace LobbyRelaySample.lobby
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
-        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Lobby> onComplete, string allocationId)
+        public static void UpdatePlayerAsync(string lobbyId, string playerId, Dictionary<string, PlayerDataObject> data, Action<Lobby> onComplete, string allocationId, string connectionInfo)
         {
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
                 Data = data,
-                AllocationId = allocationId
+                AllocationId = allocationId,
+                ConnectionInfo = connectionInfo
             };
             var task = Lobbies.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);

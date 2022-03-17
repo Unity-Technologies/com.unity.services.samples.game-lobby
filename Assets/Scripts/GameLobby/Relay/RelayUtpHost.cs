@@ -6,6 +6,7 @@ namespace LobbyRelaySample.relay
     /// <summary>
     /// In addition to maintaining a heartbeat with the Relay server to keep it from timing out, the host player must pass network events
     /// from clients to all other clients, since they don't connect to each other.
+   /// If you are using the Unity Networking Package, you can use their Relay instead of building your own packets.
     /// </summary>
     public class RelayUtpHost : RelayUtpClient, IReceiveMessages
     {

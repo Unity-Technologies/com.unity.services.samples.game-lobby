@@ -3,18 +3,28 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
     /// <summary>
     /// Sets up and runs the entire sample.
+    /// All the Data that is important gets updated in here, the GameManager in the mainScene has all the references
+    /// needed to run the game.
     /// </summary>
     public class GameManager : MonoBehaviour, IReceiveMessages
     {
         #region UI elements that observe the local state. These should be assigned the observers in the scene during Start.
+        /// <summary>
+        /// The Observer/Observed Pattern is great for keeping the UI in Sync with the actual Values.
+        /// Each list below represents a single Observed class that gets updated by other parts of the code, and will
+        /// trigger the list of Observers that are looking for changes in that class.
+        ///
+        /// The list is serialized, so you can navigate to the Observers via the Inspector to see who's watching.
+        /// </summary>
 
         [SerializeField]
-        private List<LocalGameStateObserver> m_GameStateObservers = new List<LocalGameStateObserver>();
+        private List<LocalMenuStateObserver> m_LocalMenuStateObservers = new List<LocalMenuStateObserver>();
         [SerializeField]
         private List<LocalLobbyObserver> m_LocalLobbyObservers = new List<LocalLobbyObserver>();
         [SerializeField]
@@ -24,12 +34,12 @@ namespace LobbyRelaySample
 
         #endregion
 
-        private LocalGameState m_localGameState = new LocalGameState();
+        private LocalMenuState m_LocalMenuState = new LocalMenuState();
         private LobbyUser m_localUser;
         private LocalLobby m_localLobby;
-
         private LobbyServiceData m_lobbyServiceData = new LobbyServiceData();
         private LobbyContentHeartbeat m_lobbyContentHeartbeat = new LobbyContentHeartbeat();
+
         private RelayUtpSetup m_relaySetup;
         private RelayUtpClient m_relayClient;
 
@@ -78,8 +88,8 @@ namespace LobbyRelaySample
 
         private void BeginObservers()
         {
-            foreach (var gameStateObs in m_GameStateObservers)
-                gameStateObs.BeginObserving(m_localGameState);
+            foreach (var gameStateObs in m_LocalMenuStateObservers)
+                gameStateObs.BeginObserving(m_LocalMenuState);
             foreach (var serviceObs in m_LobbyServiceObservers)
                 serviceObs.BeginObserving(m_lobbyServiceData);
             foreach (var lobbyObs in m_LocalLobbyObservers)
@@ -87,11 +97,13 @@ namespace LobbyRelaySample
             foreach (var userObs in m_LocalUserObservers)
                 userObs.BeginObserving(m_localUser);
         }
-
         #endregion
 
         /// <summary>
-        /// Primarily used for UI elements to communicate state changes, this will receive messages from arbitrary providers for user interactions.
+        /// The Messaging System handles most of the core Lobby Service calls, and catches the callbacks from those calls.
+        /// These In turn update the observed variables and propagates the events to the game.
+        /// When looking for the interactions, look up the MessageType and search for it in the code to see where it is used outside this script.
+        /// EG. Locator.Get.Messenger.OnReceiveMessage(MessageType.RenameRequest, name);
         /// </summary>
         public void OnReceiveMessage(MessageType type, object msg)
         {
@@ -134,7 +146,7 @@ namespace LobbyRelaySample
                     },
                     OnFailedJoin);
             }
-			else if (type == MessageType.RenameRequest)
+            else if (type == MessageType.RenameRequest)
             {
                 string name = (string)msg;
                 if (string.IsNullOrWhiteSpace(name))
@@ -143,7 +155,7 @@ namespace LobbyRelaySample
                     return;
             	}
                 m_localUser.DisplayName = (string)msg;
-            }       
+            }
             else if (type == MessageType.ClientUserApproved)
             {   ConfirmApproval();
             }
@@ -164,7 +176,7 @@ namespace LobbyRelaySample
             {   if (m_relayClient is RelayUtpHost)
                     (m_relayClient as RelayUtpHost).SendInGameState();
             }
-            else if (type == MessageType.ChangeGameState)
+            else if (type == MessageType.ChangeMenuState)
             {   SetGameState((GameState)msg);
             }
             else if (type == MessageType.ConfirmInGameState)
@@ -175,12 +187,12 @@ namespace LobbyRelaySample
             {   m_localLobby.State = LobbyState.Lobby;
                 SetUserLobbyState();
             }
-		}
+        }
 
         private void SetGameState(GameState state)
         {
-            bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) && m_localGameState.State == GameState.Lobby;
-            m_localGameState.State = state;
+            bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) && m_LocalMenuState.State == GameState.Lobby;
+            m_LocalMenuState.State = state;
             if (isLeavingLobby)
                 OnLeftLobby();
         }
@@ -270,7 +282,6 @@ namespace LobbyRelaySample
                 if (!didSucceed)
                 {   Debug.LogError("Vivox login failed! Retrying in 5s...");
                     StartCoroutine(RetryConnection(StartVivoxLogin, m_localLobby.LobbyID));
-                    return;
                 }
             }
         }
@@ -284,7 +295,6 @@ namespace LobbyRelaySample
                 if (!didSucceed)
                 {   Debug.LogError("Vivox connection failed! Retrying in 5s...");
                     StartCoroutine(RetryConnection(StartVivoxJoin, m_localLobby.LobbyID));
-                    return;
                 }
             }
         }

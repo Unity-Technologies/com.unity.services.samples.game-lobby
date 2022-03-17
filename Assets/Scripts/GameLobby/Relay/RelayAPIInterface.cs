@@ -1,7 +1,7 @@
 using System;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using RelayService = Unity.Services.Relay.Relay;
+using Unity.Services.Relay;
 
 namespace LobbyRelaySample.relay
 {
@@ -25,7 +25,9 @@ namespace LobbyRelaySample.relay
                     Debug.LogError("Relay returned a null Allocation. This might occur if the Relay service has an outage, if your cloud project ID isn't linked, or if your Relay package version is outdated.");
                 else
                     onComplete?.Invoke(response);
-            };
+            }
+
+            ;
         }
 
         /// <summary>
@@ -60,7 +62,9 @@ namespace LobbyRelaySample.relay
                     Debug.LogError("Could not join async with Relay join code " + joinCode);
                 else
                     onComplete?.Invoke(response);
-            };
+            }
+
+            ;
         }
     }
 }
