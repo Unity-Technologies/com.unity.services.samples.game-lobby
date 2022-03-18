@@ -19,27 +19,27 @@ namespace LobbyRelaySample.lobby
                 IsPrivate = isPrivate,
                 Player = new Player(id: requesterUASId, data: localUserData)
             };
-            var task = Lobbies.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
+            var task = LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         public static void DeleteLobbyAsync(string lobbyId, Action onComplete)
         {
-            var task = Lobbies.Instance.DeleteLobbyAsync(lobbyId);
+            var task = LobbyService.Instance.DeleteLobbyAsync(lobbyId);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         public static void JoinLobbyAsync_ByCode(string requesterUASId, string lobbyCode, Dictionary<string, PlayerDataObject> localUserData, Action<Lobby> onComplete)
         {
             JoinLobbyByCodeOptions joinOptions = new JoinLobbyByCodeOptions { Player = new Player(id: requesterUASId, data: localUserData) };
-            var task = Lobbies.Instance.JoinLobbyByCodeAsync(lobbyCode, joinOptions);
+            var task = LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, joinOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         public static void JoinLobbyAsync_ById(string requesterUASId, string lobbyId, Dictionary<string, PlayerDataObject> localUserData, Action<Lobby> onComplete)
         {
             JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions { Player = new Player(id: requesterUASId, data: localUserData) };
-            var task = Lobbies.Instance.JoinLobbyByIdAsync(lobbyId, joinOptions);
+            var task = LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, joinOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
@@ -51,13 +51,13 @@ namespace LobbyRelaySample.lobby
                 Player = new Player(id: requesterUASId, data: localUserData)
             };
 
-            var task = Lobbies.Instance.QuickJoinLobbyAsync(joinRequest);
+            var task = LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         public static void LeaveLobbyAsync(string requesterUASId, string lobbyId, Action onComplete)
         {
-            var task = Lobbies.Instance.RemovePlayerAsync(lobbyId, requesterUASId);
+            var task = LobbyService.Instance.RemovePlayerAsync(lobbyId, requesterUASId);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
@@ -68,24 +68,23 @@ namespace LobbyRelaySample.lobby
                 Count = k_maxLobbiesToShow,
                 Filters = filters
             };
-            var task = Lobbies.Instance.QueryLobbiesAsync(queryOptions);
+            var task = LobbyService.Instance.QueryLobbiesAsync(queryOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         public static void GetLobbyAsync(string lobbyId, Action<Lobby> onComplete)
         {
-            var task = Lobbies.Instance.GetLobbyAsync(lobbyId);
+            var task = LobbyService.Instance.GetLobbyAsync(lobbyId);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
         /// <summary>
         /// Uupdates custom data to the lobby, for all to see.
         /// </summary>
-
         public static void UpdateLobbyAsync(string lobbyId, Dictionary<string, DataObject> data, bool shouldLock, Action<Lobby> onComplete)
         {
-            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = data , IsLocked = shouldLock};
-            var task = Lobbies.Instance.UpdateLobbyAsync(lobbyId, updateOptions);
+            UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = data, IsLocked = shouldLock };
+            var task = LobbyService.Instance.UpdateLobbyAsync(lobbyId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
@@ -97,13 +96,19 @@ namespace LobbyRelaySample.lobby
                 AllocationId = allocationId,
                 ConnectionInfo = connectionInfo
             };
-            var task = Lobbies.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
+            var task = LobbyService.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
+        }
+
+        public static void SubscribeToLobbyUpdates(string lobbyId, LobbyEventCallbacks lobbyEvent, Action<ILobbyEvents> onLobbySubscribed)
+        {
+            var task = LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyId, lobbyEvent);
+            AsyncRequestLobby.Instance.DoRequest(task, onLobbySubscribed);
         }
 
         public static void HeartbeatPlayerAsync(string lobbyId)
         {
-            var task = Lobbies.Instance.SendHeartbeatPingAsync(lobbyId);
+            var task = LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
             AsyncRequestLobby.Instance.DoRequest(task, null);
         }
     }

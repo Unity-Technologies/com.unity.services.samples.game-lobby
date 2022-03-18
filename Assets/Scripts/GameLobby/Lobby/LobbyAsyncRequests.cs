@@ -1,13 +1,16 @@
 ﻿using LobbyRelaySample.lobby;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using UnityEngine;
 
 namespace LobbyRelaySample
 {
     /// <summary>
-    /// An abstraction layer between the direct calls into the Lobby API and the outcomes you actually want. E.g. you can request to get a readable list of 
+    /// An abstraction layer between the direct calls into the Lobby API and the outcomes you actually want. E.g. you can request to get a readable list of
     /// current lobbies and not need to make the query call directly.
     /// </summary>
     public class LobbyAsyncRequests
@@ -25,43 +28,18 @@ namespace LobbyRelaySample
             }
         }
 
-        public LobbyAsyncRequests()
-        {
-            Locator.Get.UpdateSlow.Subscribe(UpdateLobby, 0.5f); // Shouldn't need to unsubscribe since this instance won't be replaced. 0.5s is arbitrary; the rate limits are tracked later.
-        }
+        #region Lobby
 
-        #region Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
+        public Action<Lobby> onLobbyUpdated;
 
+        //Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
-        private string m_currentLobbyId = null;
-        private Lobby m_lastKnownLobby;
-        public Lobby CurrentLobby => m_lastKnownLobby;
-
-        public void BeginTracking(string lobbyId)
-        {
-            m_currentLobbyId = lobbyId;
-        }
-
-        public void EndTracking()
-        {
-            m_currentLobbyId = null;
-            m_lastKnownLobby = null;
-            m_heartbeatTime = 0;
-        }
-
-        private void UpdateLobby(float unused)
-        {
-            if (!string.IsNullOrEmpty(m_currentLobbyId))
-                RetrieveLobbyAsync(m_currentLobbyId, OnComplete);
-
-            void OnComplete(Lobby lobby)
-            {
-                if (lobby != null)
-                {
-                    m_lastKnownLobby = lobby;
-                }
-            }
-        }
+        Lobby m_RemoteLobby;
+        /// <summary>
+        /// Store the LobbySubscription so we can unsubscribe later.
+        /// </summary>
+        ILobbyEvents m_lobbySubscription;
+        LobbyEventCallbacks m_lobbyEvents = new LobbyEventCallbacks();
 
         #endregion
 
@@ -103,6 +81,38 @@ namespace LobbyRelaySample
             return data;
         }
 
+        void BeginListening(string lobbyID)
+        {
+            m_lobbyEvents = new LobbyEventCallbacks();
+            m_lobbyEvents.LobbyChanged += OnRemoteLobbyChanged;
+            LobbyAPIInterface.SubscribeToLobbyUpdates(lobbyID, m_lobbyEvents, sub =>
+            {
+                m_lobbySubscription = sub;
+                m_lobbySubscription.SubscribeAsync();
+            });
+        }
+
+        void EndListening()
+        {
+            m_lobbySubscription.UnsubscribeAsync();
+            m_RemoteLobby = null;
+            m_lobbySubscription = null;
+            m_lobbyEvents = null;
+        }
+
+        void OnRemoteLobbyChanged(ILobbyChanges changes)
+        {
+            if (changes.LobbyDeleted)
+            {
+                EndListening();
+                return;
+            }
+
+            //Synching the cloud lobby
+            changes.ApplyToLobby(m_RemoteLobby);
+            onLobbyUpdated?.Invoke(m_RemoteLobby);
+        }
+
         /// <summary>
         /// Attempt to create a new lobby and then join it.
         /// </summary>
@@ -123,7 +133,10 @@ namespace LobbyRelaySample
                 if (response == null)
                     onFailure?.Invoke();
                 else
+                {
+                    JoinLobby(response);
                     onSuccess?.Invoke(response); // The Create request automatically joins the lobby, so we need not take further action.
+                }
             }
         }
 
@@ -151,7 +164,10 @@ namespace LobbyRelaySample
                 if (response == null)
                     onFailure?.Invoke();
                 else
+                {
+                    JoinLobby(response);
                     onSuccess?.Invoke(response);
+                }
             }
         }
 
@@ -176,8 +192,17 @@ namespace LobbyRelaySample
                 if (response == null)
                     onFailure?.Invoke();
                 else
+                {
+                    JoinLobby(response);
                     onSuccess?.Invoke(response);
+                }
             }
+        }
+
+        void JoinLobby(Lobby response)
+        {
+            m_RemoteLobby = response;
+            BeginListening(m_RemoteLobby.Id);
         }
 
         /// <summary>
@@ -186,6 +211,7 @@ namespace LobbyRelaySample
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
         public void RetrieveLobbyListAsync(Action<QueryResponse> onListRetrieved, Action<QueryResponse> onError = null, LobbyColor limitToColor = LobbyColor.None)
         {
+            Debug.Log("Retrieving Lobby List");
             if (!m_rateLimitQuery.CanCall())
             {
                 onListRetrieved?.Invoke(null);
@@ -219,23 +245,6 @@ namespace LobbyRelaySample
             return filters;
         }
 
-        /// <param name="onComplete">If no lobby is retrieved, or if this call hits the rate limit, this is given null.</param>
-        private void RetrieveLobbyAsync(string lobbyId, Action<Lobby> onComplete)
-        {
-            if (!m_rateLimitQuery.CanCall())
-            {
-                onComplete?.Invoke(null);
-                UnityEngine.Debug.LogWarning("Retrieve Lobby hit the rate limit.");
-                return;
-            }
-            LobbyAPIInterface.GetLobbyAsync(lobbyId, OnGet);
-
-            void OnGet(Lobby response)
-            {
-                onComplete?.Invoke(response); // FUTURE: Consider passing in the exception code here (and elsewhere) to, e.g., specifically handle a 404 indicating a Relay auto-disconnect.
-            }
-        }
-
         /// <summary>
         /// Attempt to leave a lobby, and then delete it if no players remain.
         /// </summary>
@@ -248,6 +257,8 @@ namespace LobbyRelaySample
             void OnLeftLobby()
             {
                 onComplete?.Invoke();
+                m_RemoteLobby = null;
+                EndListening();
 
                 // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
             }
@@ -270,9 +281,8 @@ namespace LobbyRelaySample
                     dataCurr.Add(dataNew.Key, dataObj);
             }
 
-            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, dataCurr, (result) => {
-                if (result != null)
-                    m_lastKnownLobby = result; // Store the most up-to-date lobby now since we have it, instead of waiting for the next heartbeat.
+            LobbyAPIInterface.UpdatePlayerAsync(m_RemoteLobby.Id, playerId, dataCurr, (result) =>
+            {
                 onComplete?.Invoke();
             }, null, null);
         }
@@ -285,7 +295,7 @@ namespace LobbyRelaySample
             if (!ShouldUpdateData(() => { UpdatePlayerRelayInfoAsync(allocationId, connectionInfo, onComplete); }, onComplete, true)) // Do retry here since the RelayUtpSetup that called this might be destroyed right after this.
                 return;
             string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
-            LobbyAPIInterface.UpdatePlayerAsync(m_lastKnownLobby.Id, playerId, new Dictionary<string, PlayerDataObject>(), (r) => { onComplete?.Invoke(); }, allocationId, connectionInfo);
+            LobbyAPIInterface.UpdatePlayerAsync(m_RemoteLobby.Id, playerId, new Dictionary<string, PlayerDataObject>(), (r) => { onComplete?.Invoke(); }, allocationId, connectionInfo);
         }
 
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
@@ -294,10 +304,9 @@ namespace LobbyRelaySample
             if (!ShouldUpdateData(() => { UpdateLobbyDataAsync(data, onComplete); }, onComplete, false))
                 return;
 
-            Lobby lobby = m_lastKnownLobby;
-            Dictionary<string, DataObject> dataCurr = lobby.Data ?? new Dictionary<string, DataObject>();
+            Dictionary<string, DataObject> dataCurr = m_RemoteLobby.Data ?? new Dictionary<string, DataObject>();
 
-			var shouldLock = false;
+            var shouldLock = false;
             foreach (var dataNew in data)
             {
                 // Special case: We want to be able to filter on our color data, so we need to supply an arbitrary index to retrieve later. Uses N# for numerics, instead of S# for strings.
@@ -307,19 +316,19 @@ namespace LobbyRelaySample
                     dataCurr[dataNew.Key] = dataObj;
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
-                
+
                 //Special Use: Get the state of the Local lobby so we can lock it from appearing in queries if it's not in the "Lobby" State
                 if (dataNew.Key == "State")
                 {
                     Enum.TryParse(dataNew.Value, out LobbyState lobbyState);
                     shouldLock = lobbyState != LobbyState.Lobby;
                 }
-            }         
+            }
 
-            LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, shouldLock, (result) =>
+            LobbyAPIInterface.UpdateLobbyAsync(m_RemoteLobby.Id, dataCurr, shouldLock, (result) =>
             {
                 if (result != null)
-                    m_lastKnownLobby = result;
+                    m_RemoteLobby = result;
                 onComplete?.Invoke();
             });
         }
@@ -336,8 +345,7 @@ namespace LobbyRelaySample
                 return false;
             }
 
-            Lobby lobby = m_lastKnownLobby;
-            if (lobby == null)
+            if (m_RemoteLobby == null)
             {
                 if (shouldRetryIfLobbyNull)
                     m_rateLimitQuery.EnqueuePendingOperation(caller);
@@ -360,7 +368,7 @@ namespace LobbyRelaySample
             if (m_heartbeatTime > k_heartbeatPeriod)
             {
                 m_heartbeatTime -= k_heartbeatPeriod;
-                LobbyAPIInterface.HeartbeatPlayerAsync(m_lastKnownLobby.Id);
+                LobbyAPIInterface.HeartbeatPlayerAsync(m_RemoteLobby.Id);
             }
         }
 
@@ -372,6 +380,10 @@ namespace LobbyRelaySample
 
             public void EnqueuePendingOperation(Action action)
             {
+                //We probably dont want many of the same actions added to fire off multiple times.
+                if (!m_pendingOperations.Contains(action))
+                    return;
+
                 m_pendingOperations.Enqueue(action);
             }
 

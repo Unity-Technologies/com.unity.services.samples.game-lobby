@@ -1,22 +1,23 @@
 {
   "dependencies": {
     "com.unity.2d.sprite": "1.0.0",
-    "com.unity.collab-proxy": "1.11.2",
+    "com.unity.collab-proxy": "1.15.13",
     "com.unity.collections": "1.0.0-pre.6",
     "com.unity.ide.rider": "3.0.7",
-    "com.unity.ide.visualstudio": "2.0.11",
-    "com.unity.ide.vscode": "1.2.4",
-    "com.unity.netcode.adapter.utp": "1.0.0-pre.6",
-    "com.unity.netcode.gameobjects": "1.0.0-pre.6",
+    "com.unity.ide.visualstudio": "2.0.14",
+    "com.unity.ide.vscode": "1.2.5",
+    "com.unity.netcode.adapter.utp": "1.0.0-pre.3",
+    "com.unity.netcode.gameobjects": "1.0.0-pre.2",
     "com.unity.nuget.newtonsoft-json": "2.0.0",
-    "com.unity.render-pipelines.universal": "10.6.0",
-    "com.unity.services.authentication": "1.0.0-pre.6",
-    "com.unity.services.core": "1.1.0-pre.11",
-    "com.unity.services.lobby": "1.0.0-pre.6",
+    "com.unity.render-pipelines.universal": "10.8.1",
+    "com.unity.services.authentication": "1.0.0-pre.37",
+    "com.unity.services.core": "1.2.0",
+    "com.unity.services.lobby": "1.0.0-pre.7",
     "com.unity.services.relay": "1.0.1-pre.3",
-    "com.unity.services.vivox": "15.1.150002-pre.1",
+    "com.unity.services.vivox": "15.1.170000-pre.1",
+    "com.unity.services.wire": "1.0.0-preview.20",
     "com.unity.sysroot.linux-x86_64": "0.1.15-preview",
-    "com.unity.test-framework": "1.1.29",
+    "com.unity.test-framework": "1.1.31",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.toolchain.win-x86_64-linux-x86_64": "0.1.20-preview",
     "com.unity.transport": "1.0.0-pre.9",
@@ -53,5 +54,15 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
-  "scopedRegistries": []
+  "scopedRegistries": [
+    {
+      "name": "Internal Candidates Registry",
+      "url": "https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-candidates",
+      "scopes": [
+        "com.unity.services.wire",
+        "com.unity.services.lobby",
+        "com.unity.services.authentication"
+      ]
+    }
+  ]
 }
