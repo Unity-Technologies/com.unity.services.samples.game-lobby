@@ -38,7 +38,9 @@ Once you have an ID, link it to your project under **Edit **>** Project Settings
 
 The Lobby service allows developers to create lobbies and share data between players before a real-time network connection is established. It simplifies the first step in connecting users to other services such as Relay and provides tools to allow players to find other lobbies.
 
-The Lobby documentation contains code samples and additional information about the service. It includes comprehensive details for using Lobby along with additional code samples, and it might help you better understand the Game Lobby Sample: [docs.unity.com/lobby](http:/docs.unity.com/lobby)
+The Lobby documentation contains code samples and additional information about the service. It includes comprehensive details for using Lobby along with additional code samples, and it might help you better understand the Game Lobby Sample: 
+
+[docs.unity.com/lobby](http:/docs.unity.com/lobby)
 
 The Lobby service can be managed in the Unity Dashboard:
 
