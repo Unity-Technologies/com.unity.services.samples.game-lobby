@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LobbyRelaySample.Auth
+namespace GamelobbySample.Auth
 {
     /// <summary>
     /// Represents some provider of credentials.

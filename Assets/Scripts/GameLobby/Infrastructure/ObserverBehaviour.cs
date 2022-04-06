@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// MonoBehaviour that will automatically handle setting up to observe something. It also exposes an event so some other component can effectively observe it as well.

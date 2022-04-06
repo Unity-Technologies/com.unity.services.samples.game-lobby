@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using Unity.Netcode.Components;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// Rather than track movement data for every symbol object, the symbols will all be parented under one container that will move.

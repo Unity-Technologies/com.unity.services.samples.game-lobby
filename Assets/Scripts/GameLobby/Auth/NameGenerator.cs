@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Just for fun, give a cute default player name if no name is provided, based on a hash of their anonymous ID.

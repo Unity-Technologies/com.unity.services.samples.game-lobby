@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-using LobbyRelaySample.relay;
+using GamelobbySample.relay;
 using NUnit.Framework;
 using Unity.Services.Relay.Models;
 using UnityEngine;
@@ -16,13 +16,13 @@ namespace Test
     /// </summary>
     public class RelayRoundTripTests
     {
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
+        private GamelobbySample.Auth.SubIdentity_Authentication m_auth;
         private bool m_didSigninComplete = false;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new GamelobbySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
         }
 
         [OneTimeTearDown]

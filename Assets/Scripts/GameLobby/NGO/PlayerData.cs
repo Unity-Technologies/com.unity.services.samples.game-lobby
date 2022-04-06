@@ -1,6 +1,6 @@
 ﻿using Unity.Netcode;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// An example of a custom type serialized for use in RPC calls. This represents the state of a player as far as NGO is concerned,

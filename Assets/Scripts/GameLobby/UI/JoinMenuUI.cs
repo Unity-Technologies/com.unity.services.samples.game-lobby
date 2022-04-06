@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Handles the list of LobbyButtons and ensures it stays synchronized with the lobby list from the service.

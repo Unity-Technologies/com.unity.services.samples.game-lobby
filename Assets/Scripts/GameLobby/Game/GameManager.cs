@@ -1,11 +1,11 @@
-using LobbyRelaySample.relay;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using GamelobbySample.relay;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Sets up and runs the entire sample.

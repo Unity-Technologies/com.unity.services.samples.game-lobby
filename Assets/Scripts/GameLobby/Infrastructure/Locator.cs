@@ -1,8 +1,8 @@
-using LobbyRelaySample.Auth;
 using System;
 using System.Collections.Generic;
+using GamelobbySample.Auth;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Anything which provides itself to a Locator can then be globally accessed. This should be a single access point for things that *want* to be singleton (that is,

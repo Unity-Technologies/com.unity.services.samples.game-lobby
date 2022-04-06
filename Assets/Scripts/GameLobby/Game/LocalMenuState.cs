@@ -1,6 +1,6 @@
 using System;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Current state of the local game.

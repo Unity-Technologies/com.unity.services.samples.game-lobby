@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// Used by the host to actually track scores for all players, and by each client to monitor for updates to their own score.

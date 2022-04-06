@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Contains the InLobbyUserUI instances while showing the UI for a lobby.

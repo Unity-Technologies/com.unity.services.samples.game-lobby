@@ -2,7 +2,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Controls a simple throbber that is displayed when the lobby list is being refreshed.

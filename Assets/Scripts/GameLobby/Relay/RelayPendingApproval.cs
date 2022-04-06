@@ -1,7 +1,7 @@
 ﻿using System;
 using Unity.Networking.Transport;
 
-namespace LobbyRelaySample.relay
+namespace GamelobbySample.relay
 {
     /// <summary>
     /// The Relay host doesn't need to know what might approve or disapprove of a pending connection, so this will

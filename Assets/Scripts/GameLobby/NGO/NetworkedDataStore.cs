@@ -4,7 +4,7 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine.Events;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// A place to store data needed by networked behaviors. Each client has an instance so they can retrieve data, but the server's instance stores the actual data.

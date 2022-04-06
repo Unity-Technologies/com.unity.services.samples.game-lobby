@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// For navigating the main menu.

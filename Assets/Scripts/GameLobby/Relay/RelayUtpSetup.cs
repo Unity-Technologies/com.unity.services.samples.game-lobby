@@ -6,7 +6,7 @@ using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-namespace LobbyRelaySample.relay
+namespace GamelobbySample.relay
 {
     /// <summary>
     /// Responsible for setting up a connection with Relay using Unity Transport (UTP). A Relay Allocation is created by the host, and then all players

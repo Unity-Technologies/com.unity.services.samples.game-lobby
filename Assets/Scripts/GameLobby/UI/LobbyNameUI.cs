@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Displays the name of the lobby.

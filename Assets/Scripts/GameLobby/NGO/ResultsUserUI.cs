@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// Displays the results for all players after the NGO minigame.

@@ -1,4 +1,4 @@
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Observer UI panel base class. This allows UI elements to be shown or hidden based on an Observed element.

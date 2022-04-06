@@ -2,7 +2,7 @@
 using Unity.Services.Vivox;
 using VivoxUnity;
 
-namespace LobbyRelaySample.vivox
+namespace GamelobbySample.vivox
 {
     /// <summary>
     /// Listens for changes to Vivox state for one user in the lobby.

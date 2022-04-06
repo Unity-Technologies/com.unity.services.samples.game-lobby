@@ -1,4 +1,4 @@
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Holds a LobbyUser value and notifies all subscribers when it has been changed.

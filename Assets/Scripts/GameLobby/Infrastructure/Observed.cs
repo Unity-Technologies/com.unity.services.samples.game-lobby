@@ -1,6 +1,6 @@
 using System;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Something that exposes some data that, when changed, an observer would want to be notified about automatically.

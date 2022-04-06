@@ -2,7 +2,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Controls a pop-up message that lays over the rest of the UI, with a button to dismiss. Used for displaying player-facing error messages.

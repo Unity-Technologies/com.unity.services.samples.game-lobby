@@ -1,13 +1,13 @@
-﻿using LobbyRelaySample.lobby;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using GamelobbySample.lobby;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies.Models;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
-    /// An abstraction layer between the direct calls into the Lobby API and the outcomes you actually want. E.g. you can request to get a readable list of 
+    /// An abstraction layer between the direct calls into the Lobby API and the outcomes you actually want. E.g. you can request to get a readable list of
     /// current lobbies and not need to make the query call directly.
     /// </summary>
     public class LobbyAsyncRequests
@@ -307,14 +307,14 @@ namespace LobbyRelaySample
                     dataCurr[dataNew.Key] = dataObj;
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
-                
+
                 //Special Use: Get the state of the Local lobby so we can lock it from appearing in queries if it's not in the "Lobby" State
                 if (dataNew.Key == "State")
                 {
                     Enum.TryParse(dataNew.Value, out LobbyState lobbyState);
                     shouldLock = lobbyState != LobbyState.Lobby;
                 }
-            }         
+            }
 
             LobbyAPIInterface.UpdateLobbyAsync(lobby.Id, dataCurr, shouldLock, (result) =>
             {

@@ -1,9 +1,9 @@
 ﻿using System;
+using GamelobbySample.relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using LobbyRelaySample.relay;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /*
      * To use Netcode for GameObjects (NGO), we use the Relay adapter for UTP, attached to a NetworkManager. This needs to be provided the Allocation info before we bind to it.

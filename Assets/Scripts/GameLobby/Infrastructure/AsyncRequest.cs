@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Both Lobby and Relay have need for asynchronous requests with some basic safety wrappers. This is a shared place for that.

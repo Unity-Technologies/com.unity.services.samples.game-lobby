@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     [SerializeField]
     public class LobbyUserAudio

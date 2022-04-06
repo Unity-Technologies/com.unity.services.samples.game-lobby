@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Watches for changes in the game state to/from the main menu.

@@ -2,7 +2,7 @@
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 
-namespace LobbyRelaySample.Auth
+namespace GamelobbySample.Auth
 {
     /// <summary>
     /// The Authentication package will sign in asynchronously and anonymously. When complete, we will need to store the generated ID.
@@ -34,17 +34,20 @@ namespace LobbyRelaySample.Auth
 
         private async void DoSignIn(Action onSigninComplete)
         {
-            await UnityServices.InitializeAsync();
-            AuthenticationService.Instance.SignedIn += OnSignInChange;
-            AuthenticationService.Instance.SignedOut += OnSignInChange;
-
             try
-            {   if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await UnityServices.InitializeAsync();
+                AuthenticationService.Instance.SignedIn += OnSignInChange;
+                AuthenticationService.Instance.SignedOut += OnSignInChange;
+
+                if (!AuthenticationService.Instance.IsSignedIn)
                     await AuthenticationService.Instance.SignInAnonymouslyAsync(); // Don't sign out later, since that changes the anonymous token, which would prevent the player from exiting lobbies they're already in.
                 onSigninComplete?.Invoke();
             }
             catch
-            {   UnityEngine.Debug.LogError("Failed to login. Did you remember to set your Project ID under Services > General Settings?");
+            {
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Authentication Failed: Project ID not set in Project Settings >  Services > General Settings?");
+                UnityEngine.Debug.LogError("Authentication Failed: Project ID not set in Project Settings >  Services > General Settings?");
                 throw;
             }
 

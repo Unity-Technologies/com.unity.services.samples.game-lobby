@@ -1,7 +1,7 @@
 ﻿using System;
 using Unity.Services.Relay;
 
-namespace LobbyRelaySample.relay
+namespace GamelobbySample.relay
 {
     public class AsyncRequestRelay : AsyncRequest
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// Handles selecting the randomized sequence of symbols to spawn, choosing a subset to be the ordered target sequence that each player needs to select.

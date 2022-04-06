@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// After connecting to Relay, the host can use this to end the game, returning to the regular lobby state.

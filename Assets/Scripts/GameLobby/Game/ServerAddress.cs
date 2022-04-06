@@ -1,4 +1,4 @@
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Just for displaying the anonymous Relay IP.

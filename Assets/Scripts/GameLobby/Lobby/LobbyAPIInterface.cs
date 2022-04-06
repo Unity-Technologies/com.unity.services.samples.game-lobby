@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
-namespace LobbyRelaySample.lobby
+namespace GamelobbySample.lobby
 {
     /// <summary>
     /// Wrapper for all the interactions with the Lobby API.

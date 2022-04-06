@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Acts as a buffer between receiving requests to display error messages to the player and running the pop-up UI to do so.

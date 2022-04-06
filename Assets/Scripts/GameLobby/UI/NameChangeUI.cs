@@ -1,4 +1,4 @@
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// When the player changes their name with the UI, this triggers the actual rename.

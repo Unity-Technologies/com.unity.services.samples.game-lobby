@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Current state of the user in the lobby.

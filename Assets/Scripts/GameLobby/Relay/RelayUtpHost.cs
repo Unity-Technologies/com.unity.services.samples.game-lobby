@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.Networking.Transport;
 
-namespace LobbyRelaySample.relay
+namespace GamelobbySample.relay
 {
     /// <summary>
     /// In addition to maintaining a heartbeat with the Relay server to keep it from timing out, the host player must pass network events

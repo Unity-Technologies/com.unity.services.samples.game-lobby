@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Used when displaying the lobby list, to indicate when we are awaiting an updated lobby query.

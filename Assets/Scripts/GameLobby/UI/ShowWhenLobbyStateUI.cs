@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// UI element that is displayed when the lobby is in a particular state (e.g. counting down, in-game).

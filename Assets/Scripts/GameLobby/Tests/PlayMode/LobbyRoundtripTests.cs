@@ -7,7 +7,7 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
-using LobbyAPIInterface = LobbyRelaySample.lobby.LobbyAPIInterface;
+using LobbyAPIInterface = GamelobbySample.lobby.LobbyAPIInterface;
 
 namespace Test
 {
@@ -20,14 +20,14 @@ namespace Test
     public class LobbyRoundtripTests
     {
         private string m_workingLobbyId;
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
+        private GamelobbySample.Auth.SubIdentity_Authentication m_auth;
         private bool m_didSigninComplete = false;
         private Dictionary<string, PlayerDataObject> m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
 
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new GamelobbySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
             m_mockUserData = new Dictionary<string, PlayerDataObject>();
             m_mockUserData.Add("DisplayName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
         }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample.UI
+namespace GamelobbySample.UI
 {
     /// <summary>
     /// Button callbacks for the "Ready"/"Not Ready" buttons used to indicate the local player is ready/not ready.

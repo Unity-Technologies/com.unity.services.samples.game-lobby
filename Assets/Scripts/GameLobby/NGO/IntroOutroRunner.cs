@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace LobbyRelaySample.ngo
+namespace GamelobbySample.ngo
 {
     /// <summary>
     /// Handles any visual tasks for running the NGO minigame's intro and outro.

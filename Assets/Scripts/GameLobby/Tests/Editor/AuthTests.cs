@@ -1,4 +1,4 @@
-﻿using LobbyRelaySample.Auth;
+﻿using GamelobbySample.Auth;
 using NUnit.Framework;
 
 namespace Test

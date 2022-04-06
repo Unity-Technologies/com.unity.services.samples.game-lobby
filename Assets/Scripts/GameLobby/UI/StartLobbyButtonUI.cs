@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Main menu start button.

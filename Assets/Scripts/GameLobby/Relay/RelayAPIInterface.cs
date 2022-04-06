@@ -3,7 +3,7 @@ using Unity.Services.Relay.Models;
 using UnityEngine;
 using RelayService = Unity.Services.Relay.Relay;
 
-namespace LobbyRelaySample.relay
+namespace GamelobbySample.relay
 {
     /// <summary>
     /// Wrapper for all the interaction with the Relay API.

@@ -4,10 +4,10 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "LobbyRelaySample",
         "Unity.Services.Lobbies",
         "Unity.Services.Relay",
-        "Unity.Networking.Transport"
+        "Unity.Networking.Transport",
+        "GamelobbySample"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

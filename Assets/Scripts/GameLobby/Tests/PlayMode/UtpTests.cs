@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using LobbyRelaySample.relay;
+using GamelobbySample.relay;
 using NUnit.Framework;
 using Unity.Networking.Transport;
 using Unity.Services.Relay.Models;
@@ -34,7 +34,7 @@ namespace Test
             }
         }
 
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
+        private GamelobbySample.Auth.SubIdentity_Authentication m_auth;
         GameObject m_dummy;
         //Only used when testing DTLS
         #pragma warning disable CS0414 // This is the "assigned but its value is never used" warning, which will otherwise appear when DTLS is unavailable.
@@ -45,7 +45,7 @@ namespace Test
         public void Setup()
         {
             m_dummy = new GameObject();
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new GamelobbySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
         }
 
         [OneTimeTearDown]

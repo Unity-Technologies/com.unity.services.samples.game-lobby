@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using LobbyRemote = Unity.Services.Lobbies.Models.Lobby;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Keep updated on changes to a joined lobby, at a speed compliant with Lobby's rate limiting.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Services.Vivox;
 using VivoxUnity;
 
-namespace LobbyRelaySample.vivox
+namespace GamelobbySample.vivox
 {
     /// <summary>
     /// Handles setting up a voice channel once inside a lobby.

@@ -1,4 +1,4 @@
-using LobbyRelaySample;
+using GamelobbySample;
 using System;
 using NUnit.Framework;
 using UnityEngine;

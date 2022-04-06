@@ -1,7 +1,7 @@
 ﻿using System;
 using Unity.Services.Lobbies;
 
-namespace LobbyRelaySample.lobby
+namespace GamelobbySample.lobby
 {
     public class AsyncRequestLobby : AsyncRequest
     {

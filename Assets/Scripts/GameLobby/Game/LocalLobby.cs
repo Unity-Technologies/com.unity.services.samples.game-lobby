@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     [Flags] // Some UI elements will want to specify multiple states in which to be active, so this is Flags.
     public enum LobbyState

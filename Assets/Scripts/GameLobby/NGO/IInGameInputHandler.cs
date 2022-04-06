@@ -1,4 +1,4 @@
-﻿namespace LobbyRelaySample.ngo
+﻿namespace GamelobbySample.ngo
 {
     /// <summary>
     /// Something that will handle player input while in the game.

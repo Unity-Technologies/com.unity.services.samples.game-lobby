@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace LobbyRelaySample
+namespace GamelobbySample
 {
     /// <summary>
     /// Runs the countdown to the in-game state. While the start of the countdown is synced via Relay, the countdown itself is handled locally,

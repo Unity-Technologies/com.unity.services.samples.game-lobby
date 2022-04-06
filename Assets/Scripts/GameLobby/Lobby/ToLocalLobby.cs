@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 
-namespace LobbyRelaySample.lobby
+namespace GamelobbySample.lobby
 {
     /// <summary>
     /// Convert the lobby resulting from a request into a LocalLobby for use in the game logic.
