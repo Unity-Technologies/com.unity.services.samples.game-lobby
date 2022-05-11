@@ -94,6 +94,11 @@ namespace LobbyRelaySample
 
         void EndListening()
         {
+            if (m_lobbySubscription == null)
+            {
+                Debug.LogError("Can't End listening without first listening to the lobby Callbacks.");
+                return;
+            }
             m_lobbySubscription.UnsubscribeAsync();
             m_RemoteLobby = null;
             m_lobbySubscription = null;

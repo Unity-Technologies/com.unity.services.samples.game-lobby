@@ -60,9 +60,9 @@ namespace LobbyRelaySample
                 return;
             }
 
-            if (changed.pullUpdate)
+            if (changed.canPullUpdate)
             {
-                changed.pullUpdate = false;
+                changed.canPullUpdate = false;
                 return;
             }
 
@@ -115,7 +115,7 @@ namespace LobbyRelaySample
 
         void OnRemoteLobbyUpdated(Lobby lobby)
         {
-            m_LocalLobby.pullUpdate = true;
+            m_LocalLobby.canPullUpdate = true;
 
             //synching our local lobby
             LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
