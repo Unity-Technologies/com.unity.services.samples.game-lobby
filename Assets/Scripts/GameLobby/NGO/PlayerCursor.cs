@@ -16,7 +16,7 @@ namespace LobbyRelaySample.ngo
         [SerializeField] private ParticleSystem m_onClickParticles = default;
         [SerializeField] private TMPro.TMP_Text m_nameOutput = default;
         private Camera m_mainCamera;
-        private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(NetworkVariableReadPermission.Everyone, Vector3.zero); // (Using a NetworkTransform to sync position would also work.)
+        private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>( Vector3.zero); // (Using a NetworkTransform to sync position would also work.)
         private ulong m_localId;
 
         // If the local player cursor spawns before this cursor's owner, the owner's data won't be available yet. This is used to retrieve the data later.

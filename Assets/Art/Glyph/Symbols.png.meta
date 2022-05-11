@@ -81,6 +81,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -556,6 +557,26 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      17_elemental: -2657090017763772448
+      4_matter: -612294750349367285
+      5_gas: 4906567379933833492
+      7_star: 4588468031203458904
+      2_cold: -469525390435789673
+      entropy: 5531826651420068725
+      10_life: 6472110944188623208
+      9_planet: -5148847302637816175
+      13_mind: -2962330253262605572
+      16_evil: -5893568625793066583
+      1_heat: -3739395637988037281
+      15_good: -431797579490579562
+      0_gravity: 8720604468809159126
+      8_system: 4830219810074551288
+      6_water: 8796499958254778168
+      14_moon: -5670611702303752676
+      3_entanglement: -5196480314518052078
+      12_expansion: -5943722948072908530
+      11_radiation: -2449591561013552763
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
