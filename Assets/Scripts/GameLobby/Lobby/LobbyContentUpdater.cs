@@ -1,7 +1,6 @@
 ﻿using System;
 using LobbyRelaySample.lobby;
 using Unity.Services.Lobbies.Models;
-using UnityEngine;
 
 namespace LobbyRelaySample
 {

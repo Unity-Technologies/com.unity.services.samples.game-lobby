@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
@@ -11,11 +12,10 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class SetupInGame : MonoBehaviour, IReceiveMessages
     {
-        [SerializeField] private GameObject m_prefabNetworkManager = default;
+        [SerializeField] private GameObject m_IngameRunnerPrefab = default;
         [SerializeField] private GameObject[] m_disableWhileInGame = default;
 
-        private GameObject m_inGameManagerObj;
-        private NetworkManager m_networkManager;
+
         private InGameRunner m_inGameRunner;
 
         private bool m_doesNeedCleanup = false;
@@ -43,18 +43,20 @@ namespace LobbyRelaySample.ngo
         /// The prefab with the NetworkManager contains all of the assets and logic needed to set up the NGO minigame.
         /// The UnityTransport needs to also be set up with a new Allocation from Relay.
         /// </summary>
-        private void CreateNetworkManager()
+        private async Task CreateNetworkManager()
         {
-            m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
-            m_networkManager = m_inGameManagerObj.GetComponentInChildren<NetworkManager>();
-            m_inGameRunner = m_inGameManagerObj.GetComponentInChildren<InGameRunner>();
-            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, m_localUser);
 
-            UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
+            UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
             if (m_localUser.IsHost)
-                m_inGameManagerObj.AddComponent<RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
+                NetworkManager.Singleton.gameObject.AddComponent<RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport);  NetworkManager.Singleton.StartHost(); });
             else
-                m_inGameManagerObj.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
+                NetworkManager.Singleton.gameObject.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport);  NetworkManager.Singleton.StartClient(); });
+            await Task.Delay(1);
+            m_inGameRunner = Instantiate(m_IngameRunnerPrefab).GetComponentInChildren<InGameRunner>();
+            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, m_localUser);
+            m_inGameRunner.NetworkObject.Spawn();
+
+
         }
 
         private void OnConnectionVerified()
@@ -110,7 +112,8 @@ namespace LobbyRelaySample.ngo
         {
             if (m_doesNeedCleanup)
             {
-                GameObject.Destroy(m_inGameManagerObj); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
+                NetworkManager.Singleton.Shutdown();
+                GameObject.Destroy(m_inGameRunner.gameObject); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
                 SetMenuVisibility(true);
                 m_lobby.RelayNGOCode = null;
                 m_doesNeedCleanup = false;

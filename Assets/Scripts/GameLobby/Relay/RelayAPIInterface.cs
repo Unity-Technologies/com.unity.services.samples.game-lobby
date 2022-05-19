@@ -26,8 +26,6 @@ namespace LobbyRelaySample.relay
                 else
                     onComplete?.Invoke(response);
             }
-
-            ;
         }
 
         /// <summary>
@@ -63,8 +61,6 @@ namespace LobbyRelaySample.relay
                 else
                     onComplete?.Invoke(response);
             }
-
-            ;
         }
     }
 }

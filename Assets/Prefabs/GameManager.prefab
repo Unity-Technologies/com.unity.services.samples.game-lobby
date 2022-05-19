@@ -29,6 +29,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7716713811812636911}
   m_RootOrder: 0
@@ -45,7 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f7533ddeca587549a9798a65a8670ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_prefabNetworkManager: {fileID: 238192747445020667, guid: 73173c97c128d614aa2a1167a2eaea68, type: 3}
+  m_NetworkManagerPrefab: {fileID: 5021303663353436182, guid: b963f71e4874d4066bc72b9224e3ffce, type: 3}
+  m_IngameRunnerPrefab: {fileID: 238192747445020667, guid: 73173c97c128d614aa2a1167a2eaea68, type: 3}
   m_disableWhileInGame: []
 --- !u!114 &5235782363599194820
 MonoBehaviour:
@@ -129,6 +131,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 624.1824, y: 320.50745, z: -29748.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 802462301182945455}
   m_Father: {fileID: 0}
@@ -146,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4f7225f73bfe6a4d9133ee45ac9cd73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_GameStateObservers: []
+  m_LocalMenuStateObservers: []
   m_LocalLobbyObservers: []
   m_LocalUserObservers: []
   m_LobbyServiceObservers: []

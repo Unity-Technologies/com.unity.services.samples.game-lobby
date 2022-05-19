@@ -55,6 +55,7 @@ namespace LobbyRelaySample.ngo
 
         public override void OnNetworkSpawn()
         {
+            Debug.Log($"IsHost{IsHost} - NetworkSpawned");
             if (IsHost)
                 FinishInitialize();
             m_localUserData = new PlayerData(m_localUserData.name, NetworkManager.Singleton.LocalClientId);
@@ -113,7 +114,7 @@ namespace LobbyRelaySample.ngo
             playerCursor.name += clientData.name;
             m_dataStore.AddPlayer(clientData.id, clientData.name);
 
-            bool areAllPlayersConnected = NetworkManager.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
+            bool areAllPlayersConnected = NetworkManager.Singleton.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
             VerifyConnectionConfirm_ClientRpc(clientData.id, areAllPlayersConnected);
         }
 
