@@ -17,6 +17,7 @@ namespace LobbyRelaySample
         private void Awake()
         {
             LogHandler.Get().mode = m_editorLogVerbosity;
+            Debug.Log($"Starting project with Log Level : {m_editorLogVerbosity.ToString()}");
             Locator.Get.Messenger.Subscribe(this);
         }
         private void OnDestroy()

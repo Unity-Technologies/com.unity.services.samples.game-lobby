@@ -55,7 +55,6 @@ namespace LobbyRelaySample.ngo
 
         public override void OnNetworkSpawn()
         {
-            Debug.Log($"IsHost{IsHost} - NetworkSpawned");
             if (IsHost)
                 FinishInitialize();
             m_localUserData = new PlayerData(m_localUserData.name, NetworkManager.Singleton.LocalClientId);
@@ -70,6 +69,7 @@ namespace LobbyRelaySample.ngo
         private void FinishInitialize()
         {
             m_symbolContainerInstance = NetworkObject.Instantiate(m_symbolContainerPrefab).transform;
+            m_symbolContainerInstance.GetComponent<NetworkObject>().Spawn();
             ResetPendingSymbolPositions();
             m_killVolume.Initialize(OnSymbolDeactivated);
         }
@@ -175,7 +175,7 @@ namespace LobbyRelaySample.ngo
             {
                 int index = SequenceSelector.k_symbolCount - m_pendingSymbolPositions.Count;
                 Vector3 pendingPos = m_pendingSymbolPositions.Dequeue();
-                var symbolObj = Instantiate(m_symbolObjectPrefab);
+                var symbolObj = Instantiate(m_symbolObjectPrefab, m_symbolContainerInstance);
                 symbolObj.NetworkObject.Spawn();
                 symbolObj.name = "Symbol" + index;
                 symbolObj.NetworkObject.TrySetParent(m_symbolContainerInstance, false);

@@ -54,9 +54,6 @@ namespace LobbyRelaySample.ngo
             await Task.Delay(1);
             m_inGameRunner = Instantiate(m_IngameRunnerPrefab).GetComponentInChildren<InGameRunner>();
             m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, m_localUser);
-            m_inGameRunner.NetworkObject.Spawn();
-
-
         }
 
         private void OnConnectionVerified()
