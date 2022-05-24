@@ -26,8 +26,7 @@ namespace Test
 
                 void OnAllocation(Allocation allocation)
                 {
-                    bool isSecure = false;
-                    NetworkEndPoint endpoint = GetEndpointForAllocation(allocation.ServerEndpoints, allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
+                    NetworkEndPoint endpoint = GetEndpointForAllocation(allocation.ServerEndpoints, allocation.RelayServer.IpV4, allocation.RelayServer.Port, out var isSecure);
                     OnGetEndpoint?.Invoke(endpoint, isSecure);
                     // The allocation will be cleaned up automatically, since we won't be pinging it regularly.
                 }
@@ -97,5 +96,7 @@ namespace Test
 
             #endif
         }
+
+
     }
 }

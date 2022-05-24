@@ -18,6 +18,8 @@ namespace LobbyRelaySample.Auth
         {
             DoSignIn(onSigninComplete);
         }
+
+
         ~SubIdentity_Authentication()
         {
             Dispose();
@@ -31,6 +33,8 @@ namespace LobbyRelaySample.Auth
                 m_hasDisposed = true;
             }
         }
+
+        public string ID => GetContent("id");
 
         private async void DoSignIn(Action onSigninComplete)
         {
