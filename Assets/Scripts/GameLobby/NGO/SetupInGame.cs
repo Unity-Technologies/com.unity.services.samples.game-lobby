@@ -102,7 +102,9 @@ namespace LobbyRelaySample.ngo
             {
                 m_doesNeedCleanup = true;
                 SetMenuVisibility(false);
+#pragma warning disable 4014
                 CreateNetworkManager();
+#pragma warning restore 4014
             }
 
             else if (type == MessageType.MinigameBeginning)

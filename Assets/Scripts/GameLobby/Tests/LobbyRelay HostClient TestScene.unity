@@ -309,7 +309,7 @@ GameObject:
   - component: {fileID: 1471019972}
   - component: {fileID: 1471019971}
   m_Layer: 0
-  m_Name: TestMono
+  m_Name: LobbyAndRelay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -327,6 +327,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38ce1ea741f8a5741b92bfec4a9a76d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_JoinCode: DK4PT3
+  m_RelayCode: 
+  m_Host: 1
 --- !u!4 &1471019972
 Transform:
   m_ObjectHideFlags: 0

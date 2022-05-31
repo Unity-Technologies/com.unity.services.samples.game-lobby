@@ -7,9 +7,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5021303663353436182, guid: b963f71e4874d4066bc72b9224e3ffce, type: 3}
+      propertyPath: NetworkConfig.PlayerPrefab
+      value: 
+      objectReference: {fileID: 3276792662332769109, guid: 5458b63e348081b4a89a3b5ca792748a, type: 3}
+    - target: {fileID: 5021303663353436182, guid: b963f71e4874d4066bc72b9224e3ffce, type: 3}
+      propertyPath: NetworkConfig.NetworkPrefabs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5021303663353436182, guid: b963f71e4874d4066bc72b9224e3ffce, type: 3}
+      propertyPath: NetworkConfig.NetworkPrefabs.Array.data[0].Prefab
+      value: 
+      objectReference: {fileID: 3276792662332769109, guid: 5458b63e348081b4a89a3b5ca792748a, type: 3}
     - target: {fileID: 5481270937743757918, guid: b963f71e4874d4066bc72b9224e3ffce, type: 3}
       propertyPath: m_Name
-      value: NetworkManager
+      value: TestNetworkManager
       objectReference: {fileID: 0}
     - target: {fileID: 5665493986528408842, guid: b963f71e4874d4066bc72b9224e3ffce, type: 3}
       propertyPath: m_RootOrder
