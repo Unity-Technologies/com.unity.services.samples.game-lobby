@@ -135,17 +135,33 @@ namespace LobbyRelaySample
                 return null;
             }
 
-            string uasId = AuthenticationService.Instance.PlayerId;
-
-            CreateLobbyOptions createOptions = new CreateLobbyOptions
+            try
             {
-                IsPrivate = isPrivate,
-                Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
-            };
-            var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
+                string uasId = AuthenticationService.Instance.PlayerId;
 
-            JoinLobby(lobby);
-            return lobby;
+                CreateLobbyOptions createOptions = new CreateLobbyOptions
+                {
+                    IsPrivate = isPrivate,
+                    Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
+                };
+                var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
+
+                JoinLobby(lobby);
+                return lobby;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Lobby Create failed:\n{ex}");
+                return null;
+            }
+        }
+
+
+        public async Task<Lobby> GetLobbyAsync(string lobbyId)
+        {
+            await m_rateLimitQuery.WaitUntilCooldown();
+
+            return await LobbyService.Instance.GetLobbyAsync(lobbyId);
         }
 
         /// <summary>

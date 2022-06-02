@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unity.Services.Lobbies;
-using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample.lobby
 {
@@ -11,7 +8,7 @@ namespace LobbyRelaySample.lobby
     /// </summary>
     public static class LobbyAPIInterface
     {
-
+        /* TODO Delete LobbyAPIInterface
         public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, PlayerDataObject> localUserData, Action<Lobby> onComplete)
         {
             CreateLobbyOptions createOptions = new CreateLobbyOptions
@@ -60,7 +57,7 @@ namespace LobbyRelaySample.lobby
             var task = LobbyService.Instance.RemovePlayerAsync(lobbyId, requesterUASId);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
-        
+
         /// <summary>
         /// Uupdates custom data to the lobby, for all to see.
         /// </summary>
@@ -81,7 +78,7 @@ namespace LobbyRelaySample.lobby
             };
             var task = LobbyService.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
-        }
+        }*/
 
         public static void SubscribeToLobbyUpdates(string lobbyId, LobbyEventCallbacks lobbyEvent, Action<ILobbyEvents> onLobbySubscribed)
         {
