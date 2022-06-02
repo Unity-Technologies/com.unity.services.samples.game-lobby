@@ -103,12 +103,16 @@ namespace LobbyRelaySample
 
             void DoLobbyDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby), null);
+#pragma warning disable 4014
+                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby));
+#pragma warning restore 4014
             }
 
             void DoPlayerDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser), null);
+#pragma warning disable 4014
+                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
+#pragma warning restore 4014
             }
         }
 

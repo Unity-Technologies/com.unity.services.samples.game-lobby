@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 
@@ -10,7 +11,6 @@ namespace LobbyRelaySample.lobby
     /// </summary>
     public static class LobbyAPIInterface
     {
-        private const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, PlayerDataObject> localUserData, Action<Lobby> onComplete)
         {
@@ -60,24 +60,7 @@ namespace LobbyRelaySample.lobby
             var task = LobbyService.Instance.RemovePlayerAsync(lobbyId, requesterUASId);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
-
-        public static void QueryAllLobbiesAsync(List<QueryFilter> filters, Action<QueryResponse> onComplete)
-        {
-            QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
-            {
-                Count = k_maxLobbiesToShow,
-                Filters = filters
-            };
-            var task = LobbyService.Instance.QueryLobbiesAsync(queryOptions);
-            AsyncRequestLobby.Instance.DoRequest(task, onComplete);
-        }
-
-        public static void GetLobbyAsync(string lobbyId, Action<Lobby> onComplete)
-        {
-            var task = LobbyService.Instance.GetLobbyAsync(lobbyId);
-            AsyncRequestLobby.Instance.DoRequest(task, onComplete);
-        }
-
+        
         /// <summary>
         /// Uupdates custom data to the lobby, for all to see.
         /// </summary>

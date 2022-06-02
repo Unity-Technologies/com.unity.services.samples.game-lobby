@@ -17,16 +17,16 @@ namespace LobbyRelaySample.UI
 
         private void Start()
         {
-            LobbyAsyncRequests.Instance.GetRateLimit(m_requestType).onChanged += UpdateVisibility;
+            LobbyAsyncRequests.Instance.GetRateLimit(m_requestType).onCooldownChange += UpdateVisibility;
         }
         private void OnDestroy()
         {
-            LobbyAsyncRequests.Instance.GetRateLimit(m_requestType).onChanged -= UpdateVisibility;
+            LobbyAsyncRequests.Instance.GetRateLimit(m_requestType).onCooldownChange -= UpdateVisibility;
         }
 
-        private void UpdateVisibility(LobbyAsyncRequests.RateLimitCooldown rateLimit)
+        private void UpdateVisibility(bool isCoolingDown)
         {
-            if (rateLimit.IsInCooldown)
+            if (isCoolingDown)
                 m_target.Hide(m_alphaWhenHidden);
             else
                 m_target.Show();
