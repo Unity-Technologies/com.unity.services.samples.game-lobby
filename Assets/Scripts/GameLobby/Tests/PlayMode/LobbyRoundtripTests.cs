@@ -71,7 +71,7 @@ namespace Test
             float timeout = 5;
             Debug.Log("Getting Lobby List 1");
             QueryResponse queryResponse = null;
-            yield return AsyncTestHelper.Await(async () => queryResponse = await  LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
+            yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
 
             Debug.Log("Got Lobby List 1");
 

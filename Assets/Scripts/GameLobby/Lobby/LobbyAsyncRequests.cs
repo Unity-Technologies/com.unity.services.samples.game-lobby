@@ -215,9 +215,7 @@ namespace LobbyRelaySample
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
         public async Task<QueryResponse> RetrieveLobbyListAsync(LobbyColor limitToColor = LobbyColor.None)
         {
-            if (!await m_rateLimitQuery.WaitInQueueUntilTaskIsFirst(
-                RetrieveLobbyListAsync(limitToColor)))
-                return null;
+            await m_rateLimitQuery.WaitUntilCooldown();
 
             Debug.Log("Retrieving Lobby List");
             var filters = LobbyColorToFilters(limitToColor);
@@ -259,9 +257,7 @@ namespace LobbyRelaySample
         public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
         {
 
-            if (!await m_rateLimitQuery.WaitInQueueUntilTaskIsFirst(
-                UpdatePlayerDataAsync(data)))
-                return;
+            await m_rateLimitQuery.WaitUntilCooldown();
             string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
             Dictionary<string, PlayerDataObject> dataCurr = new Dictionary<string, PlayerDataObject>();
             foreach (var dataNew in data)
@@ -288,9 +284,7 @@ namespace LobbyRelaySample
         public async Task UpdatePlayerRelayInfoAsync(string allocationId, string connectionInfo)
         {
 
-            if (!await m_rateLimitQuery.WaitInQueueUntilTaskIsFirst(
-                UpdatePlayerRelayInfoAsync(allocationId, connectionInfo)))
-                return;
+            await m_rateLimitQuery.WaitUntilCooldown();
             await AwaitRemoteLobby();
             string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
 
@@ -306,8 +300,7 @@ namespace LobbyRelaySample
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
         public async Task UpdateLobbyDataAsync(Dictionary<string, string> data)
         {
-            if (await m_rateLimitQuery.WaitInQueueUntilTaskIsFirst(UpdateLobbyDataAsync(data)))
-                return;
+            await m_rateLimitQuery.WaitUntilCooldown();
 
             Dictionary<string, DataObject> dataCurr = m_RemoteLobby.Data ?? new Dictionary<string, DataObject>();
 
@@ -392,28 +385,16 @@ namespace LobbyRelaySample
             }
 
 
-            public async Task<bool> WaitInQueueUntilTaskIsFirst(Task newTask)
+            public async Task WaitUntilCooldown() //TODO YAGNI Handle Multiple commands? Return bool if already waiting?
             {
-                //Task is already in the queue
-                if (m_TaskQueue.Contains(newTask))
-                    return false;
-
-                Debug.Log($"Enqueing Task: {newTask.Id} - {newTask.Status}");
-
                 //No Queue!
                 if (CanCall())
-                    return true;
-                Debug.LogWarning("Hit the rate limit. Queueing...");
+                    return;
 
-                m_TaskQueue.Enqueue(newTask);
                 while (m_IsInCooldown)
                 {
-                    if (m_DequeuedTask == newTask)
-                        break;
                     await Task.Delay(100);
                 }
-                //Got to the part of the queue that was the Task'
-                return true;
             }
 
             bool CanCall()
