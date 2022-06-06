@@ -18,6 +18,7 @@
     "com.unity.sysroot.linux-x86_64": "0.1.15-preview",
     "com.unity.test-framework": "1.1.31",
     "com.unity.textmeshpro": "3.0.6",
+    "com.unity.toolchain.macos-x86_64-linux-x86_64": "2.0.1",
     "com.unity.toolchain.win-x86_64-linux-x86_64": "0.1.20-preview",
     "com.unity.transport": "1.0.0-pre.9",
     "com.unity.ugui": "1.0.0",
