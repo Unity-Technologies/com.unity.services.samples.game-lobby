@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using LobbyRelaySample.lobby;
 using Unity.Services.Lobbies.Models;
 
@@ -15,6 +16,7 @@ namespace LobbyRelaySample
 
         private const float k_approvalMaxTime = 10; // Used for determining if a user should timeout if they are unable to connect.
         private float m_lifetime = 0;
+        const int k_UpdateIntervalMS = 1500;
 
         public void BeginTracking(LocalLobby localLobby, LobbyUser localUser)
         {
@@ -23,7 +25,10 @@ namespace LobbyRelaySample
             m_LocalLobby.onChanged += OnLocalLobbyChanged;
             m_ShouldPushData = true;
             Locator.Get.Messenger.Subscribe(this);
-            Locator.Get.UpdateSlow.Subscribe(OnUpdate, 1.5f);
+#pragma warning disable 4014
+            UpdateLoopAsync();
+
+#pragma warning restore 4014
             m_lifetime = 0;
             LobbyAsyncRequests.Instance.onLobbyUpdated += OnRemoteLobbyUpdated;
         }
@@ -33,7 +38,6 @@ namespace LobbyRelaySample
             m_ShouldPushData = false;
 
             Locator.Get.Messenger.Unsubscribe(this);
-            Locator.Get.UpdateSlow.Unsubscribe(OnUpdate);
             if (m_LocalLobby != null)
                 m_LocalLobby.onChanged -= OnLocalLobbyChanged;
             LobbyAsyncRequests.Instance.onLobbyUpdated -= OnRemoteLobbyUpdated;
@@ -72,47 +76,46 @@ namespace LobbyRelaySample
         /// If there have been any data changes since the last update, push them to Lobby. Regardless, pull for the most recent data.
         /// (Unless we're already awaiting a query, in which case continue waiting.)
         /// </summary>
-        private void OnUpdate(float dt)
+        private async Task UpdateLoopAsync()
         {
-            m_lifetime += dt;
-            if (m_LocalLobby == null)
-                return;
-            if (m_LocalUser.IsHost)
-                LobbyAsyncRequests.Instance.DoLobbyHeartbeat(dt);
-
-            if (!m_LocalUser.IsApproved && m_lifetime > k_approvalMaxTime)
+            while (m_LocalLobby != null)
             {
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Connection attempt timed out!");
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
-            }
-
-            if (m_ShouldPushData)
-                PushDataToLobby();
-
-            void PushDataToLobby()
-            {
-                m_ShouldPushData = false;
-
-                if (m_LocalUser.IsHost)
+                if (!m_LocalUser.IsApproved && m_lifetime > k_approvalMaxTime)
                 {
-                    DoLobbyDataPush();
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Connection attempt timed out!");
+                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
                 }
 
-                DoPlayerDataPush();
-            }
+                if (m_ShouldPushData)
+                    PushDataToLobby();
 
-            void DoLobbyDataPush()
-            {
-#pragma warning disable 4014
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby));
-#pragma warning restore 4014
-            }
+                void PushDataToLobby()
+                {
+                    m_ShouldPushData = false;
 
-            void DoPlayerDataPush()
-            {
+                    if (m_LocalUser.IsHost)
+                    {
+                        DoLobbyDataPush();
+                    }
+
+                    DoPlayerDataPush();
+                }
+
+                void DoLobbyDataPush()
+                {
 #pragma warning disable 4014
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
+                    LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby));
 #pragma warning restore 4014
+                }
+
+                void DoPlayerDataPush()
+                {
+#pragma warning disable 4014
+                    LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
+#pragma warning restore 4014
+                }
+
+                await Task.Delay(k_UpdateIntervalMS);
             }
         }
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Unity.Services.Authentication;
@@ -32,7 +33,6 @@ namespace LobbyRelaySample
             }
         }
 
-        #region Lobby
 
         public Action<Lobby> onLobbyUpdated;
 
@@ -40,13 +40,6 @@ namespace LobbyRelaySample
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
         Lobby m_RemoteLobby;
 
-        /// <summary>
-        /// Store the LobbySubscription so we can unsubscribe later.
-        /// </summary>
-        ILobbyEvents m_lobbySubscription;
-        LobbyEventCallbacks m_lobbyEvents = new LobbyEventCallbacks();
-
-        #endregion
 
         #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
 
@@ -87,42 +80,7 @@ namespace LobbyRelaySample
         }
 
         //TODO Back to Polling i Guess
-        void BeginListening(string lobbyID)
-        {
-            m_lobbyEvents = new LobbyEventCallbacks();
-            m_lobbyEvents.LobbyChanged += OnRemoteLobbyChanged;
-            LobbyAPIInterface.SubscribeToLobbyUpdates(lobbyID, m_lobbyEvents, sub =>
-            {
-                m_lobbySubscription = sub;
-                m_lobbySubscription.SubscribeAsync();
-            });
-        }
 
-        void EndListening()
-        {
-            if (m_lobbySubscription == null)
-            {
-                Debug.LogError("Can't End listening without first listening to the lobby Callbacks.");
-                return;
-            }
-            m_lobbySubscription.UnsubscribeAsync();
-            m_RemoteLobby = null;
-            m_lobbySubscription = null;
-            m_lobbyEvents = null;
-        }
-
-        void OnRemoteLobbyChanged(ILobbyChanges changes)
-        {
-            if (changes.LobbyDeleted)
-            {
-                EndListening();
-                return;
-            }
-
-            //Synching the cloud lobby
-            changes.ApplyToLobby(m_RemoteLobby);
-            onLobbyUpdated?.Invoke(m_RemoteLobby);
-        }
 
         /// <summary>
         /// Attempt to create a new lobby and then join it.
@@ -145,6 +103,9 @@ namespace LobbyRelaySample
                     Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
                 };
                 var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
+#pragma warning disable 4014
+                LobbyHeartBeatLoop();
+#pragma warning restore 4014
 
                 JoinLobby(lobby);
                 return lobby;
@@ -222,7 +183,6 @@ namespace LobbyRelaySample
         void JoinLobby(Lobby response)
         {
             m_RemoteLobby = response;
-            BeginListening(m_RemoteLobby.Id);
         }
 
         /// <summary>
@@ -265,7 +225,7 @@ namespace LobbyRelaySample
             string uasId = AuthenticationService.Instance.PlayerId;
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, uasId);
             m_RemoteLobby = null;
-            EndListening();
+
             // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
         }
 
@@ -346,18 +306,20 @@ namespace LobbyRelaySample
 
 
         private float m_heartbeatTime = 0;
-        private const float k_heartbeatPeriod = 8; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+        private const int k_heartbeatPeriodMS = 8000; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
 
         /// <summary>
         /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
         /// </summary>
-        public void DoLobbyHeartbeat(float dt)
+        async Task LobbyHeartBeatLoop()
         {
-            m_heartbeatTime += dt;
-            if (m_heartbeatTime > k_heartbeatPeriod)
+            while (m_RemoteLobby!=null)
             {
-                m_heartbeatTime -= k_heartbeatPeriod;
-                LobbyAPIInterface.HeartbeatPlayerAsync(m_RemoteLobby.Id);
+
+#pragma warning disable 4014
+                LobbyService.Instance.SendHeartbeatPingAsync(m_RemoteLobby.Id);
+#pragma warning restore 4014
+                await Task.Delay(k_heartbeatPeriodMS);
             }
         }
 

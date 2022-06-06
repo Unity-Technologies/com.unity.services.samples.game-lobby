@@ -79,17 +79,6 @@ namespace LobbyRelaySample.lobby
             var task = LobbyService.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }*/
-
-        public static void SubscribeToLobbyUpdates(string lobbyId, LobbyEventCallbacks lobbyEvent, Action<ILobbyEvents> onLobbySubscribed)
-        {
-            var task = LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyId, lobbyEvent);
-            AsyncRequestLobby.Instance.DoRequest(task, onLobbySubscribed);
-        }
-
-        public static void HeartbeatPlayerAsync(string lobbyId)
-        {
-            var task = LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
-            AsyncRequestLobby.Instance.DoRequest(task, null);
-        }
+        
     }
 }
