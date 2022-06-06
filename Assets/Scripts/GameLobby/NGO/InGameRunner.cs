@@ -69,6 +69,7 @@ namespace LobbyRelaySample.ngo
         private void FinishInitialize()
         {
             m_symbolContainerInstance = NetworkObject.Instantiate(m_symbolContainerPrefab).transform;
+            m_symbolContainerInstance.GetComponent<NetworkObject>().Spawn();
             ResetPendingSymbolPositions();
             m_killVolume.Initialize(OnSymbolDeactivated);
         }
@@ -113,7 +114,7 @@ namespace LobbyRelaySample.ngo
             playerCursor.name += clientData.name;
             m_dataStore.AddPlayer(clientData.id, clientData.name);
 
-            bool areAllPlayersConnected = NetworkManager.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
+            bool areAllPlayersConnected = NetworkManager.Singleton.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
             VerifyConnectionConfirm_ClientRpc(clientData.id, areAllPlayersConnected);
         }
 
@@ -174,7 +175,7 @@ namespace LobbyRelaySample.ngo
             {
                 int index = SequenceSelector.k_symbolCount - m_pendingSymbolPositions.Count;
                 Vector3 pendingPos = m_pendingSymbolPositions.Dequeue();
-                var symbolObj = Instantiate(m_symbolObjectPrefab);
+                var symbolObj = Instantiate(m_symbolObjectPrefab, m_symbolContainerInstance);
                 symbolObj.NetworkObject.Spawn();
                 symbolObj.name = "Symbol" + index;
                 symbolObj.NetworkObject.TrySetParent(m_symbolContainerInstance, false);

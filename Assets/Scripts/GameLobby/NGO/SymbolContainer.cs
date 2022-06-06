@@ -32,16 +32,6 @@ namespace LobbyRelaySample.ngo
             Locator.Get.Messenger.Subscribe(this);
         }
 
-        public void Start()
-        {
-            if (!IsHost)
-            {
-                this.enabled = false; // Just disabling this script, not the whole GameObject.
-                return;
-            }
-
-            GetComponent<NetworkObject>().Spawn();
-        }
 
         public override void OnNetworkSpawn()
         {
@@ -49,6 +39,10 @@ namespace LobbyRelaySample.ngo
             {
                 m_isConnected = true;
                 transform.position = Vector3.up * 10;
+            }
+            else
+            {
+                this.enabled = false; // Just disabling this script, not the whole GameObject.
             }
         }
 

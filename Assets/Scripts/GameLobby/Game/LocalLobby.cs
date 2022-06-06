@@ -31,7 +31,7 @@ namespace LobbyRelaySample
     {
         Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
         public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
-        public bool pullUpdate;
+        public bool canPullUpdate;
         #region LocalLobbyData
 
         public struct LobbyData

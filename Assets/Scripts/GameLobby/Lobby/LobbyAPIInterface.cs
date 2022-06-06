@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using Unity.Services.Lobbies;
-using Unity.Services.Lobbies.Models;
 
 namespace LobbyRelaySample.lobby
 {
@@ -10,8 +8,7 @@ namespace LobbyRelaySample.lobby
     /// </summary>
     public static class LobbyAPIInterface
     {
-        private const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
-
+        /* TODO Delete LobbyAPIInterface
         public static void CreateLobbyAsync(string requesterUASId, string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, PlayerDataObject> localUserData, Action<Lobby> onComplete)
         {
             CreateLobbyOptions createOptions = new CreateLobbyOptions
@@ -61,23 +58,6 @@ namespace LobbyRelaySample.lobby
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
         }
 
-        public static void QueryAllLobbiesAsync(List<QueryFilter> filters, Action<QueryResponse> onComplete)
-        {
-            QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
-            {
-                Count = k_maxLobbiesToShow,
-                Filters = filters
-            };
-            var task = LobbyService.Instance.QueryLobbiesAsync(queryOptions);
-            AsyncRequestLobby.Instance.DoRequest(task, onComplete);
-        }
-
-        public static void GetLobbyAsync(string lobbyId, Action<Lobby> onComplete)
-        {
-            var task = LobbyService.Instance.GetLobbyAsync(lobbyId);
-            AsyncRequestLobby.Instance.DoRequest(task, onComplete);
-        }
-
         /// <summary>
         /// Uupdates custom data to the lobby, for all to see.
         /// </summary>
@@ -98,7 +78,7 @@ namespace LobbyRelaySample.lobby
             };
             var task = LobbyService.Instance.UpdatePlayerAsync(lobbyId, playerId, updateOptions);
             AsyncRequestLobby.Instance.DoRequest(task, onComplete);
-        }
+        }*/
 
         public static void SubscribeToLobbyUpdates(string lobbyId, LobbyEventCallbacks lobbyEvent, Action<ILobbyEvents> onLobbySubscribed)
         {

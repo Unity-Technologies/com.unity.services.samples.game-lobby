@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Networking.Transport;
 
 namespace LobbyRelaySample.relay
@@ -92,19 +93,27 @@ namespace LobbyRelaySample.relay
                 UnityEngine.Debug.LogWarning("Disconnecting a client due to a disconnect message.");
                 conn.Disconnect(m_networkDriver);
                 m_connections.Remove(conn);
-                LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query).EnqueuePendingOperation(WaitToCheckForUsers);
-                return;
 
+
+#pragma warning disable 4014
+                var queryCooldownMilliseconds = LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query)
+                    .m_CoolDownMS;
                 // The user ready status lives in the lobby data, which won't update immediately, but we need to use it to identify if all remaining players have readied.
                 // So, we'll wait two lobby update loops before we check remaining players to ensure the lobby has received the disconnect message.
-                void WaitToCheckForUsers()
-                {   LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query).EnqueuePendingOperation(CheckIfAllUsersReady);
-                }
+                WaitAndCheckUsers(queryCooldownMilliseconds*2);
+#pragma warning restore 4014
+                return;
             }
 
             // If a client has changed state, check if this changes whether all players have readied.
             if (msgType == MsgType.ReadyState)
                 CheckIfAllUsersReady();
+        }
+
+        async Task WaitAndCheckUsers(int milliSeconds)
+        {
+            await Task.Delay(milliSeconds);
+            CheckIfAllUsersReady();
         }
 
         protected override void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)

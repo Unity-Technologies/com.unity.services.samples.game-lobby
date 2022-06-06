@@ -2,6 +2,7 @@ using LobbyRelaySample.relay;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using LobbyRelaySample.lobby;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -110,51 +111,66 @@ namespace LobbyRelaySample
         /// When looking for the interactions, look up the MessageType and search for it in the code to see where it is used outside this script.
         /// EG. Locator.Get.Messenger.OnReceiveMessage(MessageType.RenameRequest, name);
         /// </summary>
-        public void OnReceiveMessage(MessageType type, object msg)
+        public async void OnReceiveMessage(MessageType type, object msg)
         {
             if (type == MessageType.CreateLobbyRequest)
             {
                 LocalLobby.LobbyData createLobbyData = (LocalLobby.LobbyData)msg;
-                LobbyAsyncRequests.Instance.CreateLobbyAsync(createLobbyData.LobbyName, createLobbyData.MaxPlayerCount, createLobbyData.Private, m_localUser, (r) =>
-                    {
-                        lobby.LobbyConverters.RemoteToLocal(r, m_localLobby);
-                        OnCreatedLobby();
-                    },
-                    OnFailedJoin);
+                var lobby = await LobbyAsyncRequests.Instance.CreateLobbyAsync(
+                    createLobbyData.LobbyName,
+                    createLobbyData.MaxPlayerCount,
+                    createLobbyData.Private, m_localUser);
+
+                if (lobby != null)
+                {
+                    LobbyConverters.RemoteToLocal(lobby, m_localLobby);
+                    OnCreatedLobby();
+                }
+                else
+                {
+                    OnFailedJoin();
+                }
+
             }
             else if (type == MessageType.JoinLobbyRequest)
             {
                 LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
-                LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode, m_localUser, (r) =>
-                    {
-                        lobby.LobbyConverters.RemoteToLocal(r, m_localLobby);
-                        OnJoinedLobby();
-                    },
-                    OnFailedJoin);
+                var lobby = await LobbyAsyncRequests.Instance.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode,
+                    m_localUser);
+                if (lobby != null)
+                {
+                    LobbyConverters.RemoteToLocal(lobby, m_localLobby);
+                    OnJoinedLobby();
+                }
+                else
+                {
+                    OnFailedJoin();
+                }
+
             }
             else if (type == MessageType.QueryLobbies)
             {
                 m_lobbyServiceData.State = LobbyQueryState.Fetching;
-                LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(
-                    qr =>
-                    {
-                        if (qr != null)
-                            OnLobbiesQueried(lobby.LobbyConverters.QueryToLocalList(qr));
-                    },
-                    er =>
-                    {
-                        OnLobbyQueryFailed();
-                    },
-                    m_lobbyColorFilter);
+                var qr = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync(m_lobbyColorFilter);
+
+                if (qr != null)
+                    OnLobbiesQueried(LobbyConverters.QueryToLocalList(qr));
+                else
+                    OnLobbyQueryFailed();
+
             }
             else if (type == MessageType.QuickJoin)
             {
-                LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter, (r) =>
-                    {
-                        lobby.LobbyConverters.RemoteToLocal(r, m_localLobby);
-                        OnJoinedLobby();
-                    },
-                    OnFailedJoin);
+                var lobby = await LobbyAsyncRequests.Instance.QuickJoinLobbyAsync(m_localUser, m_lobbyColorFilter);
+                if (lobby != null)
+                {
+                    LobbyConverters.RemoteToLocal(lobby, m_localLobby);
+                    OnJoinedLobby();
+                }
+                else
+                {
+                    OnFailedJoin();
+                }
             }
             else if (type == MessageType.RenameRequest)
             {
@@ -257,10 +273,13 @@ namespace LobbyRelaySample
             }
         }
 
-        private void OnLeftLobby()
+        private async void OnLeftLobby()
         {
             m_localUser.ResetState();
-            LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID, ResetLocalLobby);
+#pragma warning disable 4014
+            LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby.LobbyID);
+#pragma warning restore 4014
+            ResetLocalLobby();
             m_LobbyContentUpdater.EndTracking();
             m_vivoxSetup.LeaveLobbyChannel();
 
@@ -413,7 +432,9 @@ namespace LobbyRelaySample
             Locator.Get.Messenger.Unsubscribe(this);
             if (!string.IsNullOrEmpty(m_localLobby?.LobbyID))
             {
-                LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby?.LobbyID, null);
+#pragma warning disable 4014
+                LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_localLobby?.LobbyID);
+#pragma warning restore 4014
                 m_localLobby = null;
             }
         }

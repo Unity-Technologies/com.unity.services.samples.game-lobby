@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Networking.Transport;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay.Models;
@@ -156,7 +157,9 @@ namespace LobbyRelaySample.relay
             m_localLobby.RelayCode = relayCode;
             m_localLobby.RelayServer = new ServerAddress(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port);
             m_joinState |= JoinState.Joined;
+#pragma warning disable 4014
             CheckForComplete();
+#pragma warning restore 4014
         }
 
         protected override void OnBindingComplete()
@@ -170,11 +173,13 @@ namespace LobbyRelaySample.relay
             {
                 Debug.Log("Relay host is bound.");
                 m_joinState |= JoinState.Bound;
+#pragma warning disable 4014
                 CheckForComplete();
+#pragma warning restore 4014
             }
         }
 
-        private void CheckForComplete()
+        private async Task CheckForComplete()
         {
             if (m_joinState == (JoinState.Joined | JoinState.Bound) && this != null) // this will equal null (i.e. this component has been destroyed) if the host left the lobby during the Relay connection sequence.
             {
@@ -182,7 +187,7 @@ namespace LobbyRelaySample.relay
                 RelayUtpHost host = gameObject.AddComponent<RelayUtpHost>();
                 host.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
                 m_onJoinComplete(true, host);
-                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
+                await LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode);
             }
         }
     }
@@ -222,17 +227,19 @@ namespace LobbyRelaySample.relay
 
         protected override void OnBindingComplete()
         {
-            StartCoroutine(ConnectToServer());
+#pragma warning disable 4014
+            ConnectToServer();
+#pragma warning restore 4014
         }
 
-        private IEnumerator ConnectToServer()
+        private async Task ConnectToServer()
         {
             // Once the client is bound to the Relay server, send a connection request.
             m_connections.Add(m_networkDriver.Connect(m_endpointForServer));
             while (m_networkDriver.GetConnectionState(m_connections[0]) == NetworkConnection.State.Connecting)
             {
                 m_networkDriver.ScheduleUpdate().Complete();
-                yield return null;
+                await Task.Delay(100);
             }
             if (m_networkDriver.GetConnectionState(m_connections[0]) != NetworkConnection.State.Connected)
             {
@@ -245,7 +252,7 @@ namespace LobbyRelaySample.relay
                 RelayUtpClient client = gameObject.AddComponent<RelayUtpClient>();
                 client.Initialize(m_networkDriver, m_connections, m_localUser, m_localLobby);
                 m_onJoinComplete(true, client);
-                LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode, null);
+                await LobbyAsyncRequests.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode);
             }
         }
     }

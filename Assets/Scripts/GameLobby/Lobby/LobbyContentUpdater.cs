@@ -1,7 +1,6 @@
 ﻿using System;
 using LobbyRelaySample.lobby;
 using Unity.Services.Lobbies.Models;
-using UnityEngine;
 
 namespace LobbyRelaySample
 {
@@ -60,9 +59,9 @@ namespace LobbyRelaySample
                 return;
             }
 
-            if (changed.pullUpdate)
+            if (changed.canPullUpdate)
             {
-                changed.pullUpdate = false;
+                changed.canPullUpdate = false;
                 return;
             }
 
@@ -104,18 +103,22 @@ namespace LobbyRelaySample
 
             void DoLobbyDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby), null);
+#pragma warning disable 4014
+                LobbyAsyncRequests.Instance.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby));
+#pragma warning restore 4014
             }
 
             void DoPlayerDataPush()
             {
-                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser), null);
+#pragma warning disable 4014
+                LobbyAsyncRequests.Instance.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
+#pragma warning restore 4014
             }
         }
 
         void OnRemoteLobbyUpdated(Lobby lobby)
         {
-            m_LocalLobby.pullUpdate = true;
+            m_LocalLobby.canPullUpdate = true;
 
             //synching our local lobby
             LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
