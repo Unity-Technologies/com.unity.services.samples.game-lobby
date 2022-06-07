@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using LobbyRelaySample.relay;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using Unity.Services.Relay;
 using UnityEngine;
 
 namespace LobbyRelaySample.ngo
@@ -21,7 +23,6 @@ namespace LobbyRelaySample.ngo
         private bool m_doesNeedCleanup = false;
         private bool m_hasConnectedViaNGO = false;
 
-        private Action<UnityTransport> m_initializeTransport;
         private LocalLobby m_lobby;
         private LobbyUser m_localUser;
 
@@ -45,15 +46,49 @@ namespace LobbyRelaySample.ngo
         /// </summary>
         private async Task CreateNetworkManager()
         {
-
-            UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
-            if (m_localUser.IsHost)
-                NetworkManager.Singleton.gameObject.AddComponent<RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport);  NetworkManager.Singleton.StartHost(); });
-            else
-                NetworkManager.Singleton.gameObject.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport);  NetworkManager.Singleton.StartClient(); });
-            await Task.Delay(1);
             m_inGameRunner = Instantiate(m_IngameRunnerPrefab).GetComponentInChildren<InGameRunner>();
             m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, m_localUser);
+            if (m_localUser.IsHost)
+            {
+                await SetRelayHostData();
+                NetworkManager.Singleton.StartHost();
+            }
+            else
+            {
+                await SetRelayClientData();
+                NetworkManager.Singleton.StartClient();
+            }
+
+        }
+
+        async Task SetRelayHostData()
+        {
+            UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
+
+            var allocation = await Relay.Instance.CreateAllocationAsync(m_lobby.MaxPlayerCount);
+            var joincode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            m_lobby.RelayNGOCode = joincode;
+
+            bool isSecure = false;
+            var endpoint = RelayUtpSetup.GetEndpointForAllocation(allocation.ServerEndpoints,
+                allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
+
+            transport.SetHostRelayData(RelayUtpSetup.AddressFromEndpoint(endpoint), endpoint.Port,
+                allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, isSecure);
+        }
+
+        async Task SetRelayClientData()
+        {
+            UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
+
+            var joinAllocation = await Relay.Instance.JoinAllocationAsync(m_lobby.RelayCode);
+            bool isSecure = false;
+            var endpoint = RelayUtpSetup.GetEndpointForAllocation(joinAllocation.ServerEndpoints,
+                joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
+
+            transport.SetClientRelayData(RelayUtpSetup.AddressFromEndpoint(endpoint), endpoint.Port,
+                joinAllocation.AllocationIdBytes, joinAllocation.Key,
+                joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
         }
 
         private void OnConnectionVerified()
@@ -68,13 +103,6 @@ namespace LobbyRelaySample.ngo
         {   m_localUser = user; // Same, regarding redundancy.
         }
 
-        /// <summary>
-        /// Once the Relay Allocation is created, this passes its data to the UnityTransport.
-        /// </summary>
-        public void SetRelayServerData(string address, int port, byte[] allocationBytes, byte[] key, byte[] connectionData, byte[] hostConnectionData, bool isSecure)
-        {
-            m_initializeTransport = (transport) => { transport.SetRelayServerData(address, (ushort)port, allocationBytes, key, connectionData, hostConnectionData, isSecure); };
-        }
 
         public void OnReceiveMessage(MessageType type, object msg)
         {
