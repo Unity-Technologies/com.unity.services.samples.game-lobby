@@ -1,11 +1,6 @@
-﻿using LobbyRelaySample.lobby;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -33,8 +28,9 @@ namespace LobbyRelaySample
             }
         }
 
+        public Lobby CurrentLobby => m_RemoteLobby;
 
-        public Action<Lobby> onLobbyUpdated;
+
 
         //Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
         // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
@@ -118,7 +114,7 @@ namespace LobbyRelaySample
         }
 
 
-        public async Task<Lobby> GetLobbyAsync(string lobbyId)
+        async Task<Lobby> GetLobbyAsync(string lobbyId)
         {
             await m_rateLimitQuery.WaitUntilCooldown();
 
@@ -177,12 +173,14 @@ namespace LobbyRelaySample
             var lobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
             JoinLobby(lobby);
             return lobby;
-
         }
 
         void JoinLobby(Lobby response)
         {
             m_RemoteLobby = response;
+#pragma warning disable 4014
+            GetLobbyLoop();
+#pragma warning restore 4014
         }
 
         /// <summary>
@@ -193,7 +191,6 @@ namespace LobbyRelaySample
         {
             await m_rateLimitQuery.WaitUntilCooldown();
 
-            Debug.Log("Retrieving Lobby List");
             var filters = LobbyColorToFilters(limitToColor);
 
             QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
@@ -222,9 +219,10 @@ namespace LobbyRelaySample
         /// <param name="onComplete">Called once the request completes, regardless of success or failure.</param>
         public async Task LeaveLobbyAsync(string lobbyId)
         {
+            m_RemoteLobby = null;
+
             string uasId = AuthenticationService.Instance.PlayerId;
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, uasId);
-            m_RemoteLobby = null;
 
             // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
         }
@@ -305,9 +303,20 @@ namespace LobbyRelaySample
         }
 
 
-        private float m_heartbeatTime = 0;
-        private const int k_heartbeatPeriodMS = 8000; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+        private const int m_LobbyUpdateTime = 500;
+        async Task GetLobbyLoop()
+        {
+            //In this sample we only use the loop internally, when we've joined. Only after we have joined or created a lobby can we poll for updates.
+            //Since you only need the ID, there might be a use case to get the lobby before joining it, since you can get the ID's from Querying
+            while (m_RemoteLobby != null)
+            {
+                m_RemoteLobby = await GetLobbyAsync(m_RemoteLobby.Id);
 
+                await Task.Delay(m_LobbyUpdateTime);
+            }
+        }
+
+        private const int k_heartbeatPeriodMS = 8000; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
         /// <summary>
         /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
         /// </summary>
@@ -331,7 +340,11 @@ namespace LobbyRelaySample
 
         public void Dispose()
         {
-
+            if (m_RemoteLobby == null)
+                return;
+#pragma warning disable 4014
+            LeaveLobbyAsync(m_RemoteLobby.Id);
+#pragma warning restore 4014
         }
         public class RateLimitCooldown
         {
