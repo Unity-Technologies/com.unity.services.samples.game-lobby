@@ -62,8 +62,9 @@ namespace LobbyRelaySample
 
         private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
         private RateLimitCooldown m_rateLimitJoin = new RateLimitCooldown(3f);
-        private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
         private RateLimitCooldown m_rateLimitHost = new RateLimitCooldown(3f);
+
+        private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
 
         #endregion
 
@@ -223,8 +224,6 @@ namespace LobbyRelaySample
 
             string uasId = AuthenticationService.Instance.PlayerId;
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, uasId);
-
-            // Lobbies will automatically delete the lobby if unoccupied, so we don't need to take further action.
         }
 
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
@@ -301,9 +300,8 @@ namespace LobbyRelaySample
             if (result != null)
                 m_RemoteLobby = result;
         }
-
-
-        private const int m_LobbyUpdateTime = 500;
+        #region LobbyLoops
+        const int m_LobbyUpdateTime = 1000;
         async Task GetLobbyLoop()
         {
             //In this sample we only use the loop internally, when we've joined. Only after we have joined or created a lobby can we poll for updates.
@@ -316,7 +314,7 @@ namespace LobbyRelaySample
             }
         }
 
-        private const int k_heartbeatPeriodMS = 8000; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
+         const int k_heartbeatPeriodMS = 8000; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
         /// <summary>
         /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
         /// </summary>
@@ -331,6 +329,8 @@ namespace LobbyRelaySample
                 await Task.Delay(k_heartbeatPeriodMS);
             }
         }
+
+#endregion
 
         async Task AwaitRemoteLobby()
         {

@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
+using LobbyRelaySample;
 using LobbyRelaySample.relay;
 using NUnit.Framework;
+using Test.Tools;
+using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -47,7 +50,8 @@ namespace Test
             // Allocation
             float timeout = 5;
             Allocation allocation = null;
-            RelayAPIInterface.AllocateAsync(4, (a) => { allocation = a; });
+            yield return AsyncTestHelper.Await(async () => allocation = await  Relay.Instance.CreateAllocationAsync(4));
+
             while (allocation == null && timeout > 0)
             {
                 yield return new WaitForSeconds(0.25f);
@@ -65,7 +69,8 @@ namespace Test
             // Join code retrieval
             timeout = 5;
             string joinCode = null;
-            RelayAPIInterface.GetJoinCodeAsync(allocationId, (j) => { joinCode = j; });
+            yield return AsyncTestHelper.Await(async () => joinCode = await  Relay.Instance.GetJoinCodeAsync(allocationId));
+
             while (joinCode == null && timeout > 0)
             {
                 yield return new WaitForSeconds(0.25f);
@@ -78,7 +83,8 @@ namespace Test
             // Joining with the join code
             timeout = 5;
             JoinAllocation joinResponse = null;
-            RelayAPIInterface.JoinAsync(joinCode, (j) => { joinResponse = j; });
+            yield return AsyncTestHelper.Await(async () => joinResponse = await  Relay.Instance.JoinAllocationAsync(joinCode));
+
             while (joinResponse == null && timeout > 0)
             {
                 yield return new WaitForSeconds(0.25f);
