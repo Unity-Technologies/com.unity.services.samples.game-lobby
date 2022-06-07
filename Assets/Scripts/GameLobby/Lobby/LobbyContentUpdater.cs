@@ -30,7 +30,6 @@ namespace LobbyRelaySample
 
 #pragma warning restore 4014
             m_lifetime = 0;
-            LobbyAsyncRequests.Instance.onLobbyUpdated += OnRemoteLobbyUpdated;
         }
 
         public void EndTracking()
@@ -40,7 +39,6 @@ namespace LobbyRelaySample
             Locator.Get.Messenger.Unsubscribe(this);
             if (m_LocalLobby != null)
                 m_LocalLobby.onChanged -= OnLocalLobbyChanged;
-            LobbyAsyncRequests.Instance.onLobbyUpdated -= OnRemoteLobbyUpdated;
 
             m_LocalLobby = null;
         }
@@ -88,6 +86,8 @@ namespace LobbyRelaySample
 
                 if (m_ShouldPushData)
                     PushDataToLobby();
+                else
+                    UpdateLocalLobby();
 
                 void PushDataToLobby()
                 {
@@ -119,12 +119,15 @@ namespace LobbyRelaySample
             }
         }
 
-        void OnRemoteLobbyUpdated(Lobby lobby)
+        void UpdateLocalLobby()
         {
+            var remoteLobby = LobbyAsyncRequests.Instance.CurrentLobby;
+            if (remoteLobby == null)
+                return;
             m_LocalLobby.canPullUpdate = true;
 
             //synching our local lobby
-            LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+            LobbyConverters.RemoteToLocal(remoteLobby, m_LocalLobby);
 
             //Dont push data this tick, since we "pulled"s
             if (!m_LocalUser.IsHost)

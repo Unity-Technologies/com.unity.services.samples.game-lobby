@@ -67,18 +67,16 @@ namespace Test
             yield return
                 new WaitForSeconds(
                     1); // To prevent a possible 429 with the upcoming Query request, in case a previous test had one; Query requests can only occur at a rate of 1 per second.
-            Debug.Log("Getting Lobby List 1");
             QueryResponse queryResponse = null;
+            Debug.Log("Getting Lobby List 1");
+
             yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
 
-            Debug.Log("Got Lobby List 1");
 
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#0)");
             int numLobbiesIni = queryResponse.Results?.Count ?? 0;
 
             #endregion
-
-
 
             // Create a test lobby.
             Lobby createResponse = null;
@@ -94,41 +92,33 @@ namespace Test
             Assert.IsNotNull(createResponse, "CreateLobbyAsync should return a non-null result.");
             m_workingLobbyId = createResponse.Id;
             Assert.AreEqual(lobbyName, createResponse.Name, "Created lobby should match the provided name.");
-
             // Query for the test lobby via QueryAllLobbies.
             yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
             Debug.Log("Getting Lobby List 2");
+
             yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
-            Debug.Log("Got Lobby List 2");
 
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#1)");
             Assert.AreEqual(1 + numLobbiesIni, queryResponse.Results.Count, "Queried lobbies list should contain the test lobby.");
             Assert.IsTrue(queryResponse.Results.Where(r => r.Name == lobbyName).Count() == 1, "Checking queried lobby for name.");
             Assert.IsTrue(queryResponse.Results.Where(r => r.Id == m_workingLobbyId).Count() == 1, "Checking queried lobby for ID.");
 
-            // Query for solely the test lobby via GetLobby.
-            Debug.Log("Getting Lobby");
-            Lobby lobby = null;
-            yield return AsyncTestHelper.Await(async ()=> lobby = await LobbyAsyncRequests.Instance.GetLobbyAsync(createResponse.Id));
 
-            Debug.Log("Got Lobby");
+            Debug.Log("Getting current Lobby");
 
-            Assert.IsNotNull(lobby, "GetLobbyAsync should return a non-null result.");
-            Assert.AreEqual(lobbyName, lobby.Name, "Checking the lobby we got for name.");
-            Assert.AreEqual(m_workingLobbyId, lobby.Id, "Checking the lobby we got for ID.");
+            Lobby currentLobby = LobbyAsyncRequests.Instance.CurrentLobby;
+            Assert.IsNotNull(currentLobby, "GetLobbyAsync should return a non-null result.");
+            Assert.AreEqual(lobbyName, currentLobby.Name, "Checking the lobby we got for name.");
+            Assert.AreEqual(m_workingLobbyId, currentLobby.Id, "Checking the lobby we got for ID.");
 
+            Debug.Log("Deleting current Lobby");
             // Delete the test lobby.
             yield return AsyncTestHelper.Await(async ()=> await LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_workingLobbyId));
 
             m_workingLobbyId = null;
-
-            // Query to ensure the lobby is gone.
-            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
             Debug.Log("Getting Lobby List 3");
-
             yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
 
-            Debug.Log("Got Lobby List 3");
 
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#2)");
             Assert.AreEqual(numLobbiesIni, queryResponse.Results.Count, "Queried lobbies list should be empty.");

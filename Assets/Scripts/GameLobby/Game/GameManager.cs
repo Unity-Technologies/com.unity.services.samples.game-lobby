@@ -274,7 +274,7 @@ namespace LobbyRelaySample
             }
         }
 
-        private async void OnLeftLobby()
+        private void OnLeftLobby()
         {
             m_localUser.ResetState();
 #pragma warning disable 4014
