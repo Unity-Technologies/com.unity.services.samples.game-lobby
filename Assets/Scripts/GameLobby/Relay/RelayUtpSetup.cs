@@ -29,6 +29,9 @@ namespace LobbyRelaySample.relay
             return endpoint.Address.Split(':')[0];
         }
 
+        /// <summary>
+        /// Deprecated in sample, might be useful to someone in the future.
+        /// </summary>
         public void BeginRelayJoin(LocalLobby localLobby, LobbyUser localUser, Action<bool, RelayUtpClient> onJoinComplete)
         {
             m_localLobby = localLobby;
