@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Threading.Tasks;
 using LobbyRelaySample.relay;
 using NUnit.Framework;
 using Unity.Networking.Transport;
+using Unity.Services.Core;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -45,7 +47,14 @@ namespace Test
         public void Setup()
         {
             m_dummy = new GameObject();
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication("TestProfile",() => { m_didSigninComplete = true; });
+        }
+
+        async Task InitServices()
+        {
+            await UnityServices.InitializeAsync();
+            m_didSigninComplete = true;
+
         }
 
         [OneTimeTearDown]

@@ -6,6 +6,10 @@ using System.Threading;
 using LobbyRelaySample.lobby;
 using UnityEngine;
 using UnityEngine.Serialization;
+#if UNITY_EDITOR
+using ParrelSync;
+#endif
+
 
 namespace LobbyRelaySample
 {
@@ -65,8 +69,11 @@ namespace LobbyRelaySample
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
             var unused = Locator.Get;
 #pragma warning restore IDE0059
-
-            Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
+            string serviceProfileName = "player";
+            #if UNITY_EDITOR
+            serviceProfileName = $"{serviceProfileName}_{ClonesManager.GetCurrentProject().name}";
+            #endif
+            Locator.Get.Provide(new Auth.Identity(serviceProfileName,OnAuthSignIn));
             Application.wantsToQuit += OnWantToQuit;
         }
 

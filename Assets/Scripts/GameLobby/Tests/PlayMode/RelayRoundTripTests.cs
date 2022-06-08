@@ -1,7 +1,5 @@
 using System;
 using System.Collections;
-using LobbyRelaySample;
-using LobbyRelaySample.relay;
 using NUnit.Framework;
 using Test.Tools;
 using Unity.Services.Relay;
@@ -25,7 +23,7 @@ namespace Test
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication("testProfile", () => { m_didSigninComplete = true; });
         }
 
         [OneTimeTearDown]

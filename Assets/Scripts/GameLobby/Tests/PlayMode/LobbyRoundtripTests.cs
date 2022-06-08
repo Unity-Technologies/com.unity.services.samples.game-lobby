@@ -26,7 +26,7 @@ namespace Test
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication("testProfile", () => { m_didSigninComplete = true; });
             m_mockUserData = new Dictionary<string, PlayerDataObject>();
             m_mockUserData.Add("DisplayName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
             m_LocalUser = new LobbyUser(true);
@@ -151,6 +151,12 @@ namespace Test
             LogAssert.ignoreFailingMessages = false;
 
             Assert.Null(createLobby, "The returned object will be null, so expect to need to handle it.");
+        }
+
+        [UnityTest]
+        public IEnumerator LobbyPlayerDataUpdated()
+        {
+            yield return null;
         }
     }
 }

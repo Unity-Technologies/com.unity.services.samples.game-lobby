@@ -50,15 +50,16 @@ namespace LobbyRelaySample.Auth
     /// <summary>
     /// Our internal representation of the local player's credentials, wrapping the data required for interfacing with the identities of that player in the services.
     /// (In use here, it just wraps Auth, but it can be used to combine multiple sets of credentials into one concept of a player.)
+    /// (This callback pattern also allows for Unit Testing, something UnityServices does support easily.)
     /// </summary>
     public class Identity : IIdentity, IDisposable
     {
         private Dictionary<IIdentityType, SubIdentity> m_subIdentities = new Dictionary<IIdentityType, SubIdentity>();
 
-        public Identity(Action callbackOnAuthLogin)
+        public Identity(string profileName, Action callbackOnAuthLogin)
         {
             m_subIdentities.Add(IIdentityType.Local, new SubIdentity());
-            m_subIdentities.Add(IIdentityType.Auth, new SubIdentity_Authentication(callbackOnAuthLogin));
+            m_subIdentities.Add(IIdentityType.Auth, new SubIdentity_Authentication(profileName, callbackOnAuthLogin));
         }
 
         public SubIdentity GetSubIdentity(IIdentityType identityType)

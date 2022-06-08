@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 
@@ -14,9 +15,11 @@ namespace LobbyRelaySample.Auth
         /// <summary>
         /// This will kick off a login.
         /// </summary>
-        public SubIdentity_Authentication(Action onSigninComplete = null)
+        public SubIdentity_Authentication(string profileName = "default", Action onSigninComplete = null)
         {
-            DoSignIn(onSigninComplete);
+#pragma warning disable 4014
+            DoSignIn(profileName, onSigninComplete);
+#pragma warning restore 4014
         }
         ~SubIdentity_Authentication()
         {
@@ -32,9 +35,11 @@ namespace LobbyRelaySample.Auth
             }
         }
 
-        private async void DoSignIn(Action onSigninComplete)
+        private async Task DoSignIn(string profileName, Action onSigninComplete)
         {
-            await UnityServices.InitializeAsync();
+            var serviceProfile = new InitializationOptions();
+            serviceProfile.SetProfile(profileName);
+            await UnityServices.InitializeAsync(serviceProfile);
             AuthenticationService.Instance.SignedIn += OnSignInChange;
             AuthenticationService.Instance.SignedOut += OnSignInChange;
 
