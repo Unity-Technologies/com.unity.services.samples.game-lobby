@@ -12,7 +12,7 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class InGameRunner : NetworkBehaviour, IInGameInputHandler
     {
-        private Action m_onConnectionVerified, m_onGameEnd;
+        Action m_onConnectionVerified, m_onGameEnd;
         private int m_expectedPlayerCount; // Used by the host, but we can't call the RPC until the network connection completes.
         private bool? m_canSpawnInGameObjects;
         private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();

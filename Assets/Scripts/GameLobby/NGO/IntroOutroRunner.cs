@@ -8,8 +8,8 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class IntroOutroRunner : MonoBehaviour
     {
-        [SerializeField] private Animator m_animator;
-        private Action m_onOutroComplete;
+        [SerializeField] Animator m_animator;
+        Action m_onOutroComplete;
 
         public void DoIntro()
         {

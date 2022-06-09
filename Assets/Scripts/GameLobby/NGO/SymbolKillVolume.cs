@@ -9,8 +9,8 @@ namespace LobbyRelaySample.ngo
     [RequireComponent(typeof(Collider))]
     public class SymbolKillVolume : MonoBehaviour
     {
-        private bool m_isInitialized = false;
-        private Action m_onSymbolCollided;
+        bool m_isInitialized = false;
+        Action m_onSymbolCollided;
 
         public void Initialize(Action onSymbolCollided)
         {

@@ -12,8 +12,8 @@ namespace LobbyRelaySample
     {
         public class Data : Observed<Countdown.Data>
         {
-            private float m_timeLeft;
-            public float TimeLeft 
+            float m_timeLeft;
+            public float TimeLeft
             {
                 get => m_timeLeft;
                 set
@@ -24,7 +24,7 @@ namespace LobbyRelaySample
             public override void CopyObserved(Data oldObserved) { /*No-op, since this is unnecessary.*/ }
         }
 
-        private Data m_data = new Data();
+        Data m_data = new Data();
         private UI.CountdownUI m_ui;
         private const int k_countdownTime = 4;
 

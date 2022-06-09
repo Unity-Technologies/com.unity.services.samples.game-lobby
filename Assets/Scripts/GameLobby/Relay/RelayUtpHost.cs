@@ -37,12 +37,12 @@ namespace LobbyRelaySample.relay
         /// If so, they need to be updated with the current state of everyone else.
         /// If not, they should be informed and rejected.
         /// </summary>
-        private void OnNewConnection(NetworkConnection conn, string id)
+        void OnNewConnection(NetworkConnection conn, string id)
         {
             new RelayPendingApproval(conn, NewConnectionApprovalResult, id);
         }
 
-        private void NewConnectionApprovalResult(NetworkConnection conn, Approval result)
+        void NewConnectionApprovalResult(NetworkConnection conn, Approval result)
         {
             WriteByte(m_networkDriver, conn, m_localUser.ID, MsgType.PlayerApprovalState, (byte)result);
             if (result == Approval.OK && conn.IsCreated)
@@ -96,11 +96,11 @@ namespace LobbyRelaySample.relay
 
 
 #pragma warning disable 4014
-                var queryCooldownMilliseconds = LobbyAsyncRequests.Instance.GetRateLimit(LobbyAsyncRequests.RequestType.Query)
+                /*var queryCooldownMilliseconds = LobbyManager.Instance.GetRateLimit(LobbyManager.RequestType.Query)
                     .m_CoolDownMS;
                 // The user ready status lives in the lobby data, which won't update immediately, but we need to use it to identify if all remaining players have readied.
                 // So, we'll wait two lobby update loops before we check remaining players to ensure the lobby has received the disconnect message.
-                WaitAndCheckUsers(queryCooldownMilliseconds*2);
+                WaitAndCheckUsers(queryCooldownMilliseconds*2);*/
 #pragma warning restore 4014
                 return;
             }
@@ -133,7 +133,7 @@ namespace LobbyRelaySample.relay
             }
         }
 
-        private void CheckIfAllUsersReady()
+        void CheckIfAllUsersReady()
         {
             bool haveAllReadied = true;
             foreach (var user in m_localLobby.LobbyUsers)
@@ -170,7 +170,7 @@ namespace LobbyRelaySample.relay
         /// <summary>
         /// Clean out destroyed connections, and accept all new ones.
         /// </summary>
-        private void UpdateConnections()
+        void UpdateConnections()
         {
             for (int c = m_connections.Count - 1; c >= 0; c--)
             {

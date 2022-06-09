@@ -6,21 +6,21 @@ namespace LobbyRelaySample.UI
     public class LobbyUserVolumeUI : MonoBehaviour
     {
         [SerializeField]
-        private UIPanelBase m_volumeSliderContainer;
+        UIPanelBase m_volumeSliderContainer;
         [SerializeField]
-        private UIPanelBase m_muteToggleContainer;
+        UIPanelBase m_muteToggleContainer;
         [SerializeField]
         [Tooltip("This is shown for other players, to mute them.")]
-        private GameObject m_muteIcon;
+        GameObject m_muteIcon;
         [SerializeField]
         [Tooltip("This is shown for the local player, to make it clearer that they are muting themselves.")]
-        private GameObject m_micMuteIcon;
+        GameObject m_micMuteIcon;
         public bool IsLocalPlayer { private get; set; }
 
         [SerializeField]
-        private Slider m_volumeSlider;
+        Slider m_volumeSlider;
         [SerializeField]
-        private Toggle m_muteToggle;
+        Toggle m_muteToggle;
 
         /// <param name="shouldResetUi">
         /// When the user is being added, we want the UI to reset to the default values.

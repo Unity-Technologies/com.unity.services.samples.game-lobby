@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
-using UnityEngine;
 
 namespace LobbyRelaySample.lobby
 {
@@ -29,49 +28,39 @@ namespace LobbyRelaySample.lobby
                 return data;
             data.Add("DisplayName", user.DisplayName); // The lobby doesn't need to know any data beyond the name and state; Relay will handle the rest.
             data.Add("UserStatus", ((int)user.UserStatus).ToString());
+            data.Add("Emote", user.Emote.ToString());
             return data;
         }
 
         /// <summary>
         /// Create a new LocalLobby from the content of a retrieved lobby. Its data can be copied into an existing LocalLobby for use.
         /// </summary>
-        public static void RemoteToLocal(Lobby lobby, LocalLobby lobbyToUpdate)
+        public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobbyToUpdate)
         {
             //Copy Data from Lobby into Local lobby fields
-            LocalLobby.LobbyData info = new LocalLobby.LobbyData(lobbyToUpdate.Data)
+            LocalLobby.LobbyData lobbyData = new LocalLobby.LobbyData(localLobbyToUpdate.Data)
             {
-                LobbyID = lobby.Id,
-                LobbyCode = lobby.LobbyCode,
-                Private = lobby.IsPrivate,
-                LobbyName = lobby.Name,
-                MaxPlayerCount = lobby.MaxPlayers,
-                RelayCode = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : lobbyToUpdate.RelayCode, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
-                RelayNGOCode = lobby.Data?.ContainsKey("RelayNGOCode") == true ? lobby.Data["RelayNGOCode"].Value : lobbyToUpdate.RelayNGOCode,
-                State = lobby.Data?.ContainsKey("State") == true ? (LobbyState)int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby,
-                Color = lobby.Data?.ContainsKey("Color") == true ? (LobbyColor)int.Parse(lobby.Data["Color"].Value) : LobbyColor.None,
-                State_LastEdit = lobby.Data?.ContainsKey("State_LastEdit") == true ? long.Parse(lobby.Data["State_LastEdit"].Value) : lobbyToUpdate.Data.State_LastEdit,
-                Color_LastEdit = lobby.Data?.ContainsKey("Color_LastEdit") == true ? long.Parse(lobby.Data["Color_LastEdit"].Value) : lobbyToUpdate.Data.Color_LastEdit,
-                RelayNGOCode_LastEdit = lobby.Data?.ContainsKey("RelayNGOCode_LastEdit") == true ? long.Parse(lobby.Data["RelayNGOCode_LastEdit"].Value) : lobbyToUpdate.Data.RelayNGOCode_LastEdit
+                LobbyID = remoteLobby.Id,
+                LobbyCode = remoteLobby.LobbyCode,
+                Private = remoteLobby.IsPrivate,
+                LobbyName = remoteLobby.Name,
+                MaxPlayerCount = remoteLobby.MaxPlayers,
+                RelayCode = remoteLobby.Data?.ContainsKey("RelayCode") == true ? remoteLobby.Data["RelayCode"].Value : localLobbyToUpdate.RelayCode, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
+                RelayNGOCode = remoteLobby.Data?.ContainsKey("RelayNGOCode") == true ? remoteLobby.Data["RelayNGOCode"].Value : localLobbyToUpdate.RelayNGOCode,
+                State = remoteLobby.Data?.ContainsKey("State") == true ? (LobbyState)int.Parse(remoteLobby.Data["State"].Value) : LobbyState.Lobby,
+                Color = remoteLobby.Data?.ContainsKey("Color") == true ? (LobbyColor)int.Parse(remoteLobby.Data["Color"].Value) : LobbyColor.None,
+                State_LastEdit = remoteLobby.Data?.ContainsKey("State_LastEdit") == true ? long.Parse(remoteLobby.Data["State_LastEdit"].Value) : localLobbyToUpdate.Data.State_LastEdit,
+                Color_LastEdit = remoteLobby.Data?.ContainsKey("Color_LastEdit") == true ? long.Parse(remoteLobby.Data["Color_LastEdit"].Value) : localLobbyToUpdate.Data.Color_LastEdit,
+                RelayNGOCode_LastEdit = remoteLobby.Data?.ContainsKey("RelayNGOCode_LastEdit") == true ? long.Parse(remoteLobby.Data["RelayNGOCode_LastEdit"].Value) : localLobbyToUpdate.Data.RelayNGOCode_LastEdit
             };
 
             Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>();
-            foreach (var player in lobby.Players)
+            foreach (var player in remoteLobby.Players)
             {
-                // If we already know about this player and this player is already connected to Relay, don't overwrite things that Relay might be changing.
-                if (player.Data?.ContainsKey("UserStatus") == true && int.TryParse(player.Data["UserStatus"].Value, out int status))
-                {
-                    if (status > (int)UserStatus.Connecting && lobbyToUpdate.LobbyUsers.ContainsKey(player.Id))
-                    {
-                        lobbyUsers.Add(player.Id, lobbyToUpdate.LobbyUsers[player.Id]);
-                        continue;
-                    }
-                }
-
-                // If the player isn't connected to Relay, get the most recent data that the lobby knows.
                 // (If we haven't seen this player yet, a new local representation of the player will have already been added by the LocalLobby.)
                 LobbyUser incomingData = new LobbyUser
                 {
-                    IsHost = lobby.HostId.Equals(player.Id),
+                    IsHost = remoteLobby.HostId.Equals(player.Id),
                     DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : default,
                     Emote = player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : default,
                     UserStatus = player.Data?.ContainsKey("UserStatus") == true ? (UserStatus)int.Parse(player.Data["UserStatus"].Value) : UserStatus.Connecting,
@@ -81,7 +70,7 @@ namespace LobbyRelaySample.lobby
             }
 
             //Push all the data at once so we don't call OnChanged for each variable
-            lobbyToUpdate.CopyObserved(info, lobbyUsers);
+            localLobbyToUpdate.CopyObserved(lobbyData, lobbyUsers);
         }
 
         /// <summary>
@@ -95,7 +84,7 @@ namespace LobbyRelaySample.lobby
             return retLst;
         }
 
-        private static LocalLobby RemoteToNewLocal(Lobby lobby)
+        static LocalLobby RemoteToNewLocal(Lobby lobby)
         {
             LocalLobby data = new LocalLobby();
             RemoteToLocal(lobby, data);

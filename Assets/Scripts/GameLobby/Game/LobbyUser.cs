@@ -51,7 +51,7 @@ namespace LobbyRelaySample
             }
         }
 
-        private UserData m_data;
+        UserData m_data;
 
         public void ResetState()
         {
@@ -74,7 +74,7 @@ namespace LobbyRelaySample
             IsApproved = 32
         }
 
-        private UserMembers m_lastChanged;
+        UserMembers m_lastChanged;
         public UserMembers LastChanged => m_lastChanged;
 
         public bool IsHost

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Threading.Tasks;
+using LobbyRelaySample;
 using LobbyRelaySample.relay;
 using NUnit.Framework;
 using Unity.Networking.Transport;
@@ -13,7 +14,7 @@ namespace Test
 {
     public class UtpTests
     {
-        private class RelayUtpTest : RelayUtpSetupHost
+        class RelayUtpTest : RelayUtpSetupHost
         {
             public Action<NetworkEndPoint, bool> OnGetEndpoint { private get; set; }
 
@@ -36,7 +37,6 @@ namespace Test
             }
         }
 
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
         GameObject m_dummy;
         //Only used when testing DTLS
         #pragma warning disable CS0414 // This is the "assigned but its value is never used" warning, which will otherwise appear when DTLS is unavailable.
@@ -47,7 +47,7 @@ namespace Test
         public void Setup()
         {
             m_dummy = new GameObject();
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication("TestProfile",() => { m_didSigninComplete = true; });
+            Auth.Authenticate("testProfile");
         }
 
         async Task InitServices()
@@ -60,7 +60,6 @@ namespace Test
         [OneTimeTearDown]
         public void Teardown()
         {
-            m_auth?.Dispose();
             GameObject.Destroy(m_dummy);
         }
 

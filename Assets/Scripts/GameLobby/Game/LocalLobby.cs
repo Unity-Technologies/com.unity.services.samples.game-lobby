@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
@@ -147,11 +146,11 @@ namespace LobbyRelaySample
                 return;
             }
 
-            DoAddPlayer(user);
+            AddUser(user);
             OnChanged(this);
         }
 
-        private void DoAddPlayer(LobbyUser user)
+        void AddUser(LobbyUser user)
         {
             m_LobbyUsers.Add(user.ID, user);
             user.onChanged += OnChangedUser;
@@ -278,33 +277,33 @@ namespace LobbyRelaySample
             }
         }
 
-        public void CopyObserved(LobbyData data, Dictionary<string, LobbyUser> currUsers)
+        public void CopyObserved(LobbyData lobbyData, Dictionary<string, LobbyUser> lobbyUsers)
         {
             // It's possible for the host to edit the lobby in between the time they last pushed lobby data and the time their pull for new lobby data completes.
             // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
-            var pendingState = data.State;
-            var pendingColor = data.Color;
-            var pendingNgoCode = data.RelayNGOCode;
-            if (m_Data.State_LastEdit > data.State_LastEdit)
+            var pendingState = lobbyData.State;
+            var pendingColor = lobbyData.Color;
+            var pendingNgoCode = lobbyData.RelayNGOCode;
+            if (m_Data.State_LastEdit > lobbyData.State_LastEdit)
                 pendingState = m_Data.State;
-            if (m_Data.Color_LastEdit > data.Color_LastEdit)
+            if (m_Data.Color_LastEdit > lobbyData.Color_LastEdit)
                 pendingColor = m_Data.Color;
-            if (m_Data.RelayNGOCode_LastEdit > data.RelayNGOCode_LastEdit)
+            if (m_Data.RelayNGOCode_LastEdit > lobbyData.RelayNGOCode_LastEdit)
                 pendingNgoCode = m_Data.RelayNGOCode;
-            m_Data = data;
+            m_Data = lobbyData;
             m_Data.State = pendingState;
             m_Data.Color = pendingColor;
             m_Data.RelayNGOCode = pendingNgoCode;
 
-            if (currUsers == null)
+            if (lobbyUsers == null)
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();
             else
             {
                 List<LobbyUser> toRemove = new List<LobbyUser>();
                 foreach (var oldUser in m_LobbyUsers)
                 {
-                    if (currUsers.ContainsKey(oldUser.Key))
-                        oldUser.Value.CopyObserved(currUsers[oldUser.Key]);
+                    if (lobbyUsers.ContainsKey(oldUser.Key))
+                        oldUser.Value.CopyObserved(lobbyUsers[oldUser.Key]);
                     else
                         toRemove.Add(oldUser.Value);
                 }
@@ -314,10 +313,10 @@ namespace LobbyRelaySample
                     DoRemoveUser(remove);
                 }
 
-                foreach (var currUser in currUsers)
+                foreach (var currUser in lobbyUsers)
                 {
                     if (!m_LobbyUsers.ContainsKey(currUser.Key))
-                        DoAddPlayer(currUser.Value);
+                        AddUser(currUser.Value);
                 }
             }
 

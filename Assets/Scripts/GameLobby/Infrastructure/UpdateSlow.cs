@@ -12,13 +12,13 @@ namespace LobbyRelaySample
     /// </summary>
     public class UpdateSlow : MonoBehaviour, IUpdateSlow
     {
-        private class Subscriber
+        class Subscriber
         {
             public UpdateMethod updateMethod;
             public readonly float period;
             public float periodCurrent;
-            public Subscriber(UpdateMethod updateMethod, float period) 
-            { 
+            public Subscriber(UpdateMethod updateMethod, float period)
+            {
                 this.updateMethod = updateMethod;
                 this.period = period;
                 this.periodCurrent = 0;
@@ -27,11 +27,11 @@ namespace LobbyRelaySample
 
         [SerializeField]
         [Tooltip("If a subscriber to slow update takes longer than this to execute, it can be automatically unsubscribed.")]
-        private float m_durationToleranceMs = 10;
+        float m_durationToleranceMs = 10;
         [SerializeField]
         [Tooltip("We ordinarily automatically remove a subscriber that takes too long. Otherwise, we'll simply log.")]
-        private bool m_doNotRemoveIfTooLong = false;
-        private List<Subscriber> m_subscribers = new List<Subscriber>();
+        bool m_doNotRemoveIfTooLong = false;
+        List<Subscriber> m_subscribers = new List<Subscriber>();
 
         public void Awake()
         {
@@ -64,7 +64,7 @@ namespace LobbyRelaySample
 
         }
 
-        private void Update()
+        void Update()
         {
             OnUpdate(Time.deltaTime);
         }

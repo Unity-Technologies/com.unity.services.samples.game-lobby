@@ -8,7 +8,7 @@ namespace LobbyRelaySample.UI
     public class ShowWhenLobbyStateUI : ObserverPanel<LocalLobby>
     {
         [SerializeField]
-        private LobbyState m_ShowThisWhen;
+        LobbyState m_ShowThisWhen;
 
         public override void ObservedUpdated(LocalLobby observed)
         {

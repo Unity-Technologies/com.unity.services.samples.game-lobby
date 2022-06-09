@@ -12,7 +12,7 @@ namespace LobbyRelaySample
     /// </summary>
     public class Messenger : IMessenger
     {
-        private List<IReceiveMessages> m_receivers = new List<IReceiveMessages>();
+        List<IReceiveMessages> m_receivers = new List<IReceiveMessages>();
         private const float k_durationToleranceMs = 15;
 
         // We need to handle subscribers who modify the receiver list, e.g. a subscriber who unsubscribes in their OnReceiveMessage.

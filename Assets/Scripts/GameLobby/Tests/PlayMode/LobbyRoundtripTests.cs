@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Test.Tools;
 using LobbyRelaySample;
+using Unity.Services.Core;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -18,35 +20,40 @@ namespace Test
     /// </summary>
     public class LobbyRoundtripTests
     {
-        private string m_workingLobbyId;
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
-        private bool m_didSigninComplete = false;
-        private Dictionary<string, PlayerDataObject> m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
+        string m_workingLobbyId;
+        bool m_didSigninComplete = false;
+        string playerID;
+        Dictionary<string, PlayerDataObject> m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
         LobbyUser m_LocalUser;
+        LobbyManager m_LobbyManager;
         [OneTimeSetUp]
-        public void Setup()
+        public IEnumerator Setup()
         {
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication("testProfile", () => { m_didSigninComplete = true; });
+
             m_mockUserData = new Dictionary<string, PlayerDataObject>();
             m_mockUserData.Add("DisplayName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
             m_LocalUser = new LobbyUser(true);
+            return TestAuthSetup();
+        }
+
+        IEnumerator TestAuthSetup()
+        {
+            yield return AsyncTestHelper.Await(async ()=> await UnityServices.InitializeAsync());
+            yield return AsyncTestHelper.Await(async () => await AuthenticationService.Instance.SignInAnonymouslyAsync());
+            m_didSigninComplete = true;
         }
 
         [UnityTearDown]
         public IEnumerator PerTestTeardown()
         {
             if (m_workingLobbyId != null)
-            {   yield return AsyncTestHelper.Await(async ()=> await LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_workingLobbyId));
+            {   yield return AsyncTestHelper.Await(async ()=> await m_LobbyManager.LeaveLobbyAsync(m_workingLobbyId));
                 m_workingLobbyId = null;
             }
             yield return new WaitForSeconds(0.5f); // We need a yield anyway, so wait long enough to probably delete the lobby. There currently (6/22/2021) aren't other tests that would have issues if this took longer.
         }
 
-        [OneTimeTearDown]
-        public void Teardown()
-        {
-            m_auth?.Dispose();
-        }
+
 
         /// <summary>
         /// Make sure the entire roundtrip for Lobby works: Once signed in, create a lobby, query to make sure it exists, then delete it.
@@ -70,7 +77,7 @@ namespace Test
             QueryResponse queryResponse = null;
             Debug.Log("Getting Lobby List 1");
 
-            yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
+            yield return AsyncTestHelper.Await(async () => queryResponse = await m_LobbyManager.RetrieveLobbyListAsync());
 
 
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#0)");
@@ -83,7 +90,7 @@ namespace Test
             string lobbyName = "TestLobby-JustATest-123";
 
             yield return AsyncTestHelper.Await(async () =>
-                createResponse = await LobbyAsyncRequests.Instance.CreateLobbyAsync(
+                createResponse = await m_LobbyManager.CreateLobbyAsync(
                     lobbyName,
                     100,
                     false,
@@ -96,7 +103,7 @@ namespace Test
             yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
             Debug.Log("Getting Lobby List 2");
 
-            yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
+            yield return AsyncTestHelper.Await(async () => queryResponse = await m_LobbyManager.RetrieveLobbyListAsync());
 
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#1)");
             Assert.AreEqual(1 + numLobbiesIni, queryResponse.Results.Count, "Queried lobbies list should contain the test lobby.");
@@ -106,18 +113,18 @@ namespace Test
 
             Debug.Log("Getting current Lobby");
 
-            Lobby currentLobby = LobbyAsyncRequests.Instance.CurrentLobby;
+            Lobby currentLobby = null;
             Assert.IsNotNull(currentLobby, "GetLobbyAsync should return a non-null result.");
             Assert.AreEqual(lobbyName, currentLobby.Name, "Checking the lobby we got for name.");
             Assert.AreEqual(m_workingLobbyId, currentLobby.Id, "Checking the lobby we got for ID.");
 
             Debug.Log("Deleting current Lobby");
             // Delete the test lobby.
-            yield return AsyncTestHelper.Await(async ()=> await LobbyAsyncRequests.Instance.LeaveLobbyAsync(m_workingLobbyId));
+            yield return AsyncTestHelper.Await(async ()=> await m_LobbyManager.LeaveLobbyAsync(m_workingLobbyId));
 
             m_workingLobbyId = null;
             Debug.Log("Getting Lobby List 3");
-            yield return AsyncTestHelper.Await(async () => queryResponse = await LobbyAsyncRequests.Instance.RetrieveLobbyListAsync());
+            yield return AsyncTestHelper.Await(async () => queryResponse = await m_LobbyManager.RetrieveLobbyListAsync());
 
 
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#2)");
@@ -141,7 +148,7 @@ namespace Test
             LogAssert.ignoreFailingMessages = true; // Multiple errors will appears for the exception.
             Lobby createLobby = null;
             yield return AsyncTestHelper.Await(async () =>
-                createLobby = await LobbyAsyncRequests.Instance.CreateLobbyAsync(
+                createLobby = await m_LobbyManager.CreateLobbyAsync(
                     "lobby name",
                     123,
                     false,

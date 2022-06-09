@@ -9,12 +9,12 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class SpinnerUI : ObserverPanel<LobbyServiceData>
     {
-        [SerializeField] private TMP_Text m_errorText;
-        [SerializeField] private UIPanelBase m_spinnerImage;
-        [SerializeField] private UIPanelBase m_noServerText;
-        [SerializeField] private UIPanelBase m_errorTextVisibility;
+        [SerializeField] TMP_Text m_errorText;
+        [SerializeField] UIPanelBase m_spinnerImage;
+        [SerializeField] UIPanelBase m_noServerText;
+        [SerializeField] UIPanelBase m_errorTextVisibility;
         [Tooltip("This prevents selecting a lobby or Joining while the spinner is visible.")]
-        [SerializeField] private UIPanelBase m_raycastBlocker;
+        [SerializeField] UIPanelBase m_raycastBlocker;
 
         public override void ObservedUpdated(LobbyServiceData observed)
         {

@@ -21,8 +21,8 @@ namespace LobbyRelaySample.relay
         protected bool m_IsRelayConnected { get { return m_localLobby.RelayServer != null; } }
 
         protected bool m_hasSentInitialMessage = false;
-        private const float k_heartbeatPeriod = 5;
-        private bool m_hasDisposed = false;
+        const float k_heartbeatPeriod = 5;
+        bool m_hasDisposed = false;
 
         protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
 

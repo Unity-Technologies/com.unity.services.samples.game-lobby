@@ -17,10 +17,10 @@ namespace LobbyRelaySample.UI
 
         [SerializeField]
         TMP_Text m_StatusText;
-      
+
         [SerializeField]
         Image m_HostIcon;
-        
+
         [SerializeField]
         Image m_EmoteImage;
 
@@ -32,8 +32,8 @@ namespace LobbyRelaySample.UI
 
         public bool IsAssigned => UserId != null;
 
-        public string UserId { get; private set; }
-        private LobbyUserObserver m_observer;
+        public string UserId { get; set; }
+        LobbyUserObserver m_observer;
 
         public void SetUser(LobbyUser myLobbyUser)
         {
@@ -59,7 +59,7 @@ namespace LobbyRelaySample.UI
             m_EmoteImage.sprite = EmoteIcon(observed.Emote);
             m_HostIcon.enabled = observed.IsHost;
         }
-        
+
         /// <summary>
         /// EmoteType to Icon Sprite
         /// m_EmoteIcon[0] = Smile

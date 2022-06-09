@@ -111,7 +111,7 @@ namespace LobbyRelaySample.UI
             Locator.Get.Messenger.OnReceiveMessage(MessageType.QuickJoin, null);
         }
 
-        private bool CanDisplay(LocalLobby lobby)
+        bool CanDisplay(LocalLobby lobby)
         {
             return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
         }
@@ -119,7 +119,7 @@ namespace LobbyRelaySample.UI
         /// <summary>
         /// Instantiates UI element and initializes the observer with the LobbyData
         /// </summary>
-        private void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
+        void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
         {
             var lobbyButtonInstance = Instantiate(m_LobbyButtonPrefab, m_LobbyButtonParent);
             lobbyButtonInstance.GetComponent<LocalLobbyObserver>().BeginObserving(lobby);
@@ -129,12 +129,12 @@ namespace LobbyRelaySample.UI
             m_LocalLobby.Add(lobbyCode, lobby);
         }
 
-        private void UpdateLobbyButton(string lobbyCode, LocalLobby lobby)
+        void UpdateLobbyButton(string lobbyCode, LocalLobby lobby)
         {
             m_LobbyButtons[lobbyCode].UpdateLobby(lobby);
         }
 
-        private void RemoveLobbyButton(LocalLobby lobby)
+        void RemoveLobbyButton(LocalLobby lobby)
         {
             var lobbyID = lobby.LobbyID;
             var lobbyButton = m_LobbyButtons[lobbyID];

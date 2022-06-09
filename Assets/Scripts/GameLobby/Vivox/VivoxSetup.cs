@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Services.Authentication;
 using Unity.Services.Vivox;
 using VivoxUnity;
 
@@ -28,7 +29,7 @@ namespace LobbyRelaySample.vivox
 
             m_userHandlers = userHandlers;
             VivoxService.Instance.Initialize();
-            Account account = new Account(Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id"));
+            Account account = new Account(AuthenticationService.Instance.PlayerId);
             m_loginSession = VivoxService.Instance.Client.GetLoginSession(account);
             string token = m_loginSession.GetLoginToken();
 

@@ -47,7 +47,7 @@ namespace Test
         }
 
         // We just have a couple Observers that update some arbitrary member, in this case a string.
-        private class TestObserved : Observed<TestObserved>
+        class TestObserved : Observed<TestObserved>
         {
             string m_stringField;
 
@@ -68,7 +68,7 @@ namespace Test
             }
         }
 
-        private class TestObserverBehaviour : ObserverBehaviour<TestObserved>
+        class TestObserverBehaviour : ObserverBehaviour<TestObserved>
         {
             public string displayStringField;
 

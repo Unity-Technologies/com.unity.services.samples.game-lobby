@@ -18,7 +18,7 @@ namespace ParrelSync
         }
 
         [MenuItem("ParrelSync/Clones Manager", priority = 0)]
-        private static void InitWindow()
+        static void InitWindow()
         {
             ClonesManagerWindow window = (ClonesManagerWindow)EditorWindow.GetWindow(typeof(ClonesManagerWindow));
             window.titleContent = new GUIContent("Clones Manager");
@@ -125,7 +125,7 @@ namespace ParrelSync
                         string argumentFilePath = Path.Combine(cloneProjectPath, ClonesManager.ArgumentFileName);
                         //Need to be careful with file reading/writing since it will effect the deletion of
                         //the clone project(The directory won't be fully deleted if there's still file inside being read or write).
-                        //The argument file will be deleted first at the beginning of the project deletion process 
+                        //The argument file will be deleted first at the beginning of the project deletion process
                         //to prevent any further being read and write.
                         //Will need to take some extra cautious if want to change the design of how file editing is handled.
                         if (File.Exists(argumentFilePath))

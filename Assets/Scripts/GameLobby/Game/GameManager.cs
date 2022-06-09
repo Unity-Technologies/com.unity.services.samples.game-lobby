@@ -45,7 +45,7 @@ namespace LobbyRelaySample
         LobbyUser m_LocalUser;
         LocalLobby m_LocalLobby;
         LobbyServiceData m_LobbyServiceData = new LobbyServiceData();
-        LobbyUpdater m_LobbyUpdater;
+        LobbySynchronizer m_LobbySynchronizer;
 
         RelayUtpSetup m_RelaySetup;
         RelayUtpClient m_RelayClient;
@@ -232,7 +232,7 @@ namespace LobbyRelaySample
             m_LocalLobby
                 .AddPlayer(m_LocalUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
             LobbyManager = new LobbyManager();
-            m_LobbyUpdater = new LobbyUpdater(LobbyManager);
+            m_LobbySynchronizer = new LobbySynchronizer(LobbyManager);
         }
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace LobbyRelaySample
 
         void OnJoinedLobby()
         {
-            m_LobbyUpdater.BeginTracking(m_LocalLobby, m_LocalUser);
+            m_LobbySynchronizer.BeginTracking(m_LocalLobby, m_LocalUser);
             SetUserLobbyState();
 
             // The host has the opportunity to reject incoming players, but to do so the player needs to connect to Relay without having game logic available.
@@ -307,7 +307,7 @@ namespace LobbyRelaySample
             LobbyManager.LeaveLobbyAsync(m_LocalLobby.LobbyID);
 #pragma warning restore 4014
             ResetLocalLobby();
-            m_LobbyUpdater.EndTracking();
+            m_LobbySynchronizer.EndTracking();
             m_VivoxSetup.LeaveLobbyChannel();
 
             if (m_RelaySetup != null)
@@ -452,7 +452,7 @@ namespace LobbyRelaySample
         void OnDestroy()
         {
             ForceLeaveAttempt();
-            m_LobbyUpdater.Dispose();
+            m_LobbySynchronizer.Dispose();
             LobbyManager.Dispose();
         }
 

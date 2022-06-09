@@ -14,7 +14,7 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class SetupInGame : MonoBehaviour, IReceiveMessages
     {
-        [SerializeField] private GameObject m_IngameRunnerPrefab = default;
+        [SerializeField] GameObject m_IngameRunnerPrefab = default;
         [SerializeField] private GameObject[] m_disableWhileInGame = default;
 
 

@@ -8,7 +8,7 @@ namespace LobbyRelaySample
 	/// <summary>
 	/// Keep updated on changes to a joined lobby, at a speed compliant with Lobby's rate limiting.
 	/// </summary>
-	public class LobbyUpdater : IReceiveMessages, IDisposable
+	public class LobbySynchronizer : IReceiveMessages, IDisposable
 	{
 		LocalLobby m_LocalLobby;
 		LobbyUser m_LocalUser;
@@ -21,7 +21,7 @@ namespace LobbyRelaySample
 		int m_lifetime = 0;
 		const int k_UpdateIntervalMS = 100;
 
-		public LobbyUpdater(LobbyManager lobbyManager)
+		public LobbySynchronizer(LobbyManager lobbyManager)
 		{
 			m_LobbyManager = lobbyManager;
 		}
