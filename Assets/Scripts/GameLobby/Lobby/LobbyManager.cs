@@ -12,29 +12,15 @@ namespace LobbyRelaySample
     /// An abstraction layer between the direct calls into the Lobby API and the outcomes you actually want. E.g. you can request to get a readable list of
     /// current lobbies and not need to make the query call directly.
     /// </summary>
-    public class LobbyAsyncRequests : IDisposable
+    public class LobbyManager: IDisposable
     {
-        // Just doing a singleton since static access is all that's really necessary but we also need to be able to subscribe to the slow update loop.
-        private static LobbyAsyncRequests s_instance;
-        private const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
-
-        public static LobbyAsyncRequests Instance
-        {
-            get
-            {
-                if (s_instance == null)
-                    s_instance = new LobbyAsyncRequests();
-                return s_instance;
-            }
-        }
-
-        public Lobby CurrentLobby => m_RemoteLobby;
-
-
 
         //Once connected to a lobby, cache the local lobby object so we don't query for it for every lobby operation.
-        // (This assumes that the player will be actively in just one lobby at a time, though they could passively be in more.)
-        Lobby m_RemoteLobby;
+        // (This assumes that the game will be actively in just one lobby at a time, though they could be in more on the service side.)
+
+        public Lobby CurrentLobby => m_currentLobby;
+        const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
+        Lobby m_currentLobby;
 
 
         #region Lobby API calls are rate limited, and some other operations might want an alert when the rate limits have passed.
@@ -49,34 +35,43 @@ namespace LobbyRelaySample
             Host
         }
 
-        public RateLimitCooldown GetRateLimit(RequestType type)
+        public RateLimiter GetRateLimit(RequestType type)
         {
             if (type == RequestType.Join)
-                return m_rateLimitJoin;
+                return m_JoinCooldown;
             else if (type == RequestType.QuickJoin)
-                return m_rateLimitQuickJoin;
+                return m_QuickJoinCooldown;
             else if (type == RequestType.Host)
-                return m_rateLimitHost;
-            return m_rateLimitQuery;
+                return m_CreateCooldown;
+            return m_QueryCooldown;
         }
 
-        private RateLimitCooldown m_rateLimitQuery = new RateLimitCooldown(1.5f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
-        private RateLimitCooldown m_rateLimitJoin = new RateLimitCooldown(3f);
-        private RateLimitCooldown m_rateLimitHost = new RateLimitCooldown(3f);
+        RateLimiter m_QueryCooldown = new RateLimiter(1f); // Used for both the lobby list UI and the in-lobby updating. In the latter case, updates can be cached.
+        RateLimiter m_CreateCooldown = new RateLimiter(3f);
+        RateLimiter m_JoinCooldown = new RateLimiter(3f);
+        RateLimiter m_QuickJoinCooldown = new RateLimiter(10f);
+        RateLimiter m_GetLobbyCooldown = new RateLimiter(1f);
+        RateLimiter m_DeleteLobbyCooldown = new RateLimiter(.2f);
+        RateLimiter m_UpdateLobbyCooldown = new RateLimiter(.2f);
+        RateLimiter m_UpdatePlayerCooldown = new RateLimiter(.2f);
+        RateLimiter m_LeaveLobbyOrRemovePlayer = new RateLimiter(.2f);
+        RateLimiter m_HeartBeatCooldown = new RateLimiter(6f);
 
-        private RateLimitCooldown m_rateLimitQuickJoin = new RateLimitCooldown(10f);
 
         #endregion
 
-        private static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser player)
+        static Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser user)
         {
             Dictionary<string, PlayerDataObject> data = new Dictionary<string, PlayerDataObject>();
-            PlayerDataObject dataObjName = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, player.DisplayName);
-            data.Add("DisplayName", dataObjName);
+
+            var displayNameObject = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, user.DisplayName);
+            var emoteNameObject = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, user.Emote.ToString());
+
+            data.Add("DisplayName", displayNameObject);
+            data.Add("Emote", emoteNameObject);
             return data;
         }
 
-        //TODO Back to Polling i Guess
 
 
         /// <summary>
@@ -84,7 +79,7 @@ namespace LobbyRelaySample
         /// </summary>
         public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, LobbyUser localUser)
         {
-            if (m_rateLimitHost.IsInCooldown)
+            if (m_CreateCooldown.IsInCooldown)
             {
                 UnityEngine.Debug.LogWarning("Create Lobby hit the rate limit.");
                 return null;
@@ -100,11 +95,7 @@ namespace LobbyRelaySample
                     Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
                 };
                 var lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
-#pragma warning disable 4014
-                LobbyHeartBeatLoop();
-#pragma warning restore 4014
 
-                JoinLobby(lobby);
                 return lobby;
             }
             catch (Exception ex)
@@ -115,9 +106,9 @@ namespace LobbyRelaySample
         }
 
 
-        async Task<Lobby> GetLobbyAsync(string lobbyId)
+        public async Task<Lobby> GetLobbyAsync(string lobbyId)
         {
-            await m_rateLimitQuery.WaitUntilCooldown();
+            await m_GetLobbyCooldown.WaitUntilCooldown();
 
             return await LobbyService.Instance.GetLobbyAsync(lobbyId);
         }
@@ -127,11 +118,14 @@ namespace LobbyRelaySample
         /// </summary>
         public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LobbyUser localUser)
         {
-            if (m_rateLimitJoin.IsInCooldown ||
+            //Dont want to queue the join action in this case.
+            if (m_JoinCooldown.IsInCooldown ||
                 (lobbyId == null && lobbyCode == null))
             {
                 return null;
             }
+
+            await m_JoinCooldown.WaitUntilCooldown();
 
             string uasId = AuthenticationService.Instance.PlayerId;
             Lobby joinedLobby = null;
@@ -147,7 +141,6 @@ namespace LobbyRelaySample
                 joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, joinOptions);
             }
 
-            JoinLobby(joinedLobby);
             return joinedLobby;
         }
 
@@ -156,11 +149,14 @@ namespace LobbyRelaySample
         /// </summary>
         public async Task<Lobby> QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None)
         {
-            if (m_rateLimitQuickJoin.IsInCooldown)
+            //We dont want to queue a quickjoin
+            if (m_QuickJoinCooldown.IsInCooldown)
             {
                 UnityEngine.Debug.LogWarning("Quick Join Lobby hit the rate limit.");
                 return null;
             }
+
+            await m_QuickJoinCooldown.WaitUntilCooldown();
             var filters = LobbyColorToFilters(limitToColor);
             string uasId = AuthenticationService.Instance.PlayerId;
 
@@ -172,17 +168,9 @@ namespace LobbyRelaySample
             };
 
             var lobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinRequest);
-            JoinLobby(lobby);
             return lobby;
         }
 
-        void JoinLobby(Lobby response)
-        {
-            m_RemoteLobby = response;
-#pragma warning disable 4014
-            GetLobbyLoop();
-#pragma warning restore 4014
-        }
 
         /// <summary>
         /// Used for getting the list of all active lobbies, without needing full info for each.
@@ -190,7 +178,7 @@ namespace LobbyRelaySample
         /// <param name="onListRetrieved">If called with null, retrieval was unsuccessful. Else, this will be given a list of contents to display, as pairs of a lobby code and a display string for that lobby.</param>
         public async Task<QueryResponse> RetrieveLobbyListAsync(LobbyColor limitToColor = LobbyColor.None)
         {
-            await m_rateLimitQuery.WaitUntilCooldown();
+            await m_QueryCooldown.WaitUntilCooldown();
 
             var filters = LobbyColorToFilters(limitToColor);
 
@@ -202,7 +190,7 @@ namespace LobbyRelaySample
             return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
         }
 
-        private List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
+        List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
         {
             List<QueryFilter> filters = new List<QueryFilter>();
             if (limitToColor == LobbyColor.Orange)
@@ -220,18 +208,17 @@ namespace LobbyRelaySample
         /// <param name="onComplete">Called once the request completes, regardless of success or failure.</param>
         public async Task LeaveLobbyAsync(string lobbyId)
         {
-            m_RemoteLobby = null;
+            await m_LeaveLobbyOrRemovePlayer.WaitUntilCooldown();
 
-            string uasId = AuthenticationService.Instance.PlayerId;
-            await LobbyService.Instance.RemovePlayerAsync(lobbyId, uasId);
+            string playerId = AuthenticationService.Instance.PlayerId;
+            await LobbyService.Instance.RemovePlayerAsync(lobbyId, playerId);
         }
 
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
-        public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
+        public async Task UpdatePlayerDataAsync(string lobbyID, Dictionary<string, string> data)
         {
-
-            await m_rateLimitQuery.WaitUntilCooldown();
-            string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
+            await m_UpdatePlayerCooldown.WaitUntilCooldown();
+            string playerId = AuthenticationService.Instance.PlayerId;
             Dictionary<string, PlayerDataObject> dataCurr = new Dictionary<string, PlayerDataObject>();
             foreach (var dataNew in data)
             {
@@ -248,18 +235,16 @@ namespace LobbyRelaySample
                 AllocationId = null,
                 ConnectionInfo = null
             };
-            await LobbyService.Instance.UpdatePlayerAsync(m_RemoteLobby.Id, playerId, updateOptions);
+            await LobbyService.Instance.UpdatePlayerAsync(lobbyID, playerId, updateOptions);
         }
 
         /// <summary>
         /// Lobby can be provided info about Relay (or any other remote allocation) so it can add automatic disconnect handling.
         /// </summary>
-        public async Task UpdatePlayerRelayInfoAsync(string allocationId, string connectionInfo)
+        public async Task UpdatePlayerRelayInfoAsync(string lobbyID, string allocationId, string connectionInfo)
         {
-
-            await m_rateLimitQuery.WaitUntilCooldown();
-            await AwaitRemoteLobby();
-            string playerId = Locator.Get.Identity.GetSubIdentity(Auth.IIdentityType.Auth).GetContent("id");
+            await m_UpdatePlayerCooldown.WaitUntilCooldown();
+            string playerId = AuthenticationService.Instance.PlayerId;
 
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
@@ -267,15 +252,15 @@ namespace LobbyRelaySample
                 AllocationId = allocationId,
                 ConnectionInfo = connectionInfo
             };
-            await LobbyService.Instance.UpdatePlayerAsync(m_RemoteLobby.Id, playerId, updateOptions);
+            await LobbyService.Instance.UpdatePlayerAsync(lobbyID, playerId, updateOptions);
         }
 
         /// <param name="data">Key-value pairs, which will overwrite any existing data for these keys. Presumed to be available to all lobby members but not publicly.</param>
-        public async Task UpdateLobbyDataAsync(Dictionary<string, string> data)
+        public async Task<Lobby> UpdateLobbyDataAsync(Lobby remoteLobby, Dictionary<string, string> data)
         {
-            await m_rateLimitQuery.WaitUntilCooldown();
+            await m_UpdateLobbyCooldown.WaitUntilCooldown();
 
-            Dictionary<string, DataObject> dataCurr = m_RemoteLobby.Data ?? new Dictionary<string, DataObject>();
+            Dictionary<string, DataObject> dataCurr = remoteLobby.Data ?? new Dictionary<string, DataObject>();
 
             var shouldLock = false;
             foreach (var dataNew in data)
@@ -296,57 +281,24 @@ namespace LobbyRelaySample
                 }
             }
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = dataCurr, IsLocked = shouldLock };
-            var result = await LobbyService.Instance.UpdateLobbyAsync(m_RemoteLobby.Id, updateOptions);
-            if (result != null)
-                m_RemoteLobby = result;
-        }
-        #region LobbyLoops
-        const int m_LobbyUpdateTime = 1000;
-        async Task GetLobbyLoop()
-        {
-            //In this sample we only use the loop internally, when we've joined. Only after we have joined or created a lobby can we poll for updates.
-            //Since you only need the ID, there might be a use case to get the lobby before joining it, since you can get the ID's from Querying
-            while (m_RemoteLobby != null)
-            {
-                m_RemoteLobby = await GetLobbyAsync(m_RemoteLobby.Id);
-
-                await Task.Delay(m_LobbyUpdateTime);
-            }
+            var result = await LobbyService.Instance.UpdateLobbyAsync(remoteLobby.Id, updateOptions);
+            return result;
         }
 
-         const int k_heartbeatPeriodMS = 8000; // The heartbeat must be rate-limited to 5 calls per 30 seconds. We'll aim for longer in case periods don't align.
-        /// <summary>
-        /// Lobby requires a periodic ping to detect rooms that are still active, in order to mitigate "zombie" lobbies.
-        /// </summary>
-        async Task LobbyHeartBeatLoop()
+        public async Task SendHeartbeatPingAsync(string remoteLobbyId)
         {
-            while (m_RemoteLobby!=null)
-            {
-
-#pragma warning disable 4014
-                LobbyService.Instance.SendHeartbeatPingAsync(m_RemoteLobby.Id);
-#pragma warning restore 4014
-                await Task.Delay(k_heartbeatPeriodMS);
-            }
-        }
-
-#endregion
-
-        async Task AwaitRemoteLobby()
-        {
-            while (m_RemoteLobby == null)
-                await Task.Delay(100);
+            if (m_HeartBeatCooldown.IsInCooldown)
+                return;
+            await m_HeartBeatCooldown.WaitUntilCooldown();
+            await LobbyService.Instance.SendHeartbeatPingAsync(remoteLobbyId);
         }
 
         public void Dispose()
         {
-            if (m_RemoteLobby == null)
-                return;
-#pragma warning disable 4014
-            LeaveLobbyAsync(m_RemoteLobby.Id);
-#pragma warning restore 4014
+            throw new NotImplementedException();
         }
-        public class RateLimitCooldown
+
+        public class RateLimiter
         {
             public Action<bool> onCooldownChange;
             public readonly float m_CooldownSeconds;
@@ -369,7 +321,7 @@ namespace LobbyRelaySample
                 }
             }
 
-            public RateLimitCooldown(float cooldownSeconds)
+            public RateLimiter(float cooldownSeconds)
             {
                 m_CooldownSeconds = cooldownSeconds;
                 m_CoolDownMS = Mathf.FloorToInt(m_CooldownSeconds * 1000);
@@ -384,7 +336,7 @@ namespace LobbyRelaySample
 
                 while (m_IsInCooldown)
                 {
-                    await Task.Delay(100);
+                    await Task.Delay(50);
                 }
             }
 
