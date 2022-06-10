@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
@@ -30,7 +31,7 @@ namespace LobbyRelaySample
     {
         Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
         public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
-        public bool canPullUpdate;
+        public bool changedByLobbySynch;
         #region LocalLobbyData
 
         public struct LobbyData

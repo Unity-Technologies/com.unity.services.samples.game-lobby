@@ -19,6 +19,8 @@ namespace LobbyRelaySample.UI
 
 		void OnDestroy()
 		{
+			if (GameManager.Instance == null || GameManager.Instance.LobbyManager == null)
+				return;
 			GameManager.Instance.LobbyManager.GetRateLimit(m_requestType).onCooldownChange -= UpdateVisibility;
 		}
 

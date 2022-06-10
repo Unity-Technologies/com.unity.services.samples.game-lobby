@@ -13,25 +13,24 @@ namespace LobbyRelaySample
 		LocalLobby m_LocalLobby;
 		LobbyUser m_LocalUser;
 		LobbyManager m_LobbyManager;
-		bool m_ShouldPushData = false;
+		bool m_LocalChanges = false;
 
-		const int
-			k_approvalMaxMS = 10000; // Used for determining if a user should timeout if they are unable to connect.
+		const int k_approvalMaxMS = 10000; // Used for determining if a user should timeout if they are unable to connect.
 
 		int m_lifetime = 0;
-		const int k_UpdateIntervalMS = 100;
+		const int k_UpdateIntervalMS = 1000;
 
 		public LobbySynchronizer(LobbyManager lobbyManager)
 		{
 			m_LobbyManager = lobbyManager;
 		}
 
-		public void BeginTracking(LocalLobby localLobby, LobbyUser localUser)
+		public void StartSynch(LocalLobby localLobby, LobbyUser localUser)
 		{
 			m_LocalUser = localUser;
 			m_LocalLobby = localLobby;
 			m_LocalLobby.onChanged += OnLocalLobbyChanged;
-			m_ShouldPushData = true;
+			m_LocalChanges = true;
 			Locator.Get.Messenger.Subscribe(this);
 #pragma warning disable 4014
 			UpdateLoopAsync();
@@ -39,9 +38,9 @@ namespace LobbyRelaySample
 			m_lifetime = 0;
 		}
 
-		public void EndTracking()
+		public void EndSynch()
 		{
-			m_ShouldPushData = false;
+			m_LocalChanges = false;
 
 			Locator.Get.Messenger.Unsubscribe(this);
 			if (m_LocalLobby != null)
@@ -69,57 +68,86 @@ namespace LobbyRelaySample
 		/// </summary>
 		async Task UpdateLoopAsync()
 		{
+			Lobby latestLobby = null;
+
 			while (m_LocalLobby != null)
 			{
-				if (!m_LocalUser.IsApproved && m_lifetime > k_approvalMaxMS)
+				if (UserTimedOut())
 				{
-					Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
-						"Connection attempt timed out!");
-					Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+					LeaveLobbyBecauseTimeout();
+					break;
 				}
 
-				if (m_ShouldPushData)
-					await PushDataToLobby();
+				if (m_LocalChanges)
+					latestLobby = await PushDataToLobby();
 				else
-					UpdateLocalLobby();
+					latestLobby = await m_LobbyManager.GetLobbyAsync();
 
+				if (IfRemoteLobbyChanged(latestLobby))
+					LobbyConverters.RemoteToLocal(latestLobby, m_LocalLobby);
+				if (!LobbyHasHost())
+				{
+					LeaveLobbyBecauseNoHost();
+					break;
+				}
 
 				m_lifetime += k_UpdateIntervalMS;
 				await Task.Delay(k_UpdateIntervalMS);
 			}
 
-			async Task PushDataToLobby()
+			bool IfRemoteLobbyChanged(Lobby remoteLobby)
 			{
-				m_ShouldPushData = false;
+				return remoteLobby.LastUpdated.ToFileTime() > m_LocalLobby.Data.State_LastEdit;
+			}
+
+			bool UserTimedOut()
+			{
+				return m_LocalUser.IsApproved && m_lifetime > k_approvalMaxMS;
+			}
+
+			async Task<Lobby> PushDataToLobby()
+			{
+				m_LocalChanges = false;
+				m_LocalLobby.changedByLobbySynch = true;
 
 				if (m_LocalUser.IsHost)
-					m_LobbyManager.UpdateLobbyDataAsync(m_LobbyManager.CurrentLobby,
+					await m_LobbyManager.UpdateLobbyDataAsync(
 						LobbyConverters.LocalToRemoteData(m_LocalLobby));
-				m_LobbyManager.UpdatePlayerDataAsync(m_LobbyManager.CurrentLobby.Id,
+
+				return await m_LobbyManager.UpdatePlayerDataAsync(
 					LobbyConverters.LocalToRemoteUserData(m_LocalUser));
 			}
 
 
-			void UpdateLocalLobby()
+			bool LobbyHasHost()
 			{
-				m_LocalLobby.canPullUpdate = true;
-
-				//synching our local lobby
-				LobbyConverters.RemoteToLocal(m_LobbyManager.CurrentLobby, m_LocalLobby);
-
 				if (!m_LocalUser.IsHost)
 				{
 					foreach (var lobbyUser in m_LocalLobby.LobbyUsers)
 					{
 						if (lobbyUser.Value.IsHost)
-							return;
+							return true;
 					}
 
-					Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
-						"Host left the lobby! Disconnecting...");
-					Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
-					Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+					return false;
 				}
+
+				return true;
+			}
+
+			void LeaveLobbyBecauseTimeout()
+			{
+				Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
+					"Connection attempt timed out!");
+				Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+			}
+
+			void LeaveLobbyBecauseNoHost()
+			{
+				Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
+					"Host left the lobby! Disconnecting...");
+				Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
+				Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
 			}
 		}
 
@@ -128,23 +156,25 @@ namespace LobbyRelaySample
 			if (string.IsNullOrEmpty(localLobby.LobbyID)
 			) // When the player leaves, their LocalLobby is cleared out.
 			{
-				EndTracking();
+				EndSynch();
 				return;
 			}
 
-			if (localLobby.canPullUpdate)
+			//Catch for infinite update looping from the synchronizer.
+			if (localLobby.changedByLobbySynch)
 			{
-				localLobby.canPullUpdate = false;
+				localLobby.changedByLobbySynch = false;
 				return;
 			}
 
-			m_ShouldPushData = true;
+
+			m_LocalChanges = true;
 		}
 
 
 		public void Dispose()
 		{
-			EndTracking();
+			EndSynch();
 		}
 	}
 }

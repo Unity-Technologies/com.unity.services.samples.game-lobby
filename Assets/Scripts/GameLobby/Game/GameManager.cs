@@ -207,8 +207,10 @@ namespace LobbyRelaySample
 #pragma warning restore IDE0059
 
             Application.wantsToQuit += OnWantToQuit;
+            LobbyManager = new LobbyManager();
+            m_LobbySynchronizer = new LobbySynchronizer(LobbyManager);
             await InitializeServices();
-            InitializeLobbies();
+            InitializeLocalValues();
             StartVivoxLogin();
             Locator.Get.Messenger.Subscribe(this);
             BeginObservers();
@@ -223,16 +225,16 @@ namespace LobbyRelaySample
             await Auth.Authenticate(serviceProfileName);
         }
 
-        void InitializeLobbies()
+        void InitializeLocalValues()
         {
             m_LocalLobby = new LocalLobby {State = LobbyState.Lobby};
             m_LocalUser = new LobbyUser();
             m_LocalUser.ID = AuthenticationService.Instance.PlayerId;
             m_LocalUser.DisplayName = NameGenerator.GetName(m_LocalUser.ID);
-            m_LocalLobby
-                .AddPlayer(m_LocalUser); // The local LobbyUser object will be hooked into UI before the LocalLobby is populated during lobby join, so the LocalLobby must know about it already when that happens.
-            LobbyManager = new LobbyManager();
-            m_LobbySynchronizer = new LobbySynchronizer(LobbyManager);
+            m_LocalLobby.AddPlayer(m_LocalUser); // The local LobbyUser object will be hooked into UI
+                                                 // before the LocalLobby is populated during lobby join,
+                                                 // so the LocalLobby must know about it already when that happens.
+
         }
 
         /// <summary>
@@ -283,7 +285,7 @@ namespace LobbyRelaySample
 
         void OnJoinedLobby()
         {
-            m_LobbySynchronizer.BeginTracking(m_LocalLobby, m_LocalUser);
+            m_LobbySynchronizer.StartSynch(m_LocalLobby, m_LocalUser);
             SetUserLobbyState();
 
             // The host has the opportunity to reject incoming players, but to do so the player needs to connect to Relay without having game logic available.
@@ -304,10 +306,10 @@ namespace LobbyRelaySample
         {
             m_LocalUser.ResetState();
 #pragma warning disable 4014
-            LobbyManager.LeaveLobbyAsync(m_LocalLobby.LobbyID);
+            LobbyManager.LeaveLobbyAsync();
 #pragma warning restore 4014
             ResetLocalLobby();
-            m_LobbySynchronizer.EndTracking();
+            m_LobbySynchronizer.EndSynch();
             m_VivoxSetup.LeaveLobbyChannel();
 
             if (m_RelaySetup != null)
@@ -462,7 +464,7 @@ namespace LobbyRelaySample
             if (!string.IsNullOrEmpty(m_LocalLobby?.LobbyID))
             {
 #pragma warning disable 4014
-                LobbyManager.LeaveLobbyAsync(m_LocalLobby?.LobbyID);
+                LobbyManager.LeaveLobbyAsync();
 #pragma warning restore 4014
                 m_LocalLobby = null;
             }

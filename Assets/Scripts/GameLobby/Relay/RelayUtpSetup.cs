@@ -208,7 +208,7 @@ namespace LobbyRelaySample.relay
 			}
 		}
 
-		private async Task CheckForComplete()
+		private void CheckForComplete()
 		{
 			if (m_joinState == (JoinState.Joined | JoinState.Bound) && this != null
 			) // this will equal null (i.e. this component has been destroyed) if the host left the lobby during the Relay connection sequence.

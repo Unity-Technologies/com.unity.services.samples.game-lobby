@@ -28,7 +28,7 @@ namespace LobbyRelaySample.lobby
                 return data;
             data.Add("DisplayName", user.DisplayName); // The lobby doesn't need to know any data beyond the name and state; Relay will handle the rest.
             data.Add("UserStatus", ((int)user.UserStatus).ToString());
-            data.Add("Emote", user.Emote.ToString());
+            data.Add("Emote", ((int)user.Emote).ToString());
             return data;
         }
 
@@ -45,11 +45,11 @@ namespace LobbyRelaySample.lobby
                 Private = remoteLobby.IsPrivate,
                 LobbyName = remoteLobby.Name,
                 MaxPlayerCount = remoteLobby.MaxPlayers,
+                State_LastEdit = remoteLobby.LastUpdated.Ticks,
                 RelayCode = remoteLobby.Data?.ContainsKey("RelayCode") == true ? remoteLobby.Data["RelayCode"].Value : localLobbyToUpdate.RelayCode, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
                 RelayNGOCode = remoteLobby.Data?.ContainsKey("RelayNGOCode") == true ? remoteLobby.Data["RelayNGOCode"].Value : localLobbyToUpdate.RelayNGOCode,
                 State = remoteLobby.Data?.ContainsKey("State") == true ? (LobbyState)int.Parse(remoteLobby.Data["State"].Value) : LobbyState.Lobby,
                 Color = remoteLobby.Data?.ContainsKey("Color") == true ? (LobbyColor)int.Parse(remoteLobby.Data["Color"].Value) : LobbyColor.None,
-                State_LastEdit = remoteLobby.Data?.ContainsKey("State_LastEdit") == true ? long.Parse(remoteLobby.Data["State_LastEdit"].Value) : localLobbyToUpdate.Data.State_LastEdit,
                 Color_LastEdit = remoteLobby.Data?.ContainsKey("Color_LastEdit") == true ? long.Parse(remoteLobby.Data["Color_LastEdit"].Value) : localLobbyToUpdate.Data.Color_LastEdit,
                 RelayNGOCode_LastEdit = remoteLobby.Data?.ContainsKey("RelayNGOCode_LastEdit") == true ? long.Parse(remoteLobby.Data["RelayNGOCode_LastEdit"].Value) : localLobbyToUpdate.Data.RelayNGOCode_LastEdit
             };

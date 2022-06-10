@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using LobbyRelaySample;
 using LobbyRelaySample.relay;
 using NUnit.Framework;
+using Test.Tools;
 using Unity.Networking.Transport;
 using Unity.Services.Core;
 using Unity.Services.Relay.Models;
@@ -47,14 +48,14 @@ namespace Test
         public void Setup()
         {
             m_dummy = new GameObject();
-            Auth.Authenticate("testProfile");
+#pragma warning disable 4014
+            TestAuthSetup();
+#pragma warning restore 4014
         }
 
-        async Task InitServices()
+        async Task TestAuthSetup()
         {
-            await UnityServices.InitializeAsync();
-            m_didSigninComplete = true;
-
+            await Auth.Authenticate("test");
         }
 
         [OneTimeTearDown]
@@ -68,11 +69,8 @@ namespace Test
         {
             #if ENABLE_MANAGED_UNITYTLS
 
-                if (!m_didSigninComplete)
-                    yield return new WaitForSeconds(3);
-                if (!m_didSigninComplete)
-                    Assert.Fail("Did not sign in.");
-                yield return new WaitForSeconds(1); // To prevent a possible 429 after a previous test.
+                yield return AsyncTestHelper.Await(async () => await Auth.Authenticating());
+
 
                 RelayUtpTest relaySetup = m_dummy.AddComponent<RelayUtpTest>();
                 relaySetup.OnGetEndpoint = OnGetEndpoint;

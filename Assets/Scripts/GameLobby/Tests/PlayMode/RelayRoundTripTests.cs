@@ -18,7 +18,6 @@ namespace Test
 	/// </summary>
 	public class RelayRoundTripTests
 	{
-		bool m_DidSigninComplete = false;
 
 		[OneTimeSetUp]
 		public void Setup()
