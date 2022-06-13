@@ -31,6 +31,8 @@ namespace LobbyRelaySample
     {
         Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
         public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
+        //Should be set to true when pushing lobby to the cloud, and set to false when done pulling.
+        //This is because we could get more than just our changes when we receive the latest lobby from our calls.
         public bool changedByLobbySynch;
         #region LocalLobbyData
 
@@ -47,9 +49,7 @@ namespace LobbyRelaySample
             public int MaxPlayerCount { get; set; }
             public LobbyState State { get; set; }
             public LobbyColor Color { get; set; }
-            public long State_LastEdit { get; set; }
-            public long Color_LastEdit { get; set; }
-            public long RelayNGOCode_LastEdit { get; set; }
+            public long LastEdit { get; set; }
 
             public LobbyData(LobbyData existing)
             {
@@ -62,9 +62,8 @@ namespace LobbyRelaySample
                 MaxPlayerCount = existing.MaxPlayerCount;
                 State = existing.State;
                 Color = existing.Color;
-                State_LastEdit = existing.State_LastEdit;
-                Color_LastEdit = existing.Color_LastEdit;
-                RelayNGOCode_LastEdit = existing.RelayNGOCode_LastEdit;
+                LastEdit = existing.LastEdit;
+
                 AvailableSlots = existing.AvailableSlots;
                 Locked = existing.Locked;
             }
@@ -80,11 +79,11 @@ namespace LobbyRelaySample
                 MaxPlayerCount = -1;
                 State = LobbyState.Lobby;
                 Color = LobbyColor.None;
-                State_LastEdit = 0;
-                Color_LastEdit = 0;
-                RelayNGOCode_LastEdit = 0;
+                LastEdit = 0;
+
                 AvailableSlots = 4;
                 Locked = false;
+
             }
 
             public override string ToString()
@@ -106,17 +105,14 @@ namespace LobbyRelaySample
                 sb.Append("LobbyState: ");
                 sb.AppendLine(State.ToString());
                 sb.Append("Lobby State Last Edit: ");
-                sb.AppendLine(new DateTime(State_LastEdit).ToString());
+                sb.AppendLine(new DateTime(LastEdit).ToString());
                 sb.Append("LobbyColor: ");
                 sb.AppendLine(Color.ToString());
-                sb.Append("Color Last Edit: ");
-                sb.AppendLine(new DateTime(Color_LastEdit).ToString());
                 sb.Append("RelayCode: ");
                 sb.AppendLine(RelayCode);
                 sb.Append("RelayNGO: ");
                 sb.AppendLine(RelayNGOCode);
-                sb.Append("Relay NGO last Edit: ");
-                sb.AppendLine(new DateTime(RelayNGOCode_LastEdit).ToString());
+
                 return sb.ToString();
             }
         }
@@ -124,7 +120,14 @@ namespace LobbyRelaySample
         public LobbyData Data => m_Data;
         LobbyData m_Data;
 
+
         ServerAddress m_RelayServer;
+
+        public LocalLobby()
+        {
+            onChanged += (lobby) => { m_Data.LastEdit = DateTime.Now.ToFileTimeUtc(); };
+        }
+
 
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
         public ServerAddress RelayServer
@@ -153,6 +156,7 @@ namespace LobbyRelaySample
 
         void AddUser(LobbyUser user)
         {
+            Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
             m_LobbyUsers.Add(user.ID, user);
             user.onChanged += OnChangedUser;
         }
@@ -216,7 +220,6 @@ namespace LobbyRelaySample
             set
             {
                 m_Data.RelayNGOCode = value;
-                m_Data.RelayNGOCode_LastEdit = DateTime.Now.Ticks;
                 OnChanged(this);
             }
         }
@@ -237,7 +240,6 @@ namespace LobbyRelaySample
             set
             {
                 m_Data.State = value;
-                m_Data.State_LastEdit = DateTime.Now.Ticks;
                 OnChanged(this);
             }
         }
@@ -272,7 +274,6 @@ namespace LobbyRelaySample
                 if (m_Data.Color != value)
                 {
                     m_Data.Color = value;
-                    m_Data.Color_LastEdit = DateTime.Now.Ticks;
                     OnChanged(this);
                 }
             }
@@ -285,12 +286,9 @@ namespace LobbyRelaySample
             var pendingState = lobbyData.State;
             var pendingColor = lobbyData.Color;
             var pendingNgoCode = lobbyData.RelayNGOCode;
-            if (m_Data.State_LastEdit > lobbyData.State_LastEdit)
-                pendingState = m_Data.State;
-            if (m_Data.Color_LastEdit > lobbyData.Color_LastEdit)
-                pendingColor = m_Data.Color;
-            if (m_Data.RelayNGOCode_LastEdit > lobbyData.RelayNGOCode_LastEdit)
-                pendingNgoCode = m_Data.RelayNGOCode;
+            pendingState = m_Data.State;
+            pendingColor = m_Data.Color;
+            pendingNgoCode = m_Data.RelayNGOCode;
             m_Data = lobbyData;
             m_Data.State = pendingState;
             m_Data.Color = pendingColor;

@@ -126,10 +126,10 @@ namespace LobbyRelaySample.relay
                 if (msgType == MsgType.PlayerApprovalState)
                 {
                     Approval approval = (Approval)msgContents[0];
-                    if (approval == Approval.OK && !m_localUser.IsApproved)
-                        OnApproved(m_networkDriver, conn);
-                    else if (approval == Approval.GameAlreadyStarted)
-                        Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Rejected: Game has already started.");
+//                    if (approval == Approval.OK && !m_localUser.IsApproved)
+//                        OnApproved(m_networkDriver, conn);
+//                    else if (approval == Approval.GameAlreadyStarted)
+//                        Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Rejected: Game has already started.");
                 }
                 else if (msgType == MsgType.PlayerName)
                 {
@@ -166,7 +166,7 @@ namespace LobbyRelaySample.relay
         {
             // Don't react to our own messages. Also, don't need to hold onto messages if the ID is absent; clients should be initialized and in the lobby before they send events.
             // (Note that this enforces lobby membership before processing any events besides an approval request, so a client is unable to fully use Relay unless they're in the lobby.)
-            return id != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LobbyUsers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
+            return true;// != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LobbyUsers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
         }
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id) { }
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
@@ -210,7 +210,7 @@ namespace LobbyRelaySample.relay
         }
         private void OnApproved(NetworkDriver driver, NetworkConnection connection)
         {
-            m_localUser.IsApproved = true;
+           // m_localUser.IsApproved = true;
             ForceFullUserUpdate(driver, connection, m_localUser);
         }
 

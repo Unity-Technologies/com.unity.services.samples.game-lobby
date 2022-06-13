@@ -87,8 +87,6 @@ namespace LobbyRelaySample
                     m_data.IsHost = value;
                     m_lastChanged = UserMembers.IsHost;
                     OnChanged(this);
-                    if (value)
-                        IsApproved = true;
                 }
             }
         }
@@ -150,20 +148,7 @@ namespace LobbyRelaySample
             }
         }
 
-        public bool IsApproved // Clients joining the lobby should be approved by the host before they can interact.
-        {
-            get => m_data.IsApproved;
-            set
-            {
-                if (!m_data.IsApproved && value) // Don't be un-approved except by a call to ResetState.
-                {
-                    m_data.IsApproved = value;
-                    m_lastChanged = UserMembers.IsApproved;
-                    OnChanged(this);
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ClientUserApproved, null);
-                }
-            }
-        }
+
 
         public override void CopyObserved(LobbyUser observed)
         {

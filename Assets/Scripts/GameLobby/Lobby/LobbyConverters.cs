@@ -15,9 +15,8 @@ namespace LobbyRelaySample.lobby
             data.Add("RelayNGOCode", lobby.RelayNGOCode);
             data.Add("State", ((int)lobby.State).ToString()); // Using an int is smaller than using the enum state's name.
             data.Add("Color", ((int)lobby.Color).ToString());
-            data.Add("State_LastEdit", lobby.Data.State_LastEdit.ToString());
-            data.Add("Color_LastEdit", lobby.Data.Color_LastEdit.ToString());
-            data.Add("RelayNGOCode_LastEdit", lobby.Data.RelayNGOCode_LastEdit.ToString());
+            data.Add("LastEdit", lobby.Data.LastEdit.ToString());
+
             return data;
         }
 
@@ -26,7 +25,7 @@ namespace LobbyRelaySample.lobby
             Dictionary<string, string> data = new Dictionary<string, string>();
             if (user == null || string.IsNullOrEmpty(user.ID))
                 return data;
-            data.Add("DisplayName", user.DisplayName); // The lobby doesn't need to know any data beyond the name and state; Relay will handle the rest.
+            data.Add("DisplayName", user.DisplayName);
             data.Add("UserStatus", ((int)user.UserStatus).ToString());
             data.Add("Emote", ((int)user.Emote).ToString());
             return data;
@@ -45,13 +44,11 @@ namespace LobbyRelaySample.lobby
                 Private = remoteLobby.IsPrivate,
                 LobbyName = remoteLobby.Name,
                 MaxPlayerCount = remoteLobby.MaxPlayers,
-                State_LastEdit = remoteLobby.LastUpdated.Ticks,
+                LastEdit = remoteLobby.LastUpdated.ToFileTimeUtc(),
                 RelayCode = remoteLobby.Data?.ContainsKey("RelayCode") == true ? remoteLobby.Data["RelayCode"].Value : localLobbyToUpdate.RelayCode, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
                 RelayNGOCode = remoteLobby.Data?.ContainsKey("RelayNGOCode") == true ? remoteLobby.Data["RelayNGOCode"].Value : localLobbyToUpdate.RelayNGOCode,
                 State = remoteLobby.Data?.ContainsKey("State") == true ? (LobbyState)int.Parse(remoteLobby.Data["State"].Value) : LobbyState.Lobby,
                 Color = remoteLobby.Data?.ContainsKey("Color") == true ? (LobbyColor)int.Parse(remoteLobby.Data["Color"].Value) : LobbyColor.None,
-                Color_LastEdit = remoteLobby.Data?.ContainsKey("Color_LastEdit") == true ? long.Parse(remoteLobby.Data["Color_LastEdit"].Value) : localLobbyToUpdate.Data.Color_LastEdit,
-                RelayNGOCode_LastEdit = remoteLobby.Data?.ContainsKey("RelayNGOCode_LastEdit") == true ? long.Parse(remoteLobby.Data["RelayNGOCode_LastEdit"].Value) : localLobbyToUpdate.Data.RelayNGOCode_LastEdit
             };
 
             Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>();
@@ -64,7 +61,7 @@ namespace LobbyRelaySample.lobby
                     DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : default,
                     Emote = player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : default,
                     UserStatus = player.Data?.ContainsKey("UserStatus") == true ? (UserStatus)int.Parse(player.Data["UserStatus"].Value) : UserStatus.Connecting,
-                    ID = player.Id
+                    ID = player.Id,
                 };
                 lobbyUsers.Add(incomingData.ID, incomingData);
             }

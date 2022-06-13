@@ -154,10 +154,6 @@ namespace LobbyRelaySample
 
                 m_LocalUser.DisplayName = (string)msg;
             }
-            else if (type == MessageType.ClientUserApproved)
-            {
-                ConfirmApproval();
-            }
             else if (type == MessageType.UserSetEmote)
             {
                 EmoteType emote = (EmoteType)msg;
@@ -234,7 +230,6 @@ namespace LobbyRelaySample
             m_LocalLobby.AddPlayer(m_LocalUser); // The local LobbyUser object will be hooked into UI
                                                  // before the LocalLobby is populated during lobby join,
                                                  // so the LocalLobby must know about it already when that happens.
-
         }
 
         /// <summary>
@@ -288,18 +283,8 @@ namespace LobbyRelaySample
             m_LobbySynchronizer.StartSynch(m_LocalLobby, m_LocalUser);
             SetUserLobbyState();
 
-            // The host has the opportunity to reject incoming players, but to do so the player needs to connect to Relay without having game logic available.
-            // In particular, we should prevent players from joining voice chat until they are approved.
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
-            if (m_LocalUser.IsHost)
-            {
-               // StartRelayConnection();
-                StartVivoxJoin();
-            }
-            else
-            {
-               // StartRelayConnection();
-            }
+            StartVivoxJoin();
+
         }
 
         void OnLeftLobby()
@@ -390,10 +375,7 @@ namespace LobbyRelaySample
                 }
 
                 m_RelayClient = client;
-                if (m_LocalUser.IsHost)
-                    CompleteRelayConnection();
-                else
-                    Debug.Log("Client is now waiting for approval...");
+                OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
             }
         }
 
@@ -402,20 +384,6 @@ namespace LobbyRelaySample
             yield return new WaitForSeconds(5);
             if (m_LocalLobby != null && m_LocalLobby.LobbyID == lobbyId && !string.IsNullOrEmpty(lobbyId)) // Ensure we didn't leave the lobby during this waiting period.
                 doConnection?.Invoke();
-        }
-
-        void ConfirmApproval()
-        {
-            if (!m_LocalUser.IsHost && m_LocalUser.IsApproved)
-            {
-                CompleteRelayConnection();
-                StartVivoxJoin();
-            }
-        }
-
-        void CompleteRelayConnection()
-        {
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }
 
         void SetUserLobbyState()
