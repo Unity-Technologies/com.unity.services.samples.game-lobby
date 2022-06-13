@@ -143,13 +143,13 @@ namespace LobbyRelaySample.relay
                     break;
                 }
             }
-            if (haveAllReadied && m_localLobby.State == LobbyState.Lobby) // Need to notify both this client and all others that all players have readied.
+            if (haveAllReadied && m_localLobby.LobbyState == LobbyState.Lobby) // Need to notify both this client and all others that all players have readied.
             {
                 Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
                 foreach (NetworkConnection connection in m_connections)
                     WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.StartCountdown, 0);
             }
-            else if (!haveAllReadied && m_localLobby.State == LobbyState.CountDown) // Someone cancelled during the countdown, so abort the countdown.
+            else if (!haveAllReadied && m_localLobby.LobbyState == LobbyState.CountDown) // Someone cancelled during the countdown, so abort the countdown.
             {
                 Locator.Get.Messenger.OnReceiveMessage(MessageType.CancelCountdown, null);
                 foreach (NetworkConnection connection in m_connections)

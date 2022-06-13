@@ -219,13 +219,7 @@ namespace LobbyRelaySample.relay
         /// </summary>
         private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
         {
-            // Only update with actual changes. (If multiple change at once, we send messages for each separately, but that shouldn't happen often.)
-            if (0 < (user.LastChanged & LobbyUser.UserMembers.DisplayName))
-                WriteString(driver, connection, user.ID, MsgType.PlayerName, user.DisplayName);
-            if (0 < (user.LastChanged & LobbyUser.UserMembers.Emote))
-                WriteByte(driver, connection, user.ID, MsgType.Emote, (byte)user.Emote);
-            if (0 < (user.LastChanged & LobbyUser.UserMembers.UserStatus))
-                WriteByte(driver, connection, user.ID, MsgType.ReadyState, (byte)user.UserStatus);
+
         }
         /// <summary>
         /// Sometimes (e.g. when a new player joins), we need to send out the full current state of this player.

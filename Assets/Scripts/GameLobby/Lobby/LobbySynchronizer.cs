@@ -57,7 +57,7 @@ namespace LobbyRelaySample
 //            if (type == MessageType.ClientUserSeekingDisapproval)
 //            {
 //                bool shouldDisapprove =
-//                    m_LocalLobby.State !=
+//                    m_LocalLobby.LobbyState !=
 //                    LobbyState.Lobby; // By not refreshing, it's possible to have a lobby in the lobby list UI after its countdown starts and then try joining.
 //                if (shouldDisapprove)
 //                    (msg as Action<relay.Approval>)?.Invoke(relay.Approval.GameAlreadyStarted);
@@ -76,15 +76,19 @@ namespace LobbyRelaySample
             {
                 if (m_LocalChanges)
                 {
-                    m_LocalLobby.changedByLobbySynch = true;
                     latestLobby = await PushDataToLobby();
                 }
                 else
+                {
                     latestLobby = await m_LobbyManager.GetLobbyAsync();
+                }
 
                 if (IfRemoteLobbyChanged(latestLobby))
+                {
+                    m_LocalLobby.changedByLobbySynch = true;
                     LobbyConverters.RemoteToLocal(latestLobby, m_LocalLobby);
-                m_LocalLobby.changedByLobbySynch = false;
+                    m_LocalLobby.changedByLobbySynch = false;
+                }
 
                 if (!LobbyHasHost())
                 {

@@ -22,7 +22,7 @@ namespace LobbyRelaySample.UI
         public void UpdateLobby(LocalLobby lobby)
         {
             m_lobby = lobby;
-            Color color = s_colorsOrdered[(int)lobby.Color];
+            Color color = s_colorsOrdered[(int)lobby.LobbyColor];
             foreach (Graphic graphic in m_toRecolor)
                 graphic.color = new Color(color.r, color.g, color.b, graphic.color.a);
         }
@@ -33,7 +33,7 @@ namespace LobbyRelaySample.UI
         public void ChangeColor(int color)
         {
             if (m_lobby != null)
-                m_lobby.Color = (LobbyColor)color;
+                m_lobby.LobbyColor = (LobbyColor)color;
         }
     }
 }

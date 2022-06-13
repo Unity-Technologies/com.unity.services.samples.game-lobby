@@ -34,6 +34,7 @@ namespace LobbyRelaySample
         //Should be set to true when pushing lobby to the cloud, and set to false when done pulling.
         //This is because we could get more than just our changes when we receive the latest lobby from our calls.
         public bool changedByLobbySynch;
+        public Action<LocalLobby> onLobbyChanged { get; private set; }
         #region LocalLobbyData
 
         public struct LobbyData
@@ -47,8 +48,8 @@ namespace LobbyRelaySample
             public bool Locked { get; set; }
             public int AvailableSlots { get; set; }
             public int MaxPlayerCount { get; set; }
-            public LobbyState State { get; set; }
-            public LobbyColor Color { get; set; }
+            public LobbyState LobbyState { get; set; }
+            public LobbyColor LobbyColor { get; set; }
             public long LastEdit { get; set; }
 
             public LobbyData(LobbyData existing)
@@ -60,8 +61,8 @@ namespace LobbyRelaySample
                 LobbyName = existing.LobbyName;
                 Private = existing.Private;
                 MaxPlayerCount = existing.MaxPlayerCount;
-                State = existing.State;
-                Color = existing.Color;
+                LobbyState = existing.LobbyState;
+                LobbyColor = existing.LobbyColor;
                 LastEdit = existing.LastEdit;
 
                 AvailableSlots = existing.AvailableSlots;
@@ -77,8 +78,8 @@ namespace LobbyRelaySample
                 LobbyName = null;
                 Private = false;
                 MaxPlayerCount = -1;
-                State = LobbyState.Lobby;
-                Color = LobbyColor.None;
+                LobbyState = LobbyState.Lobby;
+                LobbyColor = LobbyColor.None;
                 LastEdit = 0;
 
                 AvailableSlots = 4;
@@ -103,11 +104,11 @@ namespace LobbyRelaySample
                 sb.Append("AvailableSlots: ");
                 sb.AppendLine(AvailableSlots.ToString());
                 sb.Append("LobbyState: ");
-                sb.AppendLine(State.ToString());
-                sb.Append("Lobby State Last Edit: ");
+                sb.AppendLine(LobbyState.ToString());
+                sb.Append("Lobby LobbyState Last Edit: ");
                 sb.AppendLine(new DateTime(LastEdit).ToString());
                 sb.Append("LobbyColor: ");
-                sb.AppendLine(Color.ToString());
+                sb.AppendLine(LobbyColor.ToString());
                 sb.Append("RelayCode: ");
                 sb.AppendLine(RelayCode);
                 sb.Append("RelayNGO: ");
@@ -234,12 +235,12 @@ namespace LobbyRelaySample
             }
         }
 
-        public LobbyState State
+        public LobbyState LobbyState
         {
-            get => m_Data.State;
+            get => m_Data.LobbyState;
             set
             {
-                m_Data.State = value;
+                m_Data.LobbyState = value;
                 OnChanged(this);
             }
         }
@@ -266,33 +267,32 @@ namespace LobbyRelaySample
             }
         }
 
-        public LobbyColor Color
+        public LobbyColor LobbyColor
         {
-            get => m_Data.Color;
+            get => m_Data.LobbyColor;
             set
             {
-                if (m_Data.Color != value)
+                if (m_Data.LobbyColor != value)
                 {
-                    m_Data.Color = value;
+                    m_Data.LobbyColor = value;
                     OnChanged(this);
                 }
             }
+        }
+
+        public void OnChanged()
+        {
+            onLobbyChanged?.Invoke(this);
         }
 
         public void CopyObserved(LobbyData lobbyData, Dictionary<string, LobbyUser> lobbyUsers)
         {
             // It's possible for the host to edit the lobby in between the time they last pushed lobby data and the time their pull for new lobby data completes.
             // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
-            var pendingState = lobbyData.State;
-            var pendingColor = lobbyData.Color;
-            var pendingNgoCode = lobbyData.RelayNGOCode;
-            pendingState = m_Data.State;
-            pendingColor = m_Data.Color;
-            pendingNgoCode = m_Data.RelayNGOCode;
             m_Data = lobbyData;
-            m_Data.State = pendingState;
-            m_Data.Color = pendingColor;
-            m_Data.RelayNGOCode = pendingNgoCode;
+            m_Data.LobbyState = lobbyData.LobbyState;;
+            m_Data.LobbyColor =  lobbyData.LobbyColor;
+            m_Data.RelayNGOCode =  lobbyData.RelayNGOCode;
 
             if (lobbyUsers == null)
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();

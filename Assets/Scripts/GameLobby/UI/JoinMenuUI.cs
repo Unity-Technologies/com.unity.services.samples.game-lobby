@@ -113,7 +113,7 @@ namespace LobbyRelaySample.UI
 
         bool CanDisplay(LocalLobby lobby)
         {
-            return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
+            return lobby.Data.LobbyState == LobbyState.Lobby && !lobby.Private;
         }
 
         /// <summary>

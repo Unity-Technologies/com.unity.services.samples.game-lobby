@@ -12,7 +12,7 @@ namespace LobbyRelaySample.UI
 
         public override void ObservedUpdated(LocalLobby observed)
         {
-            if (m_ShowThisWhen.HasFlag(observed.State))
+            if (m_ShowThisWhen.HasFlag(observed.LobbyState))
                 Show();
             else
                 Hide();
