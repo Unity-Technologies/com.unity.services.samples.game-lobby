@@ -14,6 +14,18 @@ using ParrelSync;
 namespace LobbyRelaySample
 {
     /// <summary>
+    /// Current state of the local game.
+    /// Set as a flag to allow for the Inspector to select multiple valid states for various UI features.
+    /// </summary>
+    [Flags]
+    public enum GameState
+    {
+        Menu = 1,
+        Lobby = 2,
+        JoinMenu = 4,
+    }
+
+    /// <summary>
     /// Sets up and runs the entire sample.
     /// All the Data that is important gets updated in here, the GameManager in the mainScene has all the references
     /// needed to run the game.
@@ -30,26 +42,22 @@ namespace LobbyRelaySample
         /// The list is serialized, so you can navigate to the Observers via the Inspector to see who's watching.
         /// </summary>
         [SerializeField]
-        List<LocalMenuStateObserver> m_LocalMenuStateObservers = new List<LocalMenuStateObserver>();
-        [SerializeField]
         List<LocalLobbyObserver> m_LocalLobbyObservers = new List<LocalLobbyObserver>();
         [SerializeField]
         List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
-        [SerializeField]
-        List<LobbyServiceDataObserver> m_LobbyServiceObservers = new List<LobbyServiceDataObserver>();
+
 
         #endregion
 
         public LocalLobby LocalLobby => m_LocalLobby;
         public LobbyUser LocalUser => m_LocalUser;
         public Action<GameState> onGameStateChanged;
+        public LocalLobbyList LobbyList { get; private set; } = new LocalLobbyList();
 
         public GameState LocalGameState { get; private set; }
         public LobbyManager LobbyManager { get; private set; }
-        LocalMenuState m_LocalMenuState = new LocalMenuState();
         LobbyUser m_LocalUser;
         LocalLobby m_LocalLobby;
-        LobbyServiceData m_LobbyServiceData = new LobbyServiceData();
         LobbySynchronizer m_LobbySynchronizer;
 
         RelayUtpSetup m_RelaySetup;
@@ -108,8 +116,8 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.JoinLobbyRequest)
             {
-                LocalLobby.LobbyData lobbyInfo = (LocalLobby.LobbyData)msg;
-                var lobby = await LobbyManager.JoinLobbyAsync(lobbyInfo.LobbyID, lobbyInfo.LobbyCode,
+                LocalLobby lobbyInfo = (LocalLobby)msg;
+                var lobby = await LobbyManager.JoinLobbyAsync(lobbyInfo.LobbyID.Value, lobbyInfo.LobbyCode.Value,
                     m_LocalUser);
                 if (lobby != null)
                 {
@@ -123,13 +131,13 @@ namespace LobbyRelaySample
             }
             else if (type == MessageType.QueryLobbies)
             {
-                m_LobbyServiceData.State = LobbyQueryState.Fetching;
+                LobbyList.QueryState.Value = LobbyQueryState.Fetching;
                 var qr = await LobbyManager.RetrieveLobbyListAsync(m_lobbyColorFilter);
 
                 if (qr != null)
                     SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
                 else
-                    m_LobbyServiceData.State = LobbyQueryState.Error;
+                    LobbyList.QueryState.Value = LobbyQueryState.Error;
             }
             else if (type == MessageType.QuickJoin)
             {
@@ -239,10 +247,6 @@ namespace LobbyRelaySample
         /// </summary>
         void BeginObservers()
         {
-            foreach (var gameStateObs in m_LocalMenuStateObservers)
-                gameStateObs.BeginObserving(m_LocalMenuState);
-            foreach (var serviceObs in m_LobbyServiceObservers)
-                serviceObs.BeginObserving(m_LobbyServiceData);
             foreach (var lobbyObs in m_LocalLobbyObservers)
                 lobbyObs.BeginObserving(m_LocalLobby);
             foreach (var userObs in m_LocalUserObservers)
@@ -255,7 +259,7 @@ namespace LobbyRelaySample
         {
             bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
                 LocalGameState == GameState.Lobby;
-          LocalGameState = state;
+            LocalGameState = state;
             if (isLeavingLobby)
                 LeaveLobby();
             onGameStateChanged.Invoke(LocalGameState);
@@ -265,10 +269,10 @@ namespace LobbyRelaySample
         {
             var newLobbyDict = new Dictionary<string, LocalLobby>();
             foreach (var lobby in lobbies)
-                newLobbyDict.Add(lobby.LobbyID, lobby);
+                newLobbyDict.Add(lobby.LobbyID.Value, lobby);
 
-            m_LobbyServiceData.State = LobbyQueryState.Fetched;
-            m_LobbyServiceData.CurrentLobbies = newLobbyDict;
+            LobbyList.QueryState.Value = LobbyQueryState.Fetched;
+            LobbyList.CurrentLobbies = newLobbyDict;
         }
 
         void CreateLobby()
@@ -315,7 +319,6 @@ namespace LobbyRelaySample
             }
         }
 
-
         void StartVivoxLogin()
         {
             m_VivoxSetup.Initialize(m_vivoxUserHandlers, OnVivoxLoginComplete);
@@ -325,21 +328,21 @@ namespace LobbyRelaySample
                 if (!didSucceed)
                 {
                     Debug.LogError("Vivox login failed! Retrying in 5s...");
-                    StartCoroutine(RetryConnection(StartVivoxLogin, m_LocalLobby.LobbyID));
+                    StartCoroutine(RetryConnection(StartVivoxLogin, m_LocalLobby.LobbyID.Value));
                 }
             }
         }
 
         void StartVivoxJoin()
         {
-            m_VivoxSetup.JoinLobbyChannel(m_LocalLobby.LobbyID, OnVivoxJoinComplete);
+            m_VivoxSetup.JoinLobbyChannel(m_LocalLobby.LobbyID.Value, OnVivoxJoinComplete);
 
             void OnVivoxJoinComplete(bool didSucceed)
             {
                 if (!didSucceed)
                 {
                     Debug.LogError("Vivox connection failed! Retrying in 5s...");
-                    StartCoroutine(RetryConnection(StartVivoxJoin, m_LocalLobby.LobbyID));
+                    StartCoroutine(RetryConnection(StartVivoxJoin, m_LocalLobby.LobbyID.Value));
                 }
             }
         }
@@ -360,7 +363,7 @@ namespace LobbyRelaySample
                 if (!didSucceed)
                 {
                     Debug.LogError("Relay connection failed! Retrying in 5s...");
-                    StartCoroutine(RetryConnection(StartRelayConnection, m_LocalLobby.LobbyID));
+                    StartCoroutine(RetryConnection(StartRelayConnection, m_LocalLobby.LobbyID.Value));
                     return;
                 }
 
@@ -372,7 +375,7 @@ namespace LobbyRelaySample
         IEnumerator RetryConnection(Action doConnection, string lobbyId)
         {
             yield return new WaitForSeconds(5);
-            if (m_LocalLobby != null && m_LocalLobby.LobbyID == lobbyId && !string.IsNullOrEmpty(lobbyId)
+            if (m_LocalLobby != null && m_LocalLobby.LobbyID.Value == lobbyId && !string.IsNullOrEmpty(lobbyId)
             ) // Ensure we didn't leave the lobby during this waiting period.
                 doConnection?.Invoke();
         }
@@ -406,7 +409,7 @@ namespace LobbyRelaySample
 
         bool OnWantToQuit()
         {
-            bool canQuit = string.IsNullOrEmpty(m_LocalLobby?.LobbyID);
+            bool canQuit = string.IsNullOrEmpty(m_LocalLobby?.LobbyID.Value);
             StartCoroutine(LeaveBeforeQuit());
             return canQuit;
         }
@@ -421,7 +424,7 @@ namespace LobbyRelaySample
         void ForceLeaveAttempt()
         {
             Locator.Get.Messenger.Unsubscribe(this);
-            if (!string.IsNullOrEmpty(m_LocalLobby?.LobbyID))
+            if (!string.IsNullOrEmpty(m_LocalLobby?.LobbyID.Value))
             {
 #pragma warning disable 4014
                 LobbyManager.LeaveLobbyAsync();

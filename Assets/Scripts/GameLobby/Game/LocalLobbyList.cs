@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
@@ -17,20 +19,13 @@ namespace LobbyRelaySample
     /// Holds data related to the Lobby service itself - The latest retrieved lobby list, the state of retrieval.
     /// </summary>
     [System.Serializable]
-    public class LobbyServiceData : Observed<LobbyServiceData>
+    public class LocalLobbyList
     {
         LobbyQueryState m_CurrentState = LobbyQueryState.Empty;
 
-        public LobbyQueryState State
-        {
-            get { return m_CurrentState; }
-            set
-            {
-                m_CurrentState = value;
-                OnChanged(this);
-            }
-        }
+        public ObservedValue<LobbyQueryState> QueryState = new ObservedValue<LobbyQueryState>();
 
+        public Action<Dictionary<string, LocalLobby>> onLobbyListChange;
         Dictionary<string, LocalLobby> m_currentLobbies = new Dictionary<string, LocalLobby>();
 
         /// <summary>
@@ -43,14 +38,8 @@ namespace LobbyRelaySample
             set
             {
                 m_currentLobbies = value;
-                OnChanged(this);
+                onLobbyListChange?.Invoke(m_currentLobbies);
             }
-        }
-
-        public override void CopyObserved(LobbyServiceData oldObserved)
-        {
-            m_currentLobbies = oldObserved.CurrentLobbies;
-            OnChanged(this);
         }
     }
 }

@@ -29,12 +29,15 @@ namespace LobbyRelaySample
     [System.Serializable]
     public class LocalLobby : Observed<LocalLobby>
     {
-        Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
-        public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
         //Should be set to true when pushing lobby to the cloud, and set to false when done pulling.
         //This is because we could get more than just our changes when we receive the latest lobby from our calls.
         public bool changedByLobbySynch;
-        public Action<LocalLobby> onLobbyChanged { get; private set; }
+        public Action<LocalLobby> onLobbyChanged { get; set; }
+        public Action<Dictionary<string, LobbyUser>> onUserListChanged;
+
+        Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
+        public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
+
         #region LocalLobbyData
 
         public struct LobbyData
@@ -84,7 +87,6 @@ namespace LobbyRelaySample
 
                 AvailableSlots = 4;
                 Locked = false;
-
             }
 
             public override string ToString()
@@ -121,7 +123,6 @@ namespace LobbyRelaySample
         public LobbyData Data => m_Data;
         LobbyData m_Data;
 
-
         ServerAddress m_RelayServer;
 
         public LocalLobby()
@@ -129,17 +130,7 @@ namespace LobbyRelaySample
             onChanged += (lobby) => { m_Data.LastEdit = DateTime.Now.ToFileTimeUtc(); };
         }
 
-
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
-        public ServerAddress RelayServer
-        {
-            get => m_RelayServer;
-            set
-            {
-                m_RelayServer = value;
-                OnChanged(this);
-            }
-        }
 
         #endregion
 
@@ -152,20 +143,19 @@ namespace LobbyRelaySample
             }
 
             AddUser(user);
-            OnChanged(this);
+            onUserListChanged?.Invoke(m_LobbyUsers);
         }
 
         void AddUser(LobbyUser user)
         {
             Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
             m_LobbyUsers.Add(user.ID, user);
-            user.onChanged += OnChangedUser;
         }
 
         public void RemovePlayer(LobbyUser user)
         {
             DoRemoveUser(user);
-            OnChanged(this);
+            onUserListChanged?.Invoke(m_LobbyUsers);
         }
 
         private void DoRemoveUser(LobbyUser user)
@@ -177,63 +167,19 @@ namespace LobbyRelaySample
             }
 
             m_LobbyUsers.Remove(user.ID);
-            user.onChanged -= OnChangedUser;
         }
 
-        private void OnChangedUser(LobbyUser user)
-        {
-            OnChanged(this);
-        }
+        public ObservedValue<string> LobbyID = new ObservedValue<string>();
 
-        public string LobbyID
-        {
-            get => m_Data.LobbyID;
-            set
-            {
-                m_Data.LobbyID = value;
-                OnChanged(this);
-            }
-        }
+        public ObservedValue<string> LobbyCode = new ObservedValue<string>();
 
-        public string LobbyCode
-        {
-            get => m_Data.LobbyCode;
-            set
-            {
-                m_Data.LobbyCode = value;
-                OnChanged(this);
-            }
-        }
+        public ObservedValue<string> RelayCode = new ObservedValue<string>();
 
-        public string RelayCode
-        {
-            get => m_Data.RelayCode;
-            set
-            {
-                m_Data.RelayCode = value;
-                OnChanged(this);
-            }
-        }
+        public ObservedValue<string> RelayNGOCode = new ObservedValue<string>();
 
-        public string RelayNGOCode
-        {
-            get => m_Data.RelayNGOCode;
-            set
-            {
-                m_Data.RelayNGOCode = value;
-                OnChanged(this);
-            }
-        }
+        public ObservedValue<ServerAddress> RelayServer = new ObservedValue<ServerAddress>();
 
-        public string LobbyName
-        {
-            get => m_Data.LobbyName;
-            set
-            {
-                m_Data.LobbyName = value;
-                OnChanged(this);
-            }
-        }
+        public ObservedValue<string> LobbyName = new ObservedValue<string>();
 
         public LobbyState LobbyState
         {
@@ -290,9 +236,10 @@ namespace LobbyRelaySample
             // It's possible for the host to edit the lobby in between the time they last pushed lobby data and the time their pull for new lobby data completes.
             // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
             m_Data = lobbyData;
-            m_Data.LobbyState = lobbyData.LobbyState;;
-            m_Data.LobbyColor =  lobbyData.LobbyColor;
-            m_Data.RelayNGOCode =  lobbyData.RelayNGOCode;
+            LobbyState = lobbyData.LobbyState;
+            ;
+            LobbyColor = lobbyData.LobbyColor;
+            m_Data.RelayNGOCode = lobbyData.RelayNGOCode;
 
             if (lobbyUsers == null)
                 m_LobbyUsers = new Dictionary<string, LobbyUser>();

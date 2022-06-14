@@ -24,7 +24,7 @@ namespace LobbyRelaySample
                 Debug.LogError($"Needs a Target of type {typeof(T)} to begin observing.", gameObject);
                 return;
             }
-          
+
             UpdateObserver(target);
             observed.onChanged += UpdateObserver;
         }

@@ -28,6 +28,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1906352097507614706}
   m_RootOrder: 1
@@ -144,7 +145,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2244251207921394025}
   - component: {fileID: 5434623004655309427}
-  - component: {fileID: 3687075862038422248}
   - component: {fileID: 3403950992349691351}
   m_Layer: 5
   m_Name: LobbyCanvas
@@ -163,6 +163,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6520888008628790540}
   - {fileID: 2244251208239780121}
@@ -188,33 +189,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &3687075862038422248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2244251207921394026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51373dc3c6ac79b4f8e36ac7c4419205, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3403950992349691351}
-        m_TargetAssemblyTypeName: LobbyRooms.GameStatePanelUI, Assembly-CSharp
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &3403950992349691351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,6 +233,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 466693923092094802}
   - {fileID: 1529153573702653751}
@@ -338,6 +313,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4212636328457333019}
   m_Father: {fileID: 6520888008628790540}
@@ -439,6 +415,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1906352097507614706}
   m_RootOrder: 0
@@ -573,6 +550,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 466693923092094802}
   m_RootOrder: 0
@@ -709,6 +687,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1906352097507614706}
   - {fileID: 2957117094117392419}
@@ -788,6 +767,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6532118317105062884}
   - {fileID: 7445706979321241619}
@@ -1467,6 +1447,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
+--- !u!224 &1529153573702653751 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1118541987231860827, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
+  m_PrefabInstance: {fileID: 1926829325626138476}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2768469221279893250 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4383951900022528110, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
@@ -1489,11 +1474,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &1529153573702653751 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 1118541987231860827, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
-  m_PrefabInstance: {fileID: 1926829325626138476}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2510549639321509767
 PrefabInstance:
   m_ObjectHideFlags: 0

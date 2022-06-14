@@ -182,8 +182,8 @@ namespace LobbyRelaySample.relay
 
 		private void OnRelayCode(string relayCode)
 		{
-			m_localLobby.RelayCode = relayCode;
-			m_localLobby.RelayServer =
+			m_localLobby.RelayCode.Value = relayCode;
+			m_localLobby.RelayServer.Value =
 				new ServerAddress(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port);
 			m_joinState |= JoinState.Joined;
 #pragma warning disable 4014
@@ -240,7 +240,7 @@ namespace LobbyRelaySample.relay
 		{
 			if (m_localLobby.RelayCode != null)
 			{
-				RelayAPIInterface.JoinAsync(m_localLobby.RelayCode, OnJoin);
+				RelayAPIInterface.JoinAsync(m_localLobby.RelayCode.Value, OnJoin);
 				m_localLobby.onChanged -= OnLobbyChange;
 			}
 		}
@@ -256,7 +256,7 @@ namespace LobbyRelaySample.relay
 				joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
 			BindToAllocation(m_endpointForServer, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData,
 				joinAllocation.HostConnectionData, joinAllocation.Key, 1, isSecure);
-			m_localLobby.RelayServer =
+			m_localLobby.RelayServer.Value =
 				new ServerAddress(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port);
 		}
 

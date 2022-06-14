@@ -147,7 +147,7 @@ namespace LobbyRelaySample
 
         void OnLocalLobbyChanged(LocalLobby localLobby)
         {
-            if (string.IsNullOrEmpty(localLobby.LobbyID)
+            if (string.IsNullOrEmpty(localLobby.LobbyID.Value)
             ) // When the player leaves, their LocalLobby is cleared out.
             {
                 EndSynch();

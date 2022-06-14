@@ -13,8 +13,9 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// The panel that holds the lobby joining and creation panels.
     /// </summary>
-    public class JoinCreateLobbyUI : ObserverPanel<LocalMenuState>
+    public class JoinCreateLobbyUI : UIPanelBase
     {
+        [HideInInspector]
         public UnityEvent<JoinCreateTabs> m_OnTabChanged;
 
         [SerializeField] //Serialized for Visisbility in Editor
@@ -40,9 +41,9 @@ namespace LobbyRelaySample.UI
             CurrentTab = JoinCreateTabs.Create;
         }
 
-        public override void ObservedUpdated(LocalMenuState observed)
+        void GameStateChanged(GameState state)
         {
-            if (observed.State == GameState.JoinMenu)
+            if (state == GameState.JoinMenu)
             {
                 m_OnTabChanged?.Invoke(m_CurrentTab);
                 Show(false);
@@ -51,6 +52,19 @@ namespace LobbyRelaySample.UI
             {
                 Hide();
             }
+        }
+
+        public override void Start()
+        {
+            base.Start();
+            Manager.onGameStateChanged += GameStateChanged;
+        }
+
+        void OnDestroy()
+        {
+            if (Manager == null)
+                return;
+            Manager.onGameStateChanged -= GameStateChanged;
         }
     }
 }

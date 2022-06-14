@@ -22,8 +22,8 @@ namespace LobbyRelaySample.lobby
         public static Dictionary<string, string> LocalToRemoteData(LocalLobby lobby)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
-            data.Add(key_RelayCode, lobby.RelayCode);
-            data.Add(key_RelayNGOCode, lobby.RelayNGOCode);
+            data.Add(key_RelayCode, lobby.RelayCode.Value);
+            data.Add(key_RelayNGOCode, lobby.RelayNGOCode.Value);
             data.Add(key_LobbyState, ((int)lobby.LobbyState).ToString()); // Using an int is smaller than using the enum state's name.
             data.Add(key_LobbyColor, ((int)lobby.LobbyColor).ToString());
             data.Add(key_LastEdit, lobby.Data.LastEdit.ToString());
@@ -45,19 +45,25 @@ namespace LobbyRelaySample.lobby
         /// <summary>
         /// Create a new LocalLobby from the content of a retrieved lobby. Its data can be copied into an existing LocalLobby for use.
         /// </summary>
-        public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobbyToUpdate)
+        public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobby)
         {
-            //Copy Data from Lobby into Local lobby fields
-            LocalLobby.LobbyData lobbyData = new LocalLobby.LobbyData(localLobbyToUpdate.Data)
+
+
+            localLobby.LobbyID.Value = remoteLobby.Id;
+            localLobby.LobbyCode.Value = remoteLobby.LobbyCode;
+            localLobby.RelayCode.Value = remoteLobby.Data?.ContainsKey(key_RelayCode) == true
+                ? remoteLobby.Data[key_RelayCode].Value
+                : localLobby.RelayCode.Value;
+            localLobby.RelayNGOCode.Value = remoteLobby.Data?.ContainsKey(key_RelayNGOCode) == true
+                ? remoteLobby.Data[key_RelayNGOCode].Value
+                : localLobby.RelayNGOCode.Value;
+
+            LocalLobby.LobbyData lobbyData = new LocalLobby.LobbyData(localLobby.Data)
             {
-                LobbyID = remoteLobby.Id,
-                LobbyCode = remoteLobby.LobbyCode,
                 Private = remoteLobby.IsPrivate,
                 LobbyName = remoteLobby.Name,
                 MaxPlayerCount = remoteLobby.MaxPlayers,
                 LastEdit = remoteLobby.LastUpdated.ToFileTimeUtc(),
-                RelayCode = remoteLobby.Data?.ContainsKey(key_RelayCode) == true ? remoteLobby.Data[key_RelayCode].Value : localLobbyToUpdate.RelayCode, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
-                RelayNGOCode = remoteLobby.Data?.ContainsKey(key_RelayNGOCode) == true ? remoteLobby.Data[key_RelayNGOCode].Value : localLobbyToUpdate.RelayNGOCode,
                 LobbyState = remoteLobby.Data?.ContainsKey(key_LobbyState) == true ? (LobbyState)int.Parse(remoteLobby.Data[key_LobbyState].Value) : LobbyState.Lobby,
                 LobbyColor = remoteLobby.Data?.ContainsKey(key_LobbyColor) == true ? (LobbyColor)int.Parse(remoteLobby.Data[key_LobbyColor].Value) : LobbyColor.None,
             };
@@ -78,7 +84,7 @@ namespace LobbyRelaySample.lobby
             }
 
             //Push all the data at once so we don't call OnChanged for each variable
-            localLobbyToUpdate.CopyObserved(lobbyData, lobbyUsers);
+            localLobby.CopyObserved(lobbyData, lobbyUsers);
         }
 
         /// <summary>

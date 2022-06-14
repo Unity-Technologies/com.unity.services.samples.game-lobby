@@ -6,14 +6,15 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Displays the name of the lobby.
     /// </summary>
-    public class LobbyNameUI : ObserverPanel<LocalLobby>
+    public class LobbyNameUI : UIPanelBase
     {
         [SerializeField]
         TMP_Text m_lobbyNameText;
 
-        public override void ObservedUpdated(LocalLobby observed)
+        public void Start()
         {
-            m_lobbyNameText.SetText(observed.LobbyName);
+            base.Start();
+            Manager.LocalLobby.LobbyName.onValueChanged += (s) => { m_lobbyNameText.SetText(s); };
         }
     }
 }

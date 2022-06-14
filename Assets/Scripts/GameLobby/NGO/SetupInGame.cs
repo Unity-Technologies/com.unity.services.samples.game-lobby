@@ -67,7 +67,7 @@ namespace LobbyRelaySample.ngo
 
             var allocation = await Relay.Instance.CreateAllocationAsync(m_lobby.MaxPlayerCount);
             var joincode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            m_lobby.RelayNGOCode = joincode;
+            m_lobby.RelayNGOCode.Value = joincode;
 
             bool isSecure = false;
             var endpoint = RelayUtpSetup.GetEndpointForAllocation(allocation.ServerEndpoints,
@@ -81,7 +81,7 @@ namespace LobbyRelaySample.ngo
         {
             UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
 
-            var joinAllocation = await Relay.Instance.JoinAllocationAsync(m_lobby.RelayCode);
+            var joinAllocation = await Relay.Instance.JoinAllocationAsync(m_lobby.RelayCode.Value);
             bool isSecure = false;
             var endpoint = RelayUtpSetup.GetEndpointForAllocation(joinAllocation.ServerEndpoints,
                 joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
