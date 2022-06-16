@@ -14,9 +14,9 @@ namespace LobbyRelaySample.lobby
         const string key_LobbyColor = nameof(LocalLobby.LobbyData.LobbyColor);
         const string key_LastEdit = nameof(LocalLobby.LobbyData.LastEdit);
 
-        const string key_Displayname = nameof(LobbyUser.DisplayName);
-        const string key_Userstatus = nameof(LobbyUser.UserStatus);
-        const string key_Emote = nameof(LobbyUser.Emote);
+        const string key_Displayname = nameof(LocalPlayer.DisplayName);
+        const string key_Userstatus = nameof(LocalPlayer.UserStatus);
+        const string key_Emote = nameof(LocalPlayer.Emote);
 
 
         public static Dictionary<string, string> LocalToRemoteData(LocalLobby lobby)
@@ -31,7 +31,7 @@ namespace LobbyRelaySample.lobby
             return data;
         }
 
-        public static Dictionary<string, string> LocalToRemoteUserData(LobbyUser user)
+        public static Dictionary<string, string> LocalToRemoteUserData(LocalPlayer user)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             if (user == null || string.IsNullOrEmpty(user.ID))
@@ -68,11 +68,11 @@ namespace LobbyRelaySample.lobby
                 LobbyColor = remoteLobby.Data?.ContainsKey(key_LobbyColor) == true ? (LobbyColor)int.Parse(remoteLobby.Data[key_LobbyColor].Value) : LobbyColor.None,
             };
 
-            Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>();
+            Dictionary<string, LocalPlayer> lobbyUsers = new Dictionary<string, LocalPlayer>();
             foreach (var player in remoteLobby.Players)
             {
                 // (If we haven't seen this player yet, a new local representation of the player will have already been added by the LocalLobby.)
-                LobbyUser incomingData = new LobbyUser
+                LocalPlayer incomingData = new LocalPlayer
                 {
                     IsHost = remoteLobby.HostId.Equals(player.Id),
                     DisplayName = player.Data?.ContainsKey(key_Displayname) == true ? player.Data[key_Displayname].Value : default,

@@ -14,7 +14,7 @@ namespace LobbyRelaySample.UI
         public void Start()
         {
             base.Start();
-            Manager.LocalLobby.LobbyName.onValueChanged += (s) => { m_lobbyNameText.SetText(s); };
+            Manager.LocalLobby.LobbyName.onChanged += (s) => { m_lobbyNameText.SetText(s); };
         }
     }
 }

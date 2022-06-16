@@ -26,7 +26,7 @@ namespace Test
 		Dictionary<string, PlayerDataObject>
 			m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
 
-		LobbyUser m_LocalUser;
+		LocalPlayer m_LocalUser;
 		LobbyManager m_LobbyManager;
 
 		[OneTimeSetUp]
@@ -35,7 +35,7 @@ namespace Test
 			m_mockUserData = new Dictionary<string, PlayerDataObject>();
 			m_mockUserData.Add("DisplayName",
 				new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
-			m_LocalUser = new LobbyUser(true);
+			m_LocalUser = new LocalPlayer(true);
 			m_LobbyManager = new LobbyManager();
 
 #pragma warning disable 4014

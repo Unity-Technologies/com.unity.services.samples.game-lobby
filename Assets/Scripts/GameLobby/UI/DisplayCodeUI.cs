@@ -35,9 +35,9 @@ namespace LobbyRelaySample.UI
         {
             base.Start();
             if(m_codeType==CodeType.Lobby)
-                Manager.LocalLobby.LobbyCode.onValueChanged += LobbyCodeChanged;
+                Manager.LocalLobby.LobbyCode.onChanged += LobbyCodeChanged;
             if(m_codeType==CodeType.Relay)
-                Manager.LocalLobby.RelayCode.onValueChanged += LobbyCodeChanged;
+                Manager.LocalLobby.RelayCode.onChanged += LobbyCodeChanged;
         }
 
         void OnDestroy()
@@ -45,9 +45,9 @@ namespace LobbyRelaySample.UI
             if (Manager == null)
                 return;
             if(m_codeType==CodeType.Lobby)
-                Manager.LocalLobby.LobbyCode.onValueChanged -= LobbyCodeChanged;
+                Manager.LocalLobby.LobbyCode.onChanged -= LobbyCodeChanged;
             if(m_codeType==CodeType.Relay)
-                Manager.LocalLobby.RelayCode.onValueChanged -= LobbyCodeChanged;
+                Manager.LocalLobby.RelayCode.onChanged -= LobbyCodeChanged;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
 namespace LobbyRelaySample
@@ -22,15 +23,21 @@ namespace LobbyRelaySample
     /// Data for a local player instance. This will update data and is observed to know when to push local player changes to the entire lobby.
     /// </summary>
     [Serializable]
-    public class LobbyUser : Observed<LobbyUser>
+    public class LocalPlayer : Observed<LocalPlayer>
     {
-        public LobbyUser(bool isHost = false, string displayName = null, string id = null,
+        public LocalPlayer(bool isHost = false, string displayName = null, string id = null,
             EmoteType emote = EmoteType.None, UserStatus userStatus = UserStatus.Menu, bool isApproved = false)
         {
             m_data = new UserData(isHost, displayName, id, emote, userStatus, isApproved);
         }
 
+        const string key_Displayname = nameof(DisplayName);
+        const string key_Userstatus = nameof(UserStatus);
+        const string key_Emote = nameof(Emote);
+
         #region Local UserData
+
+        public Player CloudPlayer { get; private set; }
 
         public struct UserData
         {
@@ -55,6 +62,12 @@ namespace LobbyRelaySample
 
         UserData m_data;
 
+        public LocalPlayer()
+        {
+            CloudPlayer = new Player();
+            DeesplayName.onChanged += SynchDisplayName;
+        }
+
         public void ResetState()
         {
             m_data = new UserData(false, m_data.DisplayName, m_data.ID, EmoteType.None, UserStatus.Menu,
@@ -76,7 +89,6 @@ namespace LobbyRelaySample
             UserStatus = 16,
         }
 
-
         public bool IsHost
         {
             get { return m_data.IsHost; }
@@ -89,11 +101,28 @@ namespace LobbyRelaySample
             }
         }
 
+        public CallbackValue<string> DeesplayName = new CallbackValue<string>();
+
+        void SynchDisplayName(string name)
+        {
+            PlayerDataObject playerDataObject;
+            if (CloudPlayer.Data.TryGetValue(key_Displayname, out playerDataObject))
+            {
+                playerDataObject.Value = name;
+            }
+            else
+            {
+                CloudPlayer.Data.Add(key_Displayname,
+                    new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, name));
+            }
+        }
+        //TODO Finish this, for now i'm going to the LocalLobby
         public string DisplayName
         {
-            get => m_data.DisplayName;
+            get => CloudPlayer.Data[key_Displayname].Value;
             set
             {
+
                 if (m_data.DisplayName == value)
                     return;
                 m_data.DisplayName = value;
@@ -139,7 +168,7 @@ namespace LobbyRelaySample
             }
         }
 
-        public override void CopyObserved(LobbyUser observed)
+        public override void CopyObserved(LocalPlayer observed)
         {
             m_data = observed.m_data;
             ;

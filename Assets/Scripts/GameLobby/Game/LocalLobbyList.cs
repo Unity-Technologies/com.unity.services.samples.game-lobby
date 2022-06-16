@@ -23,7 +23,7 @@ namespace LobbyRelaySample
     {
         LobbyQueryState m_CurrentState = LobbyQueryState.Empty;
 
-        public ObservedValue<LobbyQueryState> QueryState = new ObservedValue<LobbyQueryState>();
+        public CallbackValue<LobbyQueryState> QueryState = new CallbackValue<LobbyQueryState>();
 
         public Action<Dictionary<string, LocalLobby>> onLobbyListChange;
         Dictionary<string, LocalLobby> m_currentLobbies = new Dictionary<string, LocalLobby>();

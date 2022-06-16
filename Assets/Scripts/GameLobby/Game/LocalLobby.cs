@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -33,11 +34,13 @@ namespace LobbyRelaySample
         //This is because we could get more than just our changes when we receive the latest lobby from our calls.
         public bool changedByLobbySynch;
         public Action<LocalLobby> onLobbyChanged { get; set; }
-        public Action<Dictionary<string, LobbyUser>> onUserListChanged;
+        public Action<Dictionary<string, LocalPlayer>> onUserListChanged;
 
-        Dictionary<string, LobbyUser> m_LobbyUsers = new Dictionary<string, LobbyUser>();
-        public Dictionary<string, LobbyUser> LobbyUsers => m_LobbyUsers;
+        Dictionary<string, LocalPlayer> m_LobbyUsers = new Dictionary<string, LocalPlayer>();
+        public Dictionary<string, LocalPlayer> LobbyUsers => m_LobbyUsers;
 
+        public Lobby CloudLobby => m_CloudLobby;
+        Lobby m_CloudLobby;
         #region LocalLobbyData
 
         public struct LobbyData
@@ -127,6 +130,7 @@ namespace LobbyRelaySample
 
         public LocalLobby()
         {
+            m_CloudLobby = new Lobby();
             onChanged += (lobby) => { m_Data.LastEdit = DateTime.Now.ToFileTimeUtc(); };
         }
 
@@ -134,7 +138,7 @@ namespace LobbyRelaySample
 
         #endregion
 
-        public void AddPlayer(LobbyUser user)
+        public void AddPlayer(LocalPlayer user)
         {
             if (m_LobbyUsers.ContainsKey(user.ID))
             {
@@ -146,19 +150,20 @@ namespace LobbyRelaySample
             onUserListChanged?.Invoke(m_LobbyUsers);
         }
 
-        void AddUser(LobbyUser user)
+        void AddUser(LocalPlayer user)
         {
             Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
+            m_CloudLobby.Players.Add(new Player());
             m_LobbyUsers.Add(user.ID, user);
         }
 
-        public void RemovePlayer(LobbyUser user)
+        public void RemovePlayer(LocalPlayer user)
         {
             DoRemoveUser(user);
             onUserListChanged?.Invoke(m_LobbyUsers);
         }
 
-        private void DoRemoveUser(LobbyUser user)
+        private void DoRemoveUser(LocalPlayer user)
         {
             if (!m_LobbyUsers.ContainsKey(user.ID))
             {
@@ -169,17 +174,17 @@ namespace LobbyRelaySample
             m_LobbyUsers.Remove(user.ID);
         }
 
-        public ObservedValue<string> LobbyID = new ObservedValue<string>();
+        public CallbackValue<string> LobbyID = new CallbackValue<string>();
 
-        public ObservedValue<string> LobbyCode = new ObservedValue<string>();
+        public CallbackValue<string> LobbyCode = new CallbackValue<string>();
 
-        public ObservedValue<string> RelayCode = new ObservedValue<string>();
+        public CallbackValue<string> RelayCode = new CallbackValue<string>();
 
-        public ObservedValue<string> RelayNGOCode = new ObservedValue<string>();
+        public CallbackValue<string> RelayNGOCode = new CallbackValue<string>();
 
-        public ObservedValue<ServerAddress> RelayServer = new ObservedValue<ServerAddress>();
+        public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
 
-        public ObservedValue<string> LobbyName = new ObservedValue<string>();
+        public CallbackValue<string> LobbyName = new CallbackValue<string>();
 
         public LobbyState LobbyState
         {
@@ -231,7 +236,7 @@ namespace LobbyRelaySample
             onLobbyChanged?.Invoke(this);
         }
 
-        public void CopyObserved(LobbyData lobbyData, Dictionary<string, LobbyUser> lobbyUsers)
+        public void CopyObserved(LobbyData lobbyData, Dictionary<string, LocalPlayer> lobbyUsers)
         {
             // It's possible for the host to edit the lobby in between the time they last pushed lobby data and the time their pull for new lobby data completes.
             // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
@@ -242,10 +247,10 @@ namespace LobbyRelaySample
             m_Data.RelayNGOCode = lobbyData.RelayNGOCode;
 
             if (lobbyUsers == null)
-                m_LobbyUsers = new Dictionary<string, LobbyUser>();
+                m_LobbyUsers = new Dictionary<string, LocalPlayer>();
             else
             {
-                List<LobbyUser> toRemove = new List<LobbyUser>();
+                List<LocalPlayer> toRemove = new List<LocalPlayer>();
                 foreach (var oldUser in m_LobbyUsers)
                 {
                     if (lobbyUsers.ContainsKey(oldUser.Key))

@@ -43,7 +43,7 @@ namespace LobbyRelaySample.ngo
         private Transform m_symbolContainerInstance;
         private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
-        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LobbyUser localUser)
+        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LocalPlayer localUser)
         {
             m_onConnectionVerified = onConnectionVerified;
             m_expectedPlayerCount = expectedPlayerCount;

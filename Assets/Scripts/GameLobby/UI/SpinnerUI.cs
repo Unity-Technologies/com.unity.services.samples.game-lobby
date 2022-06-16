@@ -21,14 +21,14 @@ namespace LobbyRelaySample.UI
         public override void Start()
         {
             base.Start();
-            Manager.LobbyList.QueryState.onValueChanged += QueryStateChanged;
+            Manager.LobbyList.QueryState.onChanged += QueryStateChanged;
         }
 
         void OnDestroy()
         {
             if (Manager == null)
                 return;
-            Manager.LobbyList.QueryState.onValueChanged -= QueryStateChanged;
+            Manager.LobbyList.QueryState.onChanged -= QueryStateChanged;
 
         }
 

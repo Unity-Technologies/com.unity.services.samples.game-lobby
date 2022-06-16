@@ -50,13 +50,13 @@ namespace LobbyRelaySample
         #endregion
 
         public LocalLobby LocalLobby => m_LocalLobby;
-        public LobbyUser LocalUser => m_LocalUser;
+        public LocalPlayer LocalUser => m_LocalUser;
         public Action<GameState> onGameStateChanged;
         public LocalLobbyList LobbyList { get; private set; } = new LocalLobbyList();
 
         public GameState LocalGameState { get; private set; }
         public LobbyManager LobbyManager { get; private set; }
-        LobbyUser m_LocalUser;
+        LocalPlayer m_LocalUser;
         LocalLobby m_LocalLobby;
         LobbySynchronizer m_LobbySynchronizer;
 
@@ -233,18 +233,15 @@ namespace LobbyRelaySample
         void InitializeLocalValues()
         {
             m_LocalLobby = new LocalLobby { LobbyState = LobbyState.Lobby };
-            m_LocalUser = new LobbyUser();
+            m_LocalUser = new LocalPlayer();
             m_LocalUser.ID = AuthenticationService.Instance.PlayerId;
             m_LocalUser.DisplayName = NameGenerator.GetName(m_LocalUser.ID);
-            m_LocalLobby.AddPlayer(m_LocalUser); // The local LobbyUser object will be hooked into UI
+            m_LocalLobby.AddPlayer(m_LocalUser); // The local LocalPlayer object will be hooked into UI
 
             // before the LocalLobby is populated during lobby join,
             // so the LocalLobby must know about it already when that happens.
         }
 
-        /// <summary>
-        /// TODO Wire is a good update to remove the monolithic observers and move to observed values instead, on a Singleton gameManager
-        /// </summary>
         void BeginObservers()
         {
             foreach (var lobbyObs in m_LocalLobbyObservers)
@@ -388,7 +385,7 @@ namespace LobbyRelaySample
 
         void ResetLocalLobby()
         {
-            m_LocalLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LobbyUser>());
+            m_LocalLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LocalPlayer>());
             m_LocalLobby
                 .AddPlayer(m_LocalUser); // As before, the local player will need to be plugged into UI before the lobby join actually happens.
             m_LocalLobby.RelayServer = null;

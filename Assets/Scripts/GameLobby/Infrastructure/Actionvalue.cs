@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace LobbyRelaySample
 {
-    public class ObservedValue<T>
+    public class CallbackValue<T>
     {
-        public Action<T> onValueChanged;
+        public Action<T> onChanged;
 
         public T Value
         {
@@ -15,7 +15,7 @@ namespace LobbyRelaySample
                 if (m_CachedValue.Equals(value))
                     return;
                 m_CachedValue = value;
-                onValueChanged?.Invoke(m_CachedValue);
+                onChanged?.Invoke(m_CachedValue);
             }
         }
 

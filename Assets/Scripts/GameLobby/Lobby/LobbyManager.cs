@@ -72,7 +72,7 @@ namespace LobbyRelaySample
 
         #endregion
 
-        Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LobbyUser user)
+        Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LocalPlayer user)
         {
             Dictionary<string, PlayerDataObject> data = new Dictionary<string, PlayerDataObject>();
 
@@ -81,7 +81,7 @@ namespace LobbyRelaySample
             return data;
         }
 
-        public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, LobbyUser localUser)
+        public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate, LocalPlayer localUser)
         {
             if (m_CreateCooldown.IsInCooldown)
             {
@@ -114,7 +114,7 @@ namespace LobbyRelaySample
             }
         }
 
-        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LobbyUser localUser)
+        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser)
         {
             if (m_JoinCooldown.IsInCooldown ||
                 (lobbyId == null && lobbyCode == null))
@@ -143,7 +143,7 @@ namespace LobbyRelaySample
             return m_CurrentLobby;
         }
 
-        public async Task<Lobby> QuickJoinLobbyAsync(LobbyUser localUser, LobbyColor limitToColor = LobbyColor.None)
+        public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser, LobbyColor limitToColor = LobbyColor.None)
         {
             //We dont want to queue a quickjoin
             if (m_QuickJoinCooldown.IsInCooldown)

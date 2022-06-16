@@ -10,7 +10,7 @@ namespace LobbyRelaySample.UI
     /// When inside a lobby, this will show information about a player, whether local or remote.
     /// </summary>
     [RequireComponent(typeof(LobbyUserObserver))]
-    public class InLobbyUserUI : ObserverPanel<LobbyUser>
+    public class InLobbyUserUI : ObserverPanel<LocalPlayer>
     {
         [SerializeField]
         TMP_Text m_DisplayNameText;
@@ -35,13 +35,13 @@ namespace LobbyRelaySample.UI
         public string UserId { get; set; }
         LobbyUserObserver m_observer;
 
-        public void SetUser(LobbyUser myLobbyUser)
+        public void SetUser(LocalPlayer myLocalPlayer)
         {
             Show();
             if (m_observer == null)
                 m_observer = GetComponent<LobbyUserObserver>();
-            m_observer.BeginObserving(myLobbyUser);
-            UserId = myLobbyUser.ID;
+            m_observer.BeginObserving(myLocalPlayer);
+            UserId = myLocalPlayer.ID;
             m_vivoxUserHandler.SetId(UserId);
         }
 
@@ -52,7 +52,7 @@ namespace LobbyRelaySample.UI
             m_observer.EndObserving();
         }
 
-        public override void ObservedUpdated(LobbyUser observed)
+        public override void ObservedUpdated(LocalPlayer observed)
         {
             m_DisplayNameText.SetText(observed.DisplayName);
             m_StatusText.SetText(SetStatusFancy(observed.UserStatus));

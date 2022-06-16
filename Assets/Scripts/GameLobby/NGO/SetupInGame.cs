@@ -24,7 +24,7 @@ namespace LobbyRelaySample.ngo
         private bool m_hasConnectedViaNGO = false;
 
         private LocalLobby m_lobby;
-        private LobbyUser m_localUser;
+        private LocalPlayer m_localUser;
 
 
         public void Start()
@@ -99,7 +99,7 @@ namespace LobbyRelaySample.ngo
         public void OnLobbyChange(LocalLobby lobby)
         {   m_lobby = lobby; // Most of the time this is redundant, but we need to get multiple members of the lobby to the Relay setup components, so might as well just hold onto the whole thing.
         }
-        public void OnLocalUserChange(LobbyUser user)
+        public void OnLocalUserChange(LocalPlayer user)
         {   m_localUser = user; // Same, regarding redundancy.
         }
 

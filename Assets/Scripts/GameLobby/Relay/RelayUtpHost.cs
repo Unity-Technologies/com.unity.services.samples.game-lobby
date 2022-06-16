@@ -11,7 +11,7 @@ namespace LobbyRelaySample.relay
     /// </summary>
     public class RelayUtpHost : RelayUtpClient, IReceiveMessages
     {
-        public override void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
+        public override void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LocalPlayer localUser, LocalLobby localLobby)
         {
             base.Initialize(networkDriver, connections, localUser, localLobby);
             m_hasSentInitialMessage = true; // The host will be alone in the lobby at first, so they need not send any messages right away.

@@ -14,7 +14,7 @@ namespace LobbyRelaySample.relay
     /// </summary>
     public class RelayUtpClient : MonoBehaviour, IDisposable // This is a MonoBehaviour merely to have access to Update.
     {
-        protected LobbyUser m_localUser;
+        protected LocalPlayer m_localUser;
         protected LocalLobby m_localLobby;
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
@@ -26,7 +26,7 @@ namespace LobbyRelaySample.relay
 
         protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
 
-        public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
+        public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LocalPlayer localUser, LocalLobby localLobby)
         {
             m_localUser = localUser;
             m_localLobby = localLobby;
@@ -57,7 +57,7 @@ namespace LobbyRelaySample.relay
             Dispose();
         }
 
-        private void OnLocalChange(LobbyUser localUser)
+        private void OnLocalChange(LocalPlayer localUser)
         {
             if (m_connections.Count == 0) // This could be the case for the host alone in the lobby.
                 return;
@@ -217,14 +217,14 @@ namespace LobbyRelaySample.relay
         /// <summary>
         /// When player data is updated, send out events for just the data that actually changed.
         /// </summary>
-        private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
+        private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LocalPlayer user)
         {
 
         }
         /// <summary>
         /// Sometimes (e.g. when a new player joins), we need to send out the full current state of this player.
         /// </summary>
-        protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
+        protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LocalPlayer user)
         {
             // Note that it would be better to send a single message with the full state, but for the sake of shorter code we'll leave that out here.
             WriteString(driver, connection, user.ID, MsgType.PlayerName, user.DisplayName);

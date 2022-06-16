@@ -12,7 +12,7 @@ namespace LobbyRelaySample
     public class LobbySynchronizer : IReceiveMessages, IDisposable
     {
         LocalLobby m_LocalLobby;
-        LobbyUser m_LocalUser;
+        LocalPlayer m_LocalUser;
         LobbyManager m_LobbyManager;
         bool m_LocalChanges = false;
 
@@ -27,7 +27,7 @@ namespace LobbyRelaySample
             m_LobbyManager = lobbyManager;
         }
 
-        public void StartSynch(LocalLobby localLobby, LobbyUser localUser)
+        public void StartSynch(LocalLobby localLobby, LocalPlayer localUser)
         {
             m_LocalUser = localUser;
             m_LocalLobby = localLobby;

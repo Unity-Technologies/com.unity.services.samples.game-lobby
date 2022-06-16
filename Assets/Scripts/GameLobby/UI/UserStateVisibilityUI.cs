@@ -14,15 +14,15 @@ namespace LobbyRelaySample.UI
     }
 
     /// <summary>
-    /// Shows the UI when the LobbyUser matches some conditions, including having the target permissions.
+    /// Shows the UI when the LocalPlayer matches some conditions, including having the target permissions.
     /// </summary>
     [RequireComponent(typeof(LobbyUserObserver))]
-    public class UserStateVisibilityUI : ObserverPanel<LobbyUser>
+    public class UserStateVisibilityUI : ObserverPanel<LocalPlayer>
     {
         public UserStatus ShowThisWhen;
         public UserPermission Permissions;
 
-        public override void ObservedUpdated(LobbyUser observed)
+        public override void ObservedUpdated(LocalPlayer observed)
         {
             var hasStatusFlags = ShowThisWhen.HasFlag(observed.UserStatus);
 

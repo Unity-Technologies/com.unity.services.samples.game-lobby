@@ -21,7 +21,7 @@ namespace LobbyRelaySample.relay
 		protected List<NetworkConnection> m_connections;
 		protected NetworkEndPoint m_endpointForServer;
 		protected LocalLobby m_localLobby;
-		protected LobbyUser m_localUser;
+		protected LocalPlayer m_localUser;
 		protected Action<bool, RelayUtpClient> m_onJoinComplete;
 
 		public static string AddressFromEndpoint(NetworkEndPoint endpoint)
@@ -31,7 +31,7 @@ namespace LobbyRelaySample.relay
 
 		public void BeginRelayJoin(
 			LocalLobby localLobby,
-			LobbyUser localUser,
+			LocalPlayer localUser,
 			Action<bool, RelayUtpClient> onJoinComplete)
 		{
 			m_localLobby = localLobby;
