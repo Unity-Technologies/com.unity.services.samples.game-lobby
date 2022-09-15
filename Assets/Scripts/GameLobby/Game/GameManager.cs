@@ -42,7 +42,6 @@ namespace LobbyRelaySample
 
         public LocalLobby LocalLobby => m_LocalLobby;
         public LobbyUser LocalUser => m_LocalUser;
-        public Action<GameState> onGameStateChanged;
 
         public GameState LocalGameState { get; private set; }
         public LobbyManager LobbyManager { get; private set; }
@@ -255,10 +254,10 @@ namespace LobbyRelaySample
         {
             bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
                 LocalGameState == GameState.Lobby;
-          LocalGameState = state;
+            LocalGameState = state;
             if (isLeavingLobby)
                 LeaveLobby();
-            onGameStateChanged.Invoke(LocalGameState);
+            m_LocalMenuState.State = LocalGameState;
         }
 
         void SetCurrentLobbies(IEnumerable<LocalLobby> lobbies)
@@ -282,6 +281,7 @@ namespace LobbyRelaySample
             m_LobbySynchronizer.StartSynch(m_LocalLobby, m_LocalUser);
             SetUserLobbyState();
             StartVivoxJoin();
+            StartRelayConnection();
         }
 
         void LeaveLobby()
@@ -314,7 +314,6 @@ namespace LobbyRelaySample
                 }
             }
         }
-
 
         void StartVivoxLogin()
         {
