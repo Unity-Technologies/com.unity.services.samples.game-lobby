@@ -6,14 +6,20 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Displays the IP when connected to Relay.
     /// </summary>
-    public class RelayAddressUI : ObserverPanel<LocalLobby>
+    public class RelayAddressUI : UIPanelBase
     {
         [SerializeField]
         TMP_Text m_IPAddressText;
 
-        public override void ObservedUpdated(LocalLobby observed)
+        public override void Start()
         {
-            m_IPAddressText.SetText(observed.RelayServer?.ToString());
+            base.Start();
+            GameManager.Instance.LocalLobby.RelayServer.onChanged += GotRelayAddress;
+        }
+
+        void GotRelayAddress(ServerAddress address)
+        {
+            m_IPAddressText.SetText(address.ToString());
         }
     }
 }

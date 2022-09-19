@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -30,149 +29,37 @@ namespace LobbyRelaySample
     [System.Serializable]
     public class LocalLobby : Observed<LocalLobby>
     {
-        //Should be set to true when pushing lobby to the cloud, and set to false when done pulling.
-        //This is because we could get more than just our changes when we receive the latest lobby from our calls.
-        public bool changedByLobbySynch;
-        public Action<LocalLobby> onLobbyChanged { get; set; }
+
+        public bool CanSetChanged = true;
         public Action<Dictionary<string, LocalPlayer>> onUserListChanged;
 
-        Dictionary<string, LocalPlayer> m_LobbyUsers = new Dictionary<string, LocalPlayer>();
-        public Dictionary<string, LocalPlayer> LobbyUsers => m_LobbyUsers;
+        Dictionary<string, LocalPlayer> m_LocalPlayers = new Dictionary<string, LocalPlayer>();
+        public Dictionary<string, LocalPlayer> LocalPlayers => m_LocalPlayers;
 
-        public Lobby CloudLobby => m_CloudLobby;
-        Lobby m_CloudLobby;
         #region LocalLobbyData
-
-        public struct LobbyData
-        {
-            public string LobbyID { get; set; }
-            public string LobbyCode { get; set; }
-            public string RelayCode { get; set; }
-            public string RelayNGOCode { get; set; }
-            public string LobbyName { get; set; }
-            public bool Private { get; set; }
-            public bool Locked { get; set; }
-            public int AvailableSlots { get; set; }
-            public int MaxPlayerCount { get; set; }
-            public LobbyState LobbyState { get; set; }
-            public LobbyColor LobbyColor { get; set; }
-            public long LastEdit { get; set; }
-
-            public LobbyData(LobbyData existing)
-            {
-                LobbyID = existing.LobbyID;
-                LobbyCode = existing.LobbyCode;
-                RelayCode = existing.RelayCode;
-                RelayNGOCode = existing.RelayNGOCode;
-                LobbyName = existing.LobbyName;
-                Private = existing.Private;
-                MaxPlayerCount = existing.MaxPlayerCount;
-                LobbyState = existing.LobbyState;
-                LobbyColor = existing.LobbyColor;
-                LastEdit = existing.LastEdit;
-
-                AvailableSlots = existing.AvailableSlots;
-                Locked = existing.Locked;
-            }
-
-            public LobbyData(string lobbyCode)
-            {
-                LobbyID = null;
-                LobbyCode = lobbyCode;
-                RelayCode = null;
-                RelayNGOCode = null;
-                LobbyName = null;
-                Private = false;
-                MaxPlayerCount = -1;
-                LobbyState = LobbyState.Lobby;
-                LobbyColor = LobbyColor.None;
-                LastEdit = 0;
-
-                AvailableSlots = 4;
-                Locked = false;
-            }
-
-            public override string ToString()
-            {
-                StringBuilder sb = new StringBuilder("Lobby : ");
-                sb.AppendLine(LobbyName);
-                sb.Append("ID: ");
-                sb.AppendLine(LobbyID);
-                sb.Append("Code: ");
-                sb.AppendLine(LobbyCode);
-                sb.Append("Private: ");
-                sb.AppendLine(Private.ToString());
-                sb.Append("Locked: ");
-                sb.AppendLine(Locked.ToString());
-                sb.Append("Max Players: ");
-                sb.AppendLine(MaxPlayerCount.ToString());
-                sb.Append("AvailableSlots: ");
-                sb.AppendLine(AvailableSlots.ToString());
-                sb.Append("LobbyState: ");
-                sb.AppendLine(LobbyState.ToString());
-                sb.Append("Lobby LobbyState Last Edit: ");
-                sb.AppendLine(new DateTime(LastEdit).ToString());
-                sb.Append("LobbyColor: ");
-                sb.AppendLine(LobbyColor.ToString());
-                sb.Append("RelayCode: ");
-                sb.AppendLine(RelayCode);
-                sb.Append("RelayNGO: ");
-                sb.AppendLine(RelayNGOCode);
-
-                return sb.ToString();
-            }
-        }
-
-        public LobbyData Data => m_Data;
-        LobbyData m_Data;
 
         ServerAddress m_RelayServer;
 
         public LocalLobby()
         {
-            m_CloudLobby = new Lobby();
-            onChanged += (lobby) => { m_Data.LastEdit = DateTime.Now.ToFileTimeUtc(); };
+            LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
+            LobbyID.onChanged = (s) => {  SetValueChanged(); };
+            LobbyCode.onChanged = (s) => { SetValueChanged(); };
+            RelayCode.onChanged = (s) => { SetValueChanged(); };
+            RelayNGOCode.onChanged = (s) => { SetValueChanged(); };
+            RelayServer.onChanged = (s) => { SetValueChanged(); };
+            LobbyName.onChanged = (s) => { SetValueChanged(); };
+            LocalLobbyState.onChanged = (s) => { SetValueChanged(); };
+            Private.onChanged = (s) => { SetValueChanged(); };
+            AvailableSlots.onChanged = (s) => { SetValueChanged(); };
+            MaxPlayerCount.onChanged = (s) => { SetValueChanged(); };
+            LocalLobbyColor.onChanged = (s) => { SetValueChanged(); };
+            LastUpdated.onChanged = (s) => { SetValueChanged(); };
         }
 
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
 
         #endregion
-
-        public void AddPlayer(LocalPlayer user)
-        {
-            if (m_LobbyUsers.ContainsKey(user.ID))
-            {
-                Debug.LogError($"Cant add player {user.DisplayName}({user.ID}) to lobby: {LobbyID} twice");
-                return;
-            }
-
-            AddUser(user);
-            onUserListChanged?.Invoke(m_LobbyUsers);
-        }
-
-        void AddUser(LocalPlayer user)
-        {
-            Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
-            m_CloudLobby.Players.Add(new Player());
-            m_LobbyUsers.Add(user.ID, user);
-        }
-
-        public void RemovePlayer(LocalPlayer user)
-        {
-            DoRemoveUser(user);
-            onUserListChanged?.Invoke(m_LobbyUsers);
-        }
-
-        private void DoRemoveUser(LocalPlayer user)
-        {
-            if (!m_LobbyUsers.ContainsKey(user.ID))
-            {
-                Debug.LogWarning($"Player {user.DisplayName}({user.ID}) does not exist in lobby: {LobbyID}");
-                return;
-            }
-
-            m_LobbyUsers.Remove(user.ID);
-        }
 
         public CallbackValue<string> LobbyID = new CallbackValue<string>();
 
@@ -186,98 +73,114 @@ namespace LobbyRelaySample
 
         public CallbackValue<string> LobbyName = new CallbackValue<string>();
 
-        public LobbyState LobbyState
+        public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
+
+        public CallbackValue<bool> Private = new CallbackValue<bool>();
+
+        public CallbackValue<int> AvailableSlots = new CallbackValue<int>();
+
+        public CallbackValue<int> MaxPlayerCount = new CallbackValue<int>();
+
+        public CallbackValue<LobbyColor> LocalLobbyColor = new CallbackValue<LobbyColor>();
+
+        public CallbackValue<long> LastUpdated = new CallbackValue<long>();
+
+        public int PlayerCount => m_LocalPlayers.Count;
+
+        public void ResetLobby()
         {
-            get => m_Data.LobbyState;
-            set
-            {
-                m_Data.LobbyState = value;
-                OnChanged(this);
-            }
+            m_LocalPlayers.Clear();
+
+            LobbyName.Value = "";
+
+            LobbyID.Value = "";
+            LobbyCode.Value = "";
+            Private.Value = false;
+            LocalLobbyColor.Value = LobbyRelaySample.LobbyColor.None;
+            AvailableSlots.Value = 4;
+            MaxPlayerCount.Value = 4;
         }
 
-        public bool Private
+        /// <summary>
+        /// A locking mechanism for registering when something has looked at the Lobby to see if anything has changed
+        /// </summary>
+        /// <returns></returns>
+        public bool IsLobbyChanged()
         {
-            get => m_Data.Private;
-            set
-            {
-                m_Data.Private = value;
-                OnChanged(this);
-            }
+            bool isChanged = m_ValuesChanged;
+            m_ValuesChanged = false;
+            return isChanged;
         }
 
-        public int PlayerCount => m_LobbyUsers.Count;
-
-        public int MaxPlayerCount
+        void SetValueChanged()
         {
-            get => m_Data.MaxPlayerCount;
-            set
-            {
-                m_Data.MaxPlayerCount = value;
-                OnChanged(this);
-            }
+            if(CanSetChanged)
+                m_ValuesChanged = true;
         }
+        bool m_ValuesChanged;
 
-        public LobbyColor LobbyColor
+        public void AddPlayer(LocalPlayer user)
         {
-            get => m_Data.LobbyColor;
-            set
+            if (m_LocalPlayers.ContainsKey(user.ID.Value))
             {
-                if (m_Data.LobbyColor != value)
-                {
-                    m_Data.LobbyColor = value;
-                    OnChanged(this);
-                }
-            }
-        }
-
-        public void OnChanged()
-        {
-            onLobbyChanged?.Invoke(this);
-        }
-
-        public void CopyObserved(LobbyData lobbyData, Dictionary<string, LocalPlayer> lobbyUsers)
-        {
-            // It's possible for the host to edit the lobby in between the time they last pushed lobby data and the time their pull for new lobby data completes.
-            // If that happens, the edit will be lost, so instead we maintain the time of last edit to detect that case.
-            m_Data = lobbyData;
-            LobbyState = lobbyData.LobbyState;
-            ;
-            LobbyColor = lobbyData.LobbyColor;
-            m_Data.RelayNGOCode = lobbyData.RelayNGOCode;
-
-            if (lobbyUsers == null)
-                m_LobbyUsers = new Dictionary<string, LocalPlayer>();
-            else
-            {
-                List<LocalPlayer> toRemove = new List<LocalPlayer>();
-                foreach (var oldUser in m_LobbyUsers)
-                {
-                    if (lobbyUsers.ContainsKey(oldUser.Key))
-                        oldUser.Value.CopyObserved(lobbyUsers[oldUser.Key]);
-                    else
-                        toRemove.Add(oldUser.Value);
-                }
-
-                foreach (var remove in toRemove)
-                {
-                    DoRemoveUser(remove);
-                }
-
-                foreach (var currUser in lobbyUsers)
-                {
-                    if (!m_LobbyUsers.ContainsKey(currUser.Key))
-                        AddUser(currUser.Value);
-                }
+                Debug.LogError($"Cant add player {user.DisplayName}({user.ID}) to lobby: {LobbyID} twice");
+                return;
             }
 
-            OnChanged(this);
+            Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
+            m_LocalPlayers.Add(user.ID.Value, user);
+            onUserListChanged?.Invoke(m_LocalPlayers);
+        }
+
+        public void RemovePlayer(LocalPlayer user)
+        {
+            DoRemoveUser(user);
+            onUserListChanged?.Invoke(m_LocalPlayers);
+        }
+
+        void DoRemoveUser(LocalPlayer user)
+        {
+            if (!m_LocalPlayers.ContainsKey(user.ID.Value))
+            {
+                Debug.LogWarning($"Player {user.DisplayName}({user.ID}) does not exist in lobby: {LobbyID}");
+                return;
+            }
+
+            m_LocalPlayers.Remove(user.ID.Value);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder("Lobby : ");
+            sb.AppendLine(LobbyName.Value);
+            sb.Append("ID: ");
+            sb.AppendLine(LobbyID.Value);
+            sb.Append("Code: ");
+            sb.AppendLine(LobbyCode.Value);
+            sb.Append("Private: ");
+            sb.AppendLine(Private.Value.ToString());
+            sb.Append("AvailableSlots: ");
+            sb.AppendLine(AvailableSlots.Value.ToString());
+            sb.Append("Max Players: ");
+            sb.AppendLine(MaxPlayerCount.Value.ToString());
+            sb.Append("LocalLobbyState: ");
+            sb.AppendLine(LocalLobbyState.Value.ToString());
+            sb.Append("Lobby LocalLobbyState Last Edit: ");
+            sb.AppendLine(new DateTime(LastUpdated.Value).ToString());
+            sb.Append("LocalLobbyColor: ");
+            sb.AppendLine(LocalLobbyColor.Value.ToString());
+            sb.Append("RelayCode: ");
+            sb.AppendLine(RelayCode.Value);
+            sb.Append("RelayNGO: ");
+            sb.AppendLine(RelayNGOCode.Value);
+
+            return sb.ToString();
         }
 
         // This ends up being called from the lobby list when we get data about a lobby without having joined it yet.
         public override void CopyObserved(LocalLobby oldObserved)
         {
-            CopyObserved(oldObserved.Data, oldObserved.m_LobbyUsers);
+            // CopyObserved(oldObserved.Data, oldObserved.m_LocalPlayers);
         }
     }
 }

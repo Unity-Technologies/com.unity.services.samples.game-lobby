@@ -8,23 +8,10 @@ namespace LobbyRelaySample
     /// since precise timing isn't necessary.
     /// </summary>
     [RequireComponent(typeof(UI.CountdownUI))]
-    public class Countdown : MonoBehaviour, IReceiveMessages
+    public class Countdown : MonoBehaviour
     {
-        public class Data : Observed<Countdown.Data>
-        {
-            float m_timeLeft;
-            public float TimeLeft
-            {
-                get => m_timeLeft;
-                set
-                {   m_timeLeft = value;
-                    OnChanged(this);
-                }
-            }
-            public override void CopyObserved(Data oldObserved) { /*No-op, since this is unnecessary.*/ }
-        }
+        CallbackValue<float> TimeLeft = new CallbackValue<float>();
 
-        Data m_data = new Data();
         private UI.CountdownUI m_ui;
         private const int k_countdownTime = 4;
 
@@ -32,35 +19,27 @@ namespace LobbyRelaySample
         {
             if (m_ui == null)
                 m_ui = GetComponent<UI.CountdownUI>();
-            m_data.TimeLeft = -1;
-            Locator.Get.Messenger.Subscribe(this);
-            m_ui.BeginObserving(m_data);
-        }
-        public void OnDisable()
-        {
-            Locator.Get.Messenger.Unsubscribe(this);
-            m_ui.EndObserving();
+            TimeLeft.onChanged += m_ui.OnTimeChanged;
+            TimeLeft.Value = -1;
         }
 
-        public void OnReceiveMessage(MessageType type, object msg)
+        public void StartCountDown()
         {
-            if (type == MessageType.StartCountdown)
-            {
-                m_data.TimeLeft = k_countdownTime;
-            }
-            else if (type == MessageType.CancelCountdown)
-            {
-                m_data.TimeLeft = -1;
-            }
+            TimeLeft.Value = k_countdownTime;
+        }
+
+        public void CancelCountDown()
+        {
+            TimeLeft.Value = -1;
         }
 
         public void Update()
         {
-            if (m_data.TimeLeft < 0)
+            if (TimeLeft.Value < 0)
                 return;
-            m_data.TimeLeft -= Time.deltaTime;
-            if (m_data.TimeLeft < 0)
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.CompleteCountdown, null);
+            TimeLeft.Value -= Time.deltaTime;
+            if (TimeLeft.Value < 0)
+                GameManager.Instance.FinishedCountDown();
         }
     }
 }

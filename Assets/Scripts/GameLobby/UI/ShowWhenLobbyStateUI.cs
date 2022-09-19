@@ -11,9 +11,9 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         LobbyState m_ShowThisWhen;
 
-        public void LobbyChanged(LocalLobby lobby)
+        public void LobbyChanged(LobbyState lobbyState)
         {
-            if (m_ShowThisWhen.HasFlag(lobby.LobbyState))
+            if (m_ShowThisWhen.HasFlag(lobbyState))
                 Show();
             else
                 Hide();
@@ -22,14 +22,14 @@ namespace LobbyRelaySample.UI
         public override void Start()
         {
             base.Start();
-            Manager.LocalLobby.onLobbyChanged += LobbyChanged;
+            Manager.LocalLobby.LocalLobbyState.onChanged += LobbyChanged;
         }
 
         public void OnDestroy()
         {
             if (GameManager.Instance == null)
                 return;
-            Manager.LocalLobby.onLobbyChanged -= LobbyChanged;
+            Manager.LocalLobby.LocalLobbyState.onChanged -= LobbyChanged;
         }
     }
 }

@@ -24,15 +24,15 @@ namespace LobbyRelaySample.UI
 
         public override void ObservedUpdated(LocalPlayer observed)
         {
-            var hasStatusFlags = ShowThisWhen.HasFlag(observed.UserStatus);
+            var hasStatusFlags = ShowThisWhen.HasFlag(observed.UserStatus.Value);
 
             var hasPermissions = false;
 
-            if (Permissions.HasFlag(UserPermission.Host) && observed.IsHost)
+            if (Permissions.HasFlag(UserPermission.Host) && observed.IsHost.Value)
             {
                 hasPermissions = true;
             }
-            else if (Permissions.HasFlag(UserPermission.Client) && !observed.IsHost)
+            else if (Permissions.HasFlag(UserPermission.Client) && !observed.IsHost.Value)
             {
                 hasPermissions = true;
             }

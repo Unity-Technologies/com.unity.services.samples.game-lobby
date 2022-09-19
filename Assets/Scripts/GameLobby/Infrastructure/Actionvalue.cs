@@ -19,6 +19,11 @@ namespace LobbyRelaySample
             }
         }
 
+        public void SetNoCallback(T value)
+        {
+            m_CachedValue = value;
+        }
+
         T m_CachedValue = default;
     }
 }

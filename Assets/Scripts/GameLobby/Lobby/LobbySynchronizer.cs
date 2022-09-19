@@ -31,7 +31,7 @@ namespace LobbyRelaySample
         {
             m_LocalUser = localUser;
             m_LocalLobby = localLobby;
-            m_LocalLobby.onChanged += OnLocalLobbyChanged;
+            m_LocalLobby.LobbyID.onChanged += OnLobbyIdChanged;
             m_LocalChanges = true;
             Locator.Get.Messenger.Subscribe(this);
 #pragma warning disable 4014
@@ -46,7 +46,7 @@ namespace LobbyRelaySample
 
             Locator.Get.Messenger.Unsubscribe(this);
             if (m_LocalLobby != null)
-                m_LocalLobby.onChanged -= OnLocalLobbyChanged;
+                m_LocalLobby.LobbyID.onChanged -= OnLobbyIdChanged;
 
             m_LocalLobby = null;
         }
@@ -57,8 +57,8 @@ namespace LobbyRelaySample
 //            if (type == MessageType.ClientUserSeekingDisapproval)
 //            {
 //                bool shouldDisapprove =
-//                    m_LocalLobby.LobbyState !=
-//                    LobbyState.Lobby; // By not refreshing, it's possible to have a lobby in the lobby list UI after its countdown starts and then try joining.
+//                    m_LocalLobby.LocalLobbyState !=
+//                    LocalLobbyState.Lobby; // By not refreshing, it's possible to have a lobby in the lobby list UI after its countdown starts and then try joining.
 //                if (shouldDisapprove)
 //                    (msg as Action<relay.Approval>)?.Invoke(relay.Approval.GameAlreadyStarted);
 //            }
@@ -74,20 +74,13 @@ namespace LobbyRelaySample
 
             while (m_LocalLobby != null)
             {
-                if (m_LocalChanges)
-                {
-                    latestLobby = await PushDataToLobby();
-                }
-                else
-                {
-                    latestLobby = await m_LobbyManager.GetLobbyAsync();
-                }
+                latestLobby = await GetLatestRemoteLobby();
 
                 if (IfRemoteLobbyChanged(latestLobby))
                 {
-                    m_LocalLobby.changedByLobbySynch = true;
-                    LobbyConverters.RemoteToLocal(latestLobby, m_LocalLobby);
-                    m_LocalLobby.changedByLobbySynch = false;
+                    //Pulling remote changes, and applying them to the local lobby usually flags it as changed,
+                    //Causing another pull, the RemoteToLocal converter ensures this does not happen by flagging the lobby.
+                    LobbyConverters.RemoteToLocal(latestLobby, m_LocalLobby, false);
                 }
 
                 if (!LobbyHasHost())
@@ -96,71 +89,100 @@ namespace LobbyRelaySample
                     break;
                 }
 
+                var areAllusersReady = AreAllUsersReady();
+                if (areAllusersReady && m_LocalLobby.LocalLobbyState.Value == LobbyState.Lobby)
+                {
+                    GameManager.Instance.BeginCountdown();
+                }
+                else if (!areAllusersReady && m_LocalLobby.LocalLobbyState.Value == LobbyState.CountDown)
+                {
+                    GameManager.Instance.CancelCountDown();
+                }
+
                 m_lifetime += k_UpdateIntervalMS;
                 await Task.Delay(k_UpdateIntervalMS);
             }
-
-            bool IfRemoteLobbyChanged(Lobby remoteLobby)
-            {
-                var remoteLobbyTime = remoteLobby.LastUpdated.ToFileTimeUtc();
-                var localLobbyTime = m_LocalLobby.Data.LastEdit;
-                var isLocalOutOfDate = remoteLobbyTime > localLobbyTime;
-                return isLocalOutOfDate;
-            }
-
-            async Task<Lobby> PushDataToLobby()
-            {
-                m_LocalChanges = false;
-
-                if (m_LocalUser.IsHost)
-                    await m_LobbyManager.UpdateLobbyDataAsync(
-                        LobbyConverters.LocalToRemoteData(m_LocalLobby));
-
-                return await m_LobbyManager.UpdatePlayerDataAsync(
-                    LobbyConverters.LocalToRemoteUserData(m_LocalUser));
-            }
-
-            bool LobbyHasHost()
-            {
-                if (!m_LocalUser.IsHost)
-                {
-                    foreach (var lobbyUser in m_LocalLobby.LobbyUsers)
-                    {
-                        if (lobbyUser.Value.IsHost)
-                            return true;
-                    }
-
-                    return false;
-                }
-
-                return true;
-            }
-
-            void LeaveLobbyBecauseNoHost()
-            {
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
-                    "Host left the lobby! Disconnecting...");
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
-            }
         }
 
-        void OnLocalLobbyChanged(LocalLobby localLobby)
+        async Task<Lobby> GetLatestRemoteLobby()
         {
-            if (string.IsNullOrEmpty(localLobby.LobbyID.Value)
+            Lobby latestLobby = null;
+            if (m_LocalLobby.IsLobbyChanged())
+            {
+                latestLobby = await PushDataToLobby();
+            }
+            else
+            {
+                latestLobby = await m_LobbyManager.GetLobbyAsync();
+            }
+
+            return latestLobby;
+        }
+
+        bool IfRemoteLobbyChanged(Lobby remoteLobby)
+        {
+            var remoteLobbyTime = remoteLobby.LastUpdated.ToFileTimeUtc();
+            var localLobbyTime = m_LocalLobby.LastUpdated.Value;
+            var isLocalOutOfDate = remoteLobbyTime > localLobbyTime;
+            return isLocalOutOfDate;
+        }
+
+        async Task<Lobby> PushDataToLobby()
+        {
+            m_LocalChanges = false;
+
+            if (m_LocalUser.IsHost.Value)
+                await m_LobbyManager.UpdateLobbyDataAsync(
+                    LobbyConverters.LocalToRemoteData(m_LocalLobby));
+
+            return await m_LobbyManager.UpdatePlayerDataAsync(
+                LobbyConverters.LocalToRemoteUserData(m_LocalUser));
+        }
+
+        bool AreAllUsersReady()
+        {
+            foreach (var lobbyUser in m_LocalLobby.LocalPlayers.Values)
+            {
+                if (lobbyUser.UserStatus.Value != UserStatus.Ready)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool LobbyHasHost()
+        {
+            if (!m_LocalUser.IsHost.Value)
+            {
+                foreach (var lobbyUser in m_LocalLobby.LocalPlayers)
+                {
+                    if (lobbyUser.Value.IsHost.Value)
+                        return true;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        void LeaveLobbyBecauseNoHost()
+        {
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
+                "Host left the lobby! Disconnecting...");
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
+            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+        }
+
+        public void OnLobbyIdChanged(string lobbyID)
+        {
+            if (string.IsNullOrEmpty(lobbyID)
             ) // When the player leaves, their LocalLobby is cleared out.
             {
                 EndSynch();
-                return;
             }
-
-            //Catch for infinite update looping from the synchronizer.
-            if (localLobby.changedByLobbySynch)
-            {
-                return;
-            }
-
-            m_LocalChanges = true;
         }
 
         public void Dispose()

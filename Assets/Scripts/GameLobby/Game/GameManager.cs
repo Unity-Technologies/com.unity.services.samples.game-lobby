@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LobbyRelaySample.lobby;
+using LobbyRelaySample.ngo;
 using Unity.Services.Authentication;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -46,7 +47,6 @@ namespace LobbyRelaySample
         [SerializeField]
         List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
 
-
         #endregion
 
         public LocalLobby LocalLobby => m_LocalLobby;
@@ -56,6 +56,11 @@ namespace LobbyRelaySample
 
         public GameState LocalGameState { get; private set; }
         public LobbyManager LobbyManager { get; private set; }
+        [SerializeField]
+        SetupInGame m_setupInGame;
+        [SerializeField]
+        Countdown m_countdown;
+
         LocalPlayer m_LocalUser;
         LocalLobby m_LocalLobby;
         LobbySynchronizer m_LobbySynchronizer;
@@ -88,6 +93,24 @@ namespace LobbyRelaySample
             m_lobbyColorFilter = (LobbyColor)color;
         }
 
+        public async Task CreateLobby(string name, bool isPrivate, int maxPlayers = 4)
+        {
+            var lobby = await LobbyManager.CreateLobbyAsync(
+                name,
+                maxPlayers,
+                isPrivate, m_LocalUser);
+
+            if (lobby != null)
+            {
+                LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+                CreateLobby();
+            }
+            else
+            {
+                SetGameState(GameState.JoinMenu);
+            }
+        }
+
         /// <summary>
         /// The Messaging System handles most of the core Lobby Service calls, and catches the callbacks from those calls.
         /// These In turn update the observed variables and propagates the events to the game.
@@ -96,25 +119,7 @@ namespace LobbyRelaySample
         /// </summary>
         public async void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.CreateLobbyRequest)
-            {
-                LocalLobby.LobbyData createLobbyData = (LocalLobby.LobbyData)msg;
-                var lobby = await LobbyManager.CreateLobbyAsync(
-                    createLobbyData.LobbyName,
-                    createLobbyData.MaxPlayerCount,
-                    createLobbyData.Private, m_LocalUser);
-
-                if (lobby != null)
-                {
-                    LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
-                    CreateLobby();
-                }
-                else
-                {
-                    SetGameState(GameState.JoinMenu);
-                }
-            }
-            else if (type == MessageType.JoinLobbyRequest)
+            if (type == MessageType.JoinLobbyRequest)
             {
                 LocalLobby lobbyInfo = (LocalLobby)msg;
                 var lobby = await LobbyManager.JoinLobbyAsync(lobbyInfo.LobbyID.Value, lobbyInfo.LobbyCode.Value,
@@ -162,27 +167,20 @@ namespace LobbyRelaySample
                     return;
                 }
 
-                m_LocalUser.DisplayName = (string)msg;
+                m_LocalUser.DisplayName.Value = (string)msg;
             }
             else if (type == MessageType.UserSetEmote)
             {
                 EmoteType emote = (EmoteType)msg;
-                m_LocalUser.Emote = emote;
+                m_LocalUser.Emote.Value = emote;
             }
             else if (type == MessageType.LobbyUserStatus)
             {
-                m_LocalUser.UserStatus = (UserStatus)msg;
-            }
-            else if (type == MessageType.StartCountdown)
-            {
-                m_LocalLobby.LobbyState = LobbyState.CountDown;
-            }
-            else if (type == MessageType.CancelCountdown)
-            {
-                m_LocalLobby.LobbyState = LobbyState.Lobby;
+                m_LocalUser.UserStatus.Value = (UserStatus)msg;
             }
             else if (type == MessageType.CompleteCountdown)
             {
+                //Start game for everyone
                 if (m_RelayClient is RelayUtpHost)
                     (m_RelayClient as RelayUtpHost).SendInGameState();
             }
@@ -190,16 +188,31 @@ namespace LobbyRelaySample
             {
                 SetGameState((GameState)msg);
             }
-            else if (type == MessageType.ConfirmInGameState)
-            {
-                m_LocalUser.UserStatus = UserStatus.InGame;
-                m_LocalLobby.LobbyState = LobbyState.InGame;
-            }
+            else if (type == MessageType.ConfirmInGameState) { }
             else if (type == MessageType.EndGame)
             {
-                m_LocalLobby.LobbyState = LobbyState.Lobby;
+                m_LocalLobby.LocalLobbyState.Value = LobbyState.Lobby;
                 SetUserLobbyState();
             }
+        }
+
+        public void BeginCountdown()
+        {
+            m_LocalLobby.LocalLobbyState.Value = LobbyState.CountDown;
+            m_countdown.StartCountDown();
+        }
+
+        public void CancelCountDown()
+        {
+            m_countdown.CancelCountDown();
+            m_LocalLobby.LocalLobbyState.Value = LobbyState.Lobby;
+        }
+
+        public void FinishedCountDown()
+        {
+            m_LocalUser.UserStatus.Value = UserStatus.InGame;
+            m_LocalLobby.LocalLobbyState.Value = LobbyState.InGame;
+            m_setupInGame.StartNetworkedGame(m_LocalLobby, m_LocalUser);
         }
 
         #region Setup
@@ -214,8 +227,9 @@ namespace LobbyRelaySample
             Application.wantsToQuit += OnWantToQuit;
             LobbyManager = new LobbyManager();
             m_LobbySynchronizer = new LobbySynchronizer(LobbyManager);
+            InitLocalInstances();
             await InitializeServices();
-            InitializeLocalValues();
+            InitLocalPlayerId();
             StartVivoxLogin();
             Locator.Get.Messenger.Subscribe(this);
             BeginObservers();
@@ -230,16 +244,19 @@ namespace LobbyRelaySample
             await Auth.Authenticate(serviceProfileName);
         }
 
-        void InitializeLocalValues()
+        void InitLocalInstances()
         {
-            m_LocalLobby = new LocalLobby { LobbyState = LobbyState.Lobby };
-            m_LocalUser = new LocalPlayer();
-            m_LocalUser.ID = AuthenticationService.Instance.PlayerId;
-            m_LocalUser.DisplayName = NameGenerator.GetName(m_LocalUser.ID);
-            m_LocalLobby.AddPlayer(m_LocalUser); // The local LocalPlayer object will be hooked into UI
+            m_LocalLobby = new LocalLobby { LocalLobbyState = { Value = LobbyState.Lobby } };
+        }
 
-            // before the LocalLobby is populated during lobby join,
-            // so the LocalLobby must know about it already when that happens.
+        void InitLocalPlayerId()
+        {
+            var localId = AuthenticationService.Instance.PlayerId;
+            var randomName = NameGenerator.GetName(localId);
+
+            m_LocalUser = new LocalPlayer(localId, false, randomName);
+
+            m_LocalLobby.AddPlayer(m_LocalUser); // The local LocalPlayer object will be hooked into UI
         }
 
         void BeginObservers()
@@ -274,7 +291,7 @@ namespace LobbyRelaySample
 
         void CreateLobby()
         {
-            m_LocalUser.IsHost = true;
+            m_LocalUser.IsHost.Value = true;
             JoinLobby();
         }
 
@@ -346,7 +363,7 @@ namespace LobbyRelaySample
 
         void StartRelayConnection()
         {
-            if (m_LocalUser.IsHost)
+            if (m_LocalUser.IsHost.Value)
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetupHost>();
             else
                 m_RelaySetup = gameObject.AddComponent<RelayUtpSetupClient>();
@@ -385,7 +402,7 @@ namespace LobbyRelaySample
 
         void ResetLocalLobby()
         {
-            m_LocalLobby.CopyObserved(new LocalLobby.LobbyData(), new Dictionary<string, LocalPlayer>());
+            m_LocalLobby.ResetLobby();
             m_LocalLobby
                 .AddPlayer(m_LocalUser); // As before, the local player will need to be plugged into UI before the lobby join actually happens.
             m_LocalLobby.RelayServer = null;

@@ -293,7 +293,6 @@ GameObject:
   m_Component:
   - component: {fileID: 466693923092094802}
   - component: {fileID: 2177115228008557851}
-  - component: {fileID: 5843558592166708181}
   - component: {fileID: 6860436446719602335}
   - component: {fileID: 6749879306276389991}
   m_Layer: 5
@@ -332,33 +331,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4637522307789944801}
   m_CullTransparentMesh: 1
---- !u!114 &5843558592166708181
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4637522307789944801}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6860436446719602335}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.ServerNameUI, Assembly-CSharp
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &6860436446719602335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -747,7 +719,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1906352097507614706}
   - component: {fileID: 8834330287924717091}
-  - component: {fileID: 7526558453095601547}
   - component: {fileID: 279783410280127446}
   - component: {fileID: 8630015524497407890}
   m_Layer: 5
@@ -787,33 +758,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7079534792968695919}
   m_CullTransparentMesh: 1
---- !u!114 &7526558453095601547
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7079534792968695919}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 279783410280127446}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.ServerAddressUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &279783410280127446
 MonoBehaviour:
   m_ObjectHideFlags: 0

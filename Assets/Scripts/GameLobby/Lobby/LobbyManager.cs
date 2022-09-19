@@ -76,7 +76,7 @@ namespace LobbyRelaySample
         {
             Dictionary<string, PlayerDataObject> data = new Dictionary<string, PlayerDataObject>();
 
-            var displayNameObject = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, user.DisplayName);
+            var displayNameObject = new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, user.DisplayName.Value);
             data.Add("DisplayName", displayNameObject);
             return data;
         }
@@ -278,7 +278,7 @@ namespace LobbyRelaySample
             foreach (var dataNew in data)
             {
                 // Special case: We want to be able to filter on our color data, so we need to supply an arbitrary index to retrieve later. Uses N# for numerics, instead of S# for strings.
-                DataObject.IndexOptions index = dataNew.Key == "LobbyColor" ? DataObject.IndexOptions.N1 : 0;
+                DataObject.IndexOptions index = dataNew.Key == "LocalLobbyColor" ? DataObject.IndexOptions.N1 : 0;
                 DataObject
                     dataObj = new DataObject(DataObject.VisibilityOptions.Public, dataNew.Value,
                         index); // Public so that when we request the list of lobbies, we can get info about them for filtering.
@@ -287,8 +287,8 @@ namespace LobbyRelaySample
                 else
                     dataCurr.Add(dataNew.Key, dataObj);
 
-                //Special Use: Get the state of the Local lobby so we can lock it from appearing in queries if it's not in the "Lobby" LobbyState
-                if (dataNew.Key == "LobbyState")
+                //Special Use: Get the state of the Local lobby so we can lock it from appearing in queries if it's not in the "Lobby" LocalLobbyState
+                if (dataNew.Key == "LocalLobbyState")
                 {
                     Enum.TryParse(dataNew.Value, out LobbyState lobbyState);
                     shouldLock = lobbyState != LobbyState.Lobby;

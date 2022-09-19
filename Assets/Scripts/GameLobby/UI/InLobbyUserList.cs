@@ -3,25 +3,28 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
-    /// <summary>
-    /// Contains the InLobbyUserUI instances while showing the UI for a lobby.
-    /// </summary>
-    [RequireComponent(typeof(LocalLobbyObserver))]
-    public class InLobbyUserList : ObserverPanel<LocalLobby>
+    public class InLobbyUserList : UIPanelBase
     {
         [SerializeField]
         List<InLobbyUserUI> m_UserUIObjects = new List<InLobbyUserUI>();
-        List<string> m_CurrentUsers = new List<string>(); // Just for keeping track more easily of which users are already displayed.
+        List<string>
+            m_CurrentUsers =
+                new List<string>(); // Just for keeping track more easily of which users are already displayed.
 
-        /// <summary>
-        /// When the observed data updates, we need to detect changes to the list of players.
-        /// </summary>
-        public override void ObservedUpdated(LocalLobby observed)
+        public override void Start()
         {
-            for (int id = m_CurrentUsers.Count - 1; id >= 0; id--) // We might remove users if they aren't in the new data, so iterate backwards.
+            base.Start();
+            GameManager.Instance.LocalLobby.onUserListChanged += OnUsersChanged;
+        }
+
+        void OnUsersChanged(Dictionary<string, LocalPlayer> newUserDict)
+        {
+            for (int id = m_CurrentUsers.Count - 1;
+                id >= 0;
+                id--) // We might remove users if they aren't in the new data, so iterate backwards.
             {
                 string userId = m_CurrentUsers[id];
-                if (!observed.LobbyUsers.ContainsKey(userId))
+                if (!newUserDict.ContainsKey(userId))
                 {
                     foreach (var ui in m_UserUIObjects)
                     {
@@ -34,7 +37,7 @@ namespace LobbyRelaySample.UI
                 }
             }
 
-            foreach (var lobbyUserKvp in observed.LobbyUsers) // If there are new players, we need to hook them into the UI.
+            foreach (var lobbyUserKvp in newUserDict) // If there are new players, we need to hook them into the UI.
             {
                 if (m_CurrentUsers.Contains(lobbyUserKvp.Key))
                     continue;

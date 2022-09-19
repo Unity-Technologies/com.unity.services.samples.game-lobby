@@ -8,7 +8,8 @@ namespace LobbyRelaySample.UI
     public class CreateMenuUI : UIPanelBase
     {
         public JoinCreateLobbyUI m_JoinCreateLobbyUI;
-        private LocalLobby.LobbyData m_ServerRequestData = new LocalLobby.LobbyData { LobbyName = "New Lobby", MaxPlayerCount = 4 };
+        string m_ServerName;
+        bool m_IsServerPrivate;
 
         public override void Start()
         {
@@ -30,17 +31,20 @@ namespace LobbyRelaySample.UI
 
         public void SetServerName(string serverName)
         {
-            m_ServerRequestData.LobbyName = serverName;
+            m_ServerName = serverName;
         }
 
         public void SetServerPrivate(bool priv)
         {
-            m_ServerRequestData.Private = priv;
+            m_IsServerPrivate = priv;
         }
 
         public void OnCreatePressed()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.CreateLobbyRequest, m_ServerRequestData);
+            //Disabled as it's a one-off butto call
+#pragma warning disable 4014
+            GameManager.Instance.CreateLobby(m_ServerName, m_IsServerPrivate);
+#pragma warning restore 4014
         }
     }
 }

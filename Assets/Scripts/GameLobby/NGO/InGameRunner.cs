@@ -49,7 +49,7 @@ namespace LobbyRelaySample.ngo
             m_expectedPlayerCount = expectedPlayerCount;
             m_onGameEnd = onGameEnd;
             m_canSpawnInGameObjects = null;
-            m_localUserData = new PlayerData(localUser.DisplayName, 0);
+            m_localUserData = new PlayerData(localUser.DisplayName.Value, 0);
             Locator.Get.Provide(this); // Simplifies access since some networked objects can't easily communicate locally (e.g. the host might call a ClientRpc without that client knowing where the call originated).
         }
 

@@ -166,7 +166,7 @@ namespace LobbyRelaySample.relay
 
 		protected override void JoinRelay()
 		{
-			RelayAPIInterface.AllocateAsync(m_localLobby.MaxPlayerCount, OnAllocation);
+			RelayAPIInterface.AllocateAsync(m_localLobby.MaxPlayerCount.Value, OnAllocation);
 		}
 
 		private void OnAllocation(Allocation allocation)

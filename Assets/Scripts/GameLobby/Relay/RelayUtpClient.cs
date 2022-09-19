@@ -135,17 +135,17 @@ namespace LobbyRelaySample.relay
                 {
                     int nameLength = msgContents[0];
                     string name = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(1, nameLength).ToArray());
-                    m_localLobby.LobbyUsers[id].DisplayName = name;
+                    m_localLobby.LocalPlayers[id].DisplayName.Value = name;
                 }
                 else if (msgType == MsgType.Emote)
                 {
                     EmoteType emote = (EmoteType)msgContents[0];
-                    m_localLobby.LobbyUsers[id].Emote = emote;
+                    m_localLobby.LocalPlayers[id].Emote.Value = emote;
                 }
                 else if (msgType == MsgType.ReadyState)
                 {
                     UserStatus status = (UserStatus)msgContents[0];
-                    m_localLobby.LobbyUsers[id].UserStatus = status;
+                    m_localLobby.LocalPlayers[id].UserStatus.Value = status;
                 }
                 else if (msgType == MsgType.StartCountdown)
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
@@ -166,7 +166,7 @@ namespace LobbyRelaySample.relay
         {
             // Don't react to our own messages. Also, don't need to hold onto messages if the ID is absent; clients should be initialized and in the lobby before they send events.
             // (Note that this enforces lobby membership before processing any events besides an approval request, so a client is unable to fully use Relay unless they're in the lobby.)
-            return true;// != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LobbyUsers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
+            return true;// != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LocalPlayers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
         }
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id) { }
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
@@ -205,7 +205,7 @@ namespace LobbyRelaySample.relay
         /// </summary>
         private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
         {
-            WriteByte(driver, connection, m_localUser.ID, MsgType.NewPlayer, 0);
+            WriteByte(driver, connection, m_localUser.ID.Value, MsgType.NewPlayer, 0);
             m_hasSentInitialMessage = true;
         }
         private void OnApproved(NetworkDriver driver, NetworkConnection connection)
@@ -227,9 +227,9 @@ namespace LobbyRelaySample.relay
         protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LocalPlayer user)
         {
             // Note that it would be better to send a single message with the full state, but for the sake of shorter code we'll leave that out here.
-            WriteString(driver, connection, user.ID, MsgType.PlayerName, user.DisplayName);
-            WriteByte(driver, connection, user.ID, MsgType.Emote, (byte)user.Emote);
-            WriteByte(driver, connection, user.ID, MsgType.ReadyState, (byte)user.UserStatus);
+            WriteString(driver, connection, user.ID.Value, MsgType.PlayerName, user.DisplayName.Value);
+            WriteByte(driver, connection, user.ID.Value, MsgType.Emote, (byte)user.Emote.Value);
+            WriteByte(driver, connection, user.ID.Value, MsgType.ReadyState, (byte)user.UserStatus.Value);
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace LobbyRelaySample.relay
         {
             foreach (NetworkConnection connection in m_connections)
                 // If the client calls Disconnect, the host might not become aware right away (depending on when the PubSub messages get pumped), so send a message over UTP instead.
-                WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.PlayerDisconnect, 0);
+                WriteByte(m_networkDriver, connection, m_localUser.ID.Value, MsgType.PlayerDisconnect, 0);
             m_localLobby.RelayServer = null;
         }
     }

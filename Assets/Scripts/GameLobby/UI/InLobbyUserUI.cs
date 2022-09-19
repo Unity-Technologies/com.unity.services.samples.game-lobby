@@ -9,8 +9,7 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// When inside a lobby, this will show information about a player, whether local or remote.
     /// </summary>
-    [RequireComponent(typeof(LobbyUserObserver))]
-    public class InLobbyUserUI : ObserverPanel<LocalPlayer>
+    public class InLobbyUserUI : UIPanelBase
     {
         [SerializeField]
         TMP_Text m_DisplayNameText;
@@ -31,33 +30,60 @@ namespace LobbyRelaySample.UI
         vivox.VivoxUserHandler m_vivoxUserHandler;
 
         public bool IsAssigned => UserId != null;
-
         public string UserId { get; set; }
-        LobbyUserObserver m_observer;
+        LocalPlayer m_localPlayer;
 
         public void SetUser(LocalPlayer myLocalPlayer)
         {
             Show();
-            if (m_observer == null)
-                m_observer = GetComponent<LobbyUserObserver>();
-            m_observer.BeginObserving(myLocalPlayer);
-            UserId = myLocalPlayer.ID;
+            SubscribeToPlayerUpdates();
+
+            UserId = myLocalPlayer.ID.Value;
             m_vivoxUserHandler.SetId(UserId);
+        }
+
+        public void SubscribeToPlayerUpdates()
+        {
+            m_localPlayer.DisplayName.onChanged += SetDisplayName;
+            m_localPlayer.UserStatus.onChanged += SetUserStatus;
+            m_localPlayer.Emote.onChanged += SetEmote;
+            m_localPlayer.IsHost.onChanged += SetIsHost;
+        }
+
+        public void UnsubscribeToPlayerUpdates()
+        {
+            m_localPlayer.DisplayName.onChanged -= SetDisplayName;
+            m_localPlayer.UserStatus.onChanged -= SetUserStatus;
+            m_localPlayer.Emote.onChanged -= SetEmote;
+            m_localPlayer.IsHost.onChanged -= SetIsHost;
         }
 
         public void OnUserLeft()
         {
             UserId = null;
             Hide();
-            m_observer.EndObserving();
+            UnsubscribeToPlayerUpdates();
+            m_localPlayer = null;
         }
 
-        public override void ObservedUpdated(LocalPlayer observed)
+        void SetDisplayName(string displayName)
         {
-            m_DisplayNameText.SetText(observed.DisplayName);
-            m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
-            m_EmoteImage.sprite = EmoteIcon(observed.Emote);
-            m_HostIcon.enabled = observed.IsHost;
+            m_DisplayNameText.SetText(displayName);
+        }
+
+        void SetUserStatus(UserStatus statusText)
+        {
+            m_StatusText.SetText(SetStatusFancy(statusText));
+        }
+
+        void SetEmote(EmoteType emote)
+        {
+            m_EmoteImage.sprite = EmoteIcon(emote);
+        }
+
+        void SetIsHost(bool isHost)
+        {
+            m_HostIcon.enabled = isHost;
         }
 
         /// <summary>
