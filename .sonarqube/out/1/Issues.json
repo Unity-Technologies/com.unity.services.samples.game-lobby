@@ -1,0 +1,443 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Microsoft (R) Visual C# Compiler",
+        "version": "4.0.0.0",
+        "fileVersion": "4.0.1-1.22116.5 (ff289c43)",
+        "semanticVersion": "4.0.0",
+        "language": "en-US"
+      },
+      "results": [
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LobbyUserObserver.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/InLobbyUserList.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Lobby/LobbyContentHeartbeat.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Auth/Identity.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/BackButtonUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Lobby/LobbyAPIInterface.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Lobby/LobbyAsyncRequests.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/InGameRunner.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LocalMenuState.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Auth/NameGenerator.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/Scorer.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/IntroOutroRunner.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/SequenceSelector.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Relay/RelayAPIInterface.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/PlayerCursor.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/RecolorForLobbyType.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/ExitButtonUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Relay/RelayPendingApproval.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/ResultsUserUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/SpinnerUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LocalLobbyObserver.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/LobbyUserVolumeUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/UserStateVisibilityUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/DisplayCodeUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Auth/SubIdentity_Authentication.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/CreateMenuUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/UserNameUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/LogHandlerSettings.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Relay/RelayUtpHost.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LobbyUserAudio.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/LobbyNameUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/AsyncRequest.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/EmoteButtonUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/JoinCreateLobbyUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Relay/AsyncRequestRelay.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/UIPanelBase.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Vivox/VivoxSetup.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/StartLobbyButtonUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/ShowWhenLobbyStateUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/NetworkedDataStore.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/Observed.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/SymbolContainer.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/GameStateVisibilityUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/LobbyButtonUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/EndGameButtonUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LobbyServiceDataObserver.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/EmoteType.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/NameChangeUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/SymbolKillVolume.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/UITinter.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/InLobbyUserUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/RelayNGOUtpSetup.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/SymbolObject.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/ServerAddress.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LobbyUser.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/JoinMenuUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/ObserverPanel.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/SetupInGame.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Lobby/ToLocalLobby.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/LogHandler.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LobbyServiceData.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/PopUpUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/Countdown.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/UpdateSlow.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LocalLobby.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Relay/RelayUtpSetup.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/ReadyCheckUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/SymbolData.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/Messenger.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Relay/RelayUtpClient.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/MainMenuUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/ObserverBehaviour.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/CountdownUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Lobby/AsyncRequestLobby.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/RelayAddressUI.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/IInGameInputHandler.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/LocalMenuStateObserver.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Game/GameManager.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Vivox/VivoxUserHandler.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/Infrastructure/Locator.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/UI/RateLimitVisibility.cs' could not be found."
+        },
+        {
+          "ruleId": "CS2001",
+          "level": "error",
+          "message": "Source file '/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/Scripts/GameLobby/NGO/PlayerData.cs' could not be found."
+        }
+      ],
+      "rules": {
+        "CS2001": {
+          "id": "CS2001",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS2001)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

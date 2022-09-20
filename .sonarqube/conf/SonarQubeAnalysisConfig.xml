@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnalysisConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <SonarConfigDir>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf</SonarConfigDir>
+  <SonarOutputDir>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/out</SonarOutputDir>
+  <SonarBinDir>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/bin</SonarBinDir>
+  <SonarScannerWorkingDirectory>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby</SonarScannerWorkingDirectory>
+  <HasBeginStepCommandLineCredentials>true</HasBeginStepCommandLineCredentials>
+  <SonarQubeHostUrl>https://sonar-staging.internal.unity3d.com</SonarQubeHostUrl>
+  <SonarQubeVersion>8.9.6.50800</SonarQubeVersion>
+  <SonarProjectKey>55de63269e991771a94da92d0f4caca3d887b65d</SonarProjectKey>
+  <AdditionalConfig>
+    <ConfigSetting Id="BuildUri" />
+    <ConfigSetting Id="TfsUri" />
+    <ConfigSetting Id="VsCoverageConverterToolPath" />
+    <ConfigSetting Id="settings.file.path" Value="/Users/jacob.lorentzen/.dotnet/tools/.store/dotnet-sonarscanner/5.5.3/dotnet-sonarscanner/5.5.3/tools/net5.0/any/SonarQube.Analysis.xml" />
+  </AdditionalConfig>
+  <ServerSettings>
+    <Property Name="sonaranalyzer-cs.nuget.packageVersion">8.22.0.31243</Property>
+    <Property Name="sonaranalyzer.security.cs.pluginVersion">8.9.0.11439</Property>
+    <Property Name="sonar.cs.ignoreHeaderComments">true</Property>
+    <Property Name="sonar.c.file.suffixes">.c,.h</Property>
+    <Property Name="sonar.typescript.file.suffixes">.ts,.tsx</Property>
+    <Property Name="sonar.groovy.file.suffixes">.groovy</Property>
+    <Property Name="email.fromName">Unity SonarQube Staging Instance</Property>
+    <Property Name="sonar.python.xunit.skipDetails">false</Property>
+    <Property Name="sonar.go.exclusions">**/vendor/**</Property>
+    <Property Name="sonar.forceAuthentication">true</Property>
+    <Property Name="sonar.notifications.delay">60</Property>
+    <Property Name="sonar.cpp.file.suffixes">.cc,.cpp,.cxx,.c++,.hh,.hpp,.hxx,.h++,.ipp</Property>
+    <Property Name="sonar.groovy.ignoreHeaderComments">true</Property>
+    <Property Name="sonar.groovy.jacoco.itReportPath">target/jacoco-it.exec</Property>
+    <Property Name="sonaranalyzer.security.cs.nuget.packageVersion">8.9.0.11439</Property>
+    <Property Name="sonaranalyzer-cs.ruleNamespace">SonarAnalyzer.CSharp</Property>
+    <Property Name="sonar.cs.analyzeGeneratedCode">false</Property>
+    <Property Name="sonar.builtInQualityProfiles.disableNotificationOnUpdate">true</Property>
+    <Property Name="sonar.css.file.suffixes">.css,.less,.scss</Property>
+    <Property Name="sonar.html.file.suffixes">.html,.xhtml,.cshtml,.vbhtml,.aspx,.ascx,.rhtml,.erb,.shtm,.shtml</Property>
+    <Property Name="sonar.auth.gitlab.enabled">false</Property>
+    <Property Name="sonar.vb.file.suffixes">.vb,.bas,.frm,.cls,.ctl,.VB,.BAS,.FRM,.CLS,.CTL</Property>
+    <Property Name="sonar.cpd.cross_project">false</Property>
+    <Property Name="sonar.vbnet.ignoreHeaderComments">true</Property>
+    <Property Name="sonaranalyzer.security.cs.nuget.packageId">SonarAnalyzer.Security</Property>
+    <Property Name="sonar.auth.github.groupsSync">false</Property>
+    <Property Name="sonar.scala.file.suffixes">.scala</Property>
+    <Property Name="sonaranalyzer-vbnet.ruleNamespace">SonarAnalyzer.VisualBasic</Property>
+    <Property Name="sonar.javascript.ignoreHeaderComments">true</Property>
+    <Property Name="sonar.dbcleaner.daysBeforeDeletingClosedIssues">30</Property>
+    <Property Name="sonar.shell.skip">false</Property>
+    <Property Name="sonar.dbcleaner.weeksBeforeKeepingOnlyOneSnapshotByMonth">52</Property>
+    <Property Name="sonar.lf.gravatarServerUrl">https://secure.gravatar.com/avatar/{EMAIL_MD5}.jpg?s={SIZE}&amp;d=identicon</Property>
+    <Property Name="sonar.governance.report.view.frequency">Monthly</Property>
+    <Property Name="sonar.notifications.runningDelayBeforeReportingStatus">600</Property>
+    <Property Name="sonar.jsp.file.suffixes">.jsp,.jspf,.jspx</Property>
+    <Property Name="sonar.javascript.maxFileSize">1000</Property>
+    <Property Name="sonar.javascript.environments">amd, applescript, atomtest, browser, commonjs, couch, embertest, flow, greasemonkey, jasmine, jest, jquery, meteor, mocha, mongo, nashorn, node, phantomjs, prototypejs, protractor, qunit, rhino, serviceworker, shared-node-browser, shelljs, webextensions, worker, wsh, yui</Property>
+    <Property Name="sonar.scm.disabled">true</Property>
+    <Property Name="sonar.ruby.exclusions">**/vendor/**</Property>
+    <Property Name="sonar.auth.saml.enabled">true</Property>
+    <Property Name="sonar.vbnet.file.suffixes">.vb</Property>
+    <Property Name="sonar.cfamily.ignoreHeaderComments">true</Property>
+    <Property Name="sonar.technicalDebt.developmentCost">30</Property>
+    <Property Name="sonar.validateWebhooks">true</Property>
+    <Property Name="sonar.python.file.suffixes">py</Property>
+    <Property Name="sonar.cs.file.suffixes">.cs</Property>
+    <Property Name="sonaranalyzer.security.cs.ruleNamespace">SonarAnalyzer.Security</Property>
+    <Property Name="sonar.allowPermissionManagementForProjectAdmins">true</Property>
+    <Property Name="sonaranalyzer-vbnet.staticResourceName">SonarAnalyzer-8.22.0.31243.zip</Property>
+    <Property Name="sonar.java.file.suffixes">.java,.jav</Property>
+    <Property Name="sonar.kotlin.file.suffixes">.kt</Property>
+    <Property Name="sonar.php.file.suffixes">php,php3,php4,php5,phtml,inc</Property>
+    <Property Name="sonar.xml.file.suffixes">.xml,.xsd,.xsl</Property>
+    <Property Name="sonar.dbcleaner.weeksBeforeDeletingAllSnapshots">260</Property>
+    <Property Name="sonar.auth.github.enabled">false</Property>
+    <Property Name="sonar.python.coverage.reportPaths">coverage-reports/*coverage-*.xml</Property>
+    <Property Name="sonar.javascript.jQueryObjectAliases">$, jQuery</Property>
+    <Property Name="sonaranalyzer-vbnet.nuget.packageVersion">8.22.0.31243</Property>
+    <Property Name="sonar.go.file.suffixes">.go</Property>
+    <Property Name="sonar.auth.saml.applicationId">sonarqube</Property>
+    <Property Name="sonar.dbcleaner.weeksBeforeKeepingOnlyAnalysesWithVersion">104</Property>
+    <Property Name="sonar.qualitygate.ignoreSmallChanges">true</Property>
+    <Property Name="sonar.php.exclusions">**/vendor/**</Property>
+    <Property Name="sonar.ps.tokenizer.skip">false</Property>
+    <Property Name="sonar.swift.file.suffixes">.swift</Property>
+    <Property Name="sonar.vbnet.roslyn.ignoreIssues">false</Property>
+    <Property Name="sonar.auth.gitlab.groupsSync">false</Property>
+    <Property Name="sonar.auth.github.apiUrl">https://api.github.com/</Property>
+    <Property Name="sonar.ruby.file.suffixes">.rb</Property>
+    <Property Name="sonar.auth.github.allowUsersToSignUp">false</Property>
+    <Property Name="sonar.python.xunit.reportPath">xunit-reports/xunit-result-*.xml</Property>
+    <Property Name="sonar.javascript.globals">angular,goog,google,OpenLayers,d3,dojo,dojox,dijit,Backbone,moment,casper</Property>
+    <Property Name="sonar.dbcleaner.hoursBeforeKeepingOnlyOneSnapshotByDay">24</Property>
+    <Property Name="sonar.dbcleaner.daysBeforeDeletingInactiveBranchesAndPRs">30</Property>
+    <Property Name="sonar.ps.executable">powershell.exe</Property>
+    <Property Name="sonar.auth.github.webUrl">https://github.com/</Property>
+    <Property Name="sonar.dbcleaner.branchesToKeepWhenInactive">master,develop,trunk,branch-.*,release-.*,main</Property>
+    <Property Name="sonaranalyzer-vbnet.nuget.packageId">SonarAnalyzer.VisualBasic</Property>
+    <Property Name="email.from">noreply@nowhere</Property>
+    <Property Name="sonaranalyzer-vbnet.pluginVersion">8.22.0.31243</Property>
+    <Property Name="sonaranalyzer.security.cs.analyzerId">SonarAnalyzer.Security</Property>
+    <Property Name="sonar.ps.plugin.skip">false</Property>
+    <Property Name="sonar.dbcleaner.weeksBeforeKeepingOnlyOneSnapshotByWeek">4</Property>
+    <Property Name="sonaranalyzer-vbnet.analyzerId">SonarAnalyzer.VisualBasic</Property>
+    <Property Name="email.prefix">[SONARQUBE-STAGING]</Property>
+    <Property Name="sonar.cs.roslyn.ignoreIssues">false</Property>
+    <Property Name="sonaranalyzer-cs.pluginKey">csharp</Property>
+    <Property Name="sonaranalyzer.security.cs.pluginKey">securitycsharpfrontend</Property>
+    <Property Name="sonar.vb.ignoreHeaderComments">true</Property>
+    <Property Name="sonar.auth.saml.providerName">Okta</Property>
+    <Property Name="sonar.objc.file.suffixes">.m</Property>
+    <Property Name="sonar.ruby.coverage.reportPaths">coverage/.resultset.json</Property>
+    <Property Name="sonaranalyzer-cs.staticResourceName">SonarAnalyzer-8.22.0.31243.zip</Property>
+    <Property Name="sonar.auth.gitlab.allowUsersToSignUp">true</Property>
+    <Property Name="sonaranalyzer-cs.nuget.packageId">SonarAnalyzer.CSharp</Property>
+    <Property Name="sonar.groovy.jacoco.reportPath">target/jacoco.exec</Property>
+    <Property Name="sonar.authenticator.downcase">false</Property>
+    <Property Name="sonaranalyzer-cs.analyzerId">SonarAnalyzer.CSharp</Property>
+    <Property Name="sonar.ps.file.suffixes">.ps1,.psm1,.psd1</Property>
+    <Property Name="sonar.technicalDebt.ratingGrid">0.05,0.1,0.2,0.5</Property>
+    <Property Name="sonar.lf.enableGravatar">false</Property>
+    <Property Name="sonaranalyzer-cs.pluginVersion">8.22.0.31243</Property>
+    <Property Name="sonaranalyzer.security.cs.staticResourceName">SonarAnalyzer.Security-8.9.0.11439.zip</Property>
+    <Property Name="sonar.groovy.jacoco.reportMissing.force.zero">false</Property>
+    <Property Name="sonar.developerAggregatedInfo.disabled">false</Property>
+    <Property Name="sonar.ps.tokenizer.timeout">3600</Property>
+    <Property Name="sonar.javascript.file.suffixes">.js,.jsx,.mjs,.vue</Property>
+    <Property Name="sonar.shell.file.suffixes">.sh,.ksh,.bash</Property>
+    <Property Name="sonar.vbnet.analyzeGeneratedCode">false</Property>
+    <Property Name="sonar.plugins.risk.consent">ACCEPTED</Property>
+    <Property Name="sonar.auth.gitlab.url">https://gitlab.com</Property>
+    <Property Name="sonaranalyzer-vbnet.pluginKey">vbnet</Property>
+    <Property Name="sonar.updatecenter.url">https://update.sonarsource.org/update-center.properties</Property>
+    <Property Name="sonar.core.id">51804F84-AWaq1I01Cscm-M1bfiTm</Property>
+    <Property Name="sonar.core.serverBaseURL">https://sonar-staging.internal.unity3d.com</Property>
+    <Property Name="sonar.license.notifications.remainingLocThreshold">1000000</Property>
+    <Property Name="sonar.auth.github.organizations">Applifier,Unity-Technologies,UnityTech</Property>
+    <Property Name="sonar.auth.saml.providerId">http://www.okta.com/exk8uc0bb9HtazLmJ2p7</Property>
+    <Property Name="sonar.auth.saml.loginUrl">https://unity.okta.com/app/unity_sonarqubestagingsamlconfig_1/exk8uc0bb9HtazLmJ2p7/sso/saml</Property>
+    <Property Name="sonar.auth.saml.user.login">login</Property>
+    <Property Name="sonar.auth.saml.user.name">name</Property>
+    <Property Name="sonar.auth.saml.user.email">email</Property>
+    <Property Name="sonar.core.startTime">3/18/2022 11:04:40 AM</Property>
+  </ServerSettings>
+  <LocalSettings>
+    <Property Name="sonar.host.url">https://sonar-staging.internal.unity3d.com</Property>
+  </LocalSettings>
+  <AnalyzersSettings>
+    <AnalyzerSettings>
+      <Language>cs</Language>
+      <RulesetPath>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf/Sonar-cs.ruleset</RulesetPath>
+      <DeactivatedRulesetPath>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf/Sonar-cs-none.ruleset</DeactivatedRulesetPath>
+      <AnalyzerPlugins>
+        <AnalyzerPlugin Key="csharp" Version="8.22.0.31243" StaticResourceName="SonarAnalyzer-8.22.0.31243.zip">
+          <AssemblyPaths>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/Google.Protobuf.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/SonarAnalyzer.CFG.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/SonarAnalyzer.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/SonarAnalyzer.CSharp.dll</Path>
+          </AssemblyPaths>
+        </AnalyzerPlugin>
+        <AnalyzerPlugin Key="vbnet" Version="8.22.0.31243" StaticResourceName="SonarAnalyzer-8.22.0.31243.zip">
+          <AssemblyPaths>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/1/SonarAnalyzer.VisualBasic.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/1/Google.Protobuf.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/1/SonarAnalyzer.dll</Path>
+          </AssemblyPaths>
+        </AnalyzerPlugin>
+        <AnalyzerPlugin Key="securitycsharpfrontend" Version="8.9.0.11439" StaticResourceName="SonarAnalyzer.Security-8.9.0.11439.zip">
+          <AssemblyPaths>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/Microsoft.AspNetCore.Razor.Language.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/System.Buffers.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/System.Runtime.CompilerServices.Unsafe.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/SonarAnalyzer.Security.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/System.Numerics.Vectors.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/Google.Protobuf.License.txt</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/2/System.Memory.dll</Path>
+          </AssemblyPaths>
+        </AnalyzerPlugin>
+      </AnalyzerPlugins>
+      <AdditionalFilePaths>
+        <Path>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf/cs/SonarLint.xml</Path>
+      </AdditionalFilePaths>
+    </AnalyzerSettings>
+    <AnalyzerSettings>
+      <Language>vbnet</Language>
+      <RulesetPath>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf/Sonar-vbnet.ruleset</RulesetPath>
+      <DeactivatedRulesetPath>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf/Sonar-vbnet-none.ruleset</DeactivatedRulesetPath>
+      <AnalyzerPlugins>
+        <AnalyzerPlugin Key="csharp" Version="8.22.0.31243" StaticResourceName="SonarAnalyzer-8.22.0.31243.zip">
+          <AssemblyPaths>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/Google.Protobuf.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/SonarAnalyzer.CFG.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/SonarAnalyzer.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/0/SonarAnalyzer.CSharp.dll</Path>
+          </AssemblyPaths>
+        </AnalyzerPlugin>
+        <AnalyzerPlugin Key="vbnet" Version="8.22.0.31243" StaticResourceName="SonarAnalyzer-8.22.0.31243.zip">
+          <AssemblyPaths>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/1/SonarAnalyzer.VisualBasic.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/1/Google.Protobuf.dll</Path>
+            <Path>/var/folders/v0/cn2_dvwj27z87qqngyq85_bw0000gp/T/.sonarqube/resources/1/SonarAnalyzer.dll</Path>
+          </AssemblyPaths>
+        </AnalyzerPlugin>
+      </AnalyzerPlugins>
+      <AdditionalFilePaths>
+        <Path>/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/.sonarqube/conf/vbnet/SonarLint.xml</Path>
+      </AdditionalFilePaths>
+    </AnalyzerSettings>
+  </AnalyzersSettings>
+</AnalysisConfig>

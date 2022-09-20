@@ -1,0 +1,23 @@
+﻿/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMPro.cginc
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMPro_Properties.cginc
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMPro_Surface.cginc
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Sprites/EmojiOne.json
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Shaders/TMP_Sprite.shader
+/Users/jacob.lorentzen/Projects/com.unity.services.samples.game-lobby/csproj/Assets/TextMesh Pro/Fonts/Bangers - OFL.txt
