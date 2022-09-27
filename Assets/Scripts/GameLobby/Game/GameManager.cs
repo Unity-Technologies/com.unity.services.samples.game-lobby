@@ -59,11 +59,6 @@ namespace LobbyRelaySample
 
         private void Awake()
         {
-            // Do some arbitrary operations to instantiate singletons.
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-            var unused = Locator.Get;
-#pragma warning restore IDE0059
-
             Locator.Get.Provide(new Auth.Identity(OnAuthSignIn));
             Application.wantsToQuit += OnWantToQuit;
         }

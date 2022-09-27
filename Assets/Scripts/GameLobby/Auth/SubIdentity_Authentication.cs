@@ -1,6 +1,11 @@
-﻿using System;
+using System;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+
+#if UNITY_EDITOR
+using UnityEngine;
+using ParrelSync;
+#endif
 
 namespace LobbyRelaySample.Auth
 {
@@ -35,6 +40,18 @@ namespace LobbyRelaySample.Auth
         private async void DoSignIn(Action onSigninComplete)
         {
             await UnityServices.InitializeAsync();
+
+            #if UNITY_EDITOR
+            if (ClonesManager.IsClone())
+            {
+                // When using a ParrelSync clone, we'll automatically switch to a different authentication profile.
+                // This will cause the clone to sign in as a different anonymous user account.  If you're going to use
+                // authentication profiles for some other purpose, you may need to change the profile name.
+                string customArgument = ClonesManager.GetArgument();
+                AuthenticationService.Instance.SwitchProfile($"Clone_{customArgument}_Profile");
+            }
+            #endif
+
             AuthenticationService.Instance.SignedIn += OnSignInChange;
             AuthenticationService.Instance.SignedOut += OnSignInChange;
 
@@ -44,7 +61,7 @@ namespace LobbyRelaySample.Auth
                 onSigninComplete?.Invoke();
             }
             catch
-            {   UnityEngine.Debug.LogError("Failed to login. Did you remember to set your Project ID under Services > General Settings?");
+            {   UnityEngine.Debug.LogError("Login failed. Did you remember to set your Project ID under Edit > Project Settings... > Services?");
                 throw;
             }
 
