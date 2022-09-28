@@ -2,11 +2,6 @@ using System;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 
-#if UNITY_EDITOR
-using UnityEngine;
-using ParrelSync;
-#endif
-
 namespace LobbyRelaySample.Auth
 {
     /// <summary>
@@ -42,12 +37,12 @@ namespace LobbyRelaySample.Auth
             await UnityServices.InitializeAsync();
 
             #if UNITY_EDITOR
-            if (ClonesManager.IsClone())
+            if (ParrelSync.ClonesManager.IsClone())
             {
                 // When using a ParrelSync clone, we'll automatically switch to a different authentication profile.
                 // This will cause the clone to sign in as a different anonymous user account.  If you're going to use
                 // authentication profiles for some other purpose, you may need to change the profile name.
-                string customArgument = ClonesManager.GetArgument();
+                string customArgument = ParrelSync.ClonesManager.GetArgument();
                 AuthenticationService.Instance.SwitchProfile($"Clone_{customArgument}_Profile");
             }
             #endif
