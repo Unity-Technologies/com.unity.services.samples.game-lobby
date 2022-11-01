@@ -206,6 +206,17 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.services.wire": {
+      "version": "1.1.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.services.core": "1.4.2",
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.services.authentication": "2.1.1"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.settings-manager": {
       "version": "2.0.0",
       "depth": 1,

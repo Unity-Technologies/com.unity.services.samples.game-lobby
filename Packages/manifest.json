@@ -14,6 +14,7 @@
     "com.unity.services.lobby": "1.0.3",
     "com.unity.services.relay": "1.0.4",
     "com.unity.services.vivox": "15.1.170000-pre.1",
+    "com.unity.services.wire": "1.1.1",
     "com.unity.sysroot.linux-x86_64": "0.1.15-preview",
     "com.unity.test-framework": "1.1.31",
     "com.unity.textmeshpro": "3.0.6",
