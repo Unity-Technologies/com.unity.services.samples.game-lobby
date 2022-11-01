@@ -14,19 +14,19 @@ namespace LobbyRelaySample.relay
     /// </summary>
     public class RelayUtpClient : MonoBehaviour, IDisposable // This is a MonoBehaviour merely to have access to Update.
     {
-        protected LobbyUser m_localUser;
+        protected LocalPlayer m_localUser;
         protected LocalLobby m_localLobby;
         protected NetworkDriver m_networkDriver;
         protected List<NetworkConnection> m_connections; // For clients, this has just one member, but for hosts it will have more.
         protected bool m_IsRelayConnected { get { return m_localLobby.RelayServer != null; } }
 
         protected bool m_hasSentInitialMessage = false;
-        private const float k_heartbeatPeriod = 5;
-        private bool m_hasDisposed = false;
+        const float k_heartbeatPeriod = 5;
+        bool m_hasDisposed = false;
 
         protected enum MsgType { Ping = 0, NewPlayer, PlayerApprovalState, ReadyState, PlayerName, Emote, StartCountdown, CancelCountdown, ConfirmInGame, EndInGame, PlayerDisconnect }
 
-        public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LobbyUser localUser, LocalLobby localLobby)
+        public virtual void Initialize(NetworkDriver networkDriver, List<NetworkConnection> connections, LocalPlayer localUser, LocalLobby localLobby)
         {
             m_localUser = localUser;
             m_localLobby = localLobby;
@@ -57,7 +57,7 @@ namespace LobbyRelaySample.relay
             Dispose();
         }
 
-        private void OnLocalChange(LobbyUser localUser)
+        private void OnLocalChange(LocalPlayer localUser)
         {
             if (m_connections.Count == 0) // This could be the case for the host alone in the lobby.
                 return;
@@ -126,26 +126,26 @@ namespace LobbyRelaySample.relay
                 if (msgType == MsgType.PlayerApprovalState)
                 {
                     Approval approval = (Approval)msgContents[0];
-                    if (approval == Approval.OK && !m_localUser.IsApproved)
-                        OnApproved(m_networkDriver, conn);
-                    else if (approval == Approval.GameAlreadyStarted)
-                        Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Rejected: Game has already started.");
+//                    if (approval == Approval.OK && !m_localUser.IsApproved)
+//                        OnApproved(m_networkDriver, conn);
+//                    else if (approval == Approval.GameAlreadyStarted)
+//                        Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Rejected: Game has already started.");
                 }
                 else if (msgType == MsgType.PlayerName)
                 {
                     int nameLength = msgContents[0];
                     string name = System.Text.Encoding.UTF8.GetString(msgContents.GetRange(1, nameLength).ToArray());
-                    m_localLobby.LobbyUsers[id].DisplayName = name;
+                    m_localLobby.LocalPlayers[id].DisplayName.Value = name;
                 }
                 else if (msgType == MsgType.Emote)
                 {
                     EmoteType emote = (EmoteType)msgContents[0];
-                    m_localLobby.LobbyUsers[id].Emote = emote;
+                    m_localLobby.LocalPlayers[id].Emote.Value = emote;
                 }
                 else if (msgType == MsgType.ReadyState)
                 {
                     UserStatus status = (UserStatus)msgContents[0];
-                    m_localLobby.LobbyUsers[id].UserStatus = status;
+                    m_localLobby.LocalPlayers[id].UserStatus.Value = status;
                 }
                 else if (msgType == MsgType.StartCountdown)
                     Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
@@ -166,7 +166,7 @@ namespace LobbyRelaySample.relay
         {
             // Don't react to our own messages. Also, don't need to hold onto messages if the ID is absent; clients should be initialized and in the lobby before they send events.
             // (Note that this enforces lobby membership before processing any events besides an approval request, so a client is unable to fully use Relay unless they're in the lobby.)
-            return id != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LobbyUsers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
+            return true;// != m_localUser.ID && (m_localUser.IsApproved && m_localLobby.LocalPlayers.ContainsKey(id) || type == MsgType.PlayerApprovalState);
         }
         protected virtual void ProcessNetworkEventDataAdditional(NetworkConnection conn, MsgType msgType, string id) { }
         protected virtual void ProcessDisconnectEvent(NetworkConnection conn, DataStreamReader strm)
@@ -205,37 +205,31 @@ namespace LobbyRelaySample.relay
         /// </summary>
         private void SendInitialMessage(NetworkDriver driver, NetworkConnection connection)
         {
-            WriteByte(driver, connection, m_localUser.ID, MsgType.NewPlayer, 0);
+            WriteByte(driver, connection, m_localUser.ID.Value, MsgType.NewPlayer, 0);
             m_hasSentInitialMessage = true;
         }
         private void OnApproved(NetworkDriver driver, NetworkConnection connection)
         {
-            m_localUser.IsApproved = true;
+           // m_localUser.IsApproved = true;
             ForceFullUserUpdate(driver, connection, m_localUser);
         }
 
         /// <summary>
         /// When player data is updated, send out events for just the data that actually changed.
         /// </summary>
-        private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
+        private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LocalPlayer user)
         {
-            // Only update with actual changes. (If multiple change at once, we send messages for each separately, but that shouldn't happen often.)
-            if (0 < (user.LastChanged & LobbyUser.UserMembers.DisplayName))
-                WriteString(driver, connection, user.ID, MsgType.PlayerName, user.DisplayName);
-            if (0 < (user.LastChanged & LobbyUser.UserMembers.Emote))
-                WriteByte(driver, connection, user.ID, MsgType.Emote, (byte)user.Emote);
-            if (0 < (user.LastChanged & LobbyUser.UserMembers.UserStatus))
-                WriteByte(driver, connection, user.ID, MsgType.ReadyState, (byte)user.UserStatus);
+
         }
         /// <summary>
         /// Sometimes (e.g. when a new player joins), we need to send out the full current state of this player.
         /// </summary>
-        protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LobbyUser user)
+        protected void ForceFullUserUpdate(NetworkDriver driver, NetworkConnection connection, LocalPlayer user)
         {
             // Note that it would be better to send a single message with the full state, but for the sake of shorter code we'll leave that out here.
-            WriteString(driver, connection, user.ID, MsgType.PlayerName, user.DisplayName);
-            WriteByte(driver, connection, user.ID, MsgType.Emote, (byte)user.Emote);
-            WriteByte(driver, connection, user.ID, MsgType.ReadyState, (byte)user.UserStatus);
+            WriteString(driver, connection, user.ID.Value, MsgType.PlayerName, user.DisplayName.Value);
+            WriteByte(driver, connection, user.ID.Value, MsgType.Emote, (byte)user.Emote.Value);
+            WriteByte(driver, connection, user.ID.Value, MsgType.ReadyState, (byte)user.UserStatus.Value);
         }
 
         /// <summary>
@@ -292,7 +286,7 @@ namespace LobbyRelaySample.relay
         {
             foreach (NetworkConnection connection in m_connections)
                 // If the client calls Disconnect, the host might not become aware right away (depending on when the PubSub messages get pumped), so send a message over UTP instead.
-                WriteByte(m_networkDriver, connection, m_localUser.ID, MsgType.PlayerDisconnect, 0);
+                WriteByte(m_networkDriver, connection, m_localUser.ID.Value, MsgType.PlayerDisconnect, 0);
             m_localLobby.RelayServer = null;
         }
     }

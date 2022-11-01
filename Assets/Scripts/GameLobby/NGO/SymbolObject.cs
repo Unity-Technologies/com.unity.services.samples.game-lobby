@@ -11,8 +11,8 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class SymbolObject : NetworkBehaviour
     {
-        [SerializeField]  private SymbolData m_symbolData;
-        [SerializeField]  private SpriteRenderer m_renderer;
+        [SerializeField]  SymbolData m_symbolData;
+        [SerializeField]  SpriteRenderer m_renderer;
         [SerializeField]  private Animator m_animator;
 
         public bool Clicked { get; private set; }

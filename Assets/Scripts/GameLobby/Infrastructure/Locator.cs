@@ -1,4 +1,3 @@
-using LobbyRelaySample.Auth;
 using System;
 using System.Collections.Generic;
 
@@ -53,7 +52,6 @@ namespace LobbyRelaySample
         {
             Provide(new Messenger());
             Provide(new UpdateSlowNoop());
-            Provide(new IdentityNoop());
             Provide(new ngo.InGameInputHandlerNoop());
 
             FinishConstruction();
@@ -94,9 +92,6 @@ namespace LobbyRelaySample
 
         public IUpdateSlow UpdateSlow => Locate<IUpdateSlow>();
         public void Provide(IUpdateSlow updateSlow) { ProvideAny(updateSlow); }
-
-        public IIdentity Identity => Locate<IIdentity>();
-        public void Provide(IIdentity identity) { ProvideAny(identity); }
 
         public ngo.IInGameInputHandler InGameInputHandler => Locate<ngo.IInGameInputHandler>();
         public void Provide(ngo.IInGameInputHandler inputHandler) { ProvideAny(inputHandler); }

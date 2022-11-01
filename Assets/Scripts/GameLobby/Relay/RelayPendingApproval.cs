@@ -9,7 +9,7 @@ namespace LobbyRelaySample.relay
     /// </summary>
     public class RelayPendingApproval : IDisposable
     {
-        private NetworkConnection m_pendingConnection;
+        NetworkConnection m_pendingConnection;
         private bool m_hasDisposed = false;
         private const float k_waitTime = 0.1f;
         private Action<NetworkConnection, Approval> m_onResult;

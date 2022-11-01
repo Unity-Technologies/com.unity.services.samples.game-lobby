@@ -5,20 +5,32 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Show or hide a UI element based on the current GameState (e.g. in a lobby).
     /// </summary>
-    [RequireComponent(typeof(LocalMenuStateObserver))]
-    public class GameStateVisibilityUI : ObserverPanel<LocalMenuState>
+    public class GameStateVisibilityUI : UIPanelBase
     {
         [SerializeField]
         GameState ShowThisWhen;
 
-        public override void ObservedUpdated(LocalMenuState observed)
+        void GameStateChanged(GameState state)
         {
-            if (!ShowThisWhen.HasFlag(observed.State))
+            if (!ShowThisWhen.HasFlag(state))
                 Hide();
             else
-            {
                 Show();
-            }
+
+            Debug.Log($"GameStateChanged for {gameObject.name} : {state}");
+        }
+
+        public override void Start()
+        {
+            base.Start();
+            Manager.onGameStateChanged += GameStateChanged;
+        }
+
+        void OnDestroy()
+        {
+            if (Manager == null)
+                return;
+            Manager.onGameStateChanged -= GameStateChanged;
         }
     }
 }

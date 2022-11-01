@@ -14,14 +14,14 @@ namespace LobbyRelaySample.ngo
         // Using a singleton here since we need spawned PlayerCursors to be able to find it, but we don't need the flexibility offered by the Locator.
         public static NetworkedDataStore Instance;
 
-        private Dictionary<ulong, PlayerData> m_playerData = new Dictionary<ulong, PlayerData>();
-        private ulong m_localId;
+        Dictionary<ulong, PlayerData> m_playerData = new Dictionary<ulong, PlayerData>();
+        ulong m_localId;
 
         // Clients will need to retrieve the host's player data since it isn't synchronized. During that process, they will supply these callbacks.
         // Since we use RPC calls to retrieve data, these callbacks need to be retained (since the scope of the method that the client calls to request
         // data will be left in order to make the server RPC call).
-        private Action<PlayerData> m_onGetCurrentCallback;
-        private UnityEvent<PlayerData> m_onEachPlayerCallback;
+        Action<PlayerData> m_onGetCurrentCallback;
+        UnityEvent<PlayerData> m_onEachPlayerCallback;
 
         public void Awake()
         {
@@ -74,14 +74,14 @@ namespace LobbyRelaySample.ngo
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void GetAllPlayerData_ServerRpc(ulong callerId)
+        void GetAllPlayerData_ServerRpc(ulong callerId)
         {
             var sortedData = m_playerData.Select(kvp => kvp.Value).OrderByDescending(data => data.score);
             GetAllPlayerData_ClientRpc(callerId, sortedData.ToArray());
         }
 
         [ClientRpc]
-        private void GetAllPlayerData_ClientRpc(ulong callerId, PlayerData[] sortedData)
+        void GetAllPlayerData_ClientRpc(ulong callerId, PlayerData[] sortedData)
         {
             if (callerId != m_localId)
                 return;
@@ -105,7 +105,7 @@ namespace LobbyRelaySample.ngo
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void GetPlayerData_ServerRpc(ulong id, ulong callerId)
+        void GetPlayerData_ServerRpc(ulong id, ulong callerId)
         {
             if (m_playerData.ContainsKey(id))
                 GetPlayerData_ClientRpc(callerId, m_playerData[id]);

@@ -12,7 +12,7 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class InGameRunner : NetworkBehaviour, IInGameInputHandler
     {
-        private Action m_onConnectionVerified, m_onGameEnd;
+        Action m_onConnectionVerified, m_onGameEnd;
         private int m_expectedPlayerCount; // Used by the host, but we can't call the RPC until the network connection completes.
         private bool? m_canSpawnInGameObjects;
         private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();
@@ -43,13 +43,13 @@ namespace LobbyRelaySample.ngo
         private Transform m_symbolContainerInstance;
         private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
 
-        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LobbyUser localUser)
+        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LocalPlayer localUser)
         {
             m_onConnectionVerified = onConnectionVerified;
             m_expectedPlayerCount = expectedPlayerCount;
             m_onGameEnd = onGameEnd;
             m_canSpawnInGameObjects = null;
-            m_localUserData = new PlayerData(localUser.DisplayName, 0);
+            m_localUserData = new PlayerData(localUser.DisplayName.Value, 0);
             Locator.Get.Provide(this); // Simplifies access since some networked objects can't easily communicate locally (e.g. the host might call a ClientRpc without that client knowing where the call originated).
         }
 

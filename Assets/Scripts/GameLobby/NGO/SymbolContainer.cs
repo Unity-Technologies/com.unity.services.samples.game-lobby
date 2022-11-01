@@ -13,14 +13,14 @@ namespace LobbyRelaySample.ngo
     public class SymbolContainer : NetworkBehaviour, IReceiveMessages
     {
         [SerializeField]
-        private float m_speed = 1;
-        private bool m_isConnected = false;
-        private bool m_hasGameStarted = false;
+        float m_speed = 1;
+        bool m_isConnected = false;
+        bool m_hasGameStarted = false;
 
         /// <summary>
         /// Verify both that the game has started and that the network connection is working before moving the symbols.
         /// </summary>
-        private void OnGameStarted()
+        void OnGameStarted()
         {
             m_hasGameStarted = true;
             if (m_isConnected)
@@ -55,7 +55,7 @@ namespace LobbyRelaySample.ngo
             BeginMotion();
         }
 
-        private void BeginMotion()
+        void BeginMotion()
         {
             transform.position += Time.deltaTime * m_speed*Vector3.down;
         }

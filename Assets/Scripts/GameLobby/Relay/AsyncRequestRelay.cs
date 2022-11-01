@@ -5,7 +5,7 @@ namespace LobbyRelaySample.relay
 {
     public class AsyncRequestRelay : AsyncRequest
     {
-        private static AsyncRequestRelay s_instance;
+        static AsyncRequestRelay s_instance;
         public static AsyncRequestRelay Instance
         {
             get

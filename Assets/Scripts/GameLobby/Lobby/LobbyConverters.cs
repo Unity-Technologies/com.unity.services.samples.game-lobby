@@ -9,79 +9,127 @@ namespace LobbyRelaySample.lobby
     /// </summary>
     public static class LobbyConverters
     {
+        const string key_RelayCode = nameof(LocalLobby.RelayCode);
+        const string key_RelayNGOCode = nameof(LocalLobby.RelayNGOCode);
+        const string key_LobbyState = nameof(LocalLobby.LocalLobbyState);
+        const string key_LobbyColor = nameof(LocalLobby.LocalLobbyColor);
+        const string key_LastEdit = nameof(LocalLobby.LastUpdated);
+
+        const string key_Displayname = nameof(LocalPlayer.DisplayName);
+        const string key_Userstatus = nameof(LocalPlayer.UserStatus);
+        const string key_Emote = nameof(LocalPlayer.Emote);
+
         public static Dictionary<string, string> LocalToRemoteData(LocalLobby lobby)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
-            data.Add("RelayCode", lobby.RelayCode);
-            data.Add("RelayNGOCode", lobby.RelayNGOCode);
-            data.Add("State", ((int)lobby.State).ToString()); // Using an int is smaller than using the enum state's name.
-            data.Add("Color", ((int)lobby.Color).ToString());
-            data.Add("State_LastEdit", lobby.Data.State_LastEdit.ToString());
-            data.Add("Color_LastEdit", lobby.Data.Color_LastEdit.ToString());
-            data.Add("RelayNGOCode_LastEdit", lobby.Data.RelayNGOCode_LastEdit.ToString());
+            data.Add(key_RelayCode, lobby.RelayCode.Value);
+            data.Add(key_RelayNGOCode, lobby.RelayNGOCode.Value);
+            data.Add(key_LobbyState,
+                ((int)lobby.LocalLobbyState.Value)
+                .ToString()); // Using an int is smaller than using the enum state's name.
+            data.Add(key_LobbyColor, ((int)lobby.LocalLobbyColor.Value).ToString());
+            data.Add(key_LastEdit, lobby.LastUpdated.Value.ToString());
+
             return data;
         }
 
-        public static Dictionary<string, string> LocalToRemoteUserData(LobbyUser user)
+        public static Dictionary<string, string> LocalToRemoteUserData(LocalPlayer user)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
-            if (user == null || string.IsNullOrEmpty(user.ID))
+            if (user == null || string.IsNullOrEmpty(user.ID.Value))
                 return data;
-            data.Add("DisplayName", user.DisplayName); // The lobby doesn't need to know any data beyond the name and state; Relay will handle the rest.
-            data.Add("UserStatus", ((int)user.UserStatus).ToString());
+            data.Add(key_Displayname, user.DisplayName.Value);
+            data.Add(key_Userstatus,
+                ((int)user.UserStatus.Value)
+                .ToString()); // Cheaper to send the string int of the enum over the string enum
+            data.Add(key_Emote, (user.Emote).ToString());
             return data;
         }
 
         /// <summary>
         /// Create a new LocalLobby from the content of a retrieved lobby. Its data can be copied into an existing LocalLobby for use.
         /// </summary>
-        public static void RemoteToLocal(Lobby lobby, LocalLobby lobbyToUpdate)
+        public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobby, bool allowSetLobbyChanged = true)
         {
-            //Copy Data from Lobby into Local lobby fields
-            LocalLobby.LobbyData info = new LocalLobby.LobbyData(lobbyToUpdate.Data)
+            if (remoteLobby == null)
             {
-                LobbyID = lobby.Id,
-                LobbyCode = lobby.LobbyCode,
-                Private = lobby.IsPrivate,
-                LobbyName = lobby.Name,
-                MaxPlayerCount = lobby.MaxPlayers,
-                RelayCode = lobby.Data?.ContainsKey("RelayCode") == true ? lobby.Data["RelayCode"].Value : lobbyToUpdate.RelayCode, // By providing RelayCode through the lobby data with Member visibility, we ensure a client is connected to the lobby before they could attempt a relay connection, preventing timing issues between them.
-                RelayNGOCode = lobby.Data?.ContainsKey("RelayNGOCode") == true ? lobby.Data["RelayNGOCode"].Value : lobbyToUpdate.RelayNGOCode,
-                State = lobby.Data?.ContainsKey("State") == true ? (LobbyState)int.Parse(lobby.Data["State"].Value) : LobbyState.Lobby,
-                Color = lobby.Data?.ContainsKey("Color") == true ? (LobbyColor)int.Parse(lobby.Data["Color"].Value) : LobbyColor.None,
-                State_LastEdit = lobby.Data?.ContainsKey("State_LastEdit") == true ? long.Parse(lobby.Data["State_LastEdit"].Value) : lobbyToUpdate.Data.State_LastEdit,
-                Color_LastEdit = lobby.Data?.ContainsKey("Color_LastEdit") == true ? long.Parse(lobby.Data["Color_LastEdit"].Value) : lobbyToUpdate.Data.Color_LastEdit,
-                RelayNGOCode_LastEdit = lobby.Data?.ContainsKey("RelayNGOCode_LastEdit") == true ? long.Parse(lobby.Data["RelayNGOCode_LastEdit"].Value) : lobbyToUpdate.Data.RelayNGOCode_LastEdit
-            };
+                Debug.LogError("Remote lobby is null, cannot convert.");
+                return;
+            }
+            if (localLobby == null)
+            {
+                Debug.LogError("Local Lobby is null, cannot convert");
+                return;
+            }
+            localLobby.CanSetChanged = allowSetLobbyChanged;
+            localLobby.LobbyID.Value = remoteLobby.Id;
+            localLobby.LobbyName.Value = remoteLobby.Name;
+            localLobby.LobbyCode.Value = remoteLobby.LobbyCode;
+            localLobby.Private.Value = remoteLobby.IsPrivate;
+            localLobby.AvailableSlots.Value = remoteLobby.AvailableSlots;
+            localLobby.MaxPlayerCount.Value = remoteLobby.MaxPlayers;
+            localLobby.LastUpdated.Value = remoteLobby.LastUpdated.ToFileTimeUtc();
 
-            Dictionary<string, LobbyUser> lobbyUsers = new Dictionary<string, LobbyUser>();
-            foreach (var player in lobby.Players)
+            //Custom Data Conversion
+            localLobby.RelayCode.Value = remoteLobby.Data?.ContainsKey(key_RelayCode) == true
+                ? remoteLobby.Data[key_RelayCode].Value
+                : localLobby.RelayCode.Value;
+            localLobby.RelayNGOCode.Value = remoteLobby.Data?.ContainsKey(key_RelayNGOCode) == true
+                ? remoteLobby.Data[key_RelayNGOCode].Value
+                : localLobby.RelayNGOCode.Value;
+            localLobby.LocalLobbyState.Value = remoteLobby.Data?.ContainsKey(key_LobbyState) == true
+                ? (LobbyState)int.Parse(remoteLobby.Data[key_LobbyState].Value)
+                : LobbyState.Lobby;
+            localLobby.LocalLobbyColor.Value = remoteLobby.Data?.ContainsKey(key_LobbyColor) == true
+                ? (LobbyColor)int.Parse(remoteLobby.Data[key_LobbyColor].Value)
+                : LobbyColor.None;
+
+            List<string> remotePlayerIDs = new List<string>();
+            foreach (var player in remoteLobby.Players)
             {
-                // If we already know about this player and this player is already connected to Relay, don't overwrite things that Relay might be changing.
-                if (player.Data?.ContainsKey("UserStatus") == true && int.TryParse(player.Data["UserStatus"].Value, out int status))
+                var id = player.Id;
+                remotePlayerIDs.Add(id);
+                var isHost = remoteLobby.HostId.Equals(player.Id);
+                var displayName = player.Data?.ContainsKey(key_Displayname) == true
+                    ? player.Data[key_Displayname].Value
+                    : default;
+                var emote = player.Data?.ContainsKey(key_Emote) == true
+                    ? (EmoteType)int.Parse(player.Data[key_Emote].Value)
+                    : default;
+                var userStatus = player.Data?.ContainsKey(key_Userstatus) == true
+                    ? (UserStatus)int.Parse(player.Data[key_Userstatus].Value)
+                    : UserStatus.Connecting;
+                LocalPlayer localPlayer;
+
+                //See if we have the remote player locally already
+                if (localLobby.LocalPlayers.ContainsKey(player.Id))
                 {
-                    if (status > (int)UserStatus.Connecting && lobbyToUpdate.LobbyUsers.ContainsKey(player.Id))
-                    {
-                        lobbyUsers.Add(player.Id, lobbyToUpdate.LobbyUsers[player.Id]);
-                        continue;
-                    }
+                    localPlayer = localLobby.LocalPlayers[player.Id];
+                    localPlayer.ID.Value = id;
+                    localPlayer.DisplayName.Value = displayName;
+                    localPlayer.Emote.Value = emote;
+                    localPlayer.UserStatus.Value = userStatus;
                 }
-
-                // If the player isn't connected to Relay, get the most recent data that the lobby knows.
-                // (If we haven't seen this player yet, a new local representation of the player will have already been added by the LocalLobby.)
-                LobbyUser incomingData = new LobbyUser
+                else
                 {
-                    IsHost = lobby.HostId.Equals(player.Id),
-                    DisplayName = player.Data?.ContainsKey("DisplayName") == true ? player.Data["DisplayName"].Value : default,
-                    Emote = player.Data?.ContainsKey("Emote") == true ? (EmoteType)int.Parse(player.Data["Emote"].Value) : default,
-                    UserStatus = player.Data?.ContainsKey("UserStatus") == true ? (UserStatus)int.Parse(player.Data["UserStatus"].Value) : UserStatus.Connecting,
-                    ID = player.Id
-                };
-                lobbyUsers.Add(incomingData.ID, incomingData);
+                    localPlayer = new LocalPlayer(id, isHost, displayName, emote, userStatus);
+                    localLobby.AddPlayer(localPlayer);
+                }
             }
 
-            //Push all the data at once so we don't call OnChanged for each variable
-            lobbyToUpdate.CopyObserved(info, lobbyUsers);
+            var disconnectedUsers = new List<LocalPlayer>();
+            foreach (var (id, player) in localLobby.LocalPlayers)
+            {
+                if (!remotePlayerIDs.Contains(id))
+                    disconnectedUsers.Add(player);
+            }
+
+            foreach (var remove in disconnectedUsers)
+            {
+                localLobby.RemovePlayer(remove);
+            }
+
+            localLobby.CanSetChanged = true;
         }
 
         /// <summary>
@@ -95,7 +143,7 @@ namespace LobbyRelaySample.lobby
             return retLst;
         }
 
-        private static LocalLobby RemoteToNewLocal(Lobby lobby)
+        static LocalLobby RemoteToNewLocal(Lobby lobby)
         {
             LocalLobby data = new LocalLobby();
             RemoteToLocal(lobby, data);

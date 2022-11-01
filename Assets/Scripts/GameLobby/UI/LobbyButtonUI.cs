@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,7 +8,8 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Controls an entry in the join menu's list of lobbies, acting as a clickable button as well as displaying info about the lobby.
     /// </summary>
-    [RequireComponent(typeof(LocalLobbyObserver))]
+
+    //TODO WHAT WAS THIS OBSERVING??!?
     public class LobbyButtonUI : MonoBehaviour
     {
         [SerializeField]
@@ -20,29 +22,21 @@ namespace LobbyRelaySample.UI
         /// </summary>
         public UnityEvent<LocalLobby> onLobbyPressed;
         LocalLobbyObserver m_DataObserver;
-
-        void Awake()
-        {
-            m_DataObserver = GetComponent<LocalLobbyObserver>();
-        }
+        LocalLobby m_Lobby;
 
         /// <summary>
         /// UI CallBack
         /// </summary>
         public void OnLobbyClicked()
         {
-            onLobbyPressed?.Invoke(m_DataObserver.observed);
+            //TODO Select Lobby
         }
 
-        public void UpdateLobby(LocalLobby lobby)
+        public void SetLobby(LocalLobby lobby)
         {
-            m_DataObserver.observed.CopyObserved(lobby);
-        }
-
-        public void OnLobbyUpdated(LocalLobby data)
-        {
-            lobbyNameText.SetText(data.LobbyName);
-            lobbyCountText.SetText($"{data.PlayerCount}/{data.MaxPlayerCount}");
+            m_Lobby = lobby;
+            lobbyNameText.SetText(m_Lobby.LobbyName.Value);
+            lobbyCountText.SetText($"{m_Lobby.PlayerCount}/{m_Lobby.MaxPlayerCount}");
         }
     }
 }

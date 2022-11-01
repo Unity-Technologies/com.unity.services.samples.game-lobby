@@ -10,9 +10,9 @@ namespace Test
     {
         #region Test classes
         /// <summary>Trivial message recipient that will run some action on any message.</summary>
-        private class Subscriber : IReceiveMessages
+        class Subscriber : IReceiveMessages
         {
-            private Action m_thingToDo;
+            Action m_thingToDo;
             public Subscriber(Action thingToDo) { m_thingToDo = thingToDo; }
             public void OnReceiveMessage(MessageType type, object msg) { m_thingToDo?.Invoke(); }
         }
@@ -45,7 +45,7 @@ namespace Test
         {
             Messenger messenger = new Messenger();
             int msgCount = 0;
-            SubscriberArgs sub = new SubscriberArgs((type, msg) => { 
+            SubscriberArgs sub = new SubscriberArgs((type, msg) => {
                 msgCount++; // These are just for simple detection of the intended behavior.
                 if (type == MessageType.RenameRequest) msgCount += 9;
                 if (msg is string) msgCount += int.Parse(msg as string);

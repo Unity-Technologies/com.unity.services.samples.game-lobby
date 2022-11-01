@@ -12,8 +12,8 @@ namespace LobbyRelaySample.ngo
     [RequireComponent(typeof(Collider))]
     public class PlayerCursor : NetworkBehaviour, IReceiveMessages
     {
-        [SerializeField] private SpriteRenderer m_renderer = default;
-        [SerializeField] private ParticleSystem m_onClickParticles = default;
+        [SerializeField] SpriteRenderer m_renderer = default;
+        [SerializeField] ParticleSystem m_onClickParticles = default;
         [SerializeField] private TMPro.TMP_Text m_nameOutput = default;
         private Camera m_mainCamera;
         private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>( Vector3.zero); // (Using a NetworkTransform to sync position would also work.)

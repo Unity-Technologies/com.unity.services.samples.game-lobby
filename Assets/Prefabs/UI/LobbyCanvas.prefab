@@ -28,6 +28,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1906352097507614706}
   m_RootOrder: 1
@@ -144,7 +145,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2244251207921394025}
   - component: {fileID: 5434623004655309427}
-  - component: {fileID: 3687075862038422248}
   - component: {fileID: 3403950992349691351}
   m_Layer: 5
   m_Name: LobbyCanvas
@@ -163,6 +163,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6520888008628790540}
   - {fileID: 2244251208239780121}
@@ -188,33 +189,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &3687075862038422248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2244251207921394026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51373dc3c6ac79b4f8e36ac7c4419205, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3403950992349691351}
-        m_TargetAssemblyTypeName: LobbyRooms.GameStatePanelUI, Assembly-CSharp
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &3403950992349691351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,6 +233,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 466693923092094802}
   - {fileID: 1529153573702653751}
@@ -318,7 +293,6 @@ GameObject:
   m_Component:
   - component: {fileID: 466693923092094802}
   - component: {fileID: 2177115228008557851}
-  - component: {fileID: 5843558592166708181}
   - component: {fileID: 6860436446719602335}
   - component: {fileID: 6749879306276389991}
   m_Layer: 5
@@ -338,6 +312,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4212636328457333019}
   m_Father: {fileID: 6520888008628790540}
@@ -356,33 +331,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4637522307789944801}
   m_CullTransparentMesh: 1
---- !u!114 &5843558592166708181
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4637522307789944801}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6860436446719602335}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.ServerNameUI, Assembly-CSharp
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &6860436446719602335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -439,6 +387,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1906352097507614706}
   m_RootOrder: 0
@@ -573,6 +522,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 466693923092094802}
   m_RootOrder: 0
@@ -709,6 +659,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1906352097507614706}
   - {fileID: 2957117094117392419}
@@ -768,7 +719,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1906352097507614706}
   - component: {fileID: 8834330287924717091}
-  - component: {fileID: 7526558453095601547}
   - component: {fileID: 279783410280127446}
   - component: {fileID: 8630015524497407890}
   m_Layer: 5
@@ -788,6 +738,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6532118317105062884}
   - {fileID: 7445706979321241619}
@@ -807,33 +758,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7079534792968695919}
   m_CullTransparentMesh: 1
---- !u!114 &7526558453095601547
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7079534792968695919}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 279783410280127446}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.ServerAddressUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &279783410280127446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1363,7 +1287,12 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6887166789349504240, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+    - {fileID: 3235578093204888586, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+    - {fileID: 2586128159150077185, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+    - {fileID: 2853056286508716223, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
+    - {fileID: 8850815072349184999, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 2ff073ec9c74c8942bd90a541dc41bfc, type: 3}
 --- !u!224 &3566036481622844614 stripped
 RectTransform:
@@ -1467,6 +1396,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
+--- !u!224 &1529153573702653751 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1118541987231860827, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
+  m_PrefabInstance: {fileID: 1926829325626138476}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2768469221279893250 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4383951900022528110, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
@@ -1489,11 +1423,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &1529153573702653751 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 1118541987231860827, guid: 81e22025e6659264a8d0bc8dfebe95a7, type: 3}
-  m_PrefabInstance: {fileID: 1926829325626138476}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2510549639321509767
 PrefabInstance:
   m_ObjectHideFlags: 0

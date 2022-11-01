@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Threading.Tasks;
+using LobbyRelaySample;
 using LobbyRelaySample.relay;
 using NUnit.Framework;
+using Test.Tools;
 using Unity.Networking.Transport;
+using Unity.Services.Core;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -11,7 +15,7 @@ namespace Test
 {
     public class UtpTests
     {
-        private class RelayUtpTest : RelayUtpSetupHost
+        class RelayUtpTest : RelayUtpSetupHost
         {
             public Action<NetworkEndPoint, bool> OnGetEndpoint { private get; set; }
 
@@ -34,7 +38,6 @@ namespace Test
             }
         }
 
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
         GameObject m_dummy;
         //Only used when testing DTLS
         #pragma warning disable CS0414 // This is the "assigned but its value is never used" warning, which will otherwise appear when DTLS is unavailable.
@@ -45,13 +48,19 @@ namespace Test
         public void Setup()
         {
             m_dummy = new GameObject();
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
+#pragma warning disable 4014
+            TestAuthSetup();
+#pragma warning restore 4014
+        }
+
+        async Task TestAuthSetup()
+        {
+            await Auth.Authenticate("test");
         }
 
         [OneTimeTearDown]
         public void Teardown()
         {
-            m_auth?.Dispose();
             GameObject.Destroy(m_dummy);
         }
 
@@ -60,11 +69,8 @@ namespace Test
         {
             #if ENABLE_MANAGED_UNITYTLS
 
-                if (!m_didSigninComplete)
-                    yield return new WaitForSeconds(3);
-                if (!m_didSigninComplete)
-                    Assert.Fail("Did not sign in.");
-                yield return new WaitForSeconds(1); // To prevent a possible 429 after a previous test.
+                yield return AsyncTestHelper.Await(async () => await Auth.Authenticating());
+
 
                 RelayUtpTest relaySetup = m_dummy.AddComponent<RelayUtpTest>();
                 relaySetup.OnGetEndpoint = OnGetEndpoint;

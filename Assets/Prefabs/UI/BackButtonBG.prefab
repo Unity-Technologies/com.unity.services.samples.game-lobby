@@ -28,6 +28,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8687266200334079465}
   m_Father: {fileID: 21306902101918852}
@@ -90,7 +91,6 @@ GameObject:
   - component: {fileID: 9211534540060107035}
   - component: {fileID: 3548897939371032169}
   - component: {fileID: 7262104930290195570}
-  - component: {fileID: 8907220659739637781}
   - component: {fileID: 7728157518251256520}
   m_Layer: 5
   m_Name: BackButtonBG
@@ -109,6 +109,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6522473138835034473}
   m_Father: {fileID: 0}
@@ -189,33 +190,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c93e82eef7d613418b85194aace7f69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8907220659739637781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5416637149047939654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51373dc3c6ac79b4f8e36ac7c4419205, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7728157518251256520}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.GameStateVisibilityUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &7728157518251256520
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -261,6 +235,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6522473138835034473}
   m_RootOrder: 0

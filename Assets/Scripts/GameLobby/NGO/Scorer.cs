@@ -10,12 +10,12 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class Scorer : NetworkBehaviour
     {
-        [SerializeField] private NetworkedDataStore m_dataStore = default;
-        private ulong m_localId;
-        [SerializeField] private TMP_Text m_scoreOutputText = default;
+        [SerializeField] NetworkedDataStore m_dataStore = default;
+        ulong m_localId;
+        [SerializeField] TMP_Text m_scoreOutputText = default;
 
         [Tooltip("When the game ends, this will be called once for each player in order of rank (1st-place first, and so on).")]
-        [SerializeField] private UnityEvent<PlayerData> m_onGameEnd = default;
+        [SerializeField] UnityEvent<PlayerData> m_onGameEnd = default;
 
         public override void OnNetworkSpawn()
         {
@@ -35,7 +35,7 @@ namespace LobbyRelaySample.ngo
         }
 
         [ClientRpc]
-        private void UpdateScoreOutput_ClientRpc(ulong id, int score)
+        void UpdateScoreOutput_ClientRpc(ulong id, int score)
         {
             if (m_localId == id)
                 m_scoreOutputText.text = score.ToString("00");

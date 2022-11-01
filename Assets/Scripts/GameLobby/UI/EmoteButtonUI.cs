@@ -9,7 +9,7 @@ namespace LobbyRelaySample.UI
     public class EmoteButtonUI : MonoBehaviour
     {
         [SerializeField]
-        private EmoteType m_emoteType;
+        EmoteType m_emoteType;
 
         public void SetPlayerEmote()
         {

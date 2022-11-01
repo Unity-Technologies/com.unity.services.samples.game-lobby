@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -7,18 +8,33 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Controls a simple throbber that is displayed when the lobby list is being refreshed.
     /// </summary>
-    public class SpinnerUI : ObserverPanel<LobbyServiceData>
+    public class SpinnerUI : UIPanelBase
     {
-        [SerializeField] private TMP_Text m_errorText;
-        [SerializeField] private UIPanelBase m_spinnerImage;
-        [SerializeField] private UIPanelBase m_noServerText;
-        [SerializeField] private UIPanelBase m_errorTextVisibility;
+        [SerializeField] TMP_Text m_errorText;
+        [SerializeField] UIPanelBase m_spinnerImage;
+        [SerializeField] UIPanelBase m_noServerText;
+        [SerializeField] UIPanelBase m_errorTextVisibility;
         [Tooltip("This prevents selecting a lobby or Joining while the spinner is visible.")]
-        [SerializeField] private UIPanelBase m_raycastBlocker;
+        [SerializeField] UIPanelBase m_raycastBlocker;
 
-        public override void ObservedUpdated(LobbyServiceData observed)
+
+        public override void Start()
         {
-            if (observed.State == LobbyQueryState.Fetching)
+            base.Start();
+            Manager.LobbyList.QueryState.onChanged += QueryStateChanged;
+        }
+
+        void OnDestroy()
+        {
+            if (Manager == null)
+                return;
+            Manager.LobbyList.QueryState.onChanged -= QueryStateChanged;
+
+        }
+
+        void QueryStateChanged(LobbyQueryState state)
+        {
+            if (state == LobbyQueryState.Fetching)
             {
                 Show();
                 m_spinnerImage.Show();
@@ -26,16 +42,16 @@ namespace LobbyRelaySample.UI
                 m_noServerText.Hide();
                 m_errorTextVisibility.Hide();
             }
-            else if (observed.State == LobbyQueryState.Error)
+            else if (state == LobbyQueryState.Error)
             {
                 m_spinnerImage.Hide();
                 m_raycastBlocker.Hide();
                 m_errorTextVisibility.Show();
                 m_errorText.SetText("Error. See Unity Console log for details.");
             }
-            else if (observed.State == LobbyQueryState.Fetched)
+            else if (state == LobbyQueryState.Fetched)
             {
-                if (observed.CurrentLobbies.Count < 1)
+                if (Manager.LobbyList.CurrentLobbies.Count < 1)
                 {
                     m_noServerText.Show();
                 }
