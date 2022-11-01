@@ -8,7 +8,7 @@ namespace Test
 {
     public class MessengerTests
     {
-        #region Test classes
+        /*#region Test classes
         /// <summary>Trivial message recipient that will run some action on any message.</summary>
         class Subscriber : IReceiveMessages
         {
@@ -278,6 +278,6 @@ namespace Test
             messenger.OnReceiveMessage(MessageType.None, null);
 
             Assert.AreEqual(1, msgCount, "Should have acted on the message.");
-        }
+        }*/
     }
 }

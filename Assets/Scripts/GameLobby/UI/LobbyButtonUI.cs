@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -21,7 +22,6 @@ namespace LobbyRelaySample.UI
         /// Subscribed to on instantiation to pass our lobby data back
         /// </summary>
         public UnityEvent<LocalLobby> onLobbyPressed;
-        LocalLobbyObserver m_DataObserver;
         LocalLobby m_Lobby;
 
         /// <summary>
@@ -29,14 +29,27 @@ namespace LobbyRelaySample.UI
         /// </summary>
         public void OnLobbyClicked()
         {
-            //TODO Select Lobby
+           onLobbyPressed.Invoke(m_Lobby);
         }
 
         public void SetLobby(LocalLobby lobby)
         {
             m_Lobby = lobby;
+            SetLobbyname(m_Lobby.LobbyName.Value);
+            SetLobbyCount(m_Lobby.LocalPlayers);
+            m_Lobby.LobbyName.onChanged += SetLobbyname;
+            m_Lobby.onUserListChanged += SetLobbyCount;
+
+        }
+
+        void SetLobbyname(string lobbyName)
+        {
             lobbyNameText.SetText(m_Lobby.LobbyName.Value);
-            lobbyCountText.SetText($"{m_Lobby.PlayerCount}/{m_Lobby.MaxPlayerCount}");
+        }
+
+        void SetLobbyCount(Dictionary<string, LocalPlayer> userList)
+        {
+            lobbyCountText.SetText($"{userList.Count}/{m_Lobby.MaxPlayerCount}");
         }
     }
 }

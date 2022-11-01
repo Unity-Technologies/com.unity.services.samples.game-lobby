@@ -31,9 +31,8 @@ namespace LobbyRelaySample
     /// All the Data that is important gets updated in here, the GameManager in the mainScene has all the references
     /// needed to run the game.
     /// </summary>
-    public class GameManager : MonoBehaviour, IReceiveMessages
+    public class GameManager : MonoBehaviour
     {
-
 
         public LocalLobby LocalLobby => m_LocalLobby;
         public Action<GameState> onGameStateChanged;
@@ -78,7 +77,15 @@ namespace LobbyRelaySample
             m_lobbyColorFilter = (LobbyColor)color;
         }
 
-        public async Task CreateLobby(string name, bool isPrivate, int maxPlayers = 4)
+
+        public async Task<LocalPlayer> AwaitLocalUserInitialization()
+        {
+            while (m_LocalUser == null)
+                await Task.Delay(100);
+            return m_LocalUser;
+        }
+
+        public async void CreateLobby(string name, bool isPrivate, int maxPlayers = 4)
         {
             var lobby = await LobbyManager.CreateLobbyAsync(
                 name,
@@ -92,7 +99,7 @@ namespace LobbyRelaySample
                     LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
 
                 }
-                catch(Exception exception)
+                catch (Exception exception)
                 {
                     Debug.LogError(exception);
                 }
@@ -109,89 +116,111 @@ namespace LobbyRelaySample
             }
         }
 
-        /// <summary>
-        /// The Messaging System handles most of the core Lobby Service calls, and catches the callbacks from those calls.
-        /// These In turn update the observed variables and propagates the events to the game.
-        /// When looking for the interactions, look up the MessageType and search for it in the code to see where it is used outside this script.
-        /// EG. Locator.Get.Messenger.OnReceiveMessage(MessageType.RenameRequest, name);
-        /// </summary>
-        public async void OnReceiveMessage(MessageType type, object msg)
+
+        public async void JoinLobby(LocalLobby lobbyInfo)
         {
-            if (type == MessageType.JoinLobbyRequest)
+            var lobby = await LobbyManager.JoinLobbyAsync(lobbyInfo.LobbyID.Value, lobbyInfo.LobbyCode.Value,
+                m_LocalUser);
+            if (lobby != null)
             {
-                LocalLobby lobbyInfo = (LocalLobby)msg;
-                var lobby = await LobbyManager.JoinLobbyAsync(lobbyInfo.LobbyID.Value, lobbyInfo.LobbyCode.Value,
-                    m_LocalUser);
-                if (lobby != null)
-                {
-                    LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
-                    JoinLobby();
-                }
-                else
-                {
-                    SetGameState(GameState.JoinMenu);
-                }
+                LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+                JoinLobby();
             }
-            else if (type == MessageType.QueryLobbies)
+            else
             {
-                LobbyList.QueryState.Value = LobbyQueryState.Fetching;
-                var qr = await LobbyManager.RetrieveLobbyListAsync(m_lobbyColorFilter);
+                SetGameState(GameState.JoinMenu);
+            }
+        }
 
-                if (qr != null)
-                    SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
-                else
-                    LobbyList.QueryState.Value = LobbyQueryState.Error;
-            }
-            else if (type == MessageType.QuickJoin)
-            {
-                var lobby = await LobbyManager.QuickJoinLobbyAsync(m_LocalUser, m_lobbyColorFilter);
-                if (lobby != null)
-                {
-                    LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
-                    JoinLobby();
-                }
-                else
-                {
-                    SetGameState(GameState.JoinMenu);
-                }
-            }
-            else if (type == MessageType.RenameRequest)
-            {
-                string name = (string)msg;
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
-                        "Empty Name not allowed."); // Lobby error type, then HTTP error type.
-                    return;
-                }
 
-                m_LocalUser.DisplayName.Value = (string)msg;
-            }
-            else if (type == MessageType.UserSetEmote)
+        public async void QueryLobbies()
+        {
+            LobbyList.QueryState.Value = LobbyQueryState.Fetching;
+            var qr = await LobbyManager.RetrieveLobbyListAsync(m_lobbyColorFilter);
+
+            if (qr != null)
+                SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
+            else
+                LobbyList.QueryState.Value = LobbyQueryState.Error;
+        }
+
+
+        public async void QuickJoin()
+        {
+            var lobby = await LobbyManager.QuickJoinLobbyAsync(m_LocalUser, m_lobbyColorFilter);
+            if (lobby != null)
             {
-                EmoteType emote = (EmoteType)msg;
-                m_LocalUser.Emote.Value = emote;
+                LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+                JoinLobby();
             }
-            else if (type == MessageType.LobbyUserStatus)
+            else
             {
-                m_LocalUser.UserStatus.Value = (UserStatus)msg;
+                SetGameState(GameState.JoinMenu);
             }
-            else if (type == MessageType.CompleteCountdown)
+        }
+
+        public void SetLocalUserName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
             {
-                //Start game for everyone
-                if (m_RelayClient is RelayUtpHost)
-                    (m_RelayClient as RelayUtpHost).SendInGameState();
+                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
+                    "Empty Name not allowed."); // Lobby error type, then HTTP error type.
+                return;
             }
-            else if (type == MessageType.ChangeMenuState)
-            {
-                SetGameState((GameState)msg);
-            }
-            else if (type == MessageType.ConfirmInGameState) { }
-            else if (type == MessageType.EndGame)
-            {
-                m_LocalLobby.LocalLobbyState.Value = LobbyState.Lobby;
-                SetUserLobbyState();
-            }
+
+            m_LocalUser.DisplayName.Value = name;
+        }
+
+        public void SetLocalUserEmote(EmoteType emote)
+        {
+            SetUserEmote(m_LocalUser.ID.Value, emote);
+        }
+
+        public void SetUserEmote(string playerID, EmoteType emote)
+        {
+            var player = GetPlayerByID(playerID);
+            if (player == null)
+                return;
+            player.Emote.Value = emote;
+
+        }
+        public void SetLocalUserStatus(UserStatus status)
+        {
+            SetUserStatus(m_LocalUser.ID.Value, status);
+        }
+        public void SetUserStatus(string playerID, UserStatus status)
+        {
+            var player = GetPlayerByID(playerID);
+            if (player == null)
+                return;
+            m_LocalUser.UserStatus.Value = status;
+        }
+
+        public void CompleteCountDown()
+        {
+            //Start game for everyone
+            if (m_RelayClient is RelayUtpHost)
+                (m_RelayClient as RelayUtpHost).SendInGameState();
+        }
+
+        public void ChangeMenuState(GameState state)
+        {
+            SetGameState(state);
+            if (m_setupInGame)
+                m_setupInGame.OnGameEnd();
+
+
+        }
+
+        public void ConfirmIngameState()
+        {
+            m_setupInGame.ConfirmInGameState();
+        }
+
+        public void EndGame()
+        {
+            m_LocalLobby.LocalLobbyState.Value = LobbyState.Lobby;
+            LocalUserToLobby();
         }
 
         public void BeginCountdown()
@@ -230,7 +259,6 @@ namespace LobbyRelaySample
             await InitializeServices();
             AuthenticatePlayer();
             StartVivoxLogin();
-            Locator.Get.Messenger.Subscribe(this);
         }
 
         async Task InitializeServices()
@@ -241,8 +269,6 @@ namespace LobbyRelaySample
 #endif
             await Auth.Authenticate(serviceProfileName);
         }
-
-
 
         void AuthenticatePlayer()
         {
@@ -255,19 +281,25 @@ namespace LobbyRelaySample
             m_LocalLobby.AddPlayer(m_LocalUser); // The local LocalPlayer object will be hooked into UI
         }
 
-        public async Task<LocalPlayer> LocalUserInitialized()
-        {
-            while (m_LocalUser == null)
-                await Task.Delay(100);
-            return m_LocalUser;
-        }
-
         #endregion
+
+        LocalPlayer GetPlayerByID(string playerID)
+        {
+            if (m_LocalUser.ID.Value == playerID)
+                return m_LocalUser;
+
+            if (!m_LocalLobby.LocalPlayers.ContainsKey(playerID))
+            {
+                Debug.LogError($"No player by id : {playerID} in Local Lobby");
+                return null;
+            }
+            return m_LocalLobby.LocalPlayers[playerID];
+        }
 
         void SetGameState(GameState state)
         {
             bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
-                LocalGameState == GameState.Lobby;
+                                  LocalGameState == GameState.Lobby;
             LocalGameState = state;
             Debug.Log($"Switching Game State to : {LocalGameState}");
             if (isLeavingLobby)
@@ -287,17 +319,14 @@ namespace LobbyRelaySample
 
         void CreateLobby()
         {
-            Debug.Log("Creating Lobby");
             m_LocalUser.IsHost.Value = true;
             JoinLobby();
         }
 
         void JoinLobby()
         {
-            Debug.Log("Joining Lobby");
-
             m_LobbySynchronizer.StartSynch(m_LocalLobby, m_LocalUser);
-            SetUserLobbyState();
+            LocalUserToLobby();
             StartVivoxJoin();
         }
 
@@ -381,7 +410,7 @@ namespace LobbyRelaySample
                 }
 
                 m_RelayClient = client;
-                OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+                SetUserStatus(m_LocalUser.ID.Value, UserStatus.Lobby);
             }
         }
 
@@ -393,11 +422,11 @@ namespace LobbyRelaySample
                 doConnection?.Invoke();
         }
 
-        void SetUserLobbyState()
+        void LocalUserToLobby()
         {
             Debug.Log($"Setting Lobby user state {GameState.Lobby}");
             SetGameState(GameState.Lobby);
-            OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
+            SetUserStatus(m_LocalUser.ID.Value, UserStatus.Lobby);
         }
 
         void ResetLocalLobby()
@@ -437,7 +466,6 @@ namespace LobbyRelaySample
 
         void ForceLeaveAttempt()
         {
-            Locator.Get.Messenger.Unsubscribe(this);
             if (!string.IsNullOrEmpty(m_LocalLobby?.LobbyID.Value))
             {
 #pragma warning disable 4014

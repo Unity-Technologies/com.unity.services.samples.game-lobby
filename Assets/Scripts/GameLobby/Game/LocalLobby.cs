@@ -27,7 +27,7 @@ namespace LobbyRelaySample
     /// (The way that the Lobby service handles its data doesn't necessarily match our needs, so we need to map from that to this LocalLobby for use in the sample code.)
     /// </summary>
     [System.Serializable]
-    public class LocalLobby : Observed<LocalLobby>
+    public class LocalLobby
     {
 
         public bool CanSetChanged = true;
@@ -92,7 +92,6 @@ namespace LobbyRelaySample
             m_LocalPlayers.Clear();
 
             LobbyName.Value = "";
-
             LobbyID.Value = "";
             LobbyCode.Value = "";
             Private.Value = false;
@@ -175,12 +174,6 @@ namespace LobbyRelaySample
             sb.AppendLine(RelayNGOCode.Value);
 
             return sb.ToString();
-        }
-
-        // This ends up being called from the lobby list when we get data about a lobby without having joined it yet.
-        public override void CopyObserved(LocalLobby oldObserved)
-        {
-            // CopyObserved(oldObserved.Data, oldObserved.m_LocalPlayers);
         }
     }
 }

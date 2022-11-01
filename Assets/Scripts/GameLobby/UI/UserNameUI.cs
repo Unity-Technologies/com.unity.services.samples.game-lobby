@@ -15,7 +15,7 @@ namespace LobbyRelaySample.UI
         public override async void Start()
         {
             base.Start();
-            var localUser = await GameManager.Instance.LocalUserInitialized();
+            var localUser = await GameManager.Instance.AwaitLocalUserInitialization();
             localUser.DisplayName.onChanged += SetText;
 
         }

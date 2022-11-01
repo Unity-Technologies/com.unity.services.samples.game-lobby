@@ -173,7 +173,7 @@ namespace LobbyRelaySample
             Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
                 "Host left the lobby! Disconnecting...");
             Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+            GameManager.Instance.ChangeMenuState(GameState.JoinMenu);
         }
 
         public void OnLobbyIdChanged(string lobbyID)

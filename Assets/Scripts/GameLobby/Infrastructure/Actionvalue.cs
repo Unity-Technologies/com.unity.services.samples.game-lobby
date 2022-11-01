@@ -16,13 +16,13 @@ namespace LobbyRelaySample
         {
             m_CachedValue = cachedValue;
         }
-        
+
         public T Value
         {
             get => m_CachedValue;
             set
             {
-                if (m_CachedValue.Equals(value))
+                if (m_CachedValue!=null&&m_CachedValue.Equals(value))
                     return;
                 m_CachedValue = value;
                 onChanged?.Invoke(m_CachedValue);

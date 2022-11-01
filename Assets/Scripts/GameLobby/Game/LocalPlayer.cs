@@ -21,7 +21,7 @@ namespace LobbyRelaySample
     /// Data for a local player instance. This will update data and is observed to know when to push local player changes to the entire lobby.
     /// </summary>
     [Serializable]
-    public class LocalPlayer : Observed<LocalPlayer>
+    public class LocalPlayer
     {
         public CallbackValue<bool> IsHost = new CallbackValue<bool>(false);
         public CallbackValue<string> DisplayName = new CallbackValue<string>("");
@@ -45,11 +45,6 @@ namespace LobbyRelaySample
             Emote.Value = EmoteType.None;
             UserStatus.Value = LobbyRelaySample.UserStatus.Menu;
         }
-
-
-        public override void CopyObserved(LocalPlayer observed)
-        {
-            OnChanged(this);
-        }
+        
     }
 }

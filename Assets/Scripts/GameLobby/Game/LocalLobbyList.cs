@@ -20,8 +20,6 @@ namespace LobbyRelaySample
     [System.Serializable]
     public class LocalLobbyList
     {
-        LobbyQueryState m_CurrentState = LobbyQueryState.Empty;
-
         public CallbackValue<LobbyQueryState> QueryState = new CallbackValue<LobbyQueryState>();
 
         public Action<Dictionary<string, LocalLobby>> onLobbyListChange;

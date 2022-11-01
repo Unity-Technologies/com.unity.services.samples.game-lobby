@@ -27,7 +27,7 @@ namespace LobbyRelaySample.UI
 
         public void OnDestroy()
         {
-            if (GameManager.Instance == null)
+            if (Manager== null)
                 return;
             Manager.LocalLobby.LocalLobbyState.onChanged -= LobbyChanged;
         }

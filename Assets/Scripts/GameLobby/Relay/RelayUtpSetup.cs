@@ -233,16 +233,16 @@ namespace LobbyRelaySample.relay
 
 		protected override void JoinRelay()
 		{
-			m_localLobby.onChanged += OnLobbyChange;
+			m_localLobby.RelayCode.onChanged += OnRelayChanged;
 		}
 
-		private void OnLobbyChange(LocalLobby lobby)
+		private void OnRelayChanged(string relayCode)
 		{
-			if (m_localLobby.RelayCode != null)
-			{
-				RelayAPIInterface.JoinAsync(m_localLobby.RelayCode.Value, OnJoin);
-				m_localLobby.onChanged -= OnLobbyChange;
-			}
+			if (string.IsNullOrEmpty(relayCode))
+				return;
+
+			RelayAPIInterface.JoinAsync(m_localLobby.RelayCode.Value, OnJoin);
+			m_localLobby.RelayCode.onChanged -= OnRelayChanged;
 		}
 
 		private void OnJoin(JoinAllocation joinAllocation)
@@ -290,7 +290,7 @@ namespace LobbyRelaySample.relay
 				m_onJoinComplete(true, client);
 				var connectionInfo = $"{m_allocation.RelayServer.IpV4}:{m_allocation.RelayServer.Port}";
 
-				//  await LobbyManager.Instance.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode,connectionInfo);
+				await GameManager.Instance.LobbyManager.UpdatePlayerRelayInfoAsync(m_allocation.AllocationId.ToString(), m_localLobby.RelayCode.Value,connectionInfo);
 			}
 		}
 	}

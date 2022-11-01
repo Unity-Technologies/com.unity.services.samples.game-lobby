@@ -42,9 +42,7 @@ namespace LobbyRelaySample.UI
         public void OnCreatePressed()
         {
             //Disabled as it's a one-off butto call
-#pragma warning disable 4014
-            GameManager.Instance.CreateLobby(m_ServerName, m_IsServerPrivate);
-#pragma warning restore 4014
+           Manager.CreateLobby(m_ServerName, m_IsServerPrivate);
         }
     }
 }

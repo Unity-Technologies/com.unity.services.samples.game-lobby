@@ -312,7 +312,6 @@ namespace LobbyRelaySample
         public void Dispose()
         {
             m_CurrentLobby = null;
-            m_HeartBeatTask.Dispose();
         }
 
         #region HeartBeat

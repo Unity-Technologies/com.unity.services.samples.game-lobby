@@ -68,13 +68,13 @@ namespace LobbyRelaySample.UI
 
         public void OnJoinButtonPressed()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.JoinLobbyRequest, m_LocalLobbySelected);
+            Manager.JoinLobby(m_LocalLobbySelected);
             m_LocalLobbySelected = new LocalLobby();
         }
 
         public void OnRefresh()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.QueryLobbies, null);
+            Manager.QueryLobbies();
         }
 
         void OnLobbyListChanged(Dictionary<string, LocalLobby> lobbyList)
@@ -116,7 +116,7 @@ namespace LobbyRelaySample.UI
 
         public void OnQuickJoin()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.QuickJoin, null);
+            Manager.QuickJoin();
         }
 
         bool CanDisplay(LocalLobby lobby)
@@ -130,8 +130,6 @@ namespace LobbyRelaySample.UI
         void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
         {
             var lobbyButtonInstance = Instantiate(m_LobbyButtonPrefab, m_LobbyButtonParent);
-            lobbyButtonInstance.GetComponent<LocalLobbyObserver>().BeginObserving(lobby);
-            lobby.onDestroyed += RemoveLobbyButton; // Set up to clean itself
             lobbyButtonInstance.onLobbyPressed.AddListener(LobbyButtonSelected);
             m_LobbyButtons.Add(lobbyCode, lobbyButtonInstance);
             m_LocalLobby.Add(lobbyCode, lobby);
@@ -146,7 +144,6 @@ namespace LobbyRelaySample.UI
         {
             var lobbyID = lobby.LobbyID.Value;
             var lobbyButton = m_LobbyButtons[lobbyID];
-            lobbyButton.GetComponent<LocalLobbyObserver>().EndObserving();
             m_LobbyButtons.Remove(lobbyID);
             m_LocalLobby.Remove(lobbyID);
             Destroy(lobbyButton.gameObject);

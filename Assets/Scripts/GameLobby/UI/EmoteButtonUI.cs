@@ -1,4 +1,5 @@
 using TMPro;
+using UnityEditor.Scripting;
 using UnityEngine;
 
 namespace LobbyRelaySample.UI
@@ -6,14 +7,14 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Controls a button which will set the local player's emote state when pressed. This demonstrates a player updating their data within the room.
     /// </summary>
-    public class EmoteButtonUI : MonoBehaviour
+    public class EmoteButtonUI : UIPanelBase
     {
         [SerializeField]
         EmoteType m_emoteType;
 
         public void SetPlayerEmote()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.UserSetEmote, m_emoteType);
+            Manager.SetLocalUserEmote(m_emoteType);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Button callbacks for the "Ready"/"Not Ready" buttons used to indicate the local player is ready/not ready.
     /// </summary>
-    public class ReadyCheckUI : MonoBehaviour
+    public class ReadyCheckUI : UIPanelBase
     {
         public void OnReadyButton()
         {
@@ -17,7 +17,7 @@ namespace LobbyRelaySample.UI
         }
         void ChangeState(UserStatus status)
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.LobbyUserStatus, status);
+            Manager.SetLocalUserStatus(status);
         }
     }
 }

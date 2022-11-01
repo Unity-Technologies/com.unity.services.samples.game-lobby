@@ -5,16 +5,16 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// For navigating the main menu.
     /// </summary>
-    public class BackButtonUI : MonoBehaviour
+    public class BackButtonUI : UIPanelBase
     {
         public void ToJoinMenu()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+            Manager.ChangeMenuState(GameState.JoinMenu);
         }
 
         public void ToMenu()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.Menu);
+            Manager.ChangeMenuState(GameState.Menu);
         }
     }
 }

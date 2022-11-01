@@ -130,11 +130,15 @@ namespace LobbyRelaySample.relay
             // We rely on the PlayerDisconnect message instead of this disconnect message since this message might not arrive for a long time after the disconnect actually occurs.
         }
 
+        public void OnUserStatusChanged()
+        {
+            CheckIfAllUsersReady();
+        }
+
         public void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.LobbyUserStatus)
-                CheckIfAllUsersReady();
-            else if (type == MessageType.EndGame
+
+            if (type == MessageType.EndGame
             ) // This assumes that only the host will have the End Game button available; otherwise, clients need to be able to send this message, too.
             {
                 foreach (NetworkConnection connection in m_connections)
@@ -176,7 +180,7 @@ namespace LobbyRelaySample.relay
         /// </summary>
         public void SendInGameState()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ConfirmInGameState, null);
+            GameManager.Instance.ConfirmIngameState();
             foreach (NetworkConnection connection in m_connections)
                 WriteByte(m_networkDriver, connection, m_localUser.ID.Value, MsgType.ConfirmInGame, 0);
         }

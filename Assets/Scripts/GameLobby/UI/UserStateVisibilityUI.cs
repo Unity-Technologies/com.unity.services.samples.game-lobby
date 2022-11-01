@@ -26,7 +26,7 @@ namespace LobbyRelaySample.UI
         public override async void Start()
         {
             base.Start();
-            var localUser = await Manager.LocalUserInitialized();
+            var localUser = await Manager.AwaitLocalUserInitialization();
             localUser.IsHost.onChanged += OnUserHostChanged;
 
             localUser.UserStatus.onChanged += OnUserStatusChanged;

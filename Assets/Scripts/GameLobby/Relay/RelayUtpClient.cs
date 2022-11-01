@@ -30,14 +30,14 @@ namespace LobbyRelaySample.relay
         {
             m_localUser = localUser;
             m_localLobby = localLobby;
-            m_localUser.onChanged += OnLocalChange;
+            //m_localUser.onChanged += OnLocalChange;
             m_networkDriver = networkDriver;
             m_connections = connections;
             Locator.Get.UpdateSlow.Subscribe(UpdateSlow, k_heartbeatPeriod);
         }
         protected virtual void Uninitialize()
         {
-            m_localUser.onChanged -= OnLocalChange;
+            //m_localUser.onChanged -= OnLocalChange;
             Leave();
             Locator.Get.UpdateSlow.Unsubscribe(UpdateSlow);
             // Don't clean up the NetworkDriver here, or else our disconnect message won't get through to the host. The host will handle cleaning up the connection.
@@ -148,13 +148,13 @@ namespace LobbyRelaySample.relay
                     m_localLobby.LocalPlayers[id].UserStatus.Value = status;
                 }
                 else if (msgType == MsgType.StartCountdown)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.StartCountdown, null);
+                    GameManager.Instance.BeginCountdown();
                 else if (msgType == MsgType.CancelCountdown)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.CancelCountdown, null);
+                    GameManager.Instance.CancelCountDown();
                 else if (msgType == MsgType.ConfirmInGame)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.ConfirmInGameState, null);
+                    GameManager.Instance.ConfirmIngameState();
                 else if (msgType == MsgType.EndInGame)
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
+                    GameManager.Instance.EndGame();
 
                 ProcessNetworkEventDataAdditional(conn, msgType, id);
             }
@@ -181,7 +181,7 @@ namespace LobbyRelaySample.relay
             Debug.LogError(msg);
             Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, msg);
             Leave();
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+            GameManager.Instance.ChangeMenuState(GameState.JoinMenu);
         }
 
         /// <summary>
@@ -219,6 +219,7 @@ namespace LobbyRelaySample.relay
         /// </summary>
         private void DoUserUpdate(NetworkDriver driver, NetworkConnection connection, LocalPlayer user)
         {
+
 
         }
         /// <summary>

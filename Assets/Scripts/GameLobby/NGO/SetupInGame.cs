@@ -108,11 +108,16 @@ namespace LobbyRelaySample.ngo
 #pragma warning restore 4014
         }
 
+        public void ConfirmInGameState()
+        {
+
+        }
+
         public void OnReceiveMessage(MessageType type, object msg)
         {
-            if (type == MessageType.ConfirmInGameState) { }
 
-            else if (type == MessageType.MinigameBeginning)
+
+             if (type == MessageType.MinigameBeginning)
             {
                 if (!m_hasConnectedViaNGO)
                 {
@@ -121,17 +126,13 @@ namespace LobbyRelaySample.ngo
                     OnGameEnd();
                 }
             }
-            else if (type == MessageType.ChangeMenuState)
-            {
-                // Once we're in-game, any state change reflects the localPlayer leaving the game, so we should clean up.
-                OnGameEnd();
-            }
+
         }
 
         /// <summary>
         /// Return to the localLobby after the game, whether due to the game ending or due to a failed connection.
         /// </summary>
-        private void OnGameEnd()
+        public void OnGameEnd()
         {
             if (m_doesNeedCleanup)
             {

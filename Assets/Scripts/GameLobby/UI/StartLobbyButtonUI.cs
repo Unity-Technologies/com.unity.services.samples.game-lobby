@@ -1,15 +1,15 @@
-using UnityEngine;
+using LobbyRelaySample.UI;
 
 namespace LobbyRelaySample
 {
     /// <summary>
     /// Main menu start button.
     /// </summary>
-    public class StartLobbyButtonUI : MonoBehaviour
+    public class StartLobbyButtonUI : UIPanelBase
     {
         public void ToJoinMenu()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.ChangeMenuState, GameState.JoinMenu);
+            Manager.ChangeMenuState(GameState.JoinMenu);
         }
     }
 }
