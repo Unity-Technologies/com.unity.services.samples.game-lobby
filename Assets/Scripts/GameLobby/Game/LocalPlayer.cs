@@ -1,6 +1,4 @@
 using System;
-using Unity.Services.Lobbies.Models;
-using UnityEngine;
 
 namespace LobbyRelaySample
 {
@@ -25,11 +23,11 @@ namespace LobbyRelaySample
     [Serializable]
     public class LocalPlayer : Observed<LocalPlayer>
     {
-        public CallbackValue<bool> IsHost = new CallbackValue<bool>();
-        public CallbackValue<string> DisplayName = new CallbackValue<string>();
-        public CallbackValue<EmoteType> Emote = new CallbackValue<EmoteType>();
-        public CallbackValue<UserStatus> UserStatus = new CallbackValue<UserStatus>();
-        public CallbackValue<string> ID = new CallbackValue<string>();
+        public CallbackValue<bool> IsHost = new CallbackValue<bool>(false);
+        public CallbackValue<string> DisplayName = new CallbackValue<string>("");
+        public CallbackValue<EmoteType> Emote = new CallbackValue<EmoteType>(EmoteType.None);
+        public CallbackValue<UserStatus> UserStatus = new CallbackValue<UserStatus>((UserStatus)0);
+        public CallbackValue<string> ID = new CallbackValue<string>("");
 
         public LocalPlayer(string id, bool isHost, string displayName,
             EmoteType emote = default, UserStatus status = default)

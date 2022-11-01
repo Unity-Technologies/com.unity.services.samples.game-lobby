@@ -7,6 +7,16 @@ namespace LobbyRelaySample
     {
         public Action<T> onChanged;
 
+
+        public CallbackValue()
+        {
+
+        }
+        public CallbackValue(T cachedValue)
+        {
+            m_CachedValue = cachedValue;
+        }
+        
         public T Value
         {
             get => m_CachedValue;

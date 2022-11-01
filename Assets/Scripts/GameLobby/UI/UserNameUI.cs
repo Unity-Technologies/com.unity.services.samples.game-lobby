@@ -12,10 +12,12 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         TMP_Text m_TextField;
 
-        public override void Start()
+        public override async void Start()
         {
             base.Start();
-            GameManager.Instance.LocalUser.DisplayName.onChanged += SetText;
+            var localUser = await GameManager.Instance.LocalUserInitialized();
+            localUser.DisplayName.onChanged += SetText;
+
         }
 
         void SetText(string text)

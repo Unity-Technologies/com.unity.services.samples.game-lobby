@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
+using UnityEngine;
 
 namespace LobbyRelaySample.lobby
 {
@@ -50,6 +51,16 @@ namespace LobbyRelaySample.lobby
         /// </summary>
         public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobby, bool allowSetLobbyChanged = true)
         {
+            if (remoteLobby == null)
+            {
+                Debug.LogError("Remote lobby is null, cannot convert.");
+                return;
+            }
+            if (localLobby == null)
+            {
+                Debug.LogError("Local Lobby is null, cannot convert");
+                return;
+            }
             localLobby.CanSetChanged = allowSetLobbyChanged;
             localLobby.LobbyID.Value = remoteLobby.Id;
             localLobby.LobbyName.Value = remoteLobby.Name;

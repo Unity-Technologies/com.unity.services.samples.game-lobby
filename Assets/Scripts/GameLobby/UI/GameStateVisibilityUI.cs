@@ -15,9 +15,9 @@ namespace LobbyRelaySample.UI
             if (!ShowThisWhen.HasFlag(state))
                 Hide();
             else
-            {
                 Show();
-            }
+
+            Debug.Log($"GameStateChanged for {gameObject.name} : {state}");
         }
 
         public override void Start()

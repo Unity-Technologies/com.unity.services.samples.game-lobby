@@ -33,24 +33,9 @@ namespace LobbyRelaySample
     /// </summary>
     public class GameManager : MonoBehaviour, IReceiveMessages
     {
-        #region UI elements that observe the local state. These should be assigned the observers in the scene during Start.
 
-        /// <summary>
-        /// The Observer/Observed Pattern is great for keeping the UI in Sync with the actual Values.
-        /// Each list below represents a single Observed class that gets updated by other parts of the code, and will
-        /// trigger the list of Observers that are looking for changes in that class.
-        ///
-        /// The list is serialized, so you can navigate to the Observers via the Inspector to see who's watching.
-        /// </summary>
-        [SerializeField]
-        List<LocalLobbyObserver> m_LocalLobbyObservers = new List<LocalLobbyObserver>();
-        [SerializeField]
-        List<LobbyUserObserver> m_LocalUserObservers = new List<LobbyUserObserver>();
-
-        #endregion
 
         public LocalLobby LocalLobby => m_LocalLobby;
-        public LocalPlayer LocalUser => m_LocalUser;
         public Action<GameState> onGameStateChanged;
         public LocalLobbyList LobbyList { get; private set; } = new LocalLobbyList();
 
@@ -102,11 +87,24 @@ namespace LobbyRelaySample
 
             if (lobby != null)
             {
-                LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+                try
+                {
+                    LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+
+                }
+                catch(Exception exception)
+                {
+                    Debug.LogError(exception);
+                }
+
+                Debug.Log("Found Lobby");
+
                 CreateLobby();
             }
             else
             {
+                Debug.Log("Didnt find Lobby");
+
                 SetGameState(GameState.JoinMenu);
             }
         }
@@ -227,12 +225,12 @@ namespace LobbyRelaySample
             Application.wantsToQuit += OnWantToQuit;
             LobbyManager = new LobbyManager();
             m_LobbySynchronizer = new LobbySynchronizer(LobbyManager);
-            InitLocalInstances();
+            m_LocalUser = new LocalPlayer("", false, "LocalPlayer");
+            m_LocalLobby = new LocalLobby { LocalLobbyState = { Value = LobbyState.Lobby } };
             await InitializeServices();
-            InitLocalPlayerId();
+            AuthenticatePlayer();
             StartVivoxLogin();
             Locator.Get.Messenger.Subscribe(this);
-            BeginObservers();
         }
 
         async Task InitializeServices()
@@ -244,27 +242,24 @@ namespace LobbyRelaySample
             await Auth.Authenticate(serviceProfileName);
         }
 
-        void InitLocalInstances()
-        {
-            m_LocalLobby = new LocalLobby { LocalLobbyState = { Value = LobbyState.Lobby } };
-        }
 
-        void InitLocalPlayerId()
+
+        void AuthenticatePlayer()
         {
             var localId = AuthenticationService.Instance.PlayerId;
             var randomName = NameGenerator.GetName(localId);
 
-            m_LocalUser = new LocalPlayer(localId, false, randomName);
+            m_LocalUser.ID.Value = localId;
+            m_LocalUser.DisplayName.Value = randomName;
 
             m_LocalLobby.AddPlayer(m_LocalUser); // The local LocalPlayer object will be hooked into UI
         }
 
-        void BeginObservers()
+        public async Task<LocalPlayer> LocalUserInitialized()
         {
-            foreach (var lobbyObs in m_LocalLobbyObservers)
-                lobbyObs.BeginObserving(m_LocalLobby);
-            foreach (var userObs in m_LocalUserObservers)
-                userObs.BeginObserving(m_LocalUser);
+            while (m_LocalUser == null)
+                await Task.Delay(100);
+            return m_LocalUser;
         }
 
         #endregion
@@ -274,6 +269,7 @@ namespace LobbyRelaySample
             bool isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
                 LocalGameState == GameState.Lobby;
             LocalGameState = state;
+            Debug.Log($"Switching Game State to : {LocalGameState}");
             if (isLeavingLobby)
                 LeaveLobby();
             onGameStateChanged.Invoke(LocalGameState);
@@ -291,12 +287,15 @@ namespace LobbyRelaySample
 
         void CreateLobby()
         {
+            Debug.Log("Creating Lobby");
             m_LocalUser.IsHost.Value = true;
             JoinLobby();
         }
 
         void JoinLobby()
         {
+            Debug.Log("Joining Lobby");
+
             m_LobbySynchronizer.StartSynch(m_LocalLobby, m_LocalUser);
             SetUserLobbyState();
             StartVivoxJoin();
@@ -396,6 +395,7 @@ namespace LobbyRelaySample
 
         void SetUserLobbyState()
         {
+            Debug.Log($"Setting Lobby user state {GameState.Lobby}");
             SetGameState(GameState.Lobby);
             OnReceiveMessage(MessageType.LobbyUserStatus, UserStatus.Lobby);
         }

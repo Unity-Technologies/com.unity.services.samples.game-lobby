@@ -36,6 +36,7 @@ namespace LobbyRelaySample.UI
         public void SetUser(LocalPlayer myLocalPlayer)
         {
             Show();
+            m_localPlayer = myLocalPlayer;
             SubscribeToPlayerUpdates();
 
             UserId = myLocalPlayer.ID.Value;

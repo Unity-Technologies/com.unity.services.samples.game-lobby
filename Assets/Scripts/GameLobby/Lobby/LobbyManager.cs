@@ -22,11 +22,10 @@ namespace LobbyRelaySample
         public Lobby CurrentLobby => m_CurrentLobby;
         Lobby m_CurrentLobby;
 
-        const int
-            k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
+        const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
+        Task m_HeartBeatTask;
         #region Rate Limiting
-
         public enum RequestType
         {
             Query = 0,
@@ -90,6 +89,7 @@ namespace LobbyRelaySample
             }
 
             await m_CreateCooldown.WaitUntilCooldown();
+
             Debug.Log("Lobby - Creating");
 
             try
@@ -102,9 +102,9 @@ namespace LobbyRelaySample
                     Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
                 };
                 m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
-#pragma warning disable 4014
-                HeartBeatLoop();
-#pragma warning restore 4014
+
+                StartHeartBeat();
+
                 return m_CurrentLobby;
             }
             catch (Exception ex)
@@ -312,6 +312,7 @@ namespace LobbyRelaySample
         public void Dispose()
         {
             m_CurrentLobby = null;
+            m_HeartBeatTask.Dispose();
         }
 
         #region HeartBeat
@@ -329,6 +330,12 @@ namespace LobbyRelaySample
             await LobbyService.Instance.SendHeartbeatPingAsync(m_CurrentLobby.Id);
         }
 
+        void StartHeartBeat()
+        {
+ #pragma warning disable 4014
+            m_HeartBeatTask = HeartBeatLoop();
+ #pragma warning restore 4014
+        }
         async Task HeartBeatLoop()
         {
             while (m_CurrentLobby != null)

@@ -11,7 +11,7 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         TMP_Text m_lobbyNameText;
 
-        public void Start()
+        public override void Start()
         {
             base.Start();
             Manager.LocalLobby.LobbyName.onChanged += (s) => { m_lobbyNameText.SetText(s); };

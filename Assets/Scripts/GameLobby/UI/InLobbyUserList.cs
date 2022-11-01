@@ -14,6 +14,7 @@ namespace LobbyRelaySample.UI
         public override void Start()
         {
             base.Start();
+
             GameManager.Instance.LocalLobby.onUserListChanged += OnUsersChanged;
         }
 
