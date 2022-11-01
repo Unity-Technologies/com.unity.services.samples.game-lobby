@@ -233,16 +233,15 @@ namespace LobbyRelaySample.relay
 
 		protected override void JoinRelay()
 		{
-			m_localLobby.onChanged += OnLobbyChange;
+			m_localLobby.RelayCode.onChanged += OnLobbyChange;
 		}
 
-		private void OnLobbyChange(LocalLobby lobby)
+		private void OnLobbyChange(string relayChanged)
 		{
-			if (m_localLobby.RelayCode != null)
-			{
-				RelayAPIInterface.JoinAsync(m_localLobby.RelayCode.Value, OnJoin);
-				m_localLobby.onChanged -= OnLobbyChange;
-			}
+
+			RelayAPIInterface.JoinAsync(relayChanged, OnJoin);
+			m_localLobby.RelayCode.onChanged -= OnLobbyChange;
+
 		}
 
 		private void OnJoin(JoinAllocation joinAllocation)
