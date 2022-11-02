@@ -129,7 +129,7 @@ namespace LobbyRelaySample.relay
 //                    if (approval == Approval.OK && !m_localUser.IsApproved)
 //                        OnApproved(m_networkDriver, conn);
 //                    else if (approval == Approval.GameAlreadyStarted)
-//                        Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Rejected: Game has already started.");
+//                        LogHandlerSettings.Instance.SpawnErrorPopup( "Rejected: Game has already started.");
                 }
                 else if (msgType == MsgType.PlayerName)
                 {
@@ -179,7 +179,7 @@ namespace LobbyRelaySample.relay
                 msg = "Connection to host was lost. Leaving the lobby.";
 
             Debug.LogError(msg);
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, msg);
+            LogHandlerSettings.Instance.SpawnErrorPopup( msg);
             Leave();
             GameManager.Instance.ChangeMenuState(GameState.JoinMenu);
         }

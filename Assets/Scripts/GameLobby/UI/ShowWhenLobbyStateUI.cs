@@ -24,12 +24,6 @@ namespace LobbyRelaySample.UI
             base.Start();
             Manager.LocalLobby.LocalLobbyState.onChanged += LobbyChanged;
         }
-
-        public void OnDestroy()
-        {
-            if (Manager== null)
-                return;
-            Manager.LocalLobby.LocalLobbyState.onChanged -= LobbyChanged;
-        }
+        
     }
 }

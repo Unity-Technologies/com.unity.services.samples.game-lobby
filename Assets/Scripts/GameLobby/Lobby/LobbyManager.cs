@@ -127,6 +127,7 @@ namespace LobbyRelaySample
 
             string uasId = AuthenticationService.Instance.PlayerId;
             var playerData = CreateInitialPlayerData(localUser);
+            
             if (!string.IsNullOrEmpty(lobbyId))
             {
                 JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions

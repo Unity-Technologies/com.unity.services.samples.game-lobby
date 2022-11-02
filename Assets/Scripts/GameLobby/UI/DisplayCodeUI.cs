@@ -18,8 +18,6 @@ namespace LobbyRelaySample.UI
 
         void LobbyCodeChanged(string newCode)
         {
-
-
             if (!string.IsNullOrEmpty(newCode))
             {
                 m_outputText.text = newCode;
@@ -38,16 +36,6 @@ namespace LobbyRelaySample.UI
                 Manager.LocalLobby.LobbyCode.onChanged += LobbyCodeChanged;
             if(m_codeType==CodeType.Relay)
                 Manager.LocalLobby.RelayCode.onChanged += LobbyCodeChanged;
-        }
-
-        void OnDestroy()
-        {
-            if (Manager == null)
-                return;
-            if(m_codeType==CodeType.Lobby)
-                Manager.LocalLobby.LobbyCode.onChanged -= LobbyCodeChanged;
-            if(m_codeType==CodeType.Relay)
-                Manager.LocalLobby.RelayCode.onChanged -= LobbyCodeChanged;
         }
     }
 }

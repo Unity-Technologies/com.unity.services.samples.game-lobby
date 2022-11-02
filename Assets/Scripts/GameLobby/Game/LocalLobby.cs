@@ -43,7 +43,8 @@ namespace LobbyRelaySample
         public LocalLobby()
         {
             LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
-            LobbyID.onChanged = (s) => {  SetValueChanged(); };
+            onUserListChanged = (dict) => { SetValueChanged(); };
+            LobbyID.onChanged = (s) => { SetValueChanged(); };
             LobbyCode.onChanged = (s) => { SetValueChanged(); };
             RelayCode.onChanged = (s) => { SetValueChanged(); };
             RelayNGOCode.onChanged = (s) => { SetValueChanged(); };
@@ -60,7 +61,6 @@ namespace LobbyRelaySample
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
 
         #endregion
-
         public CallbackValue<string> LobbyID = new CallbackValue<string>();
 
         public CallbackValue<string> LobbyCode = new CallbackValue<string>();
@@ -75,6 +75,7 @@ namespace LobbyRelaySample
 
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
 
+        public CallbackValue<bool> Locked = new CallbackValue<bool>();
         public CallbackValue<bool> Private = new CallbackValue<bool>();
 
         public CallbackValue<int> AvailableSlots = new CallbackValue<int>();
@@ -94,6 +95,7 @@ namespace LobbyRelaySample
             LobbyName.Value = "";
             LobbyID.Value = "";
             LobbyCode.Value = "";
+            Locked.Value = false;
             Private.Value = false;
             LocalLobbyColor.Value = LobbyRelaySample.LobbyColor.None;
             AvailableSlots.Value = 4;
@@ -113,7 +115,7 @@ namespace LobbyRelaySample
 
         void SetValueChanged()
         {
-            if(CanSetChanged)
+            if (CanSetChanged)
                 m_ValuesChanged = true;
         }
         bool m_ValuesChanged;
@@ -128,25 +130,50 @@ namespace LobbyRelaySample
 
             Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
             m_LocalPlayers.Add(user.ID.Value, user);
+            user.Emote.onChanged += EmoteChangedCallback;
+            user.DisplayName.onChanged += StringChangedCallback;
+            user.IsHost.onChanged += BoolChangedCallback;
+            user.UserStatus.onChanged += EmoteChangedCallback;
+
             onUserListChanged?.Invoke(m_LocalPlayers);
         }
 
         public void RemovePlayer(LocalPlayer user)
-        {
-            DoRemoveUser(user);
-            onUserListChanged?.Invoke(m_LocalPlayers);
-        }
-
-        void DoRemoveUser(LocalPlayer user)
         {
             if (!m_LocalPlayers.ContainsKey(user.ID.Value))
             {
                 Debug.LogWarning($"Player {user.DisplayName}({user.ID}) does not exist in lobby: {LobbyID}");
                 return;
             }
-
             m_LocalPlayers.Remove(user.ID.Value);
+            user.Emote.onChanged -= EmoteChangedCallback;
+            user.DisplayName.onChanged -= StringChangedCallback;
+            user.IsHost.onChanged -= BoolChangedCallback;
+            user.UserStatus.onChanged -= EmoteChangedCallback;
+            onUserListChanged?.Invoke(m_LocalPlayers);
         }
+
+
+        void EmoteChangedCallback(EmoteType emote)
+        {
+            IsLobbyChanged();
+        }
+
+        void StringChangedCallback(string text)
+        {
+            IsLobbyChanged();
+        }
+
+        void BoolChangedCallback(bool changed)
+        {
+            IsLobbyChanged();
+        }
+
+        void EmoteChangedCallback(UserStatus status)
+        {
+            IsLobbyChanged();
+        }
+
 
         public override string ToString()
         {
@@ -156,6 +183,8 @@ namespace LobbyRelaySample
             sb.AppendLine(LobbyID.Value);
             sb.Append("Code: ");
             sb.AppendLine(LobbyCode.Value);
+            sb.Append("Locked: ");
+            sb.AppendLine(Locked.Value.ToString());
             sb.Append("Private: ");
             sb.AppendLine(Private.Value.ToString());
             sb.Append("AvailableSlots: ");

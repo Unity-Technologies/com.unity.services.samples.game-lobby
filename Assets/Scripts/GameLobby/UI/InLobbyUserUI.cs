@@ -1,5 +1,4 @@
-using System;
-using JetBrains.Annotations;
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,7 +37,7 @@ namespace LobbyRelaySample.UI
             Show();
             m_localPlayer = myLocalPlayer;
             SubscribeToPlayerUpdates();
-
+            SetDisplayName(m_localPlayer.DisplayName.Value);
             UserId = myLocalPlayer.ID.Value;
             m_vivoxUserHandler.SetId(UserId);
         }

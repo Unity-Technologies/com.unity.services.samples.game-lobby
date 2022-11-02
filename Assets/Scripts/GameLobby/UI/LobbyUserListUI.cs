@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LobbyRelaySample.UI
 {
-    public class InLobbyUserList : UIPanelBase
+    public class LobbyUserListUI : UIPanelBase
     {
         [SerializeField]
         List<InLobbyUserUI> m_UserUIObjects = new List<InLobbyUserUI>();

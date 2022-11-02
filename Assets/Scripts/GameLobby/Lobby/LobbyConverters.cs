@@ -70,7 +70,7 @@ namespace LobbyRelaySample.lobby
             localLobby.MaxPlayerCount.Value = remoteLobby.MaxPlayers;
             localLobby.LastUpdated.Value = remoteLobby.LastUpdated.ToFileTimeUtc();
 
-            //Custom Data Conversion
+            //Custom Lobby Data Conversions
             localLobby.RelayCode.Value = remoteLobby.Data?.ContainsKey(key_RelayCode) == true
                 ? remoteLobby.Data[key_RelayCode].Value
                 : localLobby.RelayCode.Value;
@@ -84,6 +84,7 @@ namespace LobbyRelaySample.lobby
                 ? (LobbyColor)int.Parse(remoteLobby.Data[key_LobbyColor].Value)
                 : LobbyColor.None;
 
+            //Custom User Data Conversions
             List<string> remotePlayerIDs = new List<string>();
             foreach (var player in remoteLobby.Players)
             {
@@ -95,10 +96,11 @@ namespace LobbyRelaySample.lobby
                     : default;
                 var emote = player.Data?.ContainsKey(key_Emote) == true
                     ? (EmoteType)int.Parse(player.Data[key_Emote].Value)
-                    : default;
+                    : EmoteType.None;
                 var userStatus = player.Data?.ContainsKey(key_Userstatus) == true
                     ? (UserStatus)int.Parse(player.Data[key_Userstatus].Value)
-                    : UserStatus.Connecting;
+                    : UserStatus.Lobby;
+
                 LocalPlayer localPlayer;
 
                 //See if we have the remote player locally already

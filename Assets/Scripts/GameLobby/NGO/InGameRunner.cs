@@ -140,7 +140,7 @@ namespace LobbyRelaySample.ngo
         private void BeginGame()
         {
             m_canSpawnInGameObjects = true;
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.MinigameBeginning, null);
+            GameManager.Instance.BeginGame();
             m_introOutroRunner.DoIntro();
         }
 

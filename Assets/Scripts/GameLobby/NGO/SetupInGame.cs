@@ -13,7 +13,7 @@ namespace LobbyRelaySample.ngo
     /// Once the local localPlayer is in a localLobby and that localLobby has entered the In-Game state, this will load in whatever is necessary to actually run the game part.
     /// This will exist in the game scene so that it can hold references to scene objects that spawned prefab instances will need.
     /// </summary>
-    public class SetupInGame : MonoBehaviour, IReceiveMessages
+    public class SetupInGame : MonoBehaviour
     {
         [SerializeField]
         GameObject m_IngameRunnerPrefab = default;
@@ -26,16 +26,6 @@ namespace LobbyRelaySample.ngo
         private bool m_hasConnectedViaNGO = false;
 
         private LocalLobby m_lobby;
-
-        public void Start()
-        {
-            Locator.Get.Messenger.Subscribe(this);
-        }
-
-        public void OnDestroy()
-        {
-            Locator.Get.Messenger.Unsubscribe(this);
-        }
 
         private void SetMenuVisibility(bool areVisible)
         {
@@ -110,23 +100,17 @@ namespace LobbyRelaySample.ngo
 
         public void ConfirmInGameState()
         {
-
+            
         }
 
-        public void OnReceiveMessage(MessageType type, object msg)
+        public void MiniGameBeginning()
         {
-
-
-             if (type == MessageType.MinigameBeginning)
+            if (!m_hasConnectedViaNGO)
             {
-                if (!m_hasConnectedViaNGO)
-                {
-                    // If this localPlayer hasn't successfully connected via NGO, forcibly exit the minigame.
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
-                    OnGameEnd();
-                }
+                // If this localPlayer hasn't successfully connected via NGO, forcibly exit the minigame.
+                LogHandlerSettings.Instance.SpawnErrorPopup( "Failed to join the game.");
+                OnGameEnd();
             }
-
         }
 
         /// <summary>

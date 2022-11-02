@@ -9,15 +9,14 @@ namespace LobbyRelaySample
     /// <summary>
     /// Keep updated on changes to a joined lobby, at a speed compliant with Lobby's rate limiting.
     /// </summary>
-    public class LobbySynchronizer : IReceiveMessages, IDisposable
+    public class LobbySynchronizer : IDisposable
     {
         LocalLobby m_LocalLobby;
         LocalPlayer m_LocalUser;
         LobbyManager m_LobbyManager;
         bool m_LocalChanges = false;
 
-        const int
-            k_approvalMaxMS = 10000; // Used for determining if a user should timeout if they are unable to connect.
+        const int k_approvalMaxMS = 10000; // Used for determining if a user should timeout if they are unable to connect.
 
         int m_lifetime = 0;
         const int k_UpdateIntervalMS = 1000;
@@ -33,35 +32,21 @@ namespace LobbyRelaySample
             m_LocalLobby = localLobby;
             m_LocalLobby.LobbyID.onChanged += OnLobbyIdChanged;
             m_LocalChanges = true;
-            Locator.Get.Messenger.Subscribe(this);
-#pragma warning disable 4014
+            #pragma warning disable 4014
             UpdateLoopAsync();
-#pragma warning restore 4014
+            #pragma warning restore 4014
             m_lifetime = 0;
         }
+
 
         public void EndSynch()
         {
             m_LocalChanges = false;
 
-            Locator.Get.Messenger.Unsubscribe(this);
             if (m_LocalLobby != null)
                 m_LocalLobby.LobbyID.onChanged -= OnLobbyIdChanged;
 
             m_LocalLobby = null;
-        }
-
-        //TODO Stop players from joining lobby while game is underway.
-        public void OnReceiveMessage(MessageType type, object msg)
-        {
-//            if (type == MessageType.ClientUserSeekingDisapproval)
-//            {
-//                bool shouldDisapprove =
-//                    m_LocalLobby.LocalLobbyState !=
-//                    LocalLobbyState.Lobby; // By not refreshing, it's possible to have a lobby in the lobby list UI after its countdown starts and then try joining.
-//                if (shouldDisapprove)
-//                    (msg as Action<relay.Approval>)?.Invoke(relay.Approval.GameAlreadyStarted);
-//            }
         }
 
         /// <summary>
@@ -82,6 +67,7 @@ namespace LobbyRelaySample
                     //Causing another pull, the RemoteToLocal converter ensures this does not happen by flagging the lobby.
                     LobbyConverters.RemoteToLocal(latestLobby, m_LocalLobby, false);
                 }
+                Debug.Log(m_LocalLobby.ToString());
 
                 if (!LobbyHasHost())
                 {
@@ -170,7 +156,7 @@ namespace LobbyRelaySample
 
         void LeaveLobbyBecauseNoHost()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
+            LogHandlerSettings.Instance.SpawnErrorPopup(
                 "Host left the lobby! Disconnecting...");
             Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
             GameManager.Instance.ChangeMenuState(GameState.JoinMenu);

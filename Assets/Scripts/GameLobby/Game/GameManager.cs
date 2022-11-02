@@ -97,21 +97,15 @@ namespace LobbyRelaySample
                 try
                 {
                     LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
-
                 }
                 catch (Exception exception)
                 {
                     Debug.LogError(exception);
                 }
-
-                Debug.Log("Found Lobby");
-
                 CreateLobby();
             }
             else
             {
-                Debug.Log("Didnt find Lobby");
-
                 SetGameState(GameState.JoinMenu);
             }
         }
@@ -163,7 +157,7 @@ namespace LobbyRelaySample
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup,
+                LogHandlerSettings.Instance.SpawnErrorPopup(
                     "Empty Name not allowed."); // Lobby error type, then HTTP error type.
                 return;
             }
@@ -198,18 +192,12 @@ namespace LobbyRelaySample
 
         public void CompleteCountDown()
         {
-            //Start game for everyone
-            if (m_RelayClient is RelayUtpHost)
-                (m_RelayClient as RelayUtpHost).SendInGameState();
+            Debug.Log("CountDown Complete!");
         }
 
         public void ChangeMenuState(GameState state)
         {
             SetGameState(state);
-            if (m_setupInGame)
-                m_setupInGame.OnGameEnd();
-
-
         }
 
         public void ConfirmIngameState()
@@ -217,20 +205,31 @@ namespace LobbyRelaySample
             m_setupInGame.ConfirmInGameState();
         }
 
+        public void BeginGame()
+        {
+            if (m_LocalUser.IsHost.Value)
+                m_LocalLobby.Locked.Value = true;
+            m_LocalLobby.LocalLobbyState.Value = LobbyState.InGame;
+            m_setupInGame?.MiniGameBeginning();
+        }
+
         public void EndGame()
         {
             m_LocalLobby.LocalLobbyState.Value = LobbyState.Lobby;
+            m_setupInGame?.OnGameEnd();
             LocalUserToLobby();
         }
 
         public void BeginCountdown()
         {
+            Debug.Log("Beginning Countdown.");
             m_LocalLobby.LocalLobbyState.Value = LobbyState.CountDown;
             m_countdown.StartCountDown();
         }
 
         public void CancelCountDown()
         {
+            Debug.Log("Countdown Cancelled.");
             m_countdown.CancelCountDown();
             m_LocalLobby.LocalLobbyState.Value = LobbyState.Lobby;
         }
@@ -241,6 +240,8 @@ namespace LobbyRelaySample
             m_LocalLobby.LocalLobbyState.Value = LobbyState.InGame;
             m_setupInGame.StartNetworkedGame(m_LocalLobby, m_LocalUser);
         }
+
+
 
         #region Setup
 
