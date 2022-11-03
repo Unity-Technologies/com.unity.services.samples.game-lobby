@@ -1,5 +1,3 @@
-using TMPro;
-using UnityEditor.Scripting;
 using UnityEngine;
 
 namespace LobbyRelaySample.UI

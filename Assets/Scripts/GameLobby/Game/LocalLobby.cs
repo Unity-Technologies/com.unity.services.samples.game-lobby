@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LobbyRelaySample
 {
@@ -124,11 +123,11 @@ namespace LobbyRelaySample
         {
             if (m_LocalPlayers.ContainsKey(user.ID.Value))
             {
-                Debug.LogError($"Cant add player {user.DisplayName}({user.ID}) to lobby: {LobbyID} twice");
+                Debug.LogError($"Cant add player {user.DisplayName.Value}({user.ID.Value}) to lobby: {LobbyID.Value} twice");
                 return;
             }
 
-            Debug.Log($"Adding User: {user.DisplayName} - {user.ID}");
+            Debug.Log($"Adding User: {user.DisplayName.Value} - {user.ID.Value}");
             m_LocalPlayers.Add(user.ID.Value, user);
             user.Emote.onChanged += EmoteChangedCallback;
             user.DisplayName.onChanged += StringChangedCallback;
@@ -138,11 +137,12 @@ namespace LobbyRelaySample
             onUserListChanged?.Invoke(m_LocalPlayers);
         }
 
+
         public void RemovePlayer(LocalPlayer user)
         {
             if (!m_LocalPlayers.ContainsKey(user.ID.Value))
             {
-                Debug.LogWarning($"Player {user.DisplayName}({user.ID}) does not exist in lobby: {LobbyID}");
+                Debug.LogWarning($"Player {user.DisplayName.Value}({user.ID.Value}) does not exist in lobby: {LobbyID.Value}");
                 return;
             }
             m_LocalPlayers.Remove(user.ID.Value);

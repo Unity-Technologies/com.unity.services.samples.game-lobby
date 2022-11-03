@@ -111,9 +111,9 @@ namespace LobbyRelaySample
         }
 
 
-        public async void JoinLobby(LocalLobby lobbyInfo)
+        public async void JoinLobby(string lobbyID, string lobbyCode)
         {
-            var lobby = await LobbyManager.JoinLobbyAsync(lobbyInfo.LobbyID.Value, lobbyInfo.LobbyCode.Value,
+            var lobby = await LobbyManager.JoinLobbyAsync(lobbyID, lobbyCode,
                 m_LocalUser);
             if (lobby != null)
             {
