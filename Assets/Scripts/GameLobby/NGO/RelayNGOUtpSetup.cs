@@ -33,7 +33,7 @@ namespace LobbyRelaySample.ngo
         {
             RelayAPIInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
             bool isSecure = false;
-            var endpoint = RelayUtpSetup.GetEndpointForAllocation(allocation.ServerEndpoints, allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
+            var endpoint = RelayUtpSetup.GetEndpointForAllocation(allocation.ServerEndpoints, out isSecure);
             m_setupInGame.SetRelayServerData(RelayUtpSetup.AddressFromEndpoint(endpoint), endpoint.Port, allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, allocation.ConnectionData, isSecure);
             m_onJoin?.Invoke();
         }
@@ -80,7 +80,7 @@ namespace LobbyRelaySample.ngo
             if (joinAllocation == null || this == null) // The returned JoinAllocation is null if allocation failed. This would be destroyed already if you quit the lobby while Relay is connecting.
                 return;
             bool isSecure = false;
-            var endpoint = RelayUtpSetup.GetEndpointForAllocation(joinAllocation.ServerEndpoints, joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
+            var endpoint = RelayUtpSetup.GetEndpointForAllocation(joinAllocation.ServerEndpoints, out isSecure);
             m_setupInGame.SetRelayServerData(RelayUtpSetup.AddressFromEndpoint(endpoint), endpoint.Port, joinAllocation.AllocationIdBytes, joinAllocation.Key, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
             m_onJoin?.Invoke();
         }

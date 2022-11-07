@@ -42,20 +42,16 @@ namespace LobbyRelaySample.relay
         /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
         /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
         /// </summary>
-        public static NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, string ip, int port, out bool isSecure)
+        public static NetworkEndPoint GetEndpointForAllocation(List<RelayServerEndpoint> endpoints, out bool isSecure)
         {
             #if ENABLE_MANAGED_UNITYTLS
-                foreach (RelayServerEndpoint endpoint in endpoints)
-                {
-                    if (endpoint.Secure && endpoint.Network == RelayServerEndpoint.NetworkOptions.Udp)
-                    {
-                        isSecure = true;
-                        return NetworkEndPoint.Parse(endpoint.Host, (ushort)endpoint.Port);
-                    }
-                }
+                isSecure = true;
+                var endpoint = endpoints.Find(e => e.ConnectionType == "dtls");
+            #else
+                isSecure = false;
+                var endpoint = endpoints.Find(e => e.ConnectionType == "udp");
             #endif
-            isSecure = false;
-            return NetworkEndPoint.Parse(ip, (ushort)port);
+            return NetworkEndPoint.Parse(endpoint.Host, (ushort)endpoint.Port);
         }
 
         /// <summary>
@@ -147,7 +143,7 @@ namespace LobbyRelaySample.relay
             m_allocation = allocation;
             RelayAPIInterface.GetJoinCodeAsync(allocation.AllocationId, OnRelayCode);
             bool isSecure = false;
-            m_endpointForServer = GetEndpointForAllocation(allocation.ServerEndpoints, allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
+            m_endpointForServer = GetEndpointForAllocation(allocation.ServerEndpoints, out isSecure);
             BindToAllocation(m_endpointForServer, allocation.AllocationIdBytes, allocation.ConnectionData, allocation.ConnectionData, allocation.Key, 16, isSecure);
         }
 
@@ -215,7 +211,7 @@ namespace LobbyRelaySample.relay
                 return;
             m_allocation = joinAllocation;
             bool isSecure = false;
-            m_endpointForServer = GetEndpointForAllocation(joinAllocation.ServerEndpoints, joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
+            m_endpointForServer = GetEndpointForAllocation(joinAllocation.ServerEndpoints, out isSecure);
             BindToAllocation(m_endpointForServer, joinAllocation.AllocationIdBytes, joinAllocation.ConnectionData, joinAllocation.HostConnectionData, joinAllocation.Key, 1, isSecure);
             m_localLobby.RelayServer = new ServerAddress(AddressFromEndpoint(m_endpointForServer), m_endpointForServer.Port);
         }
