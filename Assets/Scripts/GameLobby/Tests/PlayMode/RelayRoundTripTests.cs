@@ -56,8 +56,9 @@ namespace Test
 
             Assert.Greater(timeout, 0, "Timeout Check (Allocate)");
             Guid allocationId = allocation.AllocationId;
-            var allocationIP = allocation.RelayServer.IpV4;
-            var allocationPort = allocation.RelayServer.Port;
+            var endpoint = allocation.ServerEndpoints.Find(e => e.ConnectionType == "udp");
+            var allocationIP = endpoint.Host;
+            var allocationPort = endpoint.Port;
             Assert.NotNull(allocationId);
             Assert.NotNull(allocationIP);
             Assert.NotNull(allocationPort);
@@ -86,8 +87,9 @@ namespace Test
             }
 
             Assert.Greater(timeout, 0, "Timeout Check (Join)");
-            var codeIp = joinResponse.RelayServer.IpV4;
-            var codePort = joinResponse.RelayServer.Port;
+            var joinEndpoint = joinResponse.ServerEndpoints.Find(e => e.ConnectionType == "udp");
+            var codeIp = joinEndpoint.Host;
+            var codePort = joinEndpoint.Port;
             Assert.AreEqual(codeIp, allocationIP);
             Assert.AreEqual(codePort, allocationPort);
         }
