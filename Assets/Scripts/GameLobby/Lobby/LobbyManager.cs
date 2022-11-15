@@ -21,7 +21,7 @@ namespace LobbyRelaySample
 
         public Lobby CurrentLobby => m_CurrentLobby;
         Lobby m_CurrentLobby;
-
+        LobbyEventCallbacks m_LobbyEventCallbacks = new LobbyEventCallbacks();
         const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         Task m_HeartBeatTask;
@@ -84,7 +84,7 @@ namespace LobbyRelaySample
         {
             if (m_CreateCooldown.IsInCooldown)
             {
-                UnityEngine.Debug.LogWarning("Create Lobby hit the rate limit.");
+                Debug.LogWarning("Create Lobby hit the rate limit.");
                 return null;
             }
 
@@ -102,7 +102,6 @@ namespace LobbyRelaySample
                     Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
                 };
                 m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
-
                 StartHeartBeat();
 
                 return m_CurrentLobby;
@@ -140,6 +139,8 @@ namespace LobbyRelaySample
                     { Player = new Player(id: uasId, data: playerData) };
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, joinOptions);
             }
+
+
 
             return m_CurrentLobby;
         }
@@ -181,6 +182,20 @@ namespace LobbyRelaySample
                 Filters = filters
             };
             return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
+        }
+
+//TODO Finish this
+        public async Task SubscribeToLobbyChanges(string lobbyID, LocalLobby localLobby)
+        {
+            m_LobbyEventCallbacks.LobbyChanged += changes =>
+            {
+                if (changes.Name.Changed)
+                    localLobby.LobbyName.Value = changes.Name.Value;
+                if (changes.IsPrivate.Changed)
+                    localLobby.Private.Value = changes.IsPrivate.Value;
+            };
+
+            await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
 
         List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)

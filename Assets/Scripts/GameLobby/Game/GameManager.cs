@@ -48,7 +48,6 @@ namespace LobbyRelaySample
         LocalPlayer m_LocalUser;
         LocalLobby m_LocalLobby;
         LobbySynchronizer m_LobbySynchronizer;
-
         RelayUtpSetup m_RelaySetup;
         RelayUtpClient m_RelayClient;
 
