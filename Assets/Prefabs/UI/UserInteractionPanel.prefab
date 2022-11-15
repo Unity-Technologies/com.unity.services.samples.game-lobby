@@ -213,7 +213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b3b588e7ae40ec4ca35fdb9404513ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnObservedUpdated:
+  m_onVisibilityChange:
     m_PersistentCalls:
       m_Calls: []
   m_CountDownText: {fileID: 4467363028704636643}
@@ -252,7 +252,6 @@ GameObject:
   - component: {fileID: 1611213509401803489}
   - component: {fileID: 5811625806911023419}
   - component: {fileID: 5977596652360143959}
-  - component: {fileID: 2113442049023149911}
   - component: {fileID: 4811792094336013573}
   - component: {fileID: 435124129857761185}
   m_Layer: 5
@@ -319,33 +318,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &2113442049023149911
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 609596107351326384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 435124129857761185}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.LobbyStateVisibilityUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!225 &4811792094336013573
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1124,7 +1096,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
+  m_fontSize: 22.2
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1259,7 +1231,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 56.8
+  m_fontSize: 18
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1395,7 +1367,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 23
+  m_fontSize: 13.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1621,7 +1593,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2987822160017223264}
         m_TargetAssemblyTypeName: LobbyRelaySample.UI.RecolorForLobbyType, LobbyRelaySample
-        m_MethodName: ChangeColor
+        m_MethodName: SetLobbyColor
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1801,6 +1773,7 @@ GameObject:
   - component: {fileID: 6712653532449929400}
   - component: {fileID: 8508575087870636667}
   - component: {fileID: 6640185585145895720}
+  - component: {fileID: 4800227646832904480}
   m_Layer: 5
   m_Name: TongueIcon
   m_TagString: Untagged
@@ -1824,10 +1797,10 @@ RectTransform:
   m_Father: {fileID: 5026269005358103012}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 273.5, y: -376.5}
-  m_SizeDelta: {x: 50, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5387756616337415243
 CanvasRenderer:
@@ -1935,7 +1908,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
   m_emoteType: 4
+--- !u!225 &4800227646832904480
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2186823305087296033}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2835147694615859225
 GameObject:
   m_ObjectHideFlags: 0
@@ -2024,7 +2012,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2987822160017223264}
         m_TargetAssemblyTypeName: LobbyRelaySample.UI.RecolorForLobbyType, LobbyRelaySample
-        m_MethodName: ChangeColor
+        m_MethodName: SetLobbyColor
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2182,7 +2170,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
+  m_fontSize: 22.2
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2517,7 +2505,6 @@ GameObject:
   - component: {fileID: 5151586559654887469}
   - component: {fileID: 8227063393050474168}
   - component: {fileID: 38810562540460648}
-  - component: {fileID: 2853056286508716223}
   - component: {fileID: 6834908889545701957}
   m_Layer: 5
   m_Name: LobbyTypeContainer
@@ -2580,33 +2567,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &2853056286508716223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4330603859870806951}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a03b37d5b8df06948b36dfbc430a1ea5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6834908889545701957}
-        m_TargetAssemblyTypeName: LobbyRelaySample.UI.UserStateVisibilityUI, LobbyRelaySample
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &6834908889545701957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2713,6 +2673,7 @@ GameObject:
   - component: {fileID: 6463354546789934473}
   - component: {fileID: 1712688506883075726}
   - component: {fileID: 1163834802805469247}
+  - component: {fileID: 4914536845037457902}
   m_Layer: 5
   m_Name: SmileIcon
   m_TagString: Untagged
@@ -2736,10 +2697,10 @@ RectTransform:
   m_Father: {fileID: 5026269005358103012}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 114.5, y: -376.5}
-  m_SizeDelta: {x: 50, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8764544246360663793
 CanvasRenderer:
@@ -2847,7 +2808,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
   m_emoteType: 1
+--- !u!225 &4914536845037457902
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4470000697835183986}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &4475720551491962531
 GameObject:
   m_ObjectHideFlags: 0
@@ -3069,7 +3045,6 @@ GameObject:
   - component: {fileID: 759037105273515699}
   - component: {fileID: 8742429799833895606}
   - component: {fileID: 3840037590007163527}
-  - component: {fileID: 3235578093204888586}
   - component: {fileID: 9048520512602473890}
   m_Layer: 5
   m_Name: ReadyPanel
@@ -3119,33 +3094,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &3235578093204888586
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4830900314091476641}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a03b37d5b8df06948b36dfbc430a1ea5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 9048520512602473890}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.UserStateVisibilityUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &9048520512602473890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3176,6 +3124,7 @@ GameObject:
   - component: {fileID: 6687484736792569641}
   - component: {fileID: 8495636767461452457}
   - component: {fileID: 4681140549745913102}
+  - component: {fileID: 5360291397379197498}
   m_Layer: 5
   m_Name: UserButtonBG
   m_TagString: Untagged
@@ -3276,6 +3225,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd24e242d9385c244b4c0a635949b1a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!225 &5360291397379197498
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5340674743026918435}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5409100620800317906
 GameObject:
   m_ObjectHideFlags: 0
@@ -3365,6 +3329,7 @@ GameObject:
   - component: {fileID: 6977435345365325268}
   - component: {fileID: 2928554626579320494}
   - component: {fileID: 6389975608916618572}
+  - component: {fileID: 2361201349482207691}
   m_Layer: 5
   m_Name: UnamusedIcon
   m_TagString: Untagged
@@ -3388,10 +3353,10 @@ RectTransform:
   m_Father: {fileID: 5026269005358103012}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 220.5, y: -376.5}
-  m_SizeDelta: {x: 50, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4202478155384707071
 CanvasRenderer:
@@ -3499,7 +3464,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
   m_emoteType: 3
+--- !u!225 &2361201349482207691
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5411716139989892340}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5626941668538444755
 GameObject:
   m_ObjectHideFlags: 0
@@ -3818,7 +3798,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2987822160017223264}
         m_TargetAssemblyTypeName: LobbyRelaySample.UI.RecolorForLobbyType, LobbyRelaySample
-        m_MethodName: ChangeColor
+        m_MethodName: SetLobbyColor
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3995,7 +3975,6 @@ GameObject:
   - component: {fileID: 4844555698956727370}
   - component: {fileID: 8638827337113238188}
   - component: {fileID: 1619100575765837454}
-  - component: {fileID: 6887166789349504240}
   - component: {fileID: 5998684818406589344}
   m_Layer: 5
   m_Name: CancelPanel
@@ -4057,33 +4036,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd24e242d9385c244b4c0a635949b1a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6887166789349504240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6223322455083519911}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a03b37d5b8df06948b36dfbc430a1ea5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
+  m_onVisibilityChange:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5998684818406589344}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.UserStateVisibilityUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &5998684818406589344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4112,7 +4067,6 @@ GameObject:
   - component: {fileID: 5026269005358103012}
   - component: {fileID: 6337293324110520399}
   - component: {fileID: 8045047639899645949}
-  - component: {fileID: 8850815072349184999}
   - component: {fileID: 7597047770691248045}
   m_Layer: 5
   m_Name: EmoteButtons
@@ -4181,33 +4135,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &8850815072349184999
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6356789002927649657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a03b37d5b8df06948b36dfbc430a1ea5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7597047770691248045}
-        m_TargetAssemblyTypeName: LobbyRelaySample.UI.UserStateVisibilityUI, LobbyRelaySample
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &7597047770691248045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4469,7 +4396,6 @@ GameObject:
   - component: {fileID: 6919891912281880971}
   - component: {fileID: 1519148326278112938}
   - component: {fileID: 3953612155158603721}
-  - component: {fileID: 2586128159150077185}
   - component: {fileID: 5356355227050787427}
   - component: {fileID: 900710893788416922}
   m_Layer: 5
@@ -4520,33 +4446,6 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
---- !u!114 &2586128159150077185
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6897031386683883020}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a03b37d5b8df06948b36dfbc430a1ea5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5356355227050787427}
-        m_TargetAssemblyTypeName: LobbyRooms.UI.UserStateVisibilityUI, LobbyRooms
-        m_MethodName: ObservedUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &5356355227050787427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4576,6 +4475,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 268bfa80f12de0345a051323f3279616, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6903556594047626237
 GameObject:
   m_ObjectHideFlags: 0
@@ -4951,7 +4853,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2987822160017223264}
         m_TargetAssemblyTypeName: LobbyRelaySample.UI.RecolorForLobbyType, LobbyRelaySample
-        m_MethodName: ChangeColor
+        m_MethodName: SetLobbyColor
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5034,6 +4936,7 @@ GameObject:
   - component: {fileID: 7784475288331796339}
   - component: {fileID: 588056481165772144}
   - component: {fileID: 3023764238805683497}
+  - component: {fileID: 3726981029093688172}
   m_Layer: 5
   m_Name: FrownIcon
   m_TagString: Untagged
@@ -5057,10 +4960,10 @@ RectTransform:
   m_Father: {fileID: 5026269005358103012}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 167.5, y: -376.5}
-  m_SizeDelta: {x: 50, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4168724985671927024
 CanvasRenderer:
@@ -5168,7 +5071,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 389b6bc508595ea4c920cbaa3d21fc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
   m_emoteType: 2
+--- !u!225 &3726981029093688172
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7280943722809746719}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7501509171414083009
 GameObject:
   m_ObjectHideFlags: 0

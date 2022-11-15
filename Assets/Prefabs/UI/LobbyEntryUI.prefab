@@ -28,6 +28,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9095092682662508748}
   m_RootOrder: 0
@@ -147,13 +148,12 @@ GameObject:
   - component: {fileID: 4172744935978053658}
   - component: {fileID: 5345794337443349844}
   - component: {fileID: 7018369548608736188}
-  - component: {fileID: 843756277828315513}
   - component: {fileID: 1059336587790472163}
   - component: {fileID: 5797179165760832527}
   - component: {fileID: 5385358091761997407}
   - component: {fileID: 6515571473500817606}
   m_Layer: 5
-  m_Name: LobbyButtonUI
+  m_Name: LobbyEntryUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -169,6 +169,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7388874116200379571}
   - {fileID: 2246652449813468979}
@@ -291,45 +292,6 @@ MonoBehaviour:
   onLobbyPressed:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &843756277828315513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6423115675995281648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70dfc2fde0a9ef04eaff29a138f0bf45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnObservedUpdated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7018369548608736188}
-        m_TargetAssemblyTypeName: LobbyRelaySample.UI.LobbyButtonUI, LobbyRelaySample
-        m_MethodName: OnLobbyUpdated
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 6515571473500817606}
-        m_TargetAssemblyTypeName: LobbyRelaySample.UI.RecolorForLobbyType, LobbyRelaySample
-        m_MethodName: UpdateLobby
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &1059336587790472163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -430,6 +392,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9095092682662508748}
   m_RootOrder: 1
@@ -494,7 +457,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32
+  m_fontSize: 31.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

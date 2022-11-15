@@ -36,7 +36,7 @@ namespace LobbyRelaySample.UI
         /// Called in-editor by toggles to set the color of the lobby.
         /// Triggers the ChangeColors method above
         /// </summary>
-        public void ChangeColor(int color)
+        public void SetLobbyColor(int color)
         {
             if (m_lobby != null)
                 m_lobby.LocalLobbyColor.Value = (LobbyColor)color;

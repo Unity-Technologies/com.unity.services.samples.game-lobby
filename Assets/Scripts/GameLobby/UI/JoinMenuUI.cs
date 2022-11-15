@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LobbyRelaySample.UI
 {
@@ -10,8 +11,9 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class JoinMenuUI : UIPanelBase
     {
+        [FormerlySerializedAs("m_LobbyButtonPrefab")]
         [SerializeField]
-        LobbyButtonUI m_LobbyButtonPrefab;
+        LobbyEntryUI m_LobbyEntryPrefab;
 
         [SerializeField]
         RectTransform m_LobbyButtonParent;
@@ -23,7 +25,7 @@ namespace LobbyRelaySample.UI
         /// <summary>
         /// Key: Lobby ID, Value Lobby UI
         /// </summary>
-        Dictionary<string, LobbyButtonUI> m_LobbyButtons = new Dictionary<string, LobbyButtonUI>();
+        Dictionary<string, LobbyEntryUI> m_LobbyButtons = new Dictionary<string, LobbyEntryUI>();
         Dictionary<string, LocalLobby> m_LocalLobby = new Dictionary<string, LocalLobby>();
 
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
@@ -133,7 +135,7 @@ namespace LobbyRelaySample.UI
         /// </summary>
         void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
         {
-            var lobbyButtonInstance = Instantiate(m_LobbyButtonPrefab, m_LobbyButtonParent);
+            var lobbyButtonInstance = Instantiate(m_LobbyEntryPrefab, m_LobbyButtonParent);
             lobbyButtonInstance.onLobbyPressed.AddListener(LobbyButtonSelected);
             m_LobbyButtons.Add(lobbyCode, lobbyButtonInstance);
             m_LocalLobby.Add(lobbyCode, lobby);

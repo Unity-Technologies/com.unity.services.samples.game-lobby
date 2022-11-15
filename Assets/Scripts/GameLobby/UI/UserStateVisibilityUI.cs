@@ -45,7 +45,7 @@ namespace LobbyRelaySample.UI
             {
                 m_HasPermissions = true;
             }
-            else if (Permissions.HasFlag(UserPermission.Client) && !isHost)
+            if (Permissions.HasFlag(UserPermission.Client) && !isHost)
             {
                 m_HasPermissions = true;
             }
