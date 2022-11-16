@@ -28,38 +28,20 @@ namespace LobbyRelaySample
     [System.Serializable]
     public class LocalLobby
     {
-
         public bool CanSetChanged = true;
-        public Action<Dictionary<string, LocalPlayer>> onUserListChanged;
 
-        Dictionary<string, LocalPlayer> m_LocalPlayers = new Dictionary<string, LocalPlayer>();
-        public Dictionary<string, LocalPlayer> LocalPlayers => m_LocalPlayers;
+        public Action<Dictionary<int, LocalPlayer>> onUserListChanged;
+
+        Dictionary<int, LocalPlayer> m_LocalPlayers = new Dictionary<int, LocalPlayer>();
 
         #region LocalLobbyData
 
         ServerAddress m_RelayServer;
 
-        public LocalLobby()
-        {
-            LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
-            onUserListChanged = (dict) => { SetValueChanged(); };
-            LobbyID.onChanged = (s) => { SetValueChanged(); };
-            LobbyCode.onChanged = (s) => { SetValueChanged(); };
-            RelayCode.onChanged = (s) => { SetValueChanged(); };
-            RelayNGOCode.onChanged = (s) => { SetValueChanged(); };
-            RelayServer.onChanged = (s) => { SetValueChanged(); };
-            LobbyName.onChanged = (s) => { SetValueChanged(); };
-            LocalLobbyState.onChanged = (s) => { SetValueChanged(); };
-            Private.onChanged = (s) => { SetValueChanged(); };
-            AvailableSlots.onChanged = (s) => { SetValueChanged(); };
-            MaxPlayerCount.onChanged = (s) => { SetValueChanged(); };
-            LocalLobbyColor.onChanged = (s) => { SetValueChanged(); };
-            LastUpdated.onChanged = (s) => { SetValueChanged(); };
-        }
-
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
 
-        #endregion
+        #endregion.
+
         public CallbackValue<string> LobbyID = new CallbackValue<string>();
 
         public CallbackValue<string> LobbyCode = new CallbackValue<string>();
@@ -71,6 +53,7 @@ namespace LobbyRelaySample
         public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
 
         public CallbackValue<string> LobbyName = new CallbackValue<string>();
+        public CallbackValue<string> HostID = new CallbackValue<string>();
 
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
 
@@ -101,6 +84,11 @@ namespace LobbyRelaySample
             MaxPlayerCount.Value = 4;
         }
 
+        public LocalLobby()
+        {
+            LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
+        }
+
         /// <summary>
         /// A locking mechanism for registering when something has looked at the Lobby to see if anything has changed
         /// </summary>
@@ -117,18 +105,25 @@ namespace LobbyRelaySample
             if (CanSetChanged)
                 m_ValuesChanged = true;
         }
+
         bool m_ValuesChanged;
 
-        public void AddPlayer(LocalPlayer user)
+        public LocalPlayer GetLocalPlayer(int index)
         {
-            if (m_LocalPlayers.ContainsKey(user.ID.Value))
+            return m_LocalPlayers[index];
+        }
+
+        public void AddPlayer(int index, LocalPlayer user)
+        {
+            if (m_LocalPlayers.ContainsKey(index))
             {
-                Debug.LogError($"Cant add player {user.DisplayName.Value}({user.ID.Value}) to lobby: {LobbyID.Value} twice");
+                Debug.LogError(
+                    $"Cant add player {user.DisplayName.Value}({user.ID.Value}) to lobby: {LobbyID.Value} twice");
                 return;
             }
 
             Debug.Log($"Adding User: {user.DisplayName.Value} - {user.ID.Value}");
-            m_LocalPlayers.Add(user.ID.Value, user);
+            m_LocalPlayers.Add(user.Index.Value, user);
             user.Emote.onChanged += EmoteChangedCallback;
             user.DisplayName.onChanged += StringChangedCallback;
             user.IsHost.onChanged += BoolChangedCallback;
@@ -137,22 +132,16 @@ namespace LobbyRelaySample
             onUserListChanged?.Invoke(m_LocalPlayers);
         }
 
-
-        public void RemovePlayer(LocalPlayer user)
+        public void RemovePlayer(int removePlayer)
         {
-            if (!m_LocalPlayers.ContainsKey(user.ID.Value))
-            {
-                Debug.LogWarning($"Player {user.DisplayName.Value}({user.ID.Value}) does not exist in lobby: {LobbyID.Value}");
-                return;
-            }
-            m_LocalPlayers.Remove(user.ID.Value);
-            user.Emote.onChanged -= EmoteChangedCallback;
-            user.DisplayName.onChanged -= StringChangedCallback;
-            user.IsHost.onChanged -= BoolChangedCallback;
-            user.UserStatus.onChanged -= EmoteChangedCallback;
+            var player = m_LocalPlayers[removePlayer];
+            m_LocalPlayers.Remove(removePlayer);
+            player.Emote.onChanged -= EmoteChangedCallback;
+            player.DisplayName.onChanged -= StringChangedCallback;
+            player.IsHost.onChanged -= BoolChangedCallback;
+            player.UserStatus.onChanged -= EmoteChangedCallback;
             onUserListChanged?.Invoke(m_LocalPlayers);
         }
-
 
         void EmoteChangedCallback(EmoteType emote)
         {
@@ -173,7 +162,6 @@ namespace LobbyRelaySample
         {
             IsLobbyChanged();
         }
-
 
         public override string ToString()
         {

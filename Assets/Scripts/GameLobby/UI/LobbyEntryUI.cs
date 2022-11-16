@@ -27,17 +27,19 @@ namespace LobbyRelaySample.UI
         /// </summary>
         public void OnLobbyClicked()
         {
-           onLobbyPressed.Invoke(m_Lobby);
+            onLobbyPressed.Invoke(m_Lobby);
         }
 
         public void SetLobby(LocalLobby lobby)
         {
             m_Lobby = lobby;
             SetLobbyname(m_Lobby.LobbyName.Value);
-            SetLobbyCount(m_Lobby.LocalPlayers);
+            SetLobbyCount(m_Lobby.PlayerCount);
             m_Lobby.LobbyName.onChanged += SetLobbyname;
-            m_Lobby.onUserListChanged += SetLobbyCount;
-
+            m_Lobby.onUserListChanged += (dict) =>
+            {
+                SetLobbyCount(dict.Count);
+            };
         }
 
         void SetLobbyname(string lobbyName)
@@ -45,9 +47,9 @@ namespace LobbyRelaySample.UI
             lobbyNameText.SetText(m_Lobby.LobbyName.Value);
         }
 
-        void SetLobbyCount(Dictionary<string, LocalPlayer> userList)
+        void SetLobbyCount(int count)
         {
-            lobbyCountText.SetText($"{userList.Count}/{m_Lobby.MaxPlayerCount.Value}");
+            lobbyCountText.SetText($"{count}/{m_Lobby.MaxPlayerCount.Value}");
         }
     }
 }

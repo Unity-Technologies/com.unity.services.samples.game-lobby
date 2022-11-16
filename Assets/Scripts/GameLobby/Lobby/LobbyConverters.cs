@@ -56,11 +56,13 @@ namespace LobbyRelaySample.lobby
                 Debug.LogError("Remote lobby is null, cannot convert.");
                 return;
             }
+
             if (localLobby == null)
             {
                 Debug.LogError("Local Lobby is null, cannot convert");
                 return;
             }
+
             localLobby.CanSetChanged = allowSetLobbyChanged;
             localLobby.LobbyID.Value = remoteLobby.Id;
             localLobby.LobbyName.Value = remoteLobby.Name;
@@ -104,31 +106,19 @@ namespace LobbyRelaySample.lobby
                 LocalPlayer localPlayer;
 
                 //See if we have the remote player locally already
-                if (localLobby.LocalPlayers.ContainsKey(player.Id))
-                {
-                    localPlayer = localLobby.LocalPlayers[player.Id];
-                    localPlayer.ID.Value = id;
-                    localPlayer.DisplayName.Value = displayName;
-                    localPlayer.Emote.Value = emote;
-                    localPlayer.UserStatus.Value = userStatus;
-                }
-                else
-                {
-                    localPlayer = new LocalPlayer(id, isHost, displayName, emote, userStatus);
-                    localLobby.AddPlayer(localPlayer);
-                }
-            }
-
-            var disconnectedUsers = new List<LocalPlayer>();
-            foreach (var (id, player) in localLobby.LocalPlayers)
-            {
-                if (!remotePlayerIDs.Contains(id))
-                    disconnectedUsers.Add(player);
-            }
-
-            foreach (var remove in disconnectedUsers)
-            {
-                localLobby.RemovePlayer(remove);
+                // if (localLobby.LocalPlayers.ContainsKey(player.Id))
+                // {
+                //     localPlayer = localLobby.LocalPlayers[player.Id];
+                //     localPlayer.ID.Value = id;
+                //     localPlayer.DisplayName.Value = displayName;
+                //     localPlayer.Emote.Value = emote;
+                //     localPlayer.UserStatus.Value = userStatus;
+                // }
+                // else
+                // {
+                //     localPlayer = new LocalPlayer(id, isHost, displayName, emote, userStatus);
+                //     localLobby.AddPlayer(localPlayer);
+                // }
             }
 
             localLobby.CanSetChanged = true;

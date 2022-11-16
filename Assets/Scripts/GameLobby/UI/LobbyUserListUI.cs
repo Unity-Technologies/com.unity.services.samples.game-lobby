@@ -7,9 +7,7 @@ namespace LobbyRelaySample.UI
     {
         [SerializeField]
         List<InLobbyUserUI> m_UserUIObjects = new List<InLobbyUserUI>();
-        List<string>
-            m_CurrentUsers =
-                new List<string>(); // Just for keeping track more easily of which users are already displayed.
+
 
         public override void Start()
         {
@@ -18,13 +16,13 @@ namespace LobbyRelaySample.UI
             GameManager.Instance.LocalLobby.onUserListChanged += OnUsersChanged;
         }
 
-        void OnUsersChanged(Dictionary<string, LocalPlayer> newUserDict)
+        void OnUsersChanged(Dictionary<int, LocalPlayer> newUserDict)
         {
-            for (int id = m_CurrentUsers.Count - 1;
+            for (int id = m_UserUIObjects.Count - 1;
                 id >= 0;
                 id--) // We might remove users if they aren't in the new data, so iterate backwards.
             {
-                string userId = m_CurrentUsers[id];
+                string userId = m_UserUIObjects[id];
                 if (!newUserDict.ContainsKey(userId))
                 {
                     foreach (var ui in m_UserUIObjects)
@@ -38,7 +36,8 @@ namespace LobbyRelaySample.UI
                 }
             }
 
-            foreach (var lobbyUserKvp in newUserDict) // If there are new players, we need to hook them into the UI.
+            // If there are new players, we need to hook them into the UI.
+            foreach (var lobbyUserKvp in newUserDict)
             {
                 if (m_CurrentUsers.Contains(lobbyUserKvp.Key))
                     continue;
@@ -54,11 +53,9 @@ namespace LobbyRelaySample.UI
             }
         }
 
-        void OnUserLeft(string userID)
+        void OnUserLeft(int userID)
         {
-            if (!m_CurrentUsers.Contains(userID))
-                return;
-            m_CurrentUsers.Remove(userID);
+            m_UserUIObjects.RemoveAt(userID);
         }
     }
 }
