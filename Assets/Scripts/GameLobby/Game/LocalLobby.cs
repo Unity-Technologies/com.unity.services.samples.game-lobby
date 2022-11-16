@@ -30,7 +30,9 @@ namespace LobbyRelaySample
     {
         public bool CanSetChanged = true;
 
-        public Action<Dictionary<int, LocalPlayer>> onUserListChanged;
+        public Action<LocalPlayer> onUserJoined;
+
+        public Action<int> onUserLeft;
 
         Dictionary<int, LocalPlayer> m_LocalPlayers = new Dictionary<int, LocalPlayer>();
 
@@ -113,9 +115,9 @@ namespace LobbyRelaySample
             return m_LocalPlayers[index];
         }
 
-        public void AddPlayer(int index, LocalPlayer user)
+        public void AddPlayer(LocalPlayer user)
         {
-            if (m_LocalPlayers.ContainsKey(index))
+            if (m_LocalPlayers.ContainsKey(user.Index.Value))
             {
                 Debug.LogError(
                     $"Cant add player {user.DisplayName.Value}({user.ID.Value}) to lobby: {LobbyID.Value} twice");
@@ -129,7 +131,7 @@ namespace LobbyRelaySample
             user.IsHost.onChanged += BoolChangedCallback;
             user.UserStatus.onChanged += EmoteChangedCallback;
 
-            onUserListChanged?.Invoke(m_LocalPlayers);
+            onUserJoined?.Invoke(user);
         }
 
         public void RemovePlayer(int removePlayer)
@@ -140,7 +142,7 @@ namespace LobbyRelaySample
             player.DisplayName.onChanged -= StringChangedCallback;
             player.IsHost.onChanged -= BoolChangedCallback;
             player.UserStatus.onChanged -= EmoteChangedCallback;
-            onUserListChanged?.Invoke(m_LocalPlayers);
+            onUserLeft?.Invoke(removePlayer);
         }
 
         void EmoteChangedCallback(EmoteType emote)

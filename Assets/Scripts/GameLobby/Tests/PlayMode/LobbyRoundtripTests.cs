@@ -40,7 +40,7 @@ namespace Test
 #pragma warning disable 4014
             TestAuthSetup();
 #pragma warning restore 4014
-            m_LocalUser = new LocalPlayer(Auth.ID(), false, "TESTPLAYER");
+            m_LocalUser = new LocalPlayer(Auth.ID(), 0, false, "TESTPLAYER");
             m_LobbyManager = new LobbyManager();
         }
 

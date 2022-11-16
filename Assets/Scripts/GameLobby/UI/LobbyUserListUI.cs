@@ -13,49 +13,22 @@ namespace LobbyRelaySample.UI
         {
             base.Start();
 
-            GameManager.Instance.LocalLobby.onUserListChanged += OnUsersChanged;
+            GameManager.Instance.LocalLobby.onUserJoined += OnUserJoined;
+            GameManager.Instance.LocalLobby.onUserLeft += OnUserLeft;
         }
 
-        void OnUsersChanged(Dictionary<int, LocalPlayer> newUserDict)
+        void OnUserJoined(LocalPlayer localPlayer)
         {
-            for (int id = m_UserUIObjects.Count - 1;
-                id >= 0;
-                id--) // We might remove users if they aren't in the new data, so iterate backwards.
-            {
-                string userId = m_UserUIObjects[id];
-                if (!newUserDict.ContainsKey(userId))
-                {
-                    foreach (var ui in m_UserUIObjects)
-                    {
-                        if (ui.UserId == userId)
-                        {
-                            ui.OnUserLeft();
-                            OnUserLeft(userId);
-                        }
-                    }
-                }
-            }
+            var lobbySlot = m_UserUIObjects[localPlayer.Index.Value];
 
-            // If there are new players, we need to hook them into the UI.
-            foreach (var lobbyUserKvp in newUserDict)
-            {
-                if (m_CurrentUsers.Contains(lobbyUserKvp.Key))
-                    continue;
-                m_CurrentUsers.Add(lobbyUserKvp.Key);
-
-                foreach (var pcu in m_UserUIObjects)
-                {
-                    if (pcu.IsAssigned)
-                        continue;
-                    pcu.SetUser(lobbyUserKvp.Value);
-                    break;
-                }
-            }
+            lobbySlot.SetUser(localPlayer);
         }
 
-        void OnUserLeft(int userID)
+        void OnUserLeft(int i)
         {
-            m_UserUIObjects.RemoveAt(userID);
+            m_UserUIObjects[i].ResetUI();
         }
+
+
     }
 }

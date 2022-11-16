@@ -325,7 +325,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: bc8c0e2bc04ce93488efe4ea898047a9, type: 3}
   - {fileID: 21300000, guid: f18a89c12a346a8488ed507a0bd79d2e, type: 3}
   - {fileID: 21300000, guid: 0fca28892f34375439c32b1ee1c8d655, type: 3}
-  m_vivoxUserHandler: {fileID: 4826507163535553981}
+  m_VivoxUserHandler: {fileID: 4826507163535553981}
 --- !u!114 &7885056472121154813
 MonoBehaviour:
   m_ObjectHideFlags: 0

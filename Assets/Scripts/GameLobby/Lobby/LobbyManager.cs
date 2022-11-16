@@ -197,8 +197,8 @@ namespace LobbyRelaySample
             return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
         }
 
-//TODO Finish this
-        public async Task SubscribeToLobbyChanges(string lobbyID, LocalLobby localLobby)
+
+        public async Task SubscribeToLocalLobbyChanges(string lobbyID, LocalLobby localLobby)
         {
             m_LobbyEventCallbacks.LobbyChanged += async changes =>
             {
@@ -236,7 +236,7 @@ namespace LobbyRelaySample
                     PlayersLeft();
 
                 if (changes.PlayerData.Changed)
-                    PlayersChanged();
+                    PlayerDataChanged();
 
                 void LobbyChanged()
                 {
@@ -287,16 +287,20 @@ namespace LobbyRelaySample
                             : UserStatus.Lobby;
 
                         var newPlayer = new LocalPlayer(id, index, isHost, displayName, emote, userStatus);
-                        localLobby.AddPlayer(playerChanges.PlayerIndex, newPlayer);
+                        localLobby.AddPlayer(newPlayer);
                     }
                 }
 
                 void PlayersLeft()
                 {
+                    foreach (var leftPlayerIndex in changes.PlayerLeft.Value)
+                    {
+                        localLobby.RemovePlayer(leftPlayerIndex);
+                    }
                     throw new NotImplementedException("Need to switch to Player lists");
                 }
 
-                void PlayersChanged()
+                void PlayerDataChanged()
                 {
                     foreach (var lobbyPlayerChanges in changes.PlayerData.Value)
                     {
@@ -360,8 +364,19 @@ namespace LobbyRelaySample
                 //void ApplyToLobby(Models.Lobby lobby);
             };
 
+            m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += lobbyEventConnectionState =>
+            {
+                Debug.Log($"Lobby Event Changed {lobbyEventConnectionState}");
+
+            };
+
+            m_LobbyEventCallbacks.KickedFromLobby += () =>
+            {
+                Debug.Log("Left Lobby");
+            };
             await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
+
 
         List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
         {

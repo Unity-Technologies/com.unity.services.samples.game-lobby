@@ -30,17 +30,17 @@ namespace LobbyRelaySample
         public CallbackValue<string> ID = new CallbackValue<string>("");
         public CallbackValue<int> Index = new CallbackValue<int>(0);
 
-        public DateTime LastUpdated
+        public DateTime LastUpdated;
 
         public LocalPlayer(string id, int index, bool isHost, string displayName,
             EmoteType emote = default, UserStatus status = default)
         {
+            ID.Value = id;
             IsHost.Value = isHost;
             Index.Value = index;
             DisplayName.Value = displayName;
             Emote.Value = emote;
             UserStatus.Value = status;
-            ID.Value = id;
         }
 
         public void ResetState()

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using LobbyRelaySample.relay;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport;
 using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.SocialPlatforms;
 
@@ -63,10 +66,10 @@ namespace LobbyRelaySample.ngo
             m_lobby.RelayNGOCode.Value = joincode;
 
             bool isSecure = false;
-            var endpoint = RelayUtpSetup.GetEndpointForAllocation(allocation.ServerEndpoints,
+            var endpoint = GetEndpointForAllocation(allocation.ServerEndpoints,
                 allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
 
-            transport.SetHostRelayData(RelayUtpSetup.AddressFromEndpoint(endpoint), endpoint.Port,
+            transport.SetHostRelayData(AddressFromEndpoint(endpoint), endpoint.Port,
                 allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, isSecure);
         }
 
@@ -76,15 +79,45 @@ namespace LobbyRelaySample.ngo
 
             var joinAllocation = await Relay.Instance.JoinAllocationAsync(m_lobby.RelayCode.Value);
             bool isSecure = false;
-            var endpoint = RelayUtpSetup.GetEndpointForAllocation(joinAllocation.ServerEndpoints,
+            var endpoint = GetEndpointForAllocation(joinAllocation.ServerEndpoints,
                 joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
 
-            transport.SetClientRelayData(RelayUtpSetup.AddressFromEndpoint(endpoint), endpoint.Port,
+            transport.SetClientRelayData(AddressFromEndpoint(endpoint), endpoint.Port,
                 joinAllocation.AllocationIdBytes, joinAllocation.Key,
                 joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
         }
 
-        private void OnConnectionVerified()
+
+        /// <summary>
+        /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
+        /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
+        /// </summary>
+        NetworkEndPoint GetEndpointForAllocation(
+            List<RelayServerEndpoint> endpoints,
+            string ip,
+            int port,
+            out bool isSecure)
+        {
+#if ENABLE_MANAGED_UNITYTLS
+            foreach (RelayServerEndpoint endpoint in endpoints)
+            {
+                if (endpoint.Secure && endpoint.Network == RelayServerEndpoint.NetworkOptions.Udp)
+                {
+                    isSecure = true;
+                    return NetworkEndPoint.Parse(endpoint.Host, (ushort)endpoint.Port);
+                }
+            }
+#endif
+            isSecure = false;
+            return NetworkEndPoint.Parse(ip, (ushort)port);
+        }
+
+        string AddressFromEndpoint(NetworkEndPoint endpoint)
+        {
+            return endpoint.Address.Split(':')[0];
+        }
+
+        void OnConnectionVerified()
         {
             m_hasConnectedViaNGO = true;
         }
@@ -100,7 +133,7 @@ namespace LobbyRelaySample.ngo
 
         public void ConfirmInGameState()
         {
-            
+
         }
 
         public void MiniGameBeginning()
@@ -108,7 +141,7 @@ namespace LobbyRelaySample.ngo
             if (!m_hasConnectedViaNGO)
             {
                 // If this localPlayer hasn't successfully connected via NGO, forcibly exit the minigame.
-                LogHandlerSettings.Instance.SpawnErrorPopup( "Failed to join the game.");
+                LogHandlerSettings.Instance.SpawnErrorPopup("Failed to join the game.");
                 OnGameEnd();
             }
         }

@@ -26,44 +26,44 @@ namespace LobbyRelaySample.UI
         Sprite[] m_EmoteIcons;
 
         [SerializeField]
-        vivox.VivoxUserHandler m_vivoxUserHandler;
+        vivox.VivoxUserHandler m_VivoxUserHandler;
 
         public bool IsAssigned => UserId != null;
         public string UserId { get; set; }
-        LocalPlayer m_localPlayer;
+        LocalPlayer m_LocalPlayer;
 
         public void SetUser(LocalPlayer myLocalPlayer)
         {
             Show();
-            m_localPlayer = myLocalPlayer;
+            m_LocalPlayer = myLocalPlayer;
             SubscribeToPlayerUpdates();
-            SetDisplayName(m_localPlayer.DisplayName.Value);
+            SetDisplayName(m_LocalPlayer.DisplayName.Value);
             UserId = myLocalPlayer.ID.Value;
-            m_vivoxUserHandler.SetId(UserId);
+            m_VivoxUserHandler.SetId(UserId);
         }
 
         public void SubscribeToPlayerUpdates()
         {
-            m_localPlayer.DisplayName.onChanged += SetDisplayName;
-            m_localPlayer.UserStatus.onChanged += SetUserStatus;
-            m_localPlayer.Emote.onChanged += SetEmote;
-            m_localPlayer.IsHost.onChanged += SetIsHost;
+            m_LocalPlayer.DisplayName.onChanged += SetDisplayName;
+            m_LocalPlayer.UserStatus.onChanged += SetUserStatus;
+            m_LocalPlayer.Emote.onChanged += SetEmote;
+            m_LocalPlayer.IsHost.onChanged += SetIsHost;
         }
 
         public void UnsubscribeToPlayerUpdates()
         {
-            m_localPlayer.DisplayName.onChanged -= SetDisplayName;
-            m_localPlayer.UserStatus.onChanged -= SetUserStatus;
-            m_localPlayer.Emote.onChanged -= SetEmote;
-            m_localPlayer.IsHost.onChanged -= SetIsHost;
+            m_LocalPlayer.DisplayName.onChanged -= SetDisplayName;
+            m_LocalPlayer.UserStatus.onChanged -= SetUserStatus;
+            m_LocalPlayer.Emote.onChanged -= SetEmote;
+            m_LocalPlayer.IsHost.onChanged -= SetIsHost;
         }
 
-        public void OnUserLeft()
+        public void ResetUI()
         {
             UserId = null;
             Hide();
             UnsubscribeToPlayerUpdates();
-            m_localPlayer = null;
+            m_LocalPlayer = null;
         }
 
         void SetDisplayName(string displayName)

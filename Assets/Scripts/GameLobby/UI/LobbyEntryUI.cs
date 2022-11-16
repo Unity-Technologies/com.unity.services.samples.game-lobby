@@ -36,9 +36,13 @@ namespace LobbyRelaySample.UI
             SetLobbyname(m_Lobby.LobbyName.Value);
             SetLobbyCount(m_Lobby.PlayerCount);
             m_Lobby.LobbyName.onChanged += SetLobbyname;
-            m_Lobby.onUserListChanged += (dict) =>
+            m_Lobby.onUserJoined += (_) =>
             {
-                SetLobbyCount(dict.Count);
+                SetLobbyCount(m_Lobby.PlayerCount);
+            };
+            m_Lobby.onUserLeft += (_) =>
+            {
+                SetLobbyCount(m_Lobby.PlayerCount);
             };
         }
 
