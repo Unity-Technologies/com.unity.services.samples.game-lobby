@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using LobbyRelaySample.ngo;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -32,8 +31,7 @@ namespace LobbyRelaySample
         public Lobby CurrentLobby => m_CurrentLobby;
         Lobby m_CurrentLobby;
         LobbyEventCallbacks m_LobbyEventCallbacks = new LobbyEventCallbacks();
-        const int
-            k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
+        const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         Task m_HeartBeatTask;
 
@@ -297,7 +295,6 @@ namespace LobbyRelaySample
                     {
                         localLobby.RemovePlayer(leftPlayerIndex);
                     }
-                    throw new NotImplementedException("Need to switch to Player lists");
                 }
 
                 void PlayerDataChanged()
@@ -355,13 +352,6 @@ namespace LobbyRelaySample
                         }
                     }
                 }
-
-                /// <summary>
-                /// Takes a lobby and a change applicator to update a given lobby in-place.
-                /// If LobbyDeleted is true, no changes will be applied and a warning will be logged.
-                /// </summary>
-                /// <param name="lobby">The lobby model to apply the changes to.</param>
-                //void ApplyToLobby(Models.Lobby lobby);
             };
 
             m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += lobbyEventConnectionState =>
@@ -377,21 +367,6 @@ namespace LobbyRelaySample
             await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
 
-
-        List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
-        {
-            List<QueryFilter> filters = new List<QueryFilter>();
-            if (limitToColor == LobbyColor.Orange)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(),
-                    QueryFilter.OpOptions.EQ));
-            else if (limitToColor == LobbyColor.Green)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(),
-                    QueryFilter.OpOptions.EQ));
-            else if (limitToColor == LobbyColor.Blue)
-                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(),
-                    QueryFilter.OpOptions.EQ));
-            return filters;
-        }
 
         public async Task<Lobby> GetLobbyAsync(string lobbyId = null)
         {
@@ -511,6 +486,20 @@ namespace LobbyRelaySample
 
         #region HeartBeat
 
+        List<QueryFilter> LobbyColorToFilters(LobbyColor limitToColor)
+        {
+            List<QueryFilter> filters = new List<QueryFilter>();
+            if (limitToColor == LobbyColor.Orange)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Orange).ToString(),
+                    QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Green)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Green).ToString(),
+                    QueryFilter.OpOptions.EQ));
+            else if (limitToColor == LobbyColor.Blue)
+                filters.Add(new QueryFilter(QueryFilter.FieldOptions.N1, ((int)LobbyColor.Blue).ToString(),
+                    QueryFilter.OpOptions.EQ));
+            return filters;
+        }
 //Since the LobbyManager maintains the "connection" to the lobby, we will continue to heartbeat until host leaves.
         async Task SendHeartbeatPingAsync()
         {

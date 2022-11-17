@@ -168,6 +168,8 @@ namespace LobbyRelaySample
         public void SetLocalUserEmote(EmoteType emote)
         {
             SetUserEmote(m_LocalUser.Index.Value, emote);
+            SendLocalUserData();
+
         }
 
         public void SetUserEmote(int playerID, EmoteType emote)
@@ -178,9 +180,11 @@ namespace LobbyRelaySample
             player.Emote.Value = emote;
         }
 
+
         public void SetLocalUserStatus(UserStatus status)
         {
             SetUserStatus(m_LocalUser.Index.Value, status);
+            SendLocalUserData();
         }
 
         public void SetUserStatus(int playerID, UserStatus status)
@@ -191,6 +195,15 @@ namespace LobbyRelaySample
             player.UserStatus.Value = status;
         }
 
+        async void SendLocalLobbyData()
+        {
+            await LobbyManager.UpdateLobbyDataAsync(LobbyConverters.LocalToRemoteData(m_LocalLobby));
+        }
+
+        async void SendLocalUserData()
+        {
+            await LobbyManager.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
+        }
         public void CompleteCountDown()
         {
             Debug.Log("CountDown Complete!");
@@ -367,7 +380,7 @@ namespace LobbyRelaySample
         {
             Debug.Log($"Setting Lobby user state {GameState.Lobby}");
             SetGameState(GameState.Lobby);
-            SetUserStatus(m_LocalUser.Index.Value, UserStatus.Lobby);
+            SetLocalUserStatus(UserStatus.Lobby);
         }
 
         void ResetLocalLobby()

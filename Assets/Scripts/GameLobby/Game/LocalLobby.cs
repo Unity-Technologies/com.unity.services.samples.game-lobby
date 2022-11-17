@@ -31,8 +31,9 @@ namespace LobbyRelaySample
         public bool CanSetChanged = true;
 
         public Action<LocalPlayer> onUserJoined;
-
         public Action<int> onUserLeft;
+
+        
 
         Dictionary<int, LocalPlayer> m_LocalPlayers = new Dictionary<int, LocalPlayer>();
 
@@ -43,7 +44,6 @@ namespace LobbyRelaySample
         /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
 
         #endregion.
-
         public CallbackValue<string> LobbyID = new CallbackValue<string>();
 
         public CallbackValue<string> LobbyCode = new CallbackValue<string>();
@@ -91,16 +91,6 @@ namespace LobbyRelaySample
             LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
         }
 
-        /// <summary>
-        /// A locking mechanism for registering when something has looked at the Lobby to see if anything has changed
-        /// </summary>
-        /// <returns></returns>
-        public bool IsLobbyChanged()
-        {
-            bool isChanged = m_ValuesChanged;
-            m_ValuesChanged = false;
-            return isChanged;
-        }
 
         void SetValueChanged()
         {
@@ -126,10 +116,7 @@ namespace LobbyRelaySample
 
             Debug.Log($"Adding User: {user.DisplayName.Value} - {user.ID.Value}");
             m_LocalPlayers.Add(user.Index.Value, user);
-            user.Emote.onChanged += EmoteChangedCallback;
-            user.DisplayName.onChanged += StringChangedCallback;
-            user.IsHost.onChanged += BoolChangedCallback;
-            user.UserStatus.onChanged += EmoteChangedCallback;
+
 
             onUserJoined?.Invoke(user);
         }
@@ -138,32 +125,10 @@ namespace LobbyRelaySample
         {
             var player = m_LocalPlayers[removePlayer];
             m_LocalPlayers.Remove(removePlayer);
-            player.Emote.onChanged -= EmoteChangedCallback;
-            player.DisplayName.onChanged -= StringChangedCallback;
-            player.IsHost.onChanged -= BoolChangedCallback;
-            player.UserStatus.onChanged -= EmoteChangedCallback;
+
             onUserLeft?.Invoke(removePlayer);
         }
 
-        void EmoteChangedCallback(EmoteType emote)
-        {
-            IsLobbyChanged();
-        }
-
-        void StringChangedCallback(string text)
-        {
-            IsLobbyChanged();
-        }
-
-        void BoolChangedCallback(bool changed)
-        {
-            IsLobbyChanged();
-        }
-
-        void EmoteChangedCallback(UserStatus status)
-        {
-            IsLobbyChanged();
-        }
 
         public override string ToString()
         {
