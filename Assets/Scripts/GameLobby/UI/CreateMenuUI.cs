@@ -41,8 +41,7 @@ namespace LobbyRelaySample.UI
 
         public void OnCreatePressed()
         {
-            //Disabled as it's a one-off butto call
-           Manager.CreateLobby(m_ServerName, m_IsServerPrivate);
+            Manager.CreateLobby(m_ServerName, m_IsServerPrivate);
         }
     }
 }

@@ -31,7 +31,8 @@ namespace LobbyRelaySample
         public Lobby CurrentLobby => m_CurrentLobby;
         Lobby m_CurrentLobby;
         LobbyEventCallbacks m_LobbyEventCallbacks = new LobbyEventCallbacks();
-        const int k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
+        const int
+            k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         Task m_HeartBeatTask;
 
@@ -183,8 +184,6 @@ namespace LobbyRelaySample
         {
             await m_QueryCooldown.WaitUntilCooldown();
 
-            Debug.Log("Lobby - Retrieving List.");
-
             var filters = LobbyColorToFilters(limitToColor);
 
             QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
@@ -195,8 +194,7 @@ namespace LobbyRelaySample
             return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
         }
 
-
-        public async Task SubscribeToLocalLobbyChanges(string lobbyID, LocalLobby localLobby)
+        public async Task BindLocalLobbyToRemote(string lobbyID, LocalLobby localLobby)
         {
             m_LobbyEventCallbacks.LobbyChanged += async changes =>
             {
@@ -241,14 +239,20 @@ namespace LobbyRelaySample
                     foreach (var change in changes.Data.Value)
                     {
                         var changedValue = change.Value;
+                        var changedKey = change.Key;
+
+                        if (changedValue.Removed)
+                        {
+                            RemoveCustomLobbyData(changedKey);
+                        }
+
                         if (changedValue.Changed)
                         {
-                            var changedKey = change.Key;
-                            ParseRemoteLobbyData(changedKey, changedValue.Value);
+                            ParseCustomLobbyData(changedKey, changedValue.Value);
                         }
                     }
 
-                    void ParseRemoteLobbyData(string changedKey, DataObject playerDataObject)
+                    void ParseCustomLobbyData(string changedKey, DataObject playerDataObject)
                     {
                         if (changedKey == key_RelayCode)
                             localLobby.RelayCode.Value = playerDataObject.Value;
@@ -262,6 +266,15 @@ namespace LobbyRelaySample
                         if (changedKey == key_LobbyColor)
                             localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(playerDataObject.Value);
                     }
+
+                    void RemoveCustomLobbyData(string changedKey)
+                    {
+                        if (changedKey == key_RelayCode)
+                            localLobby.RelayCode.Value = "";
+
+                        if (changedKey == key_RelayNGOCode)
+                            localLobby.RelayNGOCode.Value = "";
+                    }
                 }
 
                 void PlayersJoined()
@@ -272,20 +285,17 @@ namespace LobbyRelaySample
 
                         var id = joinedPlayer.Id;
                         var index = playerChanges.PlayerIndex;
+                        var isHost = localLobby.HostID.Value == id;
 
-                        var isHost = localLobby.HostID.Value.Equals(id);
-                        var displayName = joinedPlayer.Data?.ContainsKey(key_Displayname) == true
-                            ? joinedPlayer.Data[key_Displayname].Value
-                            : default;
-                        var emote = joinedPlayer.Data?.ContainsKey(key_Emote) == true
-                            ? (EmoteType)int.Parse(joinedPlayer.Data[key_Emote].Value)
-                            : EmoteType.None;
-                        var userStatus = joinedPlayer.Data?.ContainsKey(key_Userstatus) == true
-                            ? (UserStatus)int.Parse(joinedPlayer.Data[key_Userstatus].Value)
-                            : UserStatus.Lobby;
+                        var newPlayer = new LocalPlayer(id, index, isHost);
 
-                        var newPlayer = new LocalPlayer(id, index, isHost, displayName, emote, userStatus);
-                        localLobby.AddPlayer(newPlayer);
+                        foreach (var dataEntry in joinedPlayer.Data)
+                        {
+                            var dataObject = dataEntry.Value;
+                            ParseCustomPlayerData(newPlayer, dataEntry.Key, dataObject.Value);
+                        }
+
+                        localLobby.AddPlayer(index, newPlayer);
                     }
                 }
 
@@ -315,7 +325,7 @@ namespace LobbyRelaySample
                         {
                             var lastUpdated = playerChanges.LastUpdatedChanged.Value;
                             Debug.Log(
-                                $"ConnectionInfo for {localPlayer.DisplayName.Value} changed to {lastUpdated}");
+                                $"LastUpdated for {localPlayer.DisplayName.Value} changed to {lastUpdated}");
                         }
 
                         if (playerChanges.ChangedData.Changed)
@@ -327,28 +337,14 @@ namespace LobbyRelaySample
                                 {
                                     if (changedValue.Removed)
                                     {
-                                        Debug.LogWarning("This Sample does not remove Values currently.");
+                                        Debug.LogWarning("This Sample does not remove Player Values currently.");
                                         continue;
                                     }
 
-                                    var changedKey = playerChange.Key;
                                     var playerDataObject = changedValue.Value;
-                                    ParseLocalPlayerData(changedKey, playerDataObject);
+                                    ParseCustomPlayerData(localPlayer, playerChange.Key, playerDataObject.Value);
                                 }
                             }
-                        }
-
-                        void ParseLocalPlayerData(string dataKey, PlayerDataObject playerDataObject)
-                        {
-                            localPlayer.DisplayName.Value = dataKey == key_Displayname
-                                ? playerDataObject.Value
-                                : default;
-                            localPlayer.Emote.Value = dataKey == key_Emote
-                                ? (EmoteType)int.Parse(playerDataObject.Value)
-                                : EmoteType.None;
-                            localPlayer.UserStatus.Value = dataKey == key_Userstatus
-                                ? (UserStatus)int.Parse(playerDataObject.Value)
-                                : UserStatus.Lobby;
                         }
                     }
                 }
@@ -356,8 +352,7 @@ namespace LobbyRelaySample
 
             m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += lobbyEventConnectionState =>
             {
-                Debug.Log($"Lobby Event Changed {lobbyEventConnectionState}");
-
+                Debug.Log($"Lobby ConnectionState Changed to {lobbyEventConnectionState}");
             };
 
             m_LobbyEventCallbacks.KickedFromLobby += () =>
@@ -367,6 +362,15 @@ namespace LobbyRelaySample
             await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
 
+        void ParseCustomPlayerData(LocalPlayer player, string dataKey, string playerDataValue)
+        {
+            if (dataKey == key_Emote)
+                player.Emote.Value = (EmoteType)int.Parse(playerDataValue);
+            else if (dataKey == key_Userstatus)
+                player.UserStatus.Value = (PlayerStatus)int.Parse(playerDataValue);
+            else if (dataKey == key_Displayname)
+                player.DisplayName.Value = playerDataValue;
+        }
 
         public async Task<Lobby> GetLobbyAsync(string lobbyId = null)
         {
@@ -389,10 +393,10 @@ namespace LobbyRelaySample
             m_CurrentLobby = null;
         }
 
-        public async Task<Lobby> UpdatePlayerDataAsync(Dictionary<string, string> data)
+        public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
         {
             if (!InLobby())
-                return null;
+                return;
             await m_UpdatePlayerCooldown.WaitUntilCooldown();
             Debug.Log("Lobby - Updating Player Data");
 
@@ -414,8 +418,7 @@ namespace LobbyRelaySample
                 AllocationId = null,
                 ConnectionInfo = null
             };
-            return m_CurrentLobby =
-                await LobbyService.Instance.UpdatePlayerAsync(m_CurrentLobby.Id, playerId, updateOptions);
+            m_CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(m_CurrentLobby.Id, playerId, updateOptions);
         }
 
         public async Task<Lobby> UpdatePlayerRelayInfoAsync(string lobbyID, string allocationId, string connectionInfo)
@@ -436,10 +439,10 @@ namespace LobbyRelaySample
             return m_CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(lobbyID, playerId, updateOptions);
         }
 
-        public async Task<Lobby> UpdateLobbyDataAsync(Dictionary<string, string> data)
+        public async Task UpdateLobbyDataAsync(Dictionary<string, string> data)
         {
             if (!InLobby())
-                return null;
+                return;
             await m_UpdateLobbyCooldown.WaitUntilCooldown();
             Debug.Log("Lobby - Updating Lobby Data");
 
@@ -466,7 +469,7 @@ namespace LobbyRelaySample
             }
 
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = dataCurr, IsLocked = shouldLock };
-            return m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, updateOptions);
+            m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, updateOptions);
         }
 
         public async Task DeleteLobbyAsync()
@@ -500,6 +503,7 @@ namespace LobbyRelaySample
                     QueryFilter.OpOptions.EQ));
             return filters;
         }
+
 //Since the LobbyManager maintains the "connection" to the lobby, we will continue to heartbeat until host leaves.
         async Task SendHeartbeatPingAsync()
         {

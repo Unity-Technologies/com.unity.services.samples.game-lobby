@@ -78,7 +78,7 @@ using UnityEngine;
 //                 var areAllusersReady = AreAllUsersReady();
 //                 if (areAllusersReady && m_LocalLobby.LocalLobbyState.Value == LobbyState.Lobby)
 //                 {
-//                     GameManager.Instance.BeginCountdown();
+//                     GameManager.Instance.BeginCountDown();
 //                 }
 //                 else if (!areAllusersReady && m_LocalLobby.LocalLobbyState.Value == LobbyState.CountDown)
 //                 {
@@ -119,7 +119,7 @@ using UnityEngine;
 //
 //             if (m_LocalUser.IsHost.Value)
 //                 await m_LobbyManager.UpdateLobbyDataAsync(
-//                     LobbyConverters.LocalToRemoteData(m_LocalLobby));
+//                     LobbyConverters.LocalToRemoteLobbyData(m_LocalLobby));
 //
 //             return await m_LobbyManager.UpdatePlayerDataAsync(
 //                 LobbyConverters.LocalToRemoteUserData(m_LocalUser));
@@ -129,7 +129,7 @@ using UnityEngine;
 //         {
 //             foreach (var lobbyUser in m_LocalLobby.LocalPlayers.Values)
 //             {
-//                 if (lobbyUser.UserStatus.Value != UserStatus.Ready)
+//                 if (lobbyUser.PlayerStatus.Value != PlayerStatus.Ready)
 //                 {
 //                     return false;
 //                 }

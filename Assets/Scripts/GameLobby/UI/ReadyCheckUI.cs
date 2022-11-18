@@ -9,13 +9,13 @@ namespace LobbyRelaySample.UI
     {
         public void OnReadyButton()
         {
-            ChangeState(UserStatus.Ready);
+            ChangeState(PlayerStatus.Ready);
         }
         public void OnCancelButton()
         {
-            ChangeState(UserStatus.Lobby);
+            ChangeState(PlayerStatus.Lobby);
         }
-        void ChangeState(UserStatus status)
+        void ChangeState(PlayerStatus status)
         {
             Manager.SetLocalUserStatus(status);
         }

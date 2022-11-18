@@ -9,27 +9,20 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class RecolorForLobbyType : MonoBehaviour
     {
-        private static readonly Color s_orangeColor = new Color(0.8352942f, 0.3686275f, 0);
-        private static readonly Color s_greenColor  = new Color(0, 0.6196079f, 0.4509804f);
-        private static readonly Color s_blueColor   = new Color(0.0f, 0.4470589f, 0.6980392f);
-        private static readonly Color[] s_colorsOrdered = new Color[] { new Color(0.9f, 0.9f, 0.9f, 0.7f), s_orangeColor, s_greenColor, s_blueColor };
+        static readonly Color s_orangeColor = new Color(0.8352942f, 0.3686275f, 0);
+        static readonly Color s_greenColor = new Color(0, 0.6196079f, 0.4509804f);
+        static readonly Color s_blueColor = new Color(0.0f, 0.4470589f, 0.6980392f);
+        static readonly Color[] s_colorsOrdered = new Color[]
+            { new Color(0.9f, 0.9f, 0.9f, 0.7f), s_orangeColor, s_greenColor, s_blueColor };
 
         [SerializeField]
-        private Graphic[] m_toRecolor;
-        private LocalLobby m_lobby;
+        Graphic[] m_toRecolor;
+        LocalLobby m_lobby;
 
-        public void Start()
+        void Start()
         {
             m_lobby = GameManager.Instance.LocalLobby;
             m_lobby.LocalLobbyColor.onChanged += ChangeColors;
-        }
-
-        public void ChangeColors(LobbyColor lobbyColor)
-        {
-
-            Color color = s_colorsOrdered[(int)lobbyColor];
-            foreach (Graphic graphic in m_toRecolor)
-                graphic.color = new Color(color.r, color.g, color.b, graphic.color.a);
         }
 
         /// <summary>
@@ -38,8 +31,14 @@ namespace LobbyRelaySample.UI
         /// </summary>
         public void SetLobbyColor(int color)
         {
-            if (m_lobby != null)
-                m_lobby.LocalLobbyColor.Value = (LobbyColor)color;
+            GameManager.Instance.SetLocalLobbyColor(color);
+        }
+
+        void ChangeColors(LobbyColor lobbyColor)
+        {
+            Color color = s_colorsOrdered[(int)lobbyColor];
+            foreach (Graphic graphic in m_toRecolor)
+                graphic.color = new Color(color.r, color.g, color.b, graphic.color.a);
         }
     }
 }

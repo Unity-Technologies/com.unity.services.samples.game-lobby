@@ -86,7 +86,7 @@ using Unity.Networking.Transport;
 //             {
 //                 byte value = msgType == MsgType.Emote
 //                     ? (byte)m_localLobby.LocalPlayers[id].Emote.Value
-//                     : (byte)m_localLobby.LocalPlayers[id].UserStatus.Value;
+//                     : (byte)m_localLobby.LocalPlayers[id].PlayerStatus.Value;
 //                 foreach (NetworkConnection otherConn in m_connections)
 //                 {
 //                     if (otherConn == conn)
@@ -152,7 +152,7 @@ using Unity.Networking.Transport;
 //             bool haveAllReadied = true;
 //             foreach (var user in m_localLobby.LocalPlayers)
 //             {
-//                 if (user.Value.UserStatus.Value != UserStatus.Ready)
+//                 if (user.Value.PlayerStatus.Value != PlayerStatus.Ready)
 //                 {
 //                     haveAllReadied = false;
 //                     break;

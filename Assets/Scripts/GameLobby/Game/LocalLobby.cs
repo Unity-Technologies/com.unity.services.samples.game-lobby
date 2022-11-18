@@ -28,22 +28,12 @@ namespace LobbyRelaySample
     [System.Serializable]
     public class LocalLobby
     {
-        public bool CanSetChanged = true;
-
         public Action<LocalPlayer> onUserJoined;
+
         public Action<int> onUserLeft;
 
-        
+        public Action<int> onUserReadyChange;
 
-        Dictionary<int, LocalPlayer> m_LocalPlayers = new Dictionary<int, LocalPlayer>();
-
-        #region LocalLobbyData
-
-        ServerAddress m_RelayServer;
-
-        /// <summary>Used only for visual output of the Relay connection info. The obfuscated Relay server IP is obtained during allocation in the RelayUtpSetup.</summary>
-
-        #endregion.
         public CallbackValue<string> LobbyID = new CallbackValue<string>();
 
         public CallbackValue<string> LobbyCode = new CallbackValue<string>();
@@ -55,11 +45,13 @@ namespace LobbyRelaySample
         public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
 
         public CallbackValue<string> LobbyName = new CallbackValue<string>();
+
         public CallbackValue<string> HostID = new CallbackValue<string>();
 
         public CallbackValue<LobbyState> LocalLobbyState = new CallbackValue<LobbyState>();
 
         public CallbackValue<bool> Locked = new CallbackValue<bool>();
+
         public CallbackValue<bool> Private = new CallbackValue<bool>();
 
         public CallbackValue<int> AvailableSlots = new CallbackValue<int>();
@@ -71,6 +63,10 @@ namespace LobbyRelaySample
         public CallbackValue<long> LastUpdated = new CallbackValue<long>();
 
         public int PlayerCount => m_LocalPlayers.Count;
+        ServerAddress m_RelayServer;
+
+        public List<LocalPlayer> LocalPlayers => m_LocalPlayers;
+        List<LocalPlayer> m_LocalPlayers = new List<LocalPlayer>();
 
         public void ResetLobby()
         {
@@ -84,6 +80,8 @@ namespace LobbyRelaySample
             LocalLobbyColor.Value = LobbyRelaySample.LobbyColor.None;
             AvailableSlots.Value = 4;
             MaxPlayerCount.Value = 4;
+            onUserJoined = null;
+            onUserLeft = null;
         }
 
         public LocalLobby()
@@ -91,44 +89,39 @@ namespace LobbyRelaySample
             LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
         }
 
-
-        void SetValueChanged()
-        {
-            if (CanSetChanged)
-                m_ValuesChanged = true;
-        }
-
-        bool m_ValuesChanged;
-
         public LocalPlayer GetLocalPlayer(int index)
         {
-            return m_LocalPlayers[index];
+            if (PlayerCount < index)
+                return m_LocalPlayers[index];
+            return null;
         }
 
-        public void AddPlayer(LocalPlayer user)
+        public void AddPlayer(int index, LocalPlayer user)
         {
-            if (m_LocalPlayers.ContainsKey(user.Index.Value))
-            {
-                Debug.LogError(
-                    $"Cant add player {user.DisplayName.Value}({user.ID.Value}) to lobby: {LobbyID.Value} twice");
-                return;
-            }
-
             Debug.Log($"Adding User: {user.DisplayName.Value} - {user.ID.Value}");
-            m_LocalPlayers.Add(user.Index.Value, user);
-
-
+            m_LocalPlayers.Insert(index, user);
+            user.UserStatus.onChanged += OnUserChangedStatus;
             onUserJoined?.Invoke(user);
         }
 
-        public void RemovePlayer(int removePlayer)
+        public void RemovePlayer(int playerIndex)
         {
-            var player = m_LocalPlayers[removePlayer];
-            m_LocalPlayers.Remove(removePlayer);
-
-            onUserLeft?.Invoke(removePlayer);
+            m_LocalPlayers[playerIndex].UserStatus.onChanged -= OnUserChangedStatus;
+            m_LocalPlayers.RemoveAt(playerIndex);
+            onUserLeft?.Invoke(playerIndex);
         }
 
+        void OnUserChangedStatus(PlayerStatus status)
+        {
+            int readyCount = 0;
+            foreach (var player in m_LocalPlayers)
+            {
+                if (player.UserStatus.Value == PlayerStatus.Ready)
+                    readyCount++;
+            }
+
+            onUserReadyChange?.Invoke(readyCount);
+        }
 
         public override string ToString()
         {

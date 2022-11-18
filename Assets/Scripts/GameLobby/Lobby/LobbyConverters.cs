@@ -19,14 +19,12 @@ namespace LobbyRelaySample.lobby
         const string key_Userstatus = nameof(LocalPlayer.UserStatus);
         const string key_Emote = nameof(LocalPlayer.Emote);
 
-        public static Dictionary<string, string> LocalToRemoteData(LocalLobby lobby)
+        public static Dictionary<string, string> LocalToRemoteLobbyData(LocalLobby lobby)
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add(key_RelayCode, lobby.RelayCode.Value);
             data.Add(key_RelayNGOCode, lobby.RelayNGOCode.Value);
-            data.Add(key_LobbyState,
-                ((int)lobby.LocalLobbyState.Value)
-                .ToString()); // Using an int is smaller than using the enum state's name.
+            data.Add(key_LobbyState, ((int)lobby.LocalLobbyState.Value).ToString());
             data.Add(key_LobbyColor, ((int)lobby.LocalLobbyColor.Value).ToString());
             data.Add(key_LastEdit, lobby.LastUpdated.Value.ToString());
 
@@ -39,17 +37,15 @@ namespace LobbyRelaySample.lobby
             if (user == null || string.IsNullOrEmpty(user.ID.Value))
                 return data;
             data.Add(key_Displayname, user.DisplayName.Value);
-            data.Add(key_Userstatus,
-                ((int)user.UserStatus.Value)
-                .ToString()); // Cheaper to send the string int of the enum over the string enum
-            data.Add(key_Emote, (user.Emote).ToString());
+            data.Add(key_Userstatus, ((int)user.UserStatus.Value).ToString());
+            data.Add(key_Emote, ((int)user.Emote.Value).ToString());
             return data;
         }
 
         /// <summary>
         /// Create a new LocalLobby from the content of a retrieved lobby. Its data can be copied into an existing LocalLobby for use.
         /// </summary>
-        public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobby, bool allowSetLobbyChanged = true)
+        public static void RemoteToLocal(Lobby remoteLobby, LocalLobby localLobby)
         {
             if (remoteLobby == null)
             {
@@ -63,8 +59,8 @@ namespace LobbyRelaySample.lobby
                 return;
             }
 
-            localLobby.CanSetChanged = allowSetLobbyChanged;
             localLobby.LobbyID.Value = remoteLobby.Id;
+            localLobby.HostID.Value = remoteLobby.HostId;
             localLobby.LobbyName.Value = remoteLobby.Name;
             localLobby.LobbyCode.Value = remoteLobby.LobbyCode;
             localLobby.Private.Value = remoteLobby.IsPrivate;
@@ -88,6 +84,7 @@ namespace LobbyRelaySample.lobby
 
             //Custom User Data Conversions
             List<string> remotePlayerIDs = new List<string>();
+            int index = 0;
             foreach (var player in remoteLobby.Players)
             {
                 var id = player.Id;
@@ -100,28 +97,28 @@ namespace LobbyRelaySample.lobby
                     ? (EmoteType)int.Parse(player.Data[key_Emote].Value)
                     : EmoteType.None;
                 var userStatus = player.Data?.ContainsKey(key_Userstatus) == true
-                    ? (UserStatus)int.Parse(player.Data[key_Userstatus].Value)
-                    : UserStatus.Lobby;
+                    ? (PlayerStatus)int.Parse(player.Data[key_Userstatus].Value)
+                    : PlayerStatus.Lobby;
 
-                LocalPlayer localPlayer;
+                LocalPlayer localPlayer = localLobby.GetLocalPlayer(index);
 
-                //See if we have the remote player locally already
-                // if (localLobby.LocalPlayers.ContainsKey(player.Id))
-                // {
-                //     localPlayer = localLobby.LocalPlayers[player.Id];
-                //     localPlayer.ID.Value = id;
-                //     localPlayer.DisplayName.Value = displayName;
-                //     localPlayer.Emote.Value = emote;
-                //     localPlayer.UserStatus.Value = userStatus;
-                // }
-                // else
-                // {
-                //     localPlayer = new LocalPlayer(id, isHost, displayName, emote, userStatus);
-                //     localLobby.AddPlayer(localPlayer);
-                // }
+                if (localPlayer == null)
+                {
+                    localPlayer = new LocalPlayer(id, index, isHost, displayName, emote, userStatus);
+                    localLobby.AddPlayer(index, localPlayer);
+                }
+                else
+                {
+                    localPlayer.ID.Value = id;
+                    localPlayer.Index.Value = index;
+                    localPlayer.IsHost.Value = isHost;
+                    localPlayer.DisplayName.Value = displayName;
+                    localPlayer.Emote.Value = emote;
+                    localPlayer.UserStatus.Value = userStatus;
+                }
+
+                index++;
             }
-
-            localLobby.CanSetChanged = true;
         }
 
         /// <summary>
@@ -135,6 +132,7 @@ namespace LobbyRelaySample.lobby
             return retLst;
         }
 
+        //This might be heavy handed,
         static LocalLobby RemoteToNewLocal(Lobby lobby)
         {
             LocalLobby data = new LocalLobby();

@@ -84,7 +84,6 @@ namespace LobbyRelaySample.ngo
                 joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
         }
 
-
         /// <summary>
         /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
         /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
@@ -126,11 +125,6 @@ namespace LobbyRelaySample.ngo
 #pragma warning disable 4014
             CreateNetworkManager(localLobby, localPlayer);
 #pragma warning restore 4014
-        }
-
-        public void ConfirmInGameState()
-        {
-
         }
 
         public void MiniGameBeginning()

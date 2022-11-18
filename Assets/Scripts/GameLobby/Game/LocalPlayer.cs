@@ -7,7 +7,7 @@ namespace LobbyRelaySample
     /// This is a Flags enum to allow for the Inspector to select multiples for various UI features.
     /// </summary>
     [Flags]
-    public enum UserStatus
+    public enum PlayerStatus
     {
         None = 0,
         Connecting = 1, // User has joined a lobby but has not yet connected to Relay.
@@ -26,14 +26,14 @@ namespace LobbyRelaySample
         public CallbackValue<bool> IsHost = new CallbackValue<bool>(false);
         public CallbackValue<string> DisplayName = new CallbackValue<string>("");
         public CallbackValue<EmoteType> Emote = new CallbackValue<EmoteType>(EmoteType.None);
-        public CallbackValue<UserStatus> UserStatus = new CallbackValue<UserStatus>((UserStatus)0);
+        public CallbackValue<PlayerStatus> UserStatus = new CallbackValue<PlayerStatus>((PlayerStatus)0);
         public CallbackValue<string> ID = new CallbackValue<string>("");
         public CallbackValue<int> Index = new CallbackValue<int>(0);
 
         public DateTime LastUpdated;
 
-        public LocalPlayer(string id, int index, bool isHost, string displayName,
-            EmoteType emote = default, UserStatus status = default)
+        public LocalPlayer(string id, int index, bool isHost, string displayName = default,
+            EmoteType emote = default, PlayerStatus status = default)
         {
             ID.Value = id;
             IsHost.Value = isHost;
@@ -47,7 +47,7 @@ namespace LobbyRelaySample
         {
             IsHost.Value = false;
             Emote.Value = EmoteType.None;
-            UserStatus.Value = LobbyRelaySample.UserStatus.Menu;
+            UserStatus.Value = LobbyRelaySample.PlayerStatus.Menu;
         }
     }
 }

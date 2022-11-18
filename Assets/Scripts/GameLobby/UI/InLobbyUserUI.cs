@@ -1,4 +1,3 @@
-
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -71,7 +70,7 @@ namespace LobbyRelaySample.UI
             m_DisplayNameText.SetText(displayName);
         }
 
-        void SetUserStatus(UserStatus statusText)
+        void SetUserStatus(PlayerStatus statusText)
         {
             m_StatusText.SetText(SetStatusFancy(statusText));
         }
@@ -117,17 +116,17 @@ namespace LobbyRelaySample.UI
             }
         }
 
-        string SetStatusFancy(UserStatus status)
+        string SetStatusFancy(PlayerStatus status)
         {
             switch (status)
             {
-                case UserStatus.Lobby:
+                case PlayerStatus.Lobby:
                     return "<color=#56B4E9>In Lobby</color>"; // Light Blue
-                case UserStatus.Ready:
+                case PlayerStatus.Ready:
                     return "<color=#009E73>Ready</color>"; // Light Mint
-                case UserStatus.Connecting:
+                case PlayerStatus.Connecting:
                     return "<color=#F0E442>Connecting...</color>"; // Bright Yellow
-                case UserStatus.InGame:
+                case PlayerStatus.InGame:
                     return "<color=#005500>In Game</color>"; // Green
                 default:
                     return "";

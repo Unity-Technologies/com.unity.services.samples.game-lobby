@@ -145,11 +145,11 @@ namespace LobbyRelaySample.relay
              }
              else if (msgType == MsgType.ReadyState)
              {
-                 UserStatus status = (UserStatus)msgContents[0];
-                 m_localLobby.LocalPlayers[id].UserStatus.Value = status;
+                 PlayerStatus status = (PlayerStatus)msgContents[0];
+                 m_localLobby.LocalPlayers[id].PlayerStatus.Value = status;
              }
              else if (msgType == MsgType.StartCountdown)
-                 GameManager.Instance.BeginCountdown();
+                 GameManager.Instance.BeginCountDown();
              else if (msgType == MsgType.CancelCountdown)
                  GameManager.Instance.CancelCountDown();
              else if (msgType == MsgType.ConfirmInGame)
@@ -231,7 +231,7 @@ namespace LobbyRelaySample.relay
          // Note that it would be better to send a single message with the full state, but for the sake of shorter code we'll leave that out here.
          WriteString(driver, connection, user.ID.Value, MsgType.PlayerName, user.DisplayName.Value);
          WriteByte(driver, connection, user.ID.Value, MsgType.Emote, (byte)user.Emote.Value);
-         WriteByte(driver, connection, user.ID.Value, MsgType.ReadyState, (byte)user.UserStatus.Value);
+         WriteByte(driver, connection, user.ID.Value, MsgType.ReadyState, (byte)user.PlayerStatus.Value);
      }
 
      /// <summary>

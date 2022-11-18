@@ -18,7 +18,7 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class UserStateVisibilityUI : UIPanelBase
     {
-        public UserStatus ShowThisWhen;
+        public PlayerStatus ShowThisWhen;
         public UserPermission Permissions;
         bool m_HasStatusFlags = false;
         bool m_HasPermissions;
@@ -32,7 +32,7 @@ namespace LobbyRelaySample.UI
             localUser.UserStatus.onChanged += OnUserStatusChanged;
         }
 
-        void OnUserStatusChanged(UserStatus observedStatus)
+        void OnUserStatusChanged(PlayerStatus observedStatus)
         {
             m_HasStatusFlags = ShowThisWhen.HasFlag(observedStatus);
             CheckVisibility();
