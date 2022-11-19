@@ -91,17 +91,16 @@ namespace LobbyRelaySample
 
         public LocalPlayer GetLocalPlayer(int index)
         {
-            if (PlayerCount < index)
-                return m_LocalPlayers[index];
-            return null;
+            return PlayerCount > index ? m_LocalPlayers[index] : null;
         }
 
         public void AddPlayer(int index, LocalPlayer user)
         {
-            Debug.Log($"Adding User: {user.DisplayName.Value} - {user.ID.Value}");
             m_LocalPlayers.Insert(index, user);
             user.UserStatus.onChanged += OnUserChangedStatus;
             onUserJoined?.Invoke(user);
+            Debug.Log($"Added User: {user.DisplayName.Value} - {user.ID.Value} to slot {index+1}/{PlayerCount}");
+
         }
 
         public void RemovePlayer(int playerIndex)

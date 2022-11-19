@@ -261,6 +261,7 @@ GameObject:
   - component: {fileID: 8158052573755836851}
   - component: {fileID: 6665477889391988598}
   - component: {fileID: 5354665607884969002}
+  - component: {fileID: 302397968031337808}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -415,6 +416,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c93e82eef7d613418b85194aace7f69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_onVisibilityChange:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!225 &302397968031337808
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3486344428529569277}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3603267332317325680
 GameObject:
   m_ObjectHideFlags: 0
@@ -1816,12 +1832,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4578721078997909056}
     - target: {fileID: 1462126939442648229, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
-      propertyPath: m_onVisibilityChange.m_PersistentCalls.m_Calls.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1462126939442648229, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_onVisibilityChange.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462126939442648229, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
+      propertyPath: m_onVisibilityChange.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1462126939442648229, guid: c308ffc2a02e5ab4bbe70a8b2e8108c6, type: 3}
       propertyPath: m_onVisibilityChange.m_PersistentCalls.m_Calls.Array.data[1].m_Target

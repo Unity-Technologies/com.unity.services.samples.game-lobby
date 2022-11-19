@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -11,7 +12,6 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class JoinMenuUI : UIPanelBase
     {
-        [FormerlySerializedAs("m_LobbyButtonPrefab")]
         [SerializeField]
         LobbyEntryUI m_LobbyEntryPrefab;
 
@@ -26,11 +26,11 @@ namespace LobbyRelaySample.UI
         /// Key: Lobby ID, Value Lobby UI
         /// </summary>
         Dictionary<string, LobbyEntryUI> m_LobbyButtons = new Dictionary<string, LobbyEntryUI>();
-        Dictionary<string, LocalLobby> m_LocalLobby = new Dictionary<string, LocalLobby>();
 
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
         LocalLobby m_LocalLobbySelected;
         string m_InputLobbyCode;
+
         public override void Start()
         {
             base.Start();
@@ -85,30 +85,8 @@ namespace LobbyRelaySample.UI
 
         void OnLobbyListChanged(Dictionary<string, LocalLobby> lobbyList)
         {
-            ///Check for new entries, We take CurrentLobbies as the source of truth
-            List<string> previousKeys = new List<string>(m_LobbyButtons.Keys);
-            foreach (var codeLobby in lobbyList)
-            {
-                var lobbyCodeKey = codeLobby.Key;
-                var lobbyData = codeLobby.Value;
-                if (!m_LobbyButtons.ContainsKey(lobbyCodeKey))
-                {
-                    if (CanDisplay(lobbyData))
-                        AddNewLobbyButton(lobbyCodeKey, lobbyData);
-                }
-                else
-                {
-                    if (CanDisplay(lobbyData))
-                        SetLobbyButton(lobbyCodeKey, lobbyData);
-                    else
-                        RemoveLobbyButton(lobbyData);
-                }
-
-                previousKeys.Remove(lobbyCodeKey);
-            }
-
-            foreach (string key in previousKeys) // Need to remove any lobbies from the list that no longer exist.
-                RemoveLobbyButton(m_LocalLobby[key]);
+            PruneMissingLobbies(lobbyList.Keys.ToList());
+            PopulateLobbyButtonList(lobbyList);
         }
 
         public void JoinMenuChangedVisibility(bool show)
@@ -125,6 +103,41 @@ namespace LobbyRelaySample.UI
             Manager.QuickJoin();
         }
 
+        void PruneMissingLobbies(List<string> lobbyIDs)
+        {
+            var removalList = new List<string>();
+            foreach (var lobbyID in lobbyIDs)
+            {
+                if (!lobbyIDs.Contains(lobbyID))
+                    removalList.Add(lobbyID);
+            }
+
+            foreach (var lobbyID in removalList)
+                RemoveLobbyButton(lobbyID);
+        }
+
+        void PopulateLobbyButtonList(Dictionary<string, LocalLobby> lobbyList)
+        {
+            ///Check for new entries, We take CurrentLobbies as the source of truth
+            foreach (var lobbyKVP in lobbyList)
+            {
+                var lobbyID = lobbyKVP.Key;
+                var lobby = lobbyKVP.Value;
+                if (!m_LobbyButtons.ContainsKey(lobbyID))
+                {
+                    if (CanDisplay(lobby))
+                        AddNewLobbyButton(lobbyID, lobby);
+                }
+                else
+                {
+                    if (CanDisplay(lobby))
+                        SetLobbyButton(lobbyID, lobby);
+                    else
+                        RemoveLobbyButton(lobbyID);
+                }
+            }
+        }
+
         bool CanDisplay(LocalLobby lobby)
         {
             return lobby.LocalLobbyState.Value == LobbyState.Lobby && !lobby.Private.Value;
@@ -138,7 +151,7 @@ namespace LobbyRelaySample.UI
             var lobbyButtonInstance = Instantiate(m_LobbyEntryPrefab, m_LobbyButtonParent);
             lobbyButtonInstance.onLobbyPressed.AddListener(LobbyButtonSelected);
             m_LobbyButtons.Add(lobbyCode, lobbyButtonInstance);
-            m_LocalLobby.Add(lobbyCode, lobby);
+            lobbyButtonInstance.SetLobby(lobby);
         }
 
         void SetLobbyButton(string lobbyCode, LocalLobby lobby)
@@ -146,12 +159,10 @@ namespace LobbyRelaySample.UI
             m_LobbyButtons[lobbyCode].SetLobby(lobby);
         }
 
-        void RemoveLobbyButton(LocalLobby lobby)
+        void RemoveLobbyButton(string lobbyID)
         {
-            var lobbyID = lobby.LobbyID.Value;
             var lobbyButton = m_LobbyButtons[lobbyID];
             m_LobbyButtons.Remove(lobbyID);
-            m_LocalLobby.Remove(lobbyID);
             Destroy(lobbyButton.gameObject);
         }
     }

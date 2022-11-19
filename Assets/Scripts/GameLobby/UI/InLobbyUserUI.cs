@@ -31,17 +31,21 @@ namespace LobbyRelaySample.UI
         public string UserId { get; set; }
         LocalPlayer m_LocalPlayer;
 
-        public void SetUser(LocalPlayer myLocalPlayer)
+        public void SetUser(LocalPlayer localPlayer)
         {
             Show();
-            m_LocalPlayer = myLocalPlayer;
-            SubscribeToPlayerUpdates();
+            m_LocalPlayer = localPlayer;
+            UserId = localPlayer.ID.Value;
+            SetIsHost(localPlayer.IsHost.Value);
+            SetEmote(localPlayer.Emote.Value);
+            SetUserStatus(localPlayer.UserStatus.Value);
             SetDisplayName(m_LocalPlayer.DisplayName.Value);
-            UserId = myLocalPlayer.ID.Value;
+            SubscribeToPlayerUpdates();
+
             m_VivoxUserHandler.SetId(UserId);
         }
 
-        public void SubscribeToPlayerUpdates()
+        void SubscribeToPlayerUpdates()
         {
             m_LocalPlayer.DisplayName.onChanged += SetDisplayName;
             m_LocalPlayer.UserStatus.onChanged += SetUserStatus;
@@ -49,17 +53,27 @@ namespace LobbyRelaySample.UI
             m_LocalPlayer.IsHost.onChanged += SetIsHost;
         }
 
-        public void UnsubscribeToPlayerUpdates()
+        void UnsubscribeToPlayerUpdates()
         {
-            m_LocalPlayer.DisplayName.onChanged -= SetDisplayName;
-            m_LocalPlayer.UserStatus.onChanged -= SetUserStatus;
-            m_LocalPlayer.Emote.onChanged -= SetEmote;
-            m_LocalPlayer.IsHost.onChanged -= SetIsHost;
+            if (m_LocalPlayer == null)
+                return;
+            if (m_LocalPlayer.DisplayName?.onChanged != null)
+                m_LocalPlayer.DisplayName.onChanged -= SetDisplayName;
+            if (m_LocalPlayer.UserStatus?.onChanged != null)
+                m_LocalPlayer.UserStatus.onChanged -= SetUserStatus;
+            if (m_LocalPlayer.Emote?.onChanged != null)
+                m_LocalPlayer.Emote.onChanged -= SetEmote;
+            if (m_LocalPlayer.IsHost?.onChanged != null)
+                m_LocalPlayer.IsHost.onChanged -= SetIsHost;
         }
 
         public void ResetUI()
         {
+            if (m_LocalPlayer == null)
+                return;
             UserId = null;
+            SetEmote(EmoteType.None);
+            SetUserStatus(PlayerStatus.Lobby);
             Hide();
             UnsubscribeToPlayerUpdates();
             m_LocalPlayer = null;

@@ -57,7 +57,7 @@ namespace LobbyRelaySample
             return true;
         }
 
-        public RateLimiter GetRateLimit(RequestType type)
+        public ServiceRateLimiter GetRateLimit(RequestType type)
         {
             if (type == RequestType.Join)
                 return m_JoinCooldown;
@@ -70,16 +70,16 @@ namespace LobbyRelaySample
 
         // Rate Limits are posted here: https://docs.unity.com/lobby/rate-limits.html
 
-        RateLimiter m_QueryCooldown = new RateLimiter(1f);
-        RateLimiter m_CreateCooldown = new RateLimiter(3f);
-        RateLimiter m_JoinCooldown = new RateLimiter(3f);
-        RateLimiter m_QuickJoinCooldown = new RateLimiter(10f);
-        RateLimiter m_GetLobbyCooldown = new RateLimiter(1f);
-        RateLimiter m_DeleteLobbyCooldown = new RateLimiter(.2f);
-        RateLimiter m_UpdateLobbyCooldown = new RateLimiter(.3f);
-        RateLimiter m_UpdatePlayerCooldown = new RateLimiter(.3f);
-        RateLimiter m_LeaveLobbyOrRemovePlayer = new RateLimiter(.3f);
-        RateLimiter m_HeartBeatCooldown = new RateLimiter(6f);
+        ServiceRateLimiter m_QueryCooldown = new ServiceRateLimiter(1, 1f);
+        ServiceRateLimiter m_CreateCooldown = new ServiceRateLimiter(2, 6f);
+        ServiceRateLimiter m_JoinCooldown = new ServiceRateLimiter(2, 6f);
+        ServiceRateLimiter m_QuickJoinCooldown = new ServiceRateLimiter(1, 10f);
+        ServiceRateLimiter m_GetLobbyCooldown = new ServiceRateLimiter(1, 1f);
+        ServiceRateLimiter m_DeleteLobbyCooldown = new ServiceRateLimiter(2, 1f);
+        ServiceRateLimiter m_UpdateLobbyCooldown = new ServiceRateLimiter(5, 5f);
+        ServiceRateLimiter m_UpdatePlayerCooldown = new ServiceRateLimiter(5, 5f);
+        ServiceRateLimiter m_LeaveLobbyOrRemovePlayer = new ServiceRateLimiter(5, 1);
+        ServiceRateLimiter m_HeartBeatCooldown = new ServiceRateLimiter(5, 30);
 
         #endregion
 
@@ -96,13 +96,13 @@ namespace LobbyRelaySample
         public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate,
             LocalPlayer localUser)
         {
-            if (m_CreateCooldown.IsInCooldown)
+            if (m_CreateCooldown.IsCoolingDown)
             {
                 Debug.LogWarning("Create Lobby hit the rate limit.");
                 return null;
             }
 
-            await m_CreateCooldown.WaitUntilCooldown();
+            await m_CreateCooldown.QueueUntilCooldown();
 
             Debug.Log("Lobby - Creating");
 
@@ -129,14 +129,14 @@ namespace LobbyRelaySample
 
         public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser)
         {
-            if (m_JoinCooldown.IsInCooldown ||
+            if (m_JoinCooldown.IsCoolingDown ||
                 (lobbyId == null && lobbyCode == null))
             {
                 return null;
             }
 
-            await m_JoinCooldown.WaitUntilCooldown();
-            Debug.Log($"{localUser.DisplayName}({localUser.ID}) Joining  Lobby- {lobbyId} with {lobbyCode}");
+            await m_JoinCooldown.QueueUntilCooldown();
+            Debug.Log($"{localUser.DisplayName.Value}({localUser.ID.Value}) Joining  Lobby- {lobbyId} / {lobbyCode}");
 
             string uasId = AuthenticationService.Instance.PlayerId;
             var playerData = CreateInitialPlayerData(localUser);
@@ -160,13 +160,13 @@ namespace LobbyRelaySample
         public async Task<Lobby> QuickJoinLobbyAsync(LocalPlayer localUser, LobbyColor limitToColor = LobbyColor.None)
         {
             //We dont want to queue a quickjoin
-            if (m_QuickJoinCooldown.IsInCooldown)
+            if (m_QuickJoinCooldown.IsCoolingDown)
             {
                 UnityEngine.Debug.LogWarning("Quick Join Lobby hit the rate limit.");
                 return null;
             }
 
-            await m_QuickJoinCooldown.WaitUntilCooldown();
+            await m_QuickJoinCooldown.QueueUntilCooldown();
             Debug.Log("Lobby - Quick Joining.");
             var filters = LobbyColorToFilters(limitToColor);
             string uasId = AuthenticationService.Instance.PlayerId;
@@ -182,15 +182,19 @@ namespace LobbyRelaySample
 
         public async Task<QueryResponse> RetrieveLobbyListAsync(LobbyColor limitToColor = LobbyColor.None)
         {
-            await m_QueryCooldown.WaitUntilCooldown();
-
             var filters = LobbyColorToFilters(limitToColor);
+
+            if (m_QueryCooldown.TaskQueued)
+                return null;
+            await m_QueryCooldown.QueueUntilCooldown();
 
             QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
             {
                 Count = k_maxLobbiesToShow,
                 Filters = filters
             };
+            Debug.Log("Retrieving Lobby List");
+
             return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
         }
 
@@ -313,6 +317,7 @@ namespace LobbyRelaySample
                     {
                         var playerIndex = lobbyPlayerChanges.Key;
                         var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                        Debug.Log($"{localPlayer} at index {playerIndex} data changed");
                         var playerChanges = lobbyPlayerChanges.Value;
                         if (playerChanges.ConnectionInfoChanged.Changed)
                         {
@@ -324,15 +329,17 @@ namespace LobbyRelaySample
                         if (playerChanges.LastUpdatedChanged.Changed)
                         {
                             var lastUpdated = playerChanges.LastUpdatedChanged.Value;
-                            Debug.Log(
-                                $"LastUpdated for {localPlayer.DisplayName.Value} changed to {lastUpdated}");
+                            Debug.Log($"LastUpdated for {localPlayer.DisplayName.Value} changed to {lastUpdated}");
                         }
-
+                        //There are changes on the Player
                         if (playerChanges.ChangedData.Changed)
                         {
                             foreach (var playerChange in playerChanges.ChangedData.Value)
                             {
                                 var changedValue = playerChange.Value;
+
+                                //There are changes on some of the changes in the player list of changes
+
                                 if (changedValue.Changed)
                                 {
                                     if (changedValue.Removed)
@@ -376,14 +383,14 @@ namespace LobbyRelaySample
         {
             if (!InLobby())
                 return null;
-            await m_GetLobbyCooldown.WaitUntilCooldown();
+            await m_GetLobbyCooldown.QueueUntilCooldown();
             lobbyId ??= m_CurrentLobby.Id;
             return m_CurrentLobby = await LobbyService.Instance.GetLobbyAsync(lobbyId);
         }
 
         public async Task LeaveLobbyAsync()
         {
-            await m_LeaveLobbyOrRemovePlayer.WaitUntilCooldown();
+            await m_LeaveLobbyOrRemovePlayer.QueueUntilCooldown();
             if (!InLobby())
                 return;
             string playerId = AuthenticationService.Instance.PlayerId;
@@ -397,8 +404,6 @@ namespace LobbyRelaySample
         {
             if (!InLobby())
                 return;
-            await m_UpdatePlayerCooldown.WaitUntilCooldown();
-            Debug.Log("Lobby - Updating Player Data");
 
             string playerId = AuthenticationService.Instance.PlayerId;
             Dictionary<string, PlayerDataObject> dataCurr = new Dictionary<string, PlayerDataObject>();
@@ -412,6 +417,11 @@ namespace LobbyRelaySample
                     dataCurr.Add(dataNew.Key, dataObj);
             }
 
+            if (m_UpdatePlayerCooldown.TaskQueued)
+                return;
+            await m_UpdatePlayerCooldown.QueueUntilCooldown();
+            Debug.Log("Lobby - Updating Player Data");
+
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
                 Data = dataCurr,
@@ -421,14 +431,17 @@ namespace LobbyRelaySample
             m_CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(m_CurrentLobby.Id, playerId, updateOptions);
         }
 
-        public async Task<Lobby> UpdatePlayerRelayInfoAsync(string lobbyID, string allocationId, string connectionInfo)
+        public async Task UpdatePlayerRelayInfoAsync(string lobbyID, string allocationId, string connectionInfo)
         {
             if (!InLobby())
-                return null;
-            await m_UpdatePlayerCooldown.WaitUntilCooldown();
-            Debug.Log("Lobby - Relay Info (Player)");
+                return;
 
             string playerId = AuthenticationService.Instance.PlayerId;
+
+            if (m_UpdatePlayerCooldown.TaskQueued)
+                return;
+            await m_UpdatePlayerCooldown.QueueUntilCooldown();
+            Debug.Log("Lobby - Relay Info (Player)");
 
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
@@ -436,15 +449,13 @@ namespace LobbyRelaySample
                 AllocationId = allocationId,
                 ConnectionInfo = connectionInfo
             };
-            return m_CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(lobbyID, playerId, updateOptions);
+            m_CurrentLobby = await LobbyService.Instance.UpdatePlayerAsync(lobbyID, playerId, updateOptions);
         }
 
         public async Task UpdateLobbyDataAsync(Dictionary<string, string> data)
         {
             if (!InLobby())
                 return;
-            await m_UpdateLobbyCooldown.WaitUntilCooldown();
-            Debug.Log("Lobby - Updating Lobby Data");
 
             Dictionary<string, DataObject> dataCurr = m_CurrentLobby.Data ?? new Dictionary<string, DataObject>();
 
@@ -468,6 +479,12 @@ namespace LobbyRelaySample
                 }
             }
 
+            //We can still update the latest data to send to the service, but we will not send multiple UpdateLobbySyncCalls
+            if (m_UpdateLobbyCooldown.TaskQueued)
+                return;
+            await m_UpdateLobbyCooldown.QueueUntilCooldown();
+            Debug.Log("Lobby - Updating Lobby Data");
+
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = dataCurr, IsLocked = shouldLock };
             m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, updateOptions);
         }
@@ -476,7 +493,7 @@ namespace LobbyRelaySample
         {
             if (!InLobby())
                 return;
-            await m_DeleteLobbyCooldown.WaitUntilCooldown();
+            await m_DeleteLobbyCooldown.QueueUntilCooldown();
             Debug.Log("Lobby - Deleting Lobby");
 
             await LobbyService.Instance.DeleteLobbyAsync(m_CurrentLobby.Id);
@@ -509,9 +526,9 @@ namespace LobbyRelaySample
         {
             if (!InLobby())
                 return;
-            if (m_HeartBeatCooldown.IsInCooldown)
+            if (m_HeartBeatCooldown.IsCoolingDown)
                 return;
-            await m_HeartBeatCooldown.WaitUntilCooldown();
+            await m_HeartBeatCooldown.QueueUntilCooldown();
             Debug.Log("Lobby - Heartbeat");
 
             await LobbyService.Instance.SendHeartbeatPingAsync(m_CurrentLobby.Id);
@@ -536,60 +553,75 @@ namespace LobbyRelaySample
         #endregion
     }
 
-    //Manages the Cooldown for each service call.
+    //Manages the Amount of times you can hit a service call.
     //Adds a buffer to account for ping times.
-    public class RateLimiter
+    //Will Queue the latest overflow task for when the cooldown ends.
+    //Created to mimic the way rate limits are implemented Here:  https://docs.unity.com/lobby/rate-limits.html
+    public class ServiceRateLimiter
     {
         public Action<bool> onCooldownChange;
-        public readonly float cooldownSeconds;
         public readonly int coolDownMS;
-        public readonly int pingBufferMS;
+        public bool TaskQueued { get; private set; } = false;
+
+        readonly int m_ServiceCallTimes;
+        bool m_CoolingDown = false;
+        int m_TaskCounter;
 
         //(If you're still getting rate limit errors, try increasing the pingBuffer)
-        public RateLimiter(float cooldownSeconds, int pingBuffer = 100)
+        public ServiceRateLimiter(int callTimes, float coolDown, int pingBuffer = 100)
         {
-            this.cooldownSeconds = cooldownSeconds;
-            pingBufferMS = pingBuffer;
+            m_ServiceCallTimes = callTimes;
+            m_TaskCounter = m_ServiceCallTimes;
             coolDownMS =
-                Mathf.CeilToInt(this.cooldownSeconds * 1000) +
-                pingBufferMS;
+                Mathf.CeilToInt(coolDown * 1000) +
+                pingBuffer;
         }
 
-        public async Task WaitUntilCooldown()
+        public async Task QueueUntilCooldown()
         {
-            //No Queue!
-            if (!m_IsInCooldown)
+            if (!m_CoolingDown)
             {
 #pragma warning disable 4014
-                CooldownAsync();
+                ParallelCooldownAsync();
 #pragma warning restore 4014
+            }
+
+            m_TaskCounter--;
+
+            if (m_TaskCounter > 0)
+            {
                 return;
             }
 
-            while (m_IsInCooldown)
+            if (!TaskQueued)
+                TaskQueued = true;
+            else
+                return;
+
+            while (m_CoolingDown)
             {
                 await Task.Delay(10);
             }
         }
 
-        async Task CooldownAsync()
+        async Task ParallelCooldownAsync()
         {
-            IsInCooldown = true;
+            IsCoolingDown = true;
             await Task.Delay(coolDownMS);
-            IsInCooldown = false;
+            IsCoolingDown = false;
+            TaskQueued = false;
+            m_TaskCounter = m_ServiceCallTimes;
         }
 
-        bool m_IsInCooldown = false;
-
-        public bool IsInCooldown
+        public bool IsCoolingDown
         {
-            get => m_IsInCooldown;
+            get => m_CoolingDown;
             private set
             {
-                if (m_IsInCooldown != value)
+                if (m_CoolingDown != value)
                 {
-                    m_IsInCooldown = value;
-                    onCooldownChange?.Invoke(m_IsInCooldown);
+                    m_CoolingDown = value;
+                    onCooldownChange?.Invoke(m_CoolingDown);
                 }
             }
         }

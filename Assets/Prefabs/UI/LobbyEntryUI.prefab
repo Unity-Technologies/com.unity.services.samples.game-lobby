@@ -287,6 +287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b408c4b47ec1dd74e8708c04dc35a8fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ColorLobbyUI: {fileID: 6515571473500817606}
   lobbyNameText: {fileID: 5163640836259929489}
   lobbyCountText: {fileID: 5305878922170146764}
   onLobbyPressed:
@@ -362,6 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4079cd003fcd20c40a3bac78acf44b55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_UseLocalLobby: 0
   m_toRecolor:
   - {fileID: 4172744935978053658}
 --- !u!1 &8569242987132969498

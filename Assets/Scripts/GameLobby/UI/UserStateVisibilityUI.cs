@@ -27,6 +27,7 @@ namespace LobbyRelaySample.UI
         {
             base.Start();
             var localUser = await Manager.AwaitLocalUserInitialization();
+
             localUser.IsHost.onChanged += OnUserHostChanged;
 
             localUser.UserStatus.onChanged += OnUserStatusChanged;
@@ -45,6 +46,7 @@ namespace LobbyRelaySample.UI
             {
                 m_HasPermissions = true;
             }
+
             if (Permissions.HasFlag(UserPermission.Client) && !isHost)
             {
                 m_HasPermissions = true;
@@ -55,12 +57,10 @@ namespace LobbyRelaySample.UI
 
         void CheckVisibility()
         {
-
             if (m_HasStatusFlags && m_HasPermissions)
                 Show();
             else
                 Hide();
         }
-
     }
 }

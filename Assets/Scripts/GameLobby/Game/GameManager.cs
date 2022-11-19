@@ -119,11 +119,12 @@ namespace LobbyRelaySample
         {
             LobbyList.QueryState.Value = LobbyQueryState.Fetching;
             var qr = await LobbyManager.RetrieveLobbyListAsync(m_lobbyColorFilter);
+            if (qr == null)
+            {
+                return;
+            }
 
-            if (qr != null)
-                SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
-            else
-                LobbyList.QueryState.Value = LobbyQueryState.Error;
+            SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
         }
 
         public async void QuickJoin()
@@ -167,9 +168,13 @@ namespace LobbyRelaySample
 
         public void SetLocalLobbyColor(int color)
         {
+            if (m_LocalLobby.PlayerCount < 1)
+                return;
             m_LocalLobby.LocalLobbyColor.Value = (LobbyColor)color;
             SendLocalLobbyData();
         }
+
+        bool updatingLobby;
 
         async void SendLocalLobbyData()
         {
@@ -322,7 +327,7 @@ namespace LobbyRelaySample
             m_LocalLobby.onUserReadyChange = OnPlayersReady;
             try
             {
-                await JoinLobby();
+                await BindLobby();
             }
             catch (Exception exception)
             {
@@ -331,6 +336,13 @@ namespace LobbyRelaySample
         }
 
         async Task JoinLobby()
+        {
+            //Trigger UI Even when same value
+            m_LocalUser.IsHost.ForceSet(false);
+            await BindLobby();
+        }
+
+        async Task BindLobby()
         {
             await LobbyManager.BindLocalLobbyToRemote(m_LocalLobby.LobbyID.Value, m_LocalLobby);
             m_LocalLobby.LocalLobbyState.onChanged += OnLobbyStateChanged;

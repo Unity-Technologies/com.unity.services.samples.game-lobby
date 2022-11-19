@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,6 +10,8 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class LobbyEntryUI : MonoBehaviour
     {
+        [SerializeField]
+        ColorLobbyUI m_ColorLobbyUI;
         [SerializeField]
         TMP_Text lobbyNameText;
         [SerializeField]
@@ -35,6 +36,7 @@ namespace LobbyRelaySample.UI
             m_Lobby = lobby;
             SetLobbyname(m_Lobby.LobbyName.Value);
             SetLobbyCount(m_Lobby.PlayerCount);
+            m_ColorLobbyUI.SetLobby(lobby);
             m_Lobby.LobbyName.onChanged += SetLobbyname;
             m_Lobby.onUserJoined += (_) =>
             {

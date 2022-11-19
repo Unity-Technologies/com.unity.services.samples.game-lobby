@@ -47,7 +47,7 @@ namespace LobbyRelaySample
         {
             IsHost.Value = false;
             Emote.Value = EmoteType.None;
-            UserStatus.Value = LobbyRelaySample.PlayerStatus.Menu;
+            UserStatus.Value = PlayerStatus.Menu;
         }
     }
 }

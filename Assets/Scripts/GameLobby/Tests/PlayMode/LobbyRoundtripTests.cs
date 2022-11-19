@@ -161,15 +161,15 @@ namespace Test
         [UnityTest]
         public IEnumerator CooldownTest()
         {
-            var rateLimiter = new RateLimiter(3);
+            var rateLimiter = new ServiceRateLimiter(1, 3);
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
             //pass Through the first request, which triggers the cooldown.
-            yield return AsyncTestHelper.Await(async () => await rateLimiter.WaitUntilCooldown());
+            yield return AsyncTestHelper.Await(async () => await rateLimiter.QueueUntilCooldown());
 
             //Should wait for one second total
-            yield return AsyncTestHelper.Await(async () => await rateLimiter.WaitUntilCooldown());
+            yield return AsyncTestHelper.Await(async () => await rateLimiter.QueueUntilCooldown());
             timer.Stop();
             var elapsedMS = timer.ElapsedMilliseconds;
             Debug.Log($"Cooldown took {elapsedMS}/{rateLimiter.coolDownMS} milliseconds.");

@@ -29,6 +29,12 @@ namespace LobbyRelaySample
             }
         }
 
+        public void ForceSet(T value)
+        {
+            m_CachedValue = value;
+            onChanged?.Invoke(m_CachedValue);
+        }
+
         public void SetNoCallback(T value)
         {
             m_CachedValue = value;
