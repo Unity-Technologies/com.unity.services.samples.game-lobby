@@ -38,11 +38,13 @@ Once you have an ID, link it to your project under **Edit **>** Project Settings
 
 The Lobby service allows developers to create lobbies and share data between players before a real-time network connection is established. It simplifies the first step in connecting users to other services such as Relay and provides tools to allow players to find other lobbies.
 
-The Lobby documentation contains code samples and additional information about the service. It includes comprehensive details for using Lobby along with additional code samples, and it might help you better understand the Game Lobby Sample: [http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
+The Lobby documentation contains code samples and additional information about the service. It includes comprehensive details for using Lobby along with additional code samples, and it might help you better understand the Game Lobby Sample: 
+
+[docs.unity.com/lobby](http:/docs.unity.com/lobby)
 
 The Lobby service can be managed in the Unity Dashboard:
 
-[https://dashboard.unity3d.com/lobby](http://documentation.cloud.unity3d.com/en/articles/5371715-unity-lobby-service)
+[https://dashboard.unity3d.com/lobby](https://dashboard.unity3d.com/lobby)
 
 
 #### **Relay**
@@ -52,11 +54,11 @@ The Relay service connects players in a host-client model with an obfuscated hos
 
 The Relay documentation contains code samples and additional information about the service. It includes comprehensive details for using Relay along with additional code samples, and it might help you better understand the Game Lobby Sample: 
 
-[http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
+[docs.unity.com/relay](http://docs.unity.com/relay)
 
 The Relay service can be managed in the Unity Dashboard:
 
-[https://dashboard.unity3d.com/relay](http://documentation.cloud.unity3d.com/en/articles/5371723-relay-overview)
+[https://dashboard.unity3d.com/relay](https://dashboard.unity3d.com/relay)
 
 In this sample, once players are connected to a lobby, they are connected through Relay to set up real-time data transfer over UTP. Lobby and Relay both depend on Auth for credentials. This sample uses Auth’s anonymous login feature to create semi-permanent credentials that are unique to each player but do not require developers to maintain a persistent account for them. \
 
