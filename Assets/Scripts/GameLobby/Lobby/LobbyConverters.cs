@@ -10,7 +10,6 @@ namespace LobbyRelaySample.lobby
     public static class LobbyConverters
     {
         const string key_RelayCode = nameof(LocalLobby.RelayCode);
-        const string key_RelayNGOCode = nameof(LocalLobby.RelayNGOCode);
         const string key_LobbyState = nameof(LocalLobby.LocalLobbyState);
         const string key_LobbyColor = nameof(LocalLobby.LocalLobbyColor);
         const string key_LastEdit = nameof(LocalLobby.LastUpdated);
@@ -23,7 +22,6 @@ namespace LobbyRelaySample.lobby
         {
             Dictionary<string, string> data = new Dictionary<string, string>();
             data.Add(key_RelayCode, lobby.RelayCode.Value);
-            data.Add(key_RelayNGOCode, lobby.RelayNGOCode.Value);
             data.Add(key_LobbyState, ((int)lobby.LocalLobbyState.Value).ToString());
             data.Add(key_LobbyColor, ((int)lobby.LocalLobbyColor.Value).ToString());
             data.Add(key_LastEdit, lobby.LastUpdated.Value.ToString());
@@ -72,9 +70,6 @@ namespace LobbyRelaySample.lobby
             localLobby.RelayCode.Value = remoteLobby.Data?.ContainsKey(key_RelayCode) == true
                 ? remoteLobby.Data[key_RelayCode].Value
                 : localLobby.RelayCode.Value;
-            localLobby.RelayNGOCode.Value = remoteLobby.Data?.ContainsKey(key_RelayNGOCode) == true
-                ? remoteLobby.Data[key_RelayNGOCode].Value
-                : localLobby.RelayNGOCode.Value;
             localLobby.LocalLobbyState.Value = remoteLobby.Data?.ContainsKey(key_LobbyState) == true
                 ? (LobbyState)int.Parse(remoteLobby.Data[key_LobbyState].Value)
                 : LobbyState.Lobby;

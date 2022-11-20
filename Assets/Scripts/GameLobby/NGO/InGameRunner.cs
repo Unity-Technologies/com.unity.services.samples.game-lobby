@@ -68,7 +68,7 @@ namespace LobbyRelaySample.ngo
 
         private void FinishInitialize()
         {
-            m_symbolContainerInstance = NetworkObject.Instantiate(m_symbolContainerPrefab).transform;
+            m_symbolContainerInstance = Instantiate(m_symbolContainerPrefab).transform;
             m_symbolContainerInstance.GetComponent<NetworkObject>().Spawn();
             ResetPendingSymbolPositions();
             m_killVolume.Initialize(OnSymbolDeactivated);
@@ -109,7 +109,7 @@ namespace LobbyRelaySample.ngo
         [ServerRpc(RequireOwnership = false)]
         private void VerifyConnectionConfirm_ServerRpc(PlayerData clientData)
         {
-            NetworkObject playerCursor = NetworkObject.Instantiate(m_playerCursorPrefab); // Note that the client will not receive the cursor object reference, so the cursor must handle initializing itself.
+            NetworkObject playerCursor = Instantiate(m_playerCursorPrefab); // Note that the client will not receive the cursor object reference, so the cursor must handle initializing itself.
             playerCursor.SpawnWithOwnership(clientData.id);
             playerCursor.name += clientData.name;
             m_dataStore.AddPlayer(clientData.id, clientData.name);
@@ -146,7 +146,8 @@ namespace LobbyRelaySample.ngo
 
         public void Update()
         {
-            CheckIfCanSpawnNewSymbol();
+            if(IsServer||IsHost)
+                CheckIfCanSpawnNewSymbol();
             if (m_timeout >= 0)
             {
                 m_timeout -= Time.deltaTime;
@@ -178,9 +179,9 @@ namespace LobbyRelaySample.ngo
                 var symbolObj = Instantiate(m_symbolObjectPrefab, m_symbolContainerInstance);
                 symbolObj.NetworkObject.Spawn();
                 symbolObj.name = "Symbol" + index;
-                symbolObj.NetworkObject.TrySetParent(m_symbolContainerInstance, false);
+               // NetworkObject.TrySetParent(m_symbolContainerInstance, false);
                 symbolObj.SetPosition_Server(pendingPos);
-                symbolObj.GetComponent<SymbolObject>().symbolIndex.Value = m_sequenceSelector.GetNextSymbol(index);
+                symbolObj.symbolIndex.Value = m_sequenceSelector.GetNextSymbol(index);
                 m_remainingSymbolCount++;
             }
         }

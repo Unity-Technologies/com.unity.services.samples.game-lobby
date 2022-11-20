@@ -11,12 +11,16 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class SymbolObject : NetworkBehaviour
     {
-        [SerializeField]  SymbolData m_symbolData;
-        [SerializeField]  SpriteRenderer m_renderer;
-        [SerializeField]  private Animator m_animator;
+        [SerializeField]
+        SymbolData m_symbolData;
+        [SerializeField]
+        SpriteRenderer m_renderer;
+        [SerializeField]
+        private Animator m_animator;
 
         public bool Clicked { get; private set; }
-        [HideInInspector] public NetworkVariable<int> symbolIndex; // The index into SymbolData, not the index of this object.
+        [HideInInspector]
+        public NetworkVariable<int> symbolIndex; // The index into SymbolData, not the index of this object.
 
         public override void OnNetworkSpawn()
         {
@@ -34,6 +38,7 @@ namespace LobbyRelaySample.ngo
 
         public void SetPosition_Server(Vector3 newPosition)
         {
+
             SetPosition_ClientRpc(newPosition);
         }
 
@@ -42,7 +47,6 @@ namespace LobbyRelaySample.ngo
         {
             transform.localPosition = newPosition;
         }
-
 
         [ServerRpc]
         public void ClickedSequence_ServerRpc(ulong clickerPlayerId)
@@ -79,6 +83,5 @@ namespace LobbyRelaySample.ngo
             yield return new WaitForSeconds(0.3f);
             HideSymbol_ServerRpc();
         }
-
     }
 }

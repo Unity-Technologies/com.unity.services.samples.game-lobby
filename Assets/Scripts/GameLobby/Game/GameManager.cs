@@ -191,6 +191,12 @@ namespace LobbyRelaySample
             SetGameState(state);
         }
 
+        public void HostSetRelayCode(string code)
+        {
+            m_LocalLobby.RelayCode.Value = code;
+            SendLocalLobbyData();
+        }
+
         //Only Host needs to listen to this and change state.
         void OnPlayersReady(int readyCount)
         {
@@ -215,15 +221,13 @@ namespace LobbyRelaySample
                 BeginCountDown();
         }
 
-        public void BeginCountDown()
+        void BeginCountDown()
         {
             Debug.Log("Beginning Countdown.");
-
             m_countdown.StartCountDown();
-            SendLocalLobbyData();
         }
 
-        public void CancelCountDown()
+        void CancelCountDown()
         {
             Debug.Log("Countdown Cancelled.");
             m_countdown.CancelCountDown();

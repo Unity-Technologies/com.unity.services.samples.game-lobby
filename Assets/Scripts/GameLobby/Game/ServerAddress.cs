@@ -31,7 +31,9 @@ namespace LobbyRelaySample
             return m_IP == other.m_IP && m_Port == other.m_Port;
         }
 
+#pragma warning disable CS0659
         public override bool Equals(object obj)
+#pragma warning restore CS0659
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;

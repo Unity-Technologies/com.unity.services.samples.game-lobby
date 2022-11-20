@@ -49,8 +49,19 @@ namespace LobbyRelaySample.ngo
             }
             else
             {
+                await AwaitRelayCode(localLobby);
                 await SetRelayClientData();
                 NetworkManager.Singleton.StartClient();
+            }
+        }
+
+        async Task AwaitRelayCode(LocalLobby lobby)
+        {
+            string relayCode = lobby.RelayCode.Value;
+            lobby.RelayCode.onChanged += (code) => relayCode = code;
+            while (string.IsNullOrEmpty(relayCode))
+            {
+                await Task.Delay(100);
             }
         }
 
@@ -60,7 +71,7 @@ namespace LobbyRelaySample.ngo
 
             var allocation = await Relay.Instance.CreateAllocationAsync(m_lobby.MaxPlayerCount.Value);
             var joincode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            m_lobby.RelayNGOCode.Value = joincode;
+            GameManager.Instance.HostSetRelayCode(joincode);
 
             bool isSecure = false;
             var endpoint = GetEndpointForAllocation(allocation.ServerEndpoints,
@@ -148,7 +159,8 @@ namespace LobbyRelaySample.ngo
                 Destroy(m_inGameRunner
                     .gameObject); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
                 SetMenuVisibility(true);
-                m_lobby.RelayNGOCode = null;
+                m_lobby.RelayCode.Value = "";
+
                 m_doesNeedCleanup = false;
             }
         }

@@ -17,7 +17,6 @@ namespace LobbyRelaySample
     public class LobbyManager : IDisposable
     {
         const string key_RelayCode = nameof(LocalLobby.RelayCode);
-        const string key_RelayNGOCode = nameof(LocalLobby.RelayNGOCode);
         const string key_LobbyState = nameof(LocalLobby.LocalLobbyState);
         const string key_LobbyColor = nameof(LocalLobby.LocalLobbyColor);
 
@@ -261,9 +260,6 @@ namespace LobbyRelaySample
                         if (changedKey == key_RelayCode)
                             localLobby.RelayCode.Value = playerDataObject.Value;
 
-                        if (changedKey == key_RelayNGOCode)
-                            localLobby.RelayNGOCode.Value = playerDataObject.Value;
-
                         if (changedKey == key_LobbyState)
                             localLobby.LocalLobbyState.Value = (LobbyState)int.Parse(playerDataObject.Value);
 
@@ -275,9 +271,6 @@ namespace LobbyRelaySample
                     {
                         if (changedKey == key_RelayCode)
                             localLobby.RelayCode.Value = "";
-
-                        if (changedKey == key_RelayNGOCode)
-                            localLobby.RelayNGOCode.Value = "";
                     }
                 }
 
@@ -331,6 +324,7 @@ namespace LobbyRelaySample
                             var lastUpdated = playerChanges.LastUpdatedChanged.Value;
                             Debug.Log($"LastUpdated for {localPlayer.DisplayName.Value} changed to {lastUpdated}");
                         }
+
                         //There are changes on the Player
                         if (playerChanges.ChangedData.Changed)
                         {

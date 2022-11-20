@@ -40,8 +40,6 @@ namespace LobbyRelaySample
 
         public CallbackValue<string> RelayCode = new CallbackValue<string>();
 
-        public CallbackValue<string> RelayNGOCode = new CallbackValue<string>();
-
         public CallbackValue<ServerAddress> RelayServer = new CallbackValue<ServerAddress>();
 
         public CallbackValue<string> LobbyName = new CallbackValue<string>();
@@ -99,8 +97,7 @@ namespace LobbyRelaySample
             m_LocalPlayers.Insert(index, user);
             user.UserStatus.onChanged += OnUserChangedStatus;
             onUserJoined?.Invoke(user);
-            Debug.Log($"Added User: {user.DisplayName.Value} - {user.ID.Value} to slot {index+1}/{PlayerCount}");
-
+            Debug.Log($"Added User: {user.DisplayName.Value} - {user.ID.Value} to slot {index + 1}/{PlayerCount}");
         }
 
         public void RemovePlayer(int playerIndex)
@@ -146,8 +143,6 @@ namespace LobbyRelaySample
             sb.AppendLine(LocalLobbyColor.Value.ToString());
             sb.Append("RelayCode: ");
             sb.AppendLine(RelayCode.Value);
-            sb.Append("RelayNGO: ");
-            sb.AppendLine(RelayNGOCode.Value);
 
             return sb.ToString();
         }
