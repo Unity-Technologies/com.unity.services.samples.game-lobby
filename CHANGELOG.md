@@ -1,4 +1,4 @@
-#1.1 (2022-11-18)
+# 1.1 (2022-11-18)
 ## Highlights:
 This updates the sample to support the latest Lobby-Wire integration, which introduces a websocket callback workflow for listening to Lobby changes.
 This update also addresses multiple rounds of user feedback from discord, forums and github, where we heard that the sample had too much uneccesary infrastructure for it's size.
