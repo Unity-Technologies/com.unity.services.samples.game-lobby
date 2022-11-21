@@ -162,7 +162,7 @@ namespace LobbyRelaySample.ngo
                     .gameObject); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
                 SetMenuVisibility(true);
                 m_lobby.RelayCode.Value = "";
-
+                GameManager.Instance.EndGame();
                 m_doesNeedCleanup = false;
             }
         }

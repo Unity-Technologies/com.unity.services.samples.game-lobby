@@ -159,7 +159,7 @@ using UnityEngine;
 //             LogHandlerSettings.Instance.SpawnErrorPopup(
 //                 "Host left the lobby! Disconnecting...");
 //             Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null);
-//             GameManager.Instance.ChangeMenuState(GameState.JoinMenu);
+//             GameManager.Instance.UIChangeMenuState(GameState.JoinMenu);
 //         }
 //
 //         public void OnLobbyIdChanged(string lobbyID)

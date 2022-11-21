@@ -56,7 +56,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7716713811812636911}
   - component: {fileID: 7716713811812636910}
-  - component: {fileID: 5193415626965589893}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -92,22 +91,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4f7225f73bfe6a4d9133ee45ac9cd73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LocalLobbyObservers: []
-  m_LocalUserObservers: []
   m_setupInGame: {fileID: 6265861362966661484}
   m_countdown: {fileID: 0}
   m_vivoxUserHandlers: []
---- !u!114 &5193415626965589893
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7716713811812636896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9275e9be406280e4198464167a8b9186, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_durationToleranceMs: 50
-  m_doNotRemoveIfTooLong: 1

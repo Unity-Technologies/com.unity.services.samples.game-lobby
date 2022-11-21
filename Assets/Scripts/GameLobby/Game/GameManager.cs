@@ -1,4 +1,3 @@
-using LobbyRelaySample.relay;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -123,6 +122,7 @@ namespace LobbyRelaySample
             {
                 return;
             }
+
             SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
         }
 
@@ -185,8 +185,17 @@ namespace LobbyRelaySample
             await LobbyManager.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
         }
 
-        public void ChangeMenuState(GameState state)
+        public void UIChangeMenuState(GameState state)
         {
+            var isQuittingGame = LocalGameState == GameState.Lobby &&
+                m_LocalLobby.LocalLobbyState.Value == LobbyState.InGame;
+
+            if (isQuittingGame)
+            {
+                //If we were in-game, make sure we stop by the lobby first
+                state = GameState.Lobby;
+                ClientQuitGame();
+            }
             SetGameState(state);
         }
 
@@ -249,6 +258,12 @@ namespace LobbyRelaySample
             }
         }
 
+        public void ClientQuitGame()
+        {
+            EndGame();
+            m_setupInGame?.OnGameEnd();
+        }
+
         public void EndGame()
         {
             if (m_LocalUser.IsHost.Value)
@@ -258,7 +273,6 @@ namespace LobbyRelaySample
                 SendLocalLobbyData();
             }
 
-            m_setupInGame?.OnGameEnd();
             SetLobbyView();
         }
 
@@ -266,11 +280,6 @@ namespace LobbyRelaySample
 
         async void Awake()
         {
-            // Do some arbitrary operations to instantiate singletons.
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-            var _ = Locator.Get;
-#pragma warning restore IDE0059
-
             Application.wantsToQuit += OnWantToQuit;
             m_LocalUser = new LocalPlayer("", 0, false, "LocalPlayer");
             m_LocalLobby = new LocalLobby { LocalLobbyState = { Value = LobbyState.Lobby } };
@@ -303,16 +312,6 @@ namespace LobbyRelaySample
 
         void SetGameState(GameState state)
         {
-            var isQuittingGame = LocalGameState == GameState.Lobby &&
-                m_LocalLobby.LocalLobbyState.Value == LobbyState.InGame;
-
-            if (isQuittingGame)
-            {
-                //If we were in-game, make sure we stop by the lobby first
-                state = GameState.Lobby;
-                EndGame();
-            }
-
             var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
                 LocalGameState == GameState.Lobby;
             LocalGameState = state;
@@ -332,7 +331,6 @@ namespace LobbyRelaySample
 
             LobbyList.CurrentLobbies = newLobbyDict;
             LobbyList.QueryState.Value = LobbyQueryState.Fetched;
-
         }
 
         async Task CreateLobby()

@@ -10,12 +10,12 @@ namespace LobbyRelaySample.UI
 
         public void ToJoinMenu()
         {
-            Manager.ChangeMenuState(GameState.JoinMenu);
+            Manager.UIChangeMenuState(GameState.JoinMenu);
         }
 
         public void ToMenu()
         {
-            Manager.ChangeMenuState(GameState.Menu);
+            Manager.UIChangeMenuState(GameState.Menu);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using Unity.Services.Vivox;
 using VivoxUnity;
@@ -42,7 +43,8 @@ namespace LobbyRelaySample.vivox
                     onComplete?.Invoke(true);
                 }
                 catch (Exception ex)
-                {   UnityEngine.Debug.LogWarning("Vivox failed to login: " + ex.Message);
+                {
+                    UnityEngine.Debug.LogWarning("Vivox failed to login: " + ex.Message);
                     onComplete?.Invoke(false);
                 }
                 finally
@@ -76,9 +78,11 @@ namespace LobbyRelaySample.vivox
                 {
                     // Special case: It's possible for the player to leave the lobby between the time we called BeginConnect and the time we hit this callback.
                     // If that's the case, we should abort the rest of the connection process.
-                    if (m_channelSession.ChannelState == ConnectionState.Disconnecting || m_channelSession.ChannelState == ConnectionState.Disconnected)
+                    if (m_channelSession.ChannelState == ConnectionState.Disconnecting ||
+                        m_channelSession.ChannelState == ConnectionState.Disconnected)
                     {
-                        UnityEngine.Debug.LogWarning("Vivox channel is already disconnecting. Terminating the channel connect sequence.");
+                        UnityEngine.Debug.LogWarning(
+                            "Vivox channel is already disconnecting. Terminating the channel connect sequence.");
                         HandleEarlyDisconnect();
                         return;
                     }
@@ -89,7 +93,8 @@ namespace LobbyRelaySample.vivox
                         userHandler.OnChannelJoined(m_channelSession);
                 }
                 catch (Exception ex)
-                {   UnityEngine.Debug.LogWarning("Vivox failed to connect: " + ex.Message);
+                {
+                    UnityEngine.Debug.LogWarning("Vivox failed to connect: " + ex.Message);
                     onComplete?.Invoke(false);
                     m_channelSession?.Disconnect();
                 }
@@ -108,28 +113,38 @@ namespace LobbyRelaySample.vivox
                 // in the lobby. So, wait until the connection is completed before disconnecting in that case.
                 if (m_channelSession.ChannelState == ConnectionState.Connecting)
                 {
-                    UnityEngine.Debug.LogWarning("Vivox channel is trying to disconnect while trying to complete its connection. Will wait until connection completes.");
+                    UnityEngine.Debug.LogWarning(
+                        "Vivox channel is trying to disconnect while trying to complete its connection. Will wait until connection completes.");
                     HandleEarlyDisconnect();
                     return;
                 }
 
                 ChannelId id = m_channelSession.Channel;
                 m_channelSession?.Disconnect(
-                    (result) => { m_loginSession.DeleteChannelSession(id); m_channelSession = null; });
+                    (result) =>
+                    {
+                        m_loginSession.DeleteChannelSession(id);
+                        m_channelSession = null;
+                    });
             }
+
             foreach (VivoxUserHandler userHandler in m_userHandlers)
                 userHandler.OnChannelLeft();
         }
 
         private void HandleEarlyDisconnect()
         {
-            Locator.Get.UpdateSlow.Subscribe(DisconnectOnceConnected, 0.2f);
+            DisconnectOnceConnected();
         }
-        private void DisconnectOnceConnected(float unused)
+
+        async void DisconnectOnceConnected()
         {
-            if (m_channelSession?.ChannelState == ConnectionState.Connecting)
+            while (m_channelSession?.ChannelState == ConnectionState.Connecting)
+            {
+                await Task.Delay(200);
                 return;
-            Locator.Get.UpdateSlow.Unsubscribe(DisconnectOnceConnected);
+            }
+
             LeaveLobbyChannel();
         }
 
