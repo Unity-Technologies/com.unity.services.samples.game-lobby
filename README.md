@@ -1,7 +1,7 @@
 
 # Game Lobby Sample
-
-_Tested with Unity 2020.3 for PC and Mac._
+**Version 1.1**
+_Tested with Unity 2021.2 for PC and Mac._
 
 This sample demonstrates how to use the Lobby and Relay packages to create a typical game lobby experience. It also includes Vivox Voice chat. Players can host lobbies that other players can join using a public lobby list or lobby code, and then connect with Relay to use Unity Transport ("UTP") for basic real-time communication between them. Relay allows players to securely communicate with each other while maintaining connection anonymity. Connecting to the lobby will also connect to Vivox to enable voice chat as long as an audio input device is available.
 
