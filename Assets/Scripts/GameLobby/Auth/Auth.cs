@@ -37,7 +37,6 @@ namespace LobbyRelaySample
             profileOptions.SetProfile(profile);
             await UnityServices.InitializeAsync(profileOptions);
             await SignInAnonymouslyAsync(tries);
-            Debug.Log($"Auth attempts Finished : {AuthenticationState.ToString()}");
 
             return AuthenticationState;
         }

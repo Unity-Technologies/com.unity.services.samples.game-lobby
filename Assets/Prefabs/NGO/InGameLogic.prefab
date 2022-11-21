@@ -854,8 +854,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e30fcbc5a3738e94a87d7a028a2a6fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_playerCursorPrefab: {fileID: -1321688216342888635, guid: 905594b4ee5bb864a84af916cc445d1b, type: 3}
-  m_symbolContainerPrefab: {fileID: 3984715711634906321, guid: f42ed38d10b57ec48870f76a7a63389e, type: 3}
+  m_playerCursorPrefab: {fileID: 4403165428829500588, guid: 905594b4ee5bb864a84af916cc445d1b, type: 3}
+  m_symbolContainerPrefab: {fileID: 210836793418873202, guid: f42ed38d10b57ec48870f76a7a63389e, type: 3}
   m_symbolObjectPrefab: {fileID: -8192876538761676823, guid: e371ca3112f9e244ab574b472387b64b, type: 3}
   m_sequenceSelector: {fileID: 6829526275642584874}
   m_scorer: {fileID: 2250928641321586401}
@@ -863,6 +863,7 @@ MonoBehaviour:
   m_introOutroRunner: {fileID: 6828649701235740815}
   m_dataStore: {fileID: 2257191875943382526}
   m_collider: {fileID: 4478514896869440358}
+  m_symbolContainerInstance: {fileID: 0}
 --- !u!114 &6829526275642584874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -875,8 +876,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77910b5766924f044995dfe427e9eea3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_symbolData: {fileID: 11400000, guid: 84a81a2f14d442a49b46eccefb73933f, type: 2}
-  m_targetSequenceOutput:
+  m_SymbolData: {fileID: 11400000, guid: 84a81a2f14d442a49b46eccefb73933f, type: 2}
+  m_TargetSequenceOutput:
   - {fileID: 82602402459208677}
   - {fileID: 2579125671427676891}
   - {fileID: 6639276723346236408}
@@ -4546,6 +4547,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f7a308a72bf6ce4a862a246eaed82cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_inGameRunner: {fileID: 6673480979101889538}
   m_animator: {fileID: 9205289577047239847}
 --- !u!1 &7760914309000979352
 GameObject:

@@ -7,6 +7,7 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class BackButtonUI : UIPanelBase
     {
+
         public void ToJoinMenu()
         {
             Manager.ChangeMenuState(GameState.JoinMenu);

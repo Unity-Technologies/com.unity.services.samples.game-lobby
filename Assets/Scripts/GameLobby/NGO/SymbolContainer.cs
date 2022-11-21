@@ -10,7 +10,7 @@ namespace LobbyRelaySample.ngo
     /// It will not begin that movement until it both has been Spawned on the network and it has been informed that the game has started.
     /// </summary>
     [RequireComponent(typeof(NetworkTransform))]
-    public class SymbolContainer : NetworkBehaviour, IReceiveMessages
+    public class SymbolContainer : NetworkBehaviour
     {
         [SerializeField]
         float m_speed = 1;
@@ -20,18 +20,12 @@ namespace LobbyRelaySample.ngo
         /// <summary>
         /// Verify both that the game has started and that the network connection is working before moving the symbols.
         /// </summary>
-        void OnGameStarted()
+        public void StartMovingSymbols()
         {
             m_hasGameStarted = true;
             if (m_isConnected)
                 BeginMotion();
         }
-
-        public void Awake() // If there's just one player, Start would occur after the GameBeginning message is sent, so use Awake/OnEnable instead.
-        {
-            Locator.Get.Messenger.Subscribe(this);
-        }
-
 
         public override void OnNetworkSpawn()
         {
@@ -57,16 +51,7 @@ namespace LobbyRelaySample.ngo
 
         void BeginMotion()
         {
-            transform.position += Time.deltaTime * m_speed*Vector3.down;
-        }
-
-        public void OnReceiveMessage(MessageType type, object msg)
-        {
-            if (type == MessageType.InstructionsShown)
-            {
-                Locator.Get.Messenger.Unsubscribe(this);
-                OnGameStarted();
-            }
+            transform.position += Time.deltaTime * m_speed * Vector3.down;
         }
     }
 }

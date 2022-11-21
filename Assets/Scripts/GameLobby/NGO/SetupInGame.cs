@@ -41,7 +41,8 @@ namespace LobbyRelaySample.ngo
         {
             m_lobby = localLobby;
             m_inGameRunner = Instantiate(m_IngameRunnerPrefab).GetComponentInChildren<InGameRunner>();
-            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, localPlayer);
+            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameBegin, OnGameEnd,
+                localPlayer);
             if (localPlayer.IsHost.Value)
             {
                 await SetRelayHostData();
@@ -138,7 +139,7 @@ namespace LobbyRelaySample.ngo
 #pragma warning restore 4014
         }
 
-        public void MiniGameBeginning()
+        public void OnGameBegin()
         {
             if (!m_hasConnectedViaNGO)
             {
@@ -155,8 +156,9 @@ namespace LobbyRelaySample.ngo
         {
             if (m_doesNeedCleanup)
             {
-                NetworkManager.Singleton.Shutdown();
+                NetworkManager.Singleton.Shutdown(true);
                 Destroy(m_inGameRunner
+                    .transform.parent
                     .gameObject); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
                 SetMenuVisibility(true);
                 m_lobby.RelayCode.Value = "";

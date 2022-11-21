@@ -49,7 +49,7 @@ namespace LobbyRelaySample
         {
             if (m_CurrentLobby == null)
             {
-                Debug.LogError("LobbyManager not currently in a lobby. Did you CreateLobbyAsync or JoinLobbyAsync?");
+                Debug.LogWarning("LobbyManager not currently in a lobby. Did you CreateLobbyAsync or JoinLobbyAsync?");
                 return false;
             }
 
@@ -103,8 +103,6 @@ namespace LobbyRelaySample
 
             await m_CreateCooldown.QueueUntilCooldown();
 
-            Debug.Log("Lobby - Creating");
-
             try
             {
                 string uasId = AuthenticationService.Instance.PlayerId;
@@ -135,7 +133,6 @@ namespace LobbyRelaySample
             }
 
             await m_JoinCooldown.QueueUntilCooldown();
-            Debug.Log($"{localUser.DisplayName.Value}({localUser.ID.Value}) Joining  Lobby- {lobbyId} / {lobbyCode}");
 
             string uasId = AuthenticationService.Instance.PlayerId;
             var playerData = CreateInitialPlayerData(localUser);
@@ -166,7 +163,6 @@ namespace LobbyRelaySample
             }
 
             await m_QuickJoinCooldown.QueueUntilCooldown();
-            Debug.Log("Lobby - Quick Joining.");
             var filters = LobbyColorToFilters(limitToColor);
             string uasId = AuthenticationService.Instance.PlayerId;
 
@@ -192,7 +188,6 @@ namespace LobbyRelaySample
                 Count = k_maxLobbiesToShow,
                 Filters = filters
             };
-            Debug.Log("Retrieving Lobby List");
 
             return await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
         }
@@ -310,20 +305,17 @@ namespace LobbyRelaySample
                     {
                         var playerIndex = lobbyPlayerChanges.Key;
                         var localPlayer = localLobby.GetLocalPlayer(playerIndex);
-                        Debug.Log($"{localPlayer} at index {playerIndex} data changed");
+                        if (localPlayer == null)
+                            continue;
                         var playerChanges = lobbyPlayerChanges.Value;
                         if (playerChanges.ConnectionInfoChanged.Changed)
                         {
                             var connectionInfo = playerChanges.ConnectionInfoChanged.Value;
                             Debug.Log(
-                                $"ConnectionInfo for {localPlayer.DisplayName.Value} changed to {connectionInfo}");
+                                $"ConnectionInfo for player {playerIndex} changed to {connectionInfo}");
                         }
 
-                        if (playerChanges.LastUpdatedChanged.Changed)
-                        {
-                            var lastUpdated = playerChanges.LastUpdatedChanged.Value;
-                            Debug.Log($"LastUpdated for {localPlayer.DisplayName.Value} changed to {lastUpdated}");
-                        }
+                        if (playerChanges.LastUpdatedChanged.Changed) { }
 
                         //There are changes on the Player
                         if (playerChanges.ChangedData.Changed)
@@ -359,6 +351,7 @@ namespace LobbyRelaySample
             m_LobbyEventCallbacks.KickedFromLobby += () =>
             {
                 Debug.Log("Left Lobby");
+                Dispose();
             };
             await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
@@ -388,7 +381,6 @@ namespace LobbyRelaySample
             if (!InLobby())
                 return;
             string playerId = AuthenticationService.Instance.PlayerId;
-            Debug.Log($"{playerId} leaving Lobby {m_CurrentLobby.Id}");
 
             await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, playerId);
             m_CurrentLobby = null;
@@ -414,7 +406,6 @@ namespace LobbyRelaySample
             if (m_UpdatePlayerCooldown.TaskQueued)
                 return;
             await m_UpdatePlayerCooldown.QueueUntilCooldown();
-            Debug.Log("Lobby - Updating Player Data");
 
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
@@ -435,7 +426,6 @@ namespace LobbyRelaySample
             if (m_UpdatePlayerCooldown.TaskQueued)
                 return;
             await m_UpdatePlayerCooldown.QueueUntilCooldown();
-            Debug.Log("Lobby - Relay Info (Player)");
 
             UpdatePlayerOptions updateOptions = new UpdatePlayerOptions
             {
@@ -477,7 +467,6 @@ namespace LobbyRelaySample
             if (m_UpdateLobbyCooldown.TaskQueued)
                 return;
             await m_UpdateLobbyCooldown.QueueUntilCooldown();
-            Debug.Log("Lobby - Updating Lobby Data");
 
             UpdateLobbyOptions updateOptions = new UpdateLobbyOptions { Data = dataCurr, IsLocked = shouldLock };
             m_CurrentLobby = await LobbyService.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, updateOptions);
@@ -488,7 +477,6 @@ namespace LobbyRelaySample
             if (!InLobby())
                 return;
             await m_DeleteLobbyCooldown.QueueUntilCooldown();
-            Debug.Log("Lobby - Deleting Lobby");
 
             await LobbyService.Instance.DeleteLobbyAsync(m_CurrentLobby.Id);
         }
@@ -496,6 +484,7 @@ namespace LobbyRelaySample
         public void Dispose()
         {
             m_CurrentLobby = null;
+            m_LobbyEventCallbacks = new LobbyEventCallbacks();
         }
 
         #region HeartBeat
@@ -523,7 +512,6 @@ namespace LobbyRelaySample
             if (m_HeartBeatCooldown.IsCoolingDown)
                 return;
             await m_HeartBeatCooldown.QueueUntilCooldown();
-            Debug.Log("Lobby - Heartbeat");
 
             await LobbyService.Instance.SendHeartbeatPingAsync(m_CurrentLobby.Id);
         }

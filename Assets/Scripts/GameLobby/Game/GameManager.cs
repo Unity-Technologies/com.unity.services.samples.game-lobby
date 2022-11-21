@@ -123,7 +123,6 @@ namespace LobbyRelaySample
             {
                 return;
             }
-
             SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
         }
 
@@ -248,8 +247,6 @@ namespace LobbyRelaySample
                 m_LocalLobby.Locked.Value = true;
                 SendLocalLobbyData();
             }
-
-            m_setupInGame?.MiniGameBeginning();
         }
 
         public void EndGame()
@@ -306,10 +303,22 @@ namespace LobbyRelaySample
 
         void SetGameState(GameState state)
         {
+            var isQuittingGame = LocalGameState == GameState.Lobby &&
+                m_LocalLobby.LocalLobbyState.Value == LobbyState.InGame;
+
+            if (isQuittingGame)
+            {
+                //If we were in-game, make sure we stop by the lobby first
+                state = GameState.Lobby;
+                EndGame();
+            }
+
             var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
                 LocalGameState == GameState.Lobby;
             LocalGameState = state;
+
             Debug.Log($"Switching Game State to : {LocalGameState}");
+
             if (isLeavingLobby)
                 LeaveLobby();
             onGameStateChanged.Invoke(LocalGameState);
@@ -321,8 +330,9 @@ namespace LobbyRelaySample
             foreach (var lobby in lobbies)
                 newLobbyDict.Add(lobby.LobbyID.Value, lobby);
 
-            LobbyList.QueryState.Value = LobbyQueryState.Fetched;
             LobbyList.CurrentLobbies = newLobbyDict;
+            LobbyList.QueryState.Value = LobbyQueryState.Fetched;
+
         }
 
         async Task CreateLobby()
@@ -354,7 +364,7 @@ namespace LobbyRelaySample
             StartVivoxJoin();
         }
 
-        void LeaveLobby()
+        public void LeaveLobby()
         {
             m_LocalUser.ResetState();
 #pragma warning disable 4014

@@ -10,21 +10,12 @@ namespace LobbyRelaySample.ngo
     /// Once the NetworkManager has been spawned, we need something to manage the game state and setup other in-game objects
     /// that is itself a networked object, to track things like network connect events.
     /// </summary>
-    public class InGameRunner : NetworkBehaviour, IInGameInputHandler
+    public class InGameRunner : NetworkBehaviour
     {
-        Action m_onConnectionVerified, m_onGameEnd;
-        private int m_expectedPlayerCount; // Used by the host, but we can't call the RPC until the network connection completes.
-        private bool? m_canSpawnInGameObjects;
-        private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();
-        private float m_symbolSpawnTimer = 0.5f; // Initial time buffer to ensure connectivity before loading objects.
-        private int m_remainingSymbolCount = 0; // Only used by the host.
-        private float m_timeout = 10;
-        private bool m_hasConnected = false;
-
         [SerializeField]
-        private NetworkObject m_playerCursorPrefab = default;
+        private PlayerCursor m_playerCursorPrefab = default;
         [SerializeField]
-        private NetworkObject m_symbolContainerPrefab = default;
+        private SymbolContainer m_symbolContainerPrefab = default;
         [SerializeField]
         private SymbolObject m_symbolObjectPrefab = default;
         [SerializeField]
@@ -40,17 +31,43 @@ namespace LobbyRelaySample.ngo
         [SerializeField]
         private BoxCollider m_collider;
 
-        private Transform m_symbolContainerInstance;
-        private PlayerData m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
+        public Action onGameBeginning;
+        Action m_onConnectionVerified, m_onGameEnd;
+        private int
+            m_expectedPlayerCount; // Used by the host, but we can't call the RPC until the network connection completes.
+        private bool? m_canSpawnInGameObjects;
+        private Queue<Vector2> m_pendingSymbolPositions = new Queue<Vector2>();
+        private float m_symbolSpawnTimer = 0.5f; // Initial time buffer to ensure connectivity before loading objects.
+        private int m_remainingSymbolCount = 0; // Only used by the host.
+        private float m_timeout = 10;
+        private bool m_hasConnected = false;
 
-        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameEnd, LocalPlayer localUser)
+        [SerializeField]
+        private SymbolContainer m_symbolContainerInstance;
+        private PlayerData
+            m_localUserData; // This has an ID that's not necessarily the OwnerClientId, since all clients will see all spawned objects regardless of ownership.
+
+        public static InGameRunner Instance
+        {
+            get
+            {
+                if (s_Instance!) return s_Instance;
+                return s_Instance = FindObjectOfType<InGameRunner>();
+            }
+        }
+
+        static InGameRunner s_Instance;
+
+        public void Initialize(Action onConnectionVerified, int expectedPlayerCount, Action onGameBegin,
+            Action onGameEnd,
+            LocalPlayer localUser)
         {
             m_onConnectionVerified = onConnectionVerified;
             m_expectedPlayerCount = expectedPlayerCount;
+            onGameBeginning = onGameBegin;
             m_onGameEnd = onGameEnd;
             m_canSpawnInGameObjects = null;
             m_localUserData = new PlayerData(localUser.DisplayName.Value, 0);
-            Locator.Get.Provide(this); // Simplifies access since some networked objects can't easily communicate locally (e.g. the host might call a ClientRpc without that client knowing where the call originated).
         }
 
         public override void OnNetworkSpawn()
@@ -68,8 +85,8 @@ namespace LobbyRelaySample.ngo
 
         private void FinishInitialize()
         {
-            m_symbolContainerInstance = Instantiate(m_symbolContainerPrefab).transform;
-            m_symbolContainerInstance.GetComponent<NetworkObject>().Spawn();
+            m_symbolContainerInstance = Instantiate(m_symbolContainerPrefab);
+            m_symbolContainerInstance.NetworkObject.Spawn();
             ResetPendingSymbolPositions();
             m_killVolume.Initialize(OnSymbolDeactivated);
         }
@@ -77,7 +94,8 @@ namespace LobbyRelaySample.ngo
         private void ResetPendingSymbolPositions()
         {
             m_pendingSymbolPositions.Clear();
-            Rect boxRext = new Rect(m_collider.bounds.min.x, m_collider.bounds.min.y, m_collider.bounds.size.x, m_collider.bounds.size.y);
+            Rect boxRext = new Rect(m_collider.bounds.min.x, m_collider.bounds.min.y, m_collider.bounds.size.x,
+                m_collider.bounds.size.y);
             IList<Vector2> points = m_sequenceSelector.GenerateRandomSpawnPoints(boxRext, 2);
             foreach (Vector2 point in points)
                 m_pendingSymbolPositions.Enqueue(point);
@@ -109,12 +127,13 @@ namespace LobbyRelaySample.ngo
         [ServerRpc(RequireOwnership = false)]
         private void VerifyConnectionConfirm_ServerRpc(PlayerData clientData)
         {
-            NetworkObject playerCursor = Instantiate(m_playerCursorPrefab); // Note that the client will not receive the cursor object reference, so the cursor must handle initializing itself.
-            playerCursor.SpawnWithOwnership(clientData.id);
+            // Note that the client will not receive the cursor object reference, so the cursor must handle initializing itself.
+            PlayerCursor playerCursor = Instantiate(m_playerCursorPrefab);
+            playerCursor.NetworkObject.SpawnWithOwnership(clientData.id);
             playerCursor.name += clientData.name;
             m_dataStore.AddPlayer(clientData.id, clientData.name);
-
-            bool areAllPlayersConnected = NetworkManager.Singleton.ConnectedClients.Count >= m_expectedPlayerCount; // The game will begin at this point, or else there's a timeout for booting any unconnected players.
+            // The game will begin at this point, or else there's a timeout for booting any unconnected players.
+            bool areAllPlayersConnected = NetworkManager.Singleton.ConnectedClients.Count >= m_expectedPlayerCount;
             VerifyConnectionConfirm_ClientRpc(clientData.id, areAllPlayersConnected);
         }
 
@@ -137,17 +156,24 @@ namespace LobbyRelaySample.ngo
         /// <summary>
         /// The game will begin either when all players have connected successfully or after a timeout.
         /// </summary>
-        private void BeginGame()
+        void BeginGame()
         {
             m_canSpawnInGameObjects = true;
             GameManager.Instance.BeginGame();
-            m_introOutroRunner.DoIntro();
+            onGameBeginning?.Invoke();
+            m_introOutroRunner.DoIntro(StartMovingSymbols);
+        }
+
+        void StartMovingSymbols()
+        {
+            m_sequenceSelector.SetTargetsAnimatable();
+            if(IsHost)
+                m_symbolContainerInstance.StartMovingSymbols(); //TODO fix this for
         }
 
         public void Update()
         {
-            if(IsServer||IsHost)
-                CheckIfCanSpawnNewSymbol();
+            CheckIfCanSpawnNewSymbol();
             if (m_timeout >= 0)
             {
                 m_timeout -= Time.deltaTime;
@@ -157,7 +183,8 @@ namespace LobbyRelaySample.ngo
 
             void CheckIfCanSpawnNewSymbol()
             {
-                if (!m_canSpawnInGameObjects.GetValueOrDefault() || m_remainingSymbolCount >= SequenceSelector.k_symbolCount || !IsHost)
+                if (!m_canSpawnInGameObjects.GetValueOrDefault() ||
+                    m_remainingSymbolCount >= SequenceSelector.symbolCount || !IsHost)
                     return;
                 if (m_pendingSymbolPositions.Count > 0)
                 {
@@ -166,7 +193,7 @@ namespace LobbyRelaySample.ngo
                     {
                         m_symbolSpawnTimer = 0.02f; // Space out the object spawning a little to prevent a lag spike.
                         SpawnNewSymbol();
-                        if (m_remainingSymbolCount >= SequenceSelector.k_symbolCount)
+                        if (m_remainingSymbolCount >= SequenceSelector.symbolCount)
                             m_canSpawnInGameObjects = false;
                     }
                 }
@@ -174,14 +201,13 @@ namespace LobbyRelaySample.ngo
 
             void SpawnNewSymbol()
             {
-                int index = SequenceSelector.k_symbolCount - m_pendingSymbolPositions.Count;
+                int index = SequenceSelector.symbolCount - m_pendingSymbolPositions.Count;
                 Vector3 pendingPos = m_pendingSymbolPositions.Dequeue();
-                var symbolObj = Instantiate(m_symbolObjectPrefab, m_symbolContainerInstance);
+                var symbolObj = Instantiate(m_symbolObjectPrefab);
                 symbolObj.NetworkObject.Spawn();
                 symbolObj.name = "Symbol" + index;
-               // NetworkObject.TrySetParent(m_symbolContainerInstance, false);
-                symbolObj.SetPosition_Server(pendingPos);
-                symbolObj.symbolIndex.Value = m_sequenceSelector.GetNextSymbol(index);
+                symbolObj.SetParentAndPosition_Server(m_symbolContainerInstance.NetworkObject, pendingPos);
+                symbolObj.SetSymbolIndex_Server(m_sequenceSelector.GetNextSymbol(index));
                 m_remainingSymbolCount++;
             }
         }
@@ -194,7 +220,7 @@ namespace LobbyRelaySample.ngo
             if (selectedSymbol.Clicked)
                 return;
 
-            if (m_sequenceSelector.ConfirmSymbolCorrect(playerId, selectedSymbol.symbolIndex.Value))
+            if (m_sequenceSelector.ConfirmSymbolCorrect(playerId, selectedSymbol.SymbolIndex))
             {
                 selectedSymbol.ClickedSequence_ServerRpc(playerId);
                 m_scorer.ScoreSuccess(playerId);
@@ -204,7 +230,7 @@ namespace LobbyRelaySample.ngo
                 m_scorer.ScoreFailure(playerId);
         }
 
-        public void OnSymbolDeactivated()
+        void OnSymbolDeactivated()
         {
             if (--m_remainingSymbolCount <= 0)
                 WaitForEndingSequence_ClientRpc();
@@ -244,13 +270,7 @@ namespace LobbyRelaySample.ngo
 
         private void SendLocalEndGameSignal()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.EndGame, null); // We only send this message if the game completes, since the player remains in the lobby in that case. If the player leaves with the back button, that instead sends them to the menu.
             m_onGameEnd();
-        }
-
-        public void OnReProvided(IInGameInputHandler previousProvider)
-        {
-            /*No-op*/
         }
     }
 }

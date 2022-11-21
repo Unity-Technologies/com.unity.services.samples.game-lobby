@@ -10,25 +10,23 @@ namespace LobbyRelaySample.ngo
     /// The host will use this object's movement for detecting collision with symbol objects.
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class PlayerCursor : NetworkBehaviour, IReceiveMessages
+    public class PlayerCursor : NetworkBehaviour
     {
-        [SerializeField] SpriteRenderer m_renderer = default;
-        [SerializeField] ParticleSystem m_onClickParticles = default;
-        [SerializeField] private TMPro.TMP_Text m_nameOutput = default;
-        private Camera m_mainCamera;
-        private NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>( Vector3.zero); // (Using a NetworkTransform to sync position would also work.)
-        private ulong m_localId;
+        [SerializeField]
+        SpriteRenderer m_renderer = default;
+        [SerializeField]
+        ParticleSystem m_onClickParticles = default;
+        [SerializeField]
+        TMPro.TMP_Text m_nameOutput = default;
+        Camera m_mainCamera;
+        NetworkVariable<Vector3> m_position = new NetworkVariable<Vector3>(Vector3.zero);
+        ulong m_localId;
 
         // If the local player cursor spawns before this cursor's owner, the owner's data won't be available yet. This is used to retrieve the data later.
-        private Action<ulong, Action<PlayerData>> m_retrieveName;
+        Action<ulong, Action<PlayerData>> m_retrieveName;
 
         // The host is responsible for determining if a player has successfully selected a symbol object, since collisions should be handled serverside.
-        private List<SymbolObject> m_currentlyCollidingSymbols;
-
-        public void Awake()
-        {
-            Locator.Get.Messenger.Subscribe(this);
-        }
+        List<SymbolObject> m_currentlyCollidingSymbols;
 
         /// <summary>
         /// This cursor is spawned in dynamically but needs references to some scene objects. Pushing full object references over RPC calls
@@ -40,18 +38,23 @@ namespace LobbyRelaySample.ngo
         {
             m_retrieveName = NetworkedDataStore.Instance.GetPlayerData;
             m_mainCamera = GameObject.Find("InGameCamera").GetComponent<Camera>();
+            InGameRunner.Instance.onGameBeginning += OnGameBegan;
             if (IsHost)
                 m_currentlyCollidingSymbols = new List<SymbolObject>();
             m_localId = NetworkManager.Singleton.LocalClientId;
+
             // Other players' cursors should be less prominent than the local player's cursor.
             if (OwnerClientId != m_localId)
-            {   m_renderer.transform.localScale *= 0.75f;
+            {
+                m_renderer.transform.localScale *= 0.75f;
                 m_renderer.color = new Color(1, 1, 1, 0.5f);
                 var trails = m_onClickParticles.trails;
                 trails.colorOverLifetime = new ParticleSystem.MinMaxGradient(Color.grey);
             }
             else
-            {   m_renderer.enabled = false; // The local player should see their cursor instead of the simulated cursor object, since the object will appear laggy.
+            {
+                m_renderer.enabled =
+                    false; // The local player should see their cursor instead of the simulated cursor object, since the object will appear laggy.
             }
         }
 
@@ -74,7 +77,8 @@ namespace LobbyRelaySample.ngo
             if (m_mainCamera == null || !IsOwner)
                 return;
 
-            Vector3 targetPos = (Vector2)m_mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -m_mainCamera.transform.position.z));
+            Vector3 targetPos = (Vector2)m_mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x,
+                Input.mousePosition.y, -m_mainCamera.transform.position.z));
             SetPosition_ServerRpc(targetPos); // Client can't set a network variable value.
             if (IsSelectInputHit())
                 SendInput_ServerRpc(m_localId);
@@ -92,8 +96,9 @@ namespace LobbyRelaySample.ngo
             if (m_currentlyCollidingSymbols.Count > 0)
             {
                 SymbolObject symbol = m_currentlyCollidingSymbols[0];
-                Locator.Get.InGameInputHandler.OnPlayerInput(id, symbol);
+                InGameRunner.Instance.OnPlayerInput(id, symbol);
             }
+
             OnInputVisuals_ClientRpc();
         }
 
@@ -126,13 +131,10 @@ namespace LobbyRelaySample.ngo
                 m_currentlyCollidingSymbols.Remove(symbol);
         }
 
-        public void OnReceiveMessage(MessageType type, object msg)
+        public void OnGameBegan()
         {
-            if (type == MessageType.MinigameBeginning)
-            {
-                m_retrieveName.Invoke(OwnerClientId, SetName_ClientRpc);
-                Locator.Get.Messenger.Unsubscribe(this);
-            }
+            m_retrieveName.Invoke(OwnerClientId, SetName_ClientRpc);
+            InGameRunner.Instance.onGameBeginning -= OnGameBegan;
         }
     }
 }

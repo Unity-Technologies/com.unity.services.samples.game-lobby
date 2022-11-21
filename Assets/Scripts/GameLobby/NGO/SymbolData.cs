@@ -13,7 +13,7 @@ namespace LobbyRelaySample.ngo
 
         public Sprite GetSymbolForIndex(int index)
         {
-            if (index < 0 || index >= m_availableSymbols.Count)
+            if (index < 0 || index >= SymbolCount)
                 index = 0;
             return m_availableSymbols[index];
         }
