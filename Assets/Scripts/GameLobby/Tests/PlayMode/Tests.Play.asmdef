@@ -7,7 +7,9 @@
         "LobbyRelaySample",
         "Unity.Services.Lobbies",
         "Unity.Services.Relay",
-        "Unity.Networking.Transport"
+        "Unity.Networking.Transport",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -5,7 +5,7 @@ namespace LobbyRelaySample.relay
 {
     public class AsyncRequestRelay : AsyncRequest
     {
-        private static AsyncRequestRelay s_instance;
+        static AsyncRequestRelay s_instance;
         public static AsyncRequestRelay Instance
         {
             get
@@ -24,9 +24,9 @@ namespace LobbyRelaySample.relay
                 return;
             var relayEx = e as RelayServiceException;
             if (relayEx.Reason == RelayExceptionReason.Unknown)
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Relay Error: Relay service had an unknown error.");
+                LogHandlerSettings.Instance.SpawnErrorPopup( "Relay Error: Relay service had an unknown error.");
             else
-                Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, $"Relay Error: {relayEx.Message}");
+                LogHandlerSettings.Instance.SpawnErrorPopup( $"Relay Error: {relayEx.Message}");
         }
     }
 }

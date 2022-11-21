@@ -14,30 +14,50 @@ namespace LobbyRelaySample.UI
     }
 
     /// <summary>
-    /// Shows the UI when the LobbyUser matches some conditions, including having the target permissions.
+    /// Shows the UI when the LocalPlayer matches some conditions, including having the target permissions.
     /// </summary>
-    [RequireComponent(typeof(LobbyUserObserver))]
-    public class UserStateVisibilityUI : ObserverPanel<LobbyUser>
+    public class UserStateVisibilityUI : UIPanelBase
     {
-        public UserStatus ShowThisWhen;
+        public PlayerStatus ShowThisWhen;
         public UserPermission Permissions;
+        bool m_HasStatusFlags = false;
+        bool m_HasPermissions;
 
-        public override void ObservedUpdated(LobbyUser observed)
+        public override async void Start()
         {
-            var hasStatusFlags = ShowThisWhen.HasFlag(observed.UserStatus);
+            base.Start();
+            var localUser = await Manager.AwaitLocalUserInitialization();
 
-            var hasPermissions = false;
+            localUser.IsHost.onChanged += OnUserHostChanged;
 
-            if (Permissions.HasFlag(UserPermission.Host) && observed.IsHost)
+            localUser.UserStatus.onChanged += OnUserStatusChanged;
+        }
+
+        void OnUserStatusChanged(PlayerStatus observedStatus)
+        {
+            m_HasStatusFlags = ShowThisWhen.HasFlag(observedStatus);
+            CheckVisibility();
+        }
+
+        void OnUserHostChanged(bool isHost)
+        {
+            m_HasPermissions = false;
+            if (Permissions.HasFlag(UserPermission.Host) && isHost)
             {
-                hasPermissions = true;
-            }
-            else if (Permissions.HasFlag(UserPermission.Client) && !observed.IsHost)
-            {
-                hasPermissions = true;
+                m_HasPermissions = true;
             }
 
-            if (hasStatusFlags && hasPermissions)
+            if (Permissions.HasFlag(UserPermission.Client) && !isHost)
+            {
+                m_HasPermissions = true;
+            }
+
+            CheckVisibility();
+        }
+
+        void CheckVisibility()
+        {
+            if (m_HasStatusFlags && m_HasPermissions)
                 Show();
             else
                 Hide();

@@ -7,33 +7,41 @@ using VivoxUnity;
 namespace LobbyRelaySample.ngo
 {
     /// <summary>
-    /// This holds the logic and data for an individual symbol, which can be "clicked" if the server detects the collision with a player who sends a click input.
+    /// This holds the logic and data for an individual symbolIndex, which can be "clicked" if the server detects the collision with a player who sends a click input.
     /// </summary>
     public class SymbolObject : NetworkBehaviour
     {
-        [SerializeField]  private SymbolData m_symbolData;
-        [SerializeField]  private SpriteRenderer m_renderer;
-        [SerializeField]  private Animator m_animator;
+        [SerializeField]
+        SymbolData m_symbolData;
+        [SerializeField]
+        SpriteRenderer m_renderer;
+        [SerializeField]
+        private Animator m_animator;
 
         public bool Clicked { get; private set; }
-        [HideInInspector] public NetworkVariable<int> symbolIndex; // The index into SymbolData, not the index of this object.
+        public int SymbolIndex { get; private set; }
 
-        public override void OnNetworkSpawn()
+        public void SetSymbolIndex_Server(int symbolIndex)
         {
-            symbolIndex.OnValueChanged += OnSymbolIndexSet;
+            SetSymbolSprite(symbolIndex);
+            SetSymbolIndex_ClientRpc(symbolIndex);
         }
 
-        /// <summary>
-        /// Because of the need to distinguish host vs. client calls, we use the symbolIndex NetworkVariable to learn what symbol to display.
-        /// </summary>
-        private void OnSymbolIndexSet(int prevValue, int newValue)
+        [ClientRpc]
+        public void SetSymbolIndex_ClientRpc(int symbolIndex)
         {
-            m_renderer.sprite = m_symbolData.GetSymbolForIndex(symbolIndex.Value);
-            symbolIndex.OnValueChanged -= OnSymbolIndexSet;
+            SetSymbolSprite(symbolIndex);
         }
 
-        public void SetPosition_Server(Vector3 newPosition)
+        void SetSymbolSprite(int symbolIndex)
         {
+            SymbolIndex = symbolIndex;
+            m_renderer.sprite = m_symbolData.GetSymbolForIndex(SymbolIndex);
+        }
+
+        public void SetParentAndPosition_Server(NetworkObject parentObject, Vector3 newPosition)
+        {
+            NetworkObject.TrySetParent(parentObject, false);
             SetPosition_ClientRpc(newPosition);
         }
 
@@ -42,7 +50,6 @@ namespace LobbyRelaySample.ngo
         {
             transform.localPosition = newPosition;
         }
-
 
         [ServerRpc]
         public void ClickedSequence_ServerRpc(ulong clickerPlayerId)
@@ -66,19 +73,18 @@ namespace LobbyRelaySample.ngo
         [ServerRpc]
         public void HideSymbol_ServerRpc()
         {
-            // Actually destroying the symbol objects can cause garbage collection and other delays that might lead to desyncs.
+            // Actually destroying the symbolIndex objects can cause garbage collection and other delays that might lead to desyncs.
             // Disabling the networked object can also cause issues, so instead, just move the object, and it will be cleaned up once the NetworkManager is destroyed.
             // (If we used object pooling, this is where we would instead return it to the pool.)
             //The animation calls RemoveSymbol(only for server
             this.transform.localPosition += Vector3.forward * 500;
         }
 
-        //It's easier to have the post-animation symbol "deletion" happen entirely in server world rather than depend on client-side animation triggers.
+        //It's easier to have the post-animation symbolIndex "deletion" happen entirely in server world rather than depend on client-side animation triggers.
         IEnumerator HideSymbolAnimDelay()
         {
             yield return new WaitForSeconds(0.3f);
             HideSymbol_ServerRpc();
         }
-
     }
 }

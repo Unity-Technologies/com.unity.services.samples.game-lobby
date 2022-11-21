@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Watches a lobby or relay code for updates, displaying the current code to lobby members.
     /// </summary>
-    public class DisplayCodeUI : ObserverPanel<LocalLobby>
+    public class DisplayCodeUI : UIPanelBase
     {
         public enum CodeType { Lobby = 0, Relay = 1 }
 
@@ -15,19 +16,26 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         CodeType m_codeType;
 
-        public override void ObservedUpdated(LocalLobby observed)
+        void LobbyCodeChanged(string newCode)
         {
-            string code = m_codeType == CodeType.Lobby ? observed.LobbyCode : observed.RelayCode;
-
-            if (!string.IsNullOrEmpty(code))
+            if (!string.IsNullOrEmpty(newCode))
             {
-                m_outputText.text = code;
+                m_outputText.text = newCode;
                 Show();
             }
             else
             {
                 Hide();
             }
+        }
+
+        public override void Start()
+        {
+            base.Start();
+            if(m_codeType==CodeType.Lobby)
+                Manager.LocalLobby.LobbyCode.onChanged += LobbyCodeChanged;
+            if(m_codeType==CodeType.Relay)
+                Manager.LocalLobby.RelayCode.onChanged += LobbyCodeChanged;
         }
     }
 }

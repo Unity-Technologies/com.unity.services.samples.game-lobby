@@ -14,6 +14,16 @@ namespace LobbyRelaySample.UI
         private UnityEvent<bool> m_onVisibilityChange;
         bool showing;
 
+        protected GameManager Manager
+        {
+            get
+            {
+                if (m_gameManager != null) return m_gameManager;
+                return m_gameManager = GameManager.Instance;
+            }
+        }
+
+        GameManager m_gameManager;
         CanvasGroup m_canvasGroup;
         List<UIPanelBase> m_uiPanelsInChildren = new List<UIPanelBase>(); // Otherwise, when this Shows/Hides, the children won't know to update their own visibility.
 
@@ -47,7 +57,7 @@ namespace LobbyRelaySample.UI
         {
             Show(true);
         }
-        
+
         public void Show(bool propagateToChildren)
         {
             MyCanvasGroup.alpha = 1;

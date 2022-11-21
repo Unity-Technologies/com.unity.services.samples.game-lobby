@@ -8,11 +8,15 @@ namespace LobbyRelaySample.ngo
     /// </summary>
     public class IntroOutroRunner : MonoBehaviour
     {
-        [SerializeField] private Animator m_animator;
-        private Action m_onOutroComplete;
+        [SerializeField]
+        InGameRunner m_inGameRunner;
+        [SerializeField] Animator m_animator;
+        Action m_onIntroComplete, m_onOutroComplete;
 
-        public void DoIntro()
+
+        public void DoIntro(Action onIntroComplete)
         {
+            m_onIntroComplete = onIntroComplete;
             m_animator.SetTrigger("DoIntro");
         }
 
@@ -27,7 +31,7 @@ namespace LobbyRelaySample.ngo
         /// </summary>
         public void OnIntroComplete()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.InstructionsShown, null);
+            m_onIntroComplete?.Invoke();
         }
         /// <summary>
         /// Called via an AnimationEvent.

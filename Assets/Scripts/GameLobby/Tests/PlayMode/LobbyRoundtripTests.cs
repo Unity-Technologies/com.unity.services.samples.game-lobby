@@ -1,13 +1,15 @@
 ﻿using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
-using Unity.Services.Lobbies;
+using System.Threading.Tasks;
+using Test.Tools;
+using LobbyRelaySample;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.TestTools;
-using LobbyAPIInterface = LobbyRelaySample.lobby.LobbyAPIInterface;
+using Debug = UnityEngine.Debug;
 
 namespace Test
 {
@@ -19,33 +21,41 @@ namespace Test
     /// </summary>
     public class LobbyRoundtripTests
     {
-        private string m_workingLobbyId;
-        private LobbyRelaySample.Auth.SubIdentity_Authentication m_auth;
-        private bool m_didSigninComplete = false;
-        private Dictionary<string, PlayerDataObject> m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
+        string playerID;
+
+        Dictionary<string, PlayerDataObject>
+            m_mockUserData; // This is handled in the LobbyAsyncRequest calls normally, but we need to supply this for the direct Lobby API calls.
+
+        LocalPlayer m_LocalUser;
+        LobbyManager m_LobbyManager;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            m_auth = new LobbyRelaySample.Auth.SubIdentity_Authentication(() => { m_didSigninComplete = true; });
             m_mockUserData = new Dictionary<string, PlayerDataObject>();
-            m_mockUserData.Add("DisplayName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
+            m_mockUserData.Add("DisplayName",
+                new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, "TestUser123"));
+
+
+#pragma warning disable 4014
+            TestAuthSetup();
+#pragma warning restore 4014
+            m_LocalUser = new LocalPlayer(Auth.ID(), 0, false, "TESTPLAYER");
+            m_LobbyManager = new LobbyManager();
+        }
+
+        async Task TestAuthSetup()
+        {
+            await Auth.Authenticate("test");
         }
 
         [UnityTearDown]
         public IEnumerator PerTestTeardown()
         {
-            if (m_workingLobbyId != null)
-            {   LobbyAPIInterface.DeleteLobbyAsync(m_workingLobbyId, null);
-                m_workingLobbyId = null;
+            if (m_LobbyManager.CurrentLobby != null)
+            {
+                yield return AsyncTestHelper.Await(async () => await m_LobbyManager.LeaveLobbyAsync());
             }
-            yield return new WaitForSeconds(0.5f); // We need a yield anyway, so wait long enough to probably delete the lobby. There currently (6/22/2021) aren't other tests that would have issues if this took longer.
-        }
-
-        [OneTimeTearDown]
-        public void Teardown()
-        {
-            m_auth?.Dispose();
         }
 
         /// <summary>
@@ -55,121 +65,116 @@ namespace Test
         public IEnumerator DoRoundtrip()
         {
             #region Setup
-            // Wait a reasonable amount of time for sign-in to complete.
-            if (!m_didSigninComplete)
-                yield return new WaitForSeconds(3);
-            if (!m_didSigninComplete)
-                Assert.Fail("Did not sign in.");
+
+            yield return AsyncTestHelper.Await(async () => await Auth.Authenticating());
 
             // Since we're signed in through the same pathway as the actual game, the list of lobbies will include any that have been made in the game itself, so we should account for those.
             // If you want to get around this, consider having a secondary project using the same assets with its own credentials.
-            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request, in case a previous test had one; Query requests can only occur at a rate of 1 per second.
+            yield return
+                new WaitForSeconds(
+                    1); // To prevent a possible 429 with the upcoming Query request, in case a previous test had one; Query requests can only occur at a rate of 1 per second.
             QueryResponse queryResponse = null;
-            float timeout = 5;
-            LobbyAPIInterface.QueryAllLobbiesAsync(new List<QueryFilter>(), (qr) => { queryResponse = qr; });
-            while (queryResponse == null && timeout > 0)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            Assert.Greater(timeout, 0, "Timeout check (query #0)");
+            Debug.Log("Getting Lobby List 1");
+
+            yield return AsyncTestHelper.Await(
+                async () => queryResponse = await m_LobbyManager.RetrieveLobbyListAsync());
+
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#0)");
             int numLobbiesIni = queryResponse.Results?.Count ?? 0;
+
             #endregion
 
             // Create a test lobby.
-            Lobby createResponse = null;
-            timeout = 5;
+            Lobby createLobby = null;
             string lobbyName = "TestLobby-JustATest-123";
-            LobbyAPIInterface.CreateLobbyAsync(m_auth.GetContent("id"), lobbyName, 100, false, m_mockUserData, (r) => { createResponse = r; });
-            while (createResponse == null && timeout > 0)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            Assert.Greater(timeout, 0, "Timeout check (create)");
-            Assert.IsNotNull(createResponse, "CreateLobbyAsync should return a non-null result.");
-            m_workingLobbyId = createResponse.Id;
-            Assert.AreEqual(lobbyName, createResponse.Name, "Created lobby should match the provided name.");
+
+            yield return AsyncTestHelper.Await(async () =>
+                createLobby = await m_LobbyManager.CreateLobbyAsync(
+                    lobbyName,
+                    100,
+                    false,
+                    m_LocalUser));
+
+            Assert.IsNotNull(createLobby, "CreateLobbyAsync should return a non-null result.");
+            Assert.AreEqual(lobbyName, createLobby.Name, "Created lobby should match the provided name.");
+            var createLobbyId = createLobby.Id;
 
             // Query for the test lobby via QueryAllLobbies.
-            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
-            queryResponse = null;
-            timeout = 5;
-            LobbyAPIInterface.QueryAllLobbiesAsync(new List<QueryFilter>(), (qr) => { queryResponse = qr; });
-            while (queryResponse == null && timeout > 0)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            Assert.Greater(timeout, 0, "Timeout check (query #1)");
-            Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#1)");
-            Assert.AreEqual(1 + numLobbiesIni, queryResponse.Results.Count, "Queried lobbies list should contain the test lobby.");
-            Assert.IsTrue(queryResponse.Results.Where(r => r.Name == lobbyName).Count() == 1, "Checking queried lobby for name.");
-            Assert.IsTrue(queryResponse.Results.Where(r => r.Id == m_workingLobbyId).Count() == 1, "Checking queried lobby for ID.");
+            Debug.Log("Getting Lobby List 2");
 
-            // Query for solely the test lobby via GetLobby.
-            Lobby getResponse = null;
-            timeout = 5;
-            LobbyAPIInterface.GetLobbyAsync(createResponse.Id, (r) => { getResponse = r; });
-            while (getResponse == null && timeout > 0)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            Assert.Greater(timeout, 0, "Timeout check (get)");
-            Assert.IsNotNull(getResponse, "GetLobbyAsync should return a non-null result.");
-            Assert.AreEqual(lobbyName, getResponse.Name, "Checking the lobby we got for name.");
-            Assert.AreEqual(m_workingLobbyId, getResponse.Id, "Checking the lobby we got for ID.");
+            yield return AsyncTestHelper.Await(
+                async () => queryResponse = await m_LobbyManager.RetrieveLobbyListAsync());
+
+            Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#1)");
+            Assert.AreEqual(1 + numLobbiesIni, queryResponse.Results.Count,
+                "Queried lobbies list should contain the test lobby.");
+            Assert.IsTrue(queryResponse.Results.Where(r => r.Name == lobbyName).Count() == 1,
+                "Checking queried lobby for name.");
+            Assert.IsTrue(queryResponse.Results.Where(r => r.Id == createLobbyId).Count() == 1,
+                "Checking queried lobby for ID.");
+
+            Debug.Log("Getting current Lobby");
+
+            Lobby currentLobby = m_LobbyManager.CurrentLobby;
+            Assert.IsNotNull(currentLobby, "GetLobbyAsync should return a non-null result.");
+            Assert.AreEqual(lobbyName, currentLobby.Name, "Checking the lobby we got for name.");
+            Assert.AreEqual(createLobbyId, currentLobby.Id, "Checking the lobby we got for ID.");
+
+            Debug.Log("Deleting current Lobby");
 
             // Delete the test lobby.
-            bool didDeleteFinish = false;
-            timeout = 5;
-            LobbyAPIInterface.DeleteLobbyAsync(m_workingLobbyId, () => { didDeleteFinish = true; });
-            while (timeout > 0 && !didDeleteFinish)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            Assert.Greater(timeout, 0, "Timeout check (delete)");
-            m_workingLobbyId = null;
+            yield return AsyncTestHelper.Await(async () => await m_LobbyManager.LeaveLobbyAsync());
 
-            // Query to ensure the lobby is gone.
-            yield return new WaitForSeconds(1); // To prevent a possible 429 with the upcoming Query request.
-            QueryResponse queryResponseTwo = null;
-            timeout = 5;
-            LobbyAPIInterface.QueryAllLobbiesAsync(new List<QueryFilter>(), (qr) => { queryResponseTwo = qr; });
-            while (queryResponseTwo == null && timeout > 0)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            Assert.Greater(timeout, 0, "Timeout check (query #2)");
+            createLobbyId = null;
+            Debug.Log("Getting Lobby List 3");
+            yield return AsyncTestHelper.Await(
+                async () => queryResponse = await m_LobbyManager.RetrieveLobbyListAsync());
+
             Assert.IsNotNull(queryResponse, "QueryAllLobbiesAsync should return a non-null result. (#2)");
-            Assert.AreEqual(numLobbiesIni, queryResponseTwo.Results.Count, "Queried lobbies list should be empty.");
-
-            // Some error messages might be asynchronous, so to reduce spillover into other tests, just wait here for a bit before proceeding.
-            yield return new WaitForSeconds(3);
+            Assert.AreEqual(numLobbiesIni, queryResponse.Results.Count, "Queried lobbies list should be empty.");
         }
 
         /// <summary>
-        /// If the Lobby create call fails, we want to ensure we call onComplete so we can act on the failure.
+        /// If the Lobby create call fails, we return null
         /// </summary>
         [UnityTest]
-        public IEnumerator OnCompletesOnFailure()
+        public IEnumerator CreateFailsWithNull()
         {
-            if (!m_didSigninComplete)
-                yield return new WaitForSeconds(3);
-            if (!m_didSigninComplete)
-                Assert.Fail("Did not sign in.");
+            yield return AsyncTestHelper.Await(async () => await Auth.Authenticating());
 
-            bool? didComplete = null;
             LogAssert.ignoreFailingMessages = true; // Multiple errors will appears for the exception.
-            LobbyAPIInterface.CreateLobbyAsync("ThisStringIsInvalidHere", "lobby name", 123, false, m_mockUserData, (r) => { didComplete = (r == null); });
-            float timeout = 5;
-            while (didComplete == null && timeout > 0)
-            {   yield return new WaitForSeconds(0.25f);
-                timeout -= 0.25f;
-            }
-            LogAssert.ignoreFailingMessages = false;
+            Lobby createLobby = null;
+            yield return AsyncTestHelper.Await(async () =>
+                createLobby = await m_LobbyManager.CreateLobbyAsync(
+                    "lobby name",
+                    123,
+                    false,
+                    m_LocalUser));
 
-            Assert.Greater(timeout, 0, "Timeout check");
-            Assert.NotNull(didComplete, "Should have called onComplete, even if the async request failed.");
-            Assert.True(didComplete, "The returned object will be null, so expect to need to handle it.");
+            LogAssert.ignoreFailingMessages = false;
+            Assert.Null(createLobby, "The returned object will be null, so expect to need to handle it.");
+            yield return
+                new WaitForSeconds(
+                    3); //Since CreateLobby cannot be queued, we need to give this a buffer before moving on to other tests.
+        }
+
+        [UnityTest]
+        public IEnumerator CooldownTest()
+        {
+            var rateLimiter = new ServiceRateLimiter(1, 3);
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            //pass Through the first request, which triggers the cooldown.
+            yield return AsyncTestHelper.Await(async () => await rateLimiter.QueueUntilCooldown());
+
+            //Should wait for one second total
+            yield return AsyncTestHelper.Await(async () => await rateLimiter.QueueUntilCooldown());
+            timer.Stop();
+            var elapsedMS = timer.ElapsedMilliseconds;
+            Debug.Log($"Cooldown took {elapsedMS}/{rateLimiter.coolDownMS} milliseconds.");
+            var difference = Mathf.Abs(elapsedMS - rateLimiter.coolDownMS);
+            Assert.IsTrue(difference < 50 && difference >= 0);
         }
     }
 }

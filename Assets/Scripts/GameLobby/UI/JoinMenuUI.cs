@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -8,10 +9,10 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Handles the list of LobbyButtons and ensures it stays synchronized with the lobby list from the service.
     /// </summary>
-    public class JoinMenuUI : ObserverPanel<LobbyServiceData>
+    public class JoinMenuUI : UIPanelBase
     {
         [SerializeField]
-        LobbyButtonUI m_LobbyButtonPrefab;
+        LobbyEntryUI m_LobbyEntryPrefab;
 
         [SerializeField]
         RectTransform m_LobbyButtonParent;
@@ -23,16 +24,24 @@ namespace LobbyRelaySample.UI
         /// <summary>
         /// Key: Lobby ID, Value Lobby UI
         /// </summary>
-        Dictionary<string, LobbyButtonUI> m_LobbyButtons = new Dictionary<string, LobbyButtonUI>();
-        Dictionary<string, LocalLobby> m_LocalLobby = new Dictionary<string, LocalLobby>();
+        Dictionary<string, LobbyEntryUI> m_LobbyButtons = new Dictionary<string, LobbyEntryUI>();
 
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
-        LocalLobby.LobbyData m_LocalLobbySelected;
+        LocalLobby m_LocalLobbySelected;
+        string m_InputLobbyCode;
 
         public override void Start()
         {
             base.Start();
             m_JoinCreateLobbyUI.m_OnTabChanged.AddListener(OnTabChanged);
+            Manager.LobbyList.onLobbyListChange += OnLobbyListChanged;
+        }
+
+        void OnDestroy()
+        {
+            if (Manager == null)
+                return;
+            Manager.LobbyList.onLobbyListChange -= OnLobbyListChanged;
         }
 
         void OnTabChanged(JoinCreateTabs tabState)
@@ -49,52 +58,34 @@ namespace LobbyRelaySample.UI
 
         public void LobbyButtonSelected(LocalLobby lobby)
         {
-            m_LocalLobbySelected = lobby.Data;
+            m_LocalLobbySelected = lobby;
         }
 
         public void OnLobbyCodeInputFieldChanged(string newCode)
         {
             if (!string.IsNullOrEmpty(newCode))
-                m_LocalLobbySelected = new LocalLobby.LobbyData(newCode.ToUpper());
+                m_InputLobbyCode = newCode.ToUpper();
         }
 
         public void OnJoinButtonPressed()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.JoinLobbyRequest, m_LocalLobbySelected);
-            m_LocalLobbySelected = default;
+            if (m_LocalLobbySelected == null)
+                return;
+            var selectedLobbyID = m_LocalLobbySelected.LobbyID.Value;
+
+            Manager.JoinLobby(selectedLobbyID, m_InputLobbyCode);
+            m_LocalLobbySelected = null;
         }
 
         public void OnRefresh()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.QueryLobbies, null);
+            Manager.QueryLobbies();
         }
 
-        public override void ObservedUpdated(LobbyServiceData observed)
+        void OnLobbyListChanged(Dictionary<string, LocalLobby> lobbyList)
         {
-            ///Check for new entries, We take CurrentLobbies as the source of truth
-            List<string> previousKeys = new List<string>(m_LobbyButtons.Keys);
-            foreach (var codeLobby in observed.CurrentLobbies)
-            {
-                var lobbyCodeKey = codeLobby.Key;
-                var lobbyData = codeLobby.Value;
-                if (!m_LobbyButtons.ContainsKey(lobbyCodeKey))
-                {
-                    if (CanDisplay(lobbyData))
-                        AddNewLobbyButton(lobbyCodeKey, lobbyData);
-                }
-                else
-                {
-                    if (CanDisplay(lobbyData))
-                        UpdateLobbyButton(lobbyCodeKey, lobbyData);
-                    else
-                        RemoveLobbyButton(lobbyData);
-                }
-
-                previousKeys.Remove(lobbyCodeKey);
-            }
-
-            foreach (string key in previousKeys) // Need to remove any lobbies from the list that no longer exist.
-                RemoveLobbyButton(m_LocalLobby[key]);
+            PruneMissingLobbies(lobbyList.Keys.ToList());
+            PopulateLobbyButtonList(lobbyList);
         }
 
         public void JoinMenuChangedVisibility(bool show)
@@ -108,39 +99,69 @@ namespace LobbyRelaySample.UI
 
         public void OnQuickJoin()
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.QuickJoin, null);
+            Manager.QuickJoin();
         }
 
-        private bool CanDisplay(LocalLobby lobby)
+        void PruneMissingLobbies(List<string> lobbyIDs)
         {
-            return lobby.Data.State == LobbyState.Lobby && !lobby.Private;
+            var removalList = new List<string>();
+            foreach (var lobbyID in lobbyIDs)
+            {
+                if (!lobbyIDs.Contains(lobbyID))
+                    removalList.Add(lobbyID);
+            }
+
+            foreach (var lobbyID in removalList)
+                RemoveLobbyButton(lobbyID);
+        }
+
+        void PopulateLobbyButtonList(Dictionary<string, LocalLobby> lobbyList)
+        {
+            ///Check for new entries, We take CurrentLobbies as the source of truth
+            foreach (var lobbyKVP in lobbyList)
+            {
+                var lobbyID = lobbyKVP.Key;
+                var lobby = lobbyKVP.Value;
+                if (!m_LobbyButtons.ContainsKey(lobbyID))
+                {
+                    if (CanDisplay(lobby))
+                        AddNewLobbyButton(lobbyID, lobby);
+                }
+                else
+                {
+                    if (CanDisplay(lobby))
+                        SetLobbyButton(lobbyID, lobby);
+                    else
+                        RemoveLobbyButton(lobbyID);
+                }
+            }
+        }
+
+        bool CanDisplay(LocalLobby lobby)
+        {
+            return lobby.LocalLobbyState.Value == LobbyState.Lobby && !lobby.Private.Value;
         }
 
         /// <summary>
         /// Instantiates UI element and initializes the observer with the LobbyData
         /// </summary>
-        private void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
+        void AddNewLobbyButton(string lobbyCode, LocalLobby lobby)
         {
-            var lobbyButtonInstance = Instantiate(m_LobbyButtonPrefab, m_LobbyButtonParent);
-            lobbyButtonInstance.GetComponent<LocalLobbyObserver>().BeginObserving(lobby);
-            lobby.onDestroyed += RemoveLobbyButton; // Set up to clean itself
+            var lobbyButtonInstance = Instantiate(m_LobbyEntryPrefab, m_LobbyButtonParent);
             lobbyButtonInstance.onLobbyPressed.AddListener(LobbyButtonSelected);
             m_LobbyButtons.Add(lobbyCode, lobbyButtonInstance);
-            m_LocalLobby.Add(lobbyCode, lobby);
+            lobbyButtonInstance.SetLobby(lobby);
         }
 
-        private void UpdateLobbyButton(string lobbyCode, LocalLobby lobby)
+        void SetLobbyButton(string lobbyCode, LocalLobby lobby)
         {
-            m_LobbyButtons[lobbyCode].UpdateLobby(lobby);
+            m_LobbyButtons[lobbyCode].SetLobby(lobby);
         }
 
-        private void RemoveLobbyButton(LocalLobby lobby)
+        void RemoveLobbyButton(string lobbyID)
         {
-            var lobbyID = lobby.LobbyID;
             var lobbyButton = m_LobbyButtons[lobbyID];
-            lobbyButton.GetComponent<LocalLobbyObserver>().EndObserving();
             m_LobbyButtons.Remove(lobbyID);
-            m_LocalLobby.Remove(lobbyID);
             Destroy(lobbyButton.gameObject);
         }
     }

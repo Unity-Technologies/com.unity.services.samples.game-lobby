@@ -13,20 +13,23 @@ namespace LobbyRelaySample.UI
         [SerializeField]
         float m_alphaWhenHidden = 0.5f;
         [SerializeField]
-        LobbyAsyncRequests.RequestType m_requestType;
+        LobbyManager.RequestType m_requestType;
 
-        private void Start()
+        void Start()
         {
-            LobbyAsyncRequests.Instance.GetRateLimit(m_requestType).onChanged += UpdateVisibility;
-        }
-        private void OnDestroy()
-        {
-            LobbyAsyncRequests.Instance.GetRateLimit(m_requestType).onChanged -= UpdateVisibility;
+            GameManager.Instance.LobbyManager.GetRateLimit(m_requestType).onCooldownChange += UpdateVisibility;
         }
 
-        private void UpdateVisibility(LobbyAsyncRequests.RateLimitCooldown rateLimit)
+        void OnDestroy()
         {
-            if (rateLimit.IsInCooldown)
+            if (GameManager.Instance == null || GameManager.Instance.LobbyManager == null)
+                return;
+            GameManager.Instance.LobbyManager.GetRateLimit(m_requestType).onCooldownChange -= UpdateVisibility;
+        }
+
+        void UpdateVisibility(bool isCoolingDown)
+        {
+            if (isCoolingDown)
                 m_target.Hide(m_alphaWhenHidden);
             else
                 m_target.Show();

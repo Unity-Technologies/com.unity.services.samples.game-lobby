@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace LobbyRelaySample.UI
@@ -5,18 +6,24 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// UI element that is displayed when the lobby is in a particular state (e.g. counting down, in-game).
     /// </summary>
-    public class ShowWhenLobbyStateUI : ObserverPanel<LocalLobby>
+    public class ShowWhenLobbyStateUI : UIPanelBase
     {
         [SerializeField]
-        private LobbyState m_ShowThisWhen;
+        LobbyState m_ShowThisWhen;
 
-        public override void ObservedUpdated(LocalLobby observed)
+        public void LobbyChanged(LobbyState lobbyState)
         {
-            if (m_ShowThisWhen.HasFlag(observed.State))
+            if (m_ShowThisWhen.HasFlag(lobbyState))
                 Show();
             else
                 Hide();
         }
+
+        public override void Start()
+        {
+            base.Start();
+            Manager.LocalLobby.LocalLobbyState.onChanged += LobbyChanged;
+        }
+        
     }
 }
-

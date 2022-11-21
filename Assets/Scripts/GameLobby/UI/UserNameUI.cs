@@ -1,3 +1,4 @@
+using LobbyRelaySample.ngo;
 using TMPro;
 using UnityEngine;
 
@@ -6,14 +7,22 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// Displays the player's name.
     /// </summary>
-    public class UserNameUI : ObserverPanel<LobbyUser>
+    public class UserNameUI : UIPanelBase
     {
         [SerializeField]
         TMP_Text m_TextField;
 
-        public override void ObservedUpdated(LobbyUser observed)
+        public override async void Start()
         {
-            m_TextField.SetText(observed.DisplayName);
+            base.Start();
+            var localUser = await GameManager.Instance.AwaitLocalUserInitialization();
+            localUser.DisplayName.onChanged += SetText;
+
+        }
+
+        void SetText(string text)
+        {
+            m_TextField.SetText(text);
         }
     }
 }

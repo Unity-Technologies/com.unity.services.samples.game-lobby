@@ -5,7 +5,7 @@ namespace LobbyRelaySample
     /// <summary>
     /// Acts as a buffer between receiving requests to display error messages to the player and running the pop-up UI to do so.
     /// </summary>
-    public class LogHandlerSettings : MonoBehaviour, IReceiveMessages
+    public class LogHandlerSettings : MonoBehaviour
     {
         [SerializeField]
         [Tooltip("Only logs of this level or higher will appear in the console.")]
@@ -14,15 +14,22 @@ namespace LobbyRelaySample
         [SerializeField]
         private PopUpUI m_popUp;
 
+
+        public static LogHandlerSettings Instance
+        {
+            get
+            {
+                if (s_LogHandlerSettings != null) return s_LogHandlerSettings;
+                return s_LogHandlerSettings = FindObjectOfType<LogHandlerSettings>();
+            }
+        }
+        static LogHandlerSettings s_LogHandlerSettings;
         private void Awake()
         {
             LogHandler.Get().mode = m_editorLogVerbosity;
-            Locator.Get.Messenger.Subscribe(this);
+            Debug.Log($"Starting project with Log Level : {m_editorLogVerbosity.ToString()}");
         }
-        private void OnDestroy()
-        {
-            Locator.Get.Messenger.Unsubscribe(this);
-        }
+
 
         /// <summary>
         /// For convenience while in the Editor, update the log verbosity when its value is changed in the Inspector.
@@ -32,13 +39,8 @@ namespace LobbyRelaySample
             LogHandler.Get().mode = m_editorLogVerbosity;
         }
 
-        public void OnReceiveMessage(MessageType type, object msg)
-        {
-            if (type == MessageType.DisplayErrorPopup && msg != null)
-                SpawnErrorPopup((string)msg);
-        }
 
-        private void SpawnErrorPopup(string errorMessage)
+        public void SpawnErrorPopup(string errorMessage)
         {
             m_popUp.ShowPopup(errorMessage);
         }

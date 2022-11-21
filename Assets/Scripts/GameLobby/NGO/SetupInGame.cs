@@ -1,36 +1,31 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
 
 namespace LobbyRelaySample.ngo
 {
     /// <summary>
-    /// Once the local player is in a lobby and that lobby has entered the In-Game state, this will load in whatever is necessary to actually run the game part.
+    /// Once the local localPlayer is in a localLobby and that localLobby has entered the In-Game state, this will load in whatever is necessary to actually run the game part.
     /// This will exist in the game scene so that it can hold references to scene objects that spawned prefab instances will need.
     /// </summary>
-    public class SetupInGame : MonoBehaviour, IReceiveMessages
+    public class SetupInGame : MonoBehaviour
     {
-        [SerializeField] private GameObject m_prefabNetworkManager = default;
-        [SerializeField] private GameObject[] m_disableWhileInGame = default;
+        [SerializeField]
+        GameObject m_IngameRunnerPrefab = default;
+        [SerializeField]
+        private GameObject[] m_disableWhileInGame = default;
 
-        private GameObject m_inGameManagerObj;
-        private NetworkManager m_networkManager;
         private InGameRunner m_inGameRunner;
 
         private bool m_doesNeedCleanup = false;
         private bool m_hasConnectedViaNGO = false;
 
-        private Action<UnityTransport> m_initializeTransport;
         private LocalLobby m_lobby;
-        private LobbyUser m_localUser;
-
-
-        public void Start()
-        {   Locator.Get.Messenger.Subscribe(this);
-        }
-        public void OnDestroy()
-        {   Locator.Get.Messenger.Unsubscribe(this);
-        }
 
         private void SetMenuVisibility(bool areVisible)
         {
@@ -42,76 +37,132 @@ namespace LobbyRelaySample.ngo
         /// The prefab with the NetworkManager contains all of the assets and logic needed to set up the NGO minigame.
         /// The UnityTransport needs to also be set up with a new Allocation from Relay.
         /// </summary>
-        private void CreateNetworkManager()
+        async Task CreateNetworkManager(LocalLobby localLobby, LocalPlayer localPlayer)
         {
-            m_inGameManagerObj = GameObject.Instantiate(m_prefabNetworkManager);
-            m_networkManager = m_inGameManagerObj.GetComponentInChildren<NetworkManager>();
-            m_inGameRunner = m_inGameManagerObj.GetComponentInChildren<InGameRunner>();
-            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameEnd, m_localUser);
-
-            UnityTransport transport = m_inGameManagerObj.GetComponentInChildren<UnityTransport>();
-            if (m_localUser.IsHost)
-                m_inGameManagerObj.AddComponent<RelayUtpNGOSetupHost>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartHost(); });
+            m_lobby = localLobby;
+            m_inGameRunner = Instantiate(m_IngameRunnerPrefab).GetComponentInChildren<InGameRunner>();
+            m_inGameRunner.Initialize(OnConnectionVerified, m_lobby.PlayerCount, OnGameBegin, OnGameEnd,
+                localPlayer);
+            if (localPlayer.IsHost.Value)
+            {
+                await SetRelayHostData();
+                NetworkManager.Singleton.StartHost();
+            }
             else
-                m_inGameManagerObj.AddComponent<RelayUtpNGOSetupClient>().Initialize(this, m_lobby, () => { m_initializeTransport(transport); m_networkManager.StartClient(); });
+            {
+                await AwaitRelayCode(localLobby);
+                await SetRelayClientData();
+                NetworkManager.Singleton.StartClient();
+            }
         }
 
-        private void OnConnectionVerified()
-        {   m_hasConnectedViaNGO = true;
+        async Task AwaitRelayCode(LocalLobby lobby)
+        {
+            string relayCode = lobby.RelayCode.Value;
+            lobby.RelayCode.onChanged += (code) => relayCode = code;
+            while (string.IsNullOrEmpty(relayCode))
+            {
+                await Task.Delay(100);
+            }
         }
 
-        // These are public for use in the Inspector.
-        public void OnLobbyChange(LocalLobby lobby)
-        {   m_lobby = lobby; // Most of the time this is redundant, but we need to get multiple members of the lobby to the Relay setup components, so might as well just hold onto the whole thing.
+        async Task SetRelayHostData()
+        {
+            UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
+
+            var allocation = await Relay.Instance.CreateAllocationAsync(m_lobby.MaxPlayerCount.Value);
+            var joincode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            GameManager.Instance.HostSetRelayCode(joincode);
+
+            bool isSecure = false;
+            var endpoint = GetEndpointForAllocation(allocation.ServerEndpoints,
+                allocation.RelayServer.IpV4, allocation.RelayServer.Port, out isSecure);
+
+            transport.SetHostRelayData(AddressFromEndpoint(endpoint), endpoint.Port,
+                allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, isSecure);
         }
-        public void OnLocalUserChange(LobbyUser user)
-        {   m_localUser = user; // Same, regarding redundancy.
+
+        async Task SetRelayClientData()
+        {
+            UnityTransport transport = NetworkManager.Singleton.GetComponentInChildren<UnityTransport>();
+
+            var joinAllocation = await Relay.Instance.JoinAllocationAsync(m_lobby.RelayCode.Value);
+            bool isSecure = false;
+            var endpoint = GetEndpointForAllocation(joinAllocation.ServerEndpoints,
+                joinAllocation.RelayServer.IpV4, joinAllocation.RelayServer.Port, out isSecure);
+
+            transport.SetClientRelayData(AddressFromEndpoint(endpoint), endpoint.Port,
+                joinAllocation.AllocationIdBytes, joinAllocation.Key,
+                joinAllocation.ConnectionData, joinAllocation.HostConnectionData, isSecure);
         }
 
         /// <summary>
-        /// Once the Relay Allocation is created, this passes its data to the UnityTransport.
+        /// Determine the server endpoint for connecting to the Relay server, for either an Allocation or a JoinAllocation.
+        /// If DTLS encryption is available, and there's a secure server endpoint available, use that as a secure connection. Otherwise, just connect to the Relay IP unsecured.
         /// </summary>
-        public void SetRelayServerData(string address, int port, byte[] allocationBytes, byte[] key, byte[] connectionData, byte[] hostConnectionData, bool isSecure)
+        NetworkEndPoint GetEndpointForAllocation(
+            List<RelayServerEndpoint> endpoints,
+            string ip,
+            int port,
+            out bool isSecure)
         {
-            m_initializeTransport = (transport) => { transport.SetRelayServerData(address, (ushort)port, allocationBytes, key, connectionData, hostConnectionData, isSecure); };
-        }
-
-        public void OnReceiveMessage(MessageType type, object msg)
-        {
-            if (type == MessageType.ConfirmInGameState)
+#if ENABLE_MANAGED_UNITYTLS
+            foreach (RelayServerEndpoint endpoint in endpoints)
             {
-                m_doesNeedCleanup = true;
-                SetMenuVisibility(false);
-                CreateNetworkManager();
-            }
-
-            else if (type == MessageType.MinigameBeginning)
-            {
-                if (!m_hasConnectedViaNGO)
+                if (endpoint.Secure && endpoint.Network == RelayServerEndpoint.NetworkOptions.Udp)
                 {
-                    // If this player hasn't successfully connected via NGO, forcibly exit the minigame.
-                    Locator.Get.Messenger.OnReceiveMessage(MessageType.DisplayErrorPopup, "Failed to join the game.");
-                    OnGameEnd();
+                    isSecure = true;
+                    return NetworkEndPoint.Parse(endpoint.Host, (ushort)endpoint.Port);
                 }
             }
+#endif
+            isSecure = false;
+            return NetworkEndPoint.Parse(ip, (ushort)port);
+        }
 
-            else if (type == MessageType.ChangeMenuState)
+        string AddressFromEndpoint(NetworkEndPoint endpoint)
+        {
+            return endpoint.Address.Split(':')[0];
+        }
+
+        void OnConnectionVerified()
+        {
+            m_hasConnectedViaNGO = true;
+        }
+
+        public void StartNetworkedGame(LocalLobby localLobby, LocalPlayer localPlayer)
+        {
+            m_doesNeedCleanup = true;
+            SetMenuVisibility(false);
+#pragma warning disable 4014
+            CreateNetworkManager(localLobby, localPlayer);
+#pragma warning restore 4014
+        }
+
+        public void OnGameBegin()
+        {
+            if (!m_hasConnectedViaNGO)
             {
-                // Once we're in-game, any state change reflects the player leaving the game, so we should clean up.
+                // If this localPlayer hasn't successfully connected via NGO, forcibly exit the minigame.
+                LogHandlerSettings.Instance.SpawnErrorPopup("Failed to join the game.");
                 OnGameEnd();
             }
         }
 
         /// <summary>
-        /// Return to the lobby after the game, whether due to the game ending or due to a failed connection.
+        /// Return to the localLobby after the game, whether due to the game ending or due to a failed connection.
         /// </summary>
-        private void OnGameEnd()
+        public void OnGameEnd()
         {
             if (m_doesNeedCleanup)
             {
-                GameObject.Destroy(m_inGameManagerObj); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
+                NetworkManager.Singleton.Shutdown(true);
+                Destroy(m_inGameRunner
+                    .transform.parent
+                    .gameObject); // Since this destroys the NetworkManager, that will kick off cleaning up networked objects.
                 SetMenuVisibility(true);
-                m_lobby.RelayNGOCode = null;
+                m_lobby.RelayCode.Value = "";
+                GameManager.Instance.EndGame();
                 m_doesNeedCleanup = false;
             }
         }

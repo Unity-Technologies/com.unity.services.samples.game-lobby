@@ -1,5 +1,3 @@
-using System;
-using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,18 +7,17 @@ namespace LobbyRelaySample.UI
     /// <summary>
     /// When inside a lobby, this will show information about a player, whether local or remote.
     /// </summary>
-    [RequireComponent(typeof(LobbyUserObserver))]
-    public class InLobbyUserUI : ObserverPanel<LobbyUser>
+    public class InLobbyUserUI : UIPanelBase
     {
         [SerializeField]
         TMP_Text m_DisplayNameText;
 
         [SerializeField]
         TMP_Text m_StatusText;
-      
+
         [SerializeField]
         Image m_HostIcon;
-        
+
         [SerializeField]
         Image m_EmoteImage;
 
@@ -28,38 +25,80 @@ namespace LobbyRelaySample.UI
         Sprite[] m_EmoteIcons;
 
         [SerializeField]
-        vivox.VivoxUserHandler m_vivoxUserHandler;
+        vivox.VivoxUserHandler m_VivoxUserHandler;
 
         public bool IsAssigned => UserId != null;
+        public string UserId { get; set; }
+        LocalPlayer m_LocalPlayer;
 
-        public string UserId { get; private set; }
-        private LobbyUserObserver m_observer;
-
-        public void SetUser(LobbyUser myLobbyUser)
+        public void SetUser(LocalPlayer localPlayer)
         {
             Show();
-            if (m_observer == null)
-                m_observer = GetComponent<LobbyUserObserver>();
-            m_observer.BeginObserving(myLobbyUser);
-            UserId = myLobbyUser.ID;
-            m_vivoxUserHandler.SetId(UserId);
+            m_LocalPlayer = localPlayer;
+            UserId = localPlayer.ID.Value;
+            SetIsHost(localPlayer.IsHost.Value);
+            SetEmote(localPlayer.Emote.Value);
+            SetUserStatus(localPlayer.UserStatus.Value);
+            SetDisplayName(m_LocalPlayer.DisplayName.Value);
+            SubscribeToPlayerUpdates();
+
+            m_VivoxUserHandler.SetId(UserId);
         }
 
-        public void OnUserLeft()
+        void SubscribeToPlayerUpdates()
         {
+            m_LocalPlayer.DisplayName.onChanged += SetDisplayName;
+            m_LocalPlayer.UserStatus.onChanged += SetUserStatus;
+            m_LocalPlayer.Emote.onChanged += SetEmote;
+            m_LocalPlayer.IsHost.onChanged += SetIsHost;
+        }
+
+        void UnsubscribeToPlayerUpdates()
+        {
+            if (m_LocalPlayer == null)
+                return;
+            if (m_LocalPlayer.DisplayName?.onChanged != null)
+                m_LocalPlayer.DisplayName.onChanged -= SetDisplayName;
+            if (m_LocalPlayer.UserStatus?.onChanged != null)
+                m_LocalPlayer.UserStatus.onChanged -= SetUserStatus;
+            if (m_LocalPlayer.Emote?.onChanged != null)
+                m_LocalPlayer.Emote.onChanged -= SetEmote;
+            if (m_LocalPlayer.IsHost?.onChanged != null)
+                m_LocalPlayer.IsHost.onChanged -= SetIsHost;
+        }
+
+        public void ResetUI()
+        {
+            if (m_LocalPlayer == null)
+                return;
             UserId = null;
+            SetEmote(EmoteType.None);
+            SetUserStatus(PlayerStatus.Lobby);
             Hide();
-            m_observer.EndObserving();
+            UnsubscribeToPlayerUpdates();
+            m_LocalPlayer = null;
         }
 
-        public override void ObservedUpdated(LobbyUser observed)
+        void SetDisplayName(string displayName)
         {
-            m_DisplayNameText.SetText(observed.DisplayName);
-            m_StatusText.SetText(SetStatusFancy(observed.UserStatus));
-            m_EmoteImage.sprite = EmoteIcon(observed.Emote);
-            m_HostIcon.enabled = observed.IsHost;
+            m_DisplayNameText.SetText(displayName);
         }
-        
+
+        void SetUserStatus(PlayerStatus statusText)
+        {
+            m_StatusText.SetText(SetStatusFancy(statusText));
+        }
+
+        void SetEmote(EmoteType emote)
+        {
+            m_EmoteImage.sprite = EmoteIcon(emote);
+        }
+
+        void SetIsHost(bool isHost)
+        {
+            m_HostIcon.enabled = isHost;
+        }
+
         /// <summary>
         /// EmoteType to Icon Sprite
         /// m_EmoteIcon[0] = Smile
@@ -91,17 +130,17 @@ namespace LobbyRelaySample.UI
             }
         }
 
-        string SetStatusFancy(UserStatus status)
+        string SetStatusFancy(PlayerStatus status)
         {
             switch (status)
             {
-                case UserStatus.Lobby:
+                case PlayerStatus.Lobby:
                     return "<color=#56B4E9>In Lobby</color>"; // Light Blue
-                case UserStatus.Ready:
+                case PlayerStatus.Ready:
                     return "<color=#009E73>Ready</color>"; // Light Mint
-                case UserStatus.Connecting:
+                case PlayerStatus.Connecting:
                     return "<color=#F0E442>Connecting...</color>"; // Bright Yellow
-                case UserStatus.InGame:
+                case PlayerStatus.InGame:
                     return "<color=#005500>In Game</color>"; // Green
                 default:
                     return "";

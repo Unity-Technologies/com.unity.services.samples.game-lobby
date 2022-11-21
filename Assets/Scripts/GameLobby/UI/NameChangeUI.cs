@@ -7,7 +7,7 @@ namespace LobbyRelaySample.UI
     {
         public void OnEndNameEdit(string name)
         {
-            Locator.Get.Messenger.OnReceiveMessage(MessageType.RenameRequest, name);
+            Manager.SetLocalUserName(name);
         }
     }
 }
