@@ -13,7 +13,7 @@ We refactored to a largerly Task-based workflow, as it makes reading asynchronou
 
 ## Features:
 * **Observer** class removed, replaced with **CallbackValue<T>** which is responsible for notifying UI when a value has been changed, and hooks neatly into the Lobby API callback workflow.
-* ** Messenger and Locator** patterns retired. Replaced with the more tightly coupled, but more readable **Unity Singleton Pattern** on the GameManager and InGameRunner
+* **Messenger and Locator** patterns retired. Replaced with the more tightly coupled, but more readable **Unity Singleton Pattern** on the GameManager and InGameRunner
 * **LobbySynchronizer** retired, we now subscribe to Lobby change callbacks in **LobbyManager.BindLocalLobbyToRemote** 
 * **RelayUTP** classes retired, the lobby change callbacks are so snappy we no longer need to use the Relay and Transport combo to create a decent Lobby experience.
 
