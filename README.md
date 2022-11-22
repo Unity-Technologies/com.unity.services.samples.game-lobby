@@ -1,20 +1,20 @@
 
 # Game Lobby Sample
-**Version 1.1**
+**Version 1.1a - _UGS Events Beta_** 
+
 _Tested with Unity 2021.2 for PC and Mac._
 
-This sample demonstrates how to use the Lobby and Relay packages to create a typical game lobby experience. It also includes Vivox Voice chat. Players can host lobbies that other players can join using a public lobby list or lobby code, and then connect with Relay to use Unity Transport ("UTP") for basic real-time communication between them. Relay allows players to securely communicate with each other while maintaining connection anonymity. Connecting to the lobby will also connect to Vivox to enable voice chat as long as an audio input device is available.
+This sample demonstrates how to use the Lobby and Relay packages to create a typical game lobby experience. It also includes Vivox Voice chat. Players can host lobbies that other players can join using a public lobby list or lobby code. The Lobby also synchronizes the lobby and player data  Relay allows players to securely connect with each other via Netcode for GameObjects while maintaining connection anonymity. Connecting to the lobby will also connect to Vivox to enable voice chat as long as an audio input device is available.
 
 **Note**: This is not a “drag-and-drop” solution; the Game Lobby Sample is not a minimal code sample intended to be completely copied into a full-scale project. Rather, it demonstrates how to use multiple services in a vertical slice with some basic game logic and infrastructure. Use it as a reference and starting point to learn how Lobby and Relay work together and how to integrate them into your project.
 
 
 #### Features:
 
-* **Anonymous Auth login**: Track player credentials without a persistent account.
 * **Lobby creation**: Players host lobbies for others to join.
 * **Lobby query**: Find a list of lobbies with filters, or use lobby codes.
+* **Lobby Events**: Listen to Lobby data changes.
 * **Relay obfuscation**: Players in a lobby are connected through an anonymous IP.
-* **Lobby + Relay connection management**: Together, the services automatically handle new connections and disconnections.
 * **Vivox Voice**: Create a voice channel for the lobby to allow for voice communication, with per-user volume control and muting.
 
 
@@ -24,8 +24,7 @@ To use Unity’s multiplayer services, you need a cloud organization ID for your
 
 [https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-](https://support.unity.com/hc/en-us/articles/208592876-How-do-I-create-a-new-Organization-)
 
-Once you have an ID, link it to your project under **Edit **>** Project Settings **>** Services** and use the Unity Dashboard to manage your project’s services.\
-
+Once you have an ID, link it to your project under **Edit **>** Project Settings **>** Services** and use the Unity Dashboard to manage your project’s services.
 
 
 
