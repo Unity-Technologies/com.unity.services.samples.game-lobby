@@ -250,6 +250,12 @@ namespace LobbyRelaySample
                         }
                     }
 
+                    void RemoveCustomLobbyData(string changedKey)
+                    {
+                        if (changedKey == key_RelayCode)
+                            localLobby.RelayCode.Value = "";
+                    }
+
                     void ParseCustomLobbyData(string changedKey, DataObject playerDataObject)
                     {
                         if (changedKey == key_RelayCode)
@@ -260,12 +266,6 @@ namespace LobbyRelaySample
 
                         if (changedKey == key_LobbyColor)
                             localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(playerDataObject.Value);
-                    }
-
-                    void RemoveCustomLobbyData(string changedKey)
-                    {
-                        if (changedKey == key_RelayCode)
-                            localLobby.RelayCode.Value = "";
                     }
                 }
 
