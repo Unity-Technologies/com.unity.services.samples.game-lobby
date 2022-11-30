@@ -2,7 +2,16 @@
 # Game Lobby Sample
 **Version 1.1a - _UGS Events Beta_** 
 
-_Tested with Unity 2021.2 for PC and Mac._
+#### UGS EVENTS BETA NOTE
+
+When using the Events code in this sample, make sure your Editor _Project Settings > Player > Scripting Define Symbols_ include:
+**UGS_BETA_LOBBY_EVENTS**
+and
+**UGS_LOBBY_EVENTS**
+
+
+
+##### _Tested with Unity 2021.2 for PC and Mac._
 
 This sample demonstrates how to use the Lobby and Relay packages to create a typical game lobby experience. It also includes Vivox Voice chat. Players can host lobbies that other players can join using a public lobby list or lobby code. The Lobby also synchronizes the lobby and player data  Relay allows players to securely connect with each other via Netcode for GameObjects while maintaining connection anonymity. Connecting to the lobby will also connect to Vivox to enable voice chat as long as an audio input device is available.
 
