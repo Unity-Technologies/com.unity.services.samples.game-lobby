@@ -383,7 +383,7 @@ namespace LobbyRelaySample
             string playerId = AuthenticationService.Instance.PlayerId;
 
             await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, playerId);
-            m_CurrentLobby = null;
+            Dispose();
         }
 
         public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
