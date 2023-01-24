@@ -11,14 +11,11 @@ namespace LobbyRelaySample.UI
     /// </summary>
     public class JoinMenuUI : UIPanelBase
     {
-        [SerializeField]
-        LobbyEntryUI m_LobbyEntryPrefab;
+        [SerializeField] LobbyEntryUI m_LobbyEntryPrefab;
 
-        [SerializeField]
-        RectTransform m_LobbyButtonParent;
+        [SerializeField] RectTransform m_LobbyButtonParent;
 
-        [SerializeField]
-        TMP_InputField m_JoinCodeField;
+        [SerializeField] TMP_InputField m_JoinCodeField;
 
         public JoinCreateLobbyUI m_JoinCreateLobbyUI;
         /// <summary>
@@ -69,9 +66,11 @@ namespace LobbyRelaySample.UI
 
         public void OnJoinButtonPressed()
         {
-            if (m_LocalLobbySelected == null)
-                return;
-            var selectedLobbyID = m_LocalLobbySelected.LobbyID.Value;
+            string selectedLobbyID = null;
+            if (m_LocalLobbySelected != null)
+            {
+                selectedLobbyID = m_LocalLobbySelected.LobbyID.Value;
+            }
 
             Manager.JoinLobby(selectedLobbyID, m_InputLobbyCode);
             m_LocalLobbySelected = null;
