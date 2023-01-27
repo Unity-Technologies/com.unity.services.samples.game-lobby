@@ -12,7 +12,7 @@
     "com.unity.services.authentication": "2.2.0",
     "com.unity.services.core": "1.4.2",
     "com.unity.services.lobby": "1.0.3",
-    "com.unity.services.relay": "1.0.4",
+    "com.unity.services.relay": "1.0.5",
     "com.unity.services.vivox": "15.1.190400-pre.1",
     "com.unity.services.wire": "1.1.1",
     "com.unity.sysroot.linux-x86_64": "0.1.15-preview",
