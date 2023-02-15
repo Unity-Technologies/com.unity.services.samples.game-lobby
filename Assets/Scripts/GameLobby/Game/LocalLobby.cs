@@ -61,26 +61,30 @@ namespace LobbyRelaySample
         public CallbackValue<long> LastUpdated = new CallbackValue<long>();
 
         public int PlayerCount => m_LocalPlayers.Count;
+        ServerAddress m_RelayServer;
 
+        public List<LocalPlayer> LocalPlayers => m_LocalPlayers;
         List<LocalPlayer> m_LocalPlayers = new List<LocalPlayer>();
 
         public void ResetLobby()
         {
             m_LocalPlayers.Clear();
+
             LobbyName.Value = "";
             LobbyID.Value = "";
             LobbyCode.Value = "";
             Locked.Value = false;
             Private.Value = false;
-            LocalLobbyColor.Value = LobbyColor.None;
+            LocalLobbyColor.Value = LobbyRelaySample.LobbyColor.None;
             AvailableSlots.Value = 4;
             MaxPlayerCount.Value = 4;
+            onUserJoined = null;
+            onUserLeft = null;
         }
 
         public LocalLobby()
         {
             LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
-            HostID.onChanged += SetHost;
         }
 
         public LocalPlayer GetLocalPlayer(int index)
@@ -93,22 +97,14 @@ namespace LobbyRelaySample
             m_LocalPlayers.Insert(index, user);
             user.UserStatus.onChanged += OnUserChangedStatus;
             onUserJoined?.Invoke(user);
+            Debug.Log($"Added User: {user.DisplayName.Value} - {user.ID.Value} to slot {index + 1}/{PlayerCount}");
         }
 
         public void RemovePlayer(int playerIndex)
         {
-            var userRemoved = m_LocalPlayers[playerIndex];
-            userRemoved.UserStatus.onChanged -= OnUserChangedStatus;
+            m_LocalPlayers[playerIndex].UserStatus.onChanged -= OnUserChangedStatus;
             m_LocalPlayers.RemoveAt(playerIndex);
             onUserLeft?.Invoke(playerIndex);
-            Debug.Log(
-                $"Removed User: {userRemoved.DisplayName.Value} - {userRemoved.ID.Value} from slot {playerIndex}/{MaxPlayerCount.Value - 1}");
-        }
-
-        void SetHost(string hostID)
-        {
-            foreach (var player in m_LocalPlayers)
-                player.IsHost.Value = player.ID.Value == hostID;
         }
 
         void OnUserChangedStatus(PlayerStatus status)

@@ -9,14 +9,14 @@ namespace LobbyRelaySample.lobby
     /// </summary>
     public static class LobbyConverters
     {
-        public const string key_RelayCode = nameof(LocalLobby.RelayCode);
-        public const string key_LobbyState = nameof(LocalLobby.LocalLobbyState);
-        public const string key_LobbyColor = nameof(LocalLobby.LocalLobbyColor);
-        public const string key_LastEdit = nameof(LocalLobby.LastUpdated);
+        const string key_RelayCode = nameof(LocalLobby.RelayCode);
+        const string key_LobbyState = nameof(LocalLobby.LocalLobbyState);
+        const string key_LobbyColor = nameof(LocalLobby.LocalLobbyColor);
+        const string key_LastEdit = nameof(LocalLobby.LastUpdated);
 
-        public const string key_Displayname = nameof(LocalPlayer.DisplayName);
-        public const string key_Userstatus = nameof(LocalPlayer.UserStatus);
-        public const string key_Emote = nameof(LocalPlayer.Emote);
+        const string key_Displayname = nameof(LocalPlayer.DisplayName);
+        const string key_Userstatus = nameof(LocalPlayer.UserStatus);
+        const string key_Emote = nameof(LocalPlayer.Emote);
 
         public static Dictionary<string, string> LocalToRemoteLobbyData(LocalLobby lobby)
         {
@@ -111,9 +111,9 @@ namespace LobbyRelaySample.lobby
                     localPlayer.Emote.Value = emote;
                     localPlayer.UserStatus.Value = userStatus;
                 }
+
                 index++;
             }
-
         }
 
         /// <summary>
@@ -121,21 +121,18 @@ namespace LobbyRelaySample.lobby
         /// </summary>
         public static List<LocalLobby> QueryToLocalList(QueryResponse response)
         {
-            List<LocalLobby> returnList = new List<LocalLobby>();
-            if (response == null)
-                return returnList;
-
+            List<LocalLobby> retLst = new List<LocalLobby>();
             foreach (var lobby in response.Results)
-                returnList.Add(RemoteToNewLocal(lobby));
-            return returnList;
+                retLst.Add(RemoteToNewLocal(lobby));
+            return retLst;
         }
 
         //This might be heavy handed,
         static LocalLobby RemoteToNewLocal(Lobby lobby)
         {
-            LocalLobby localLobby = new LocalLobby();
-            RemoteToLocal(lobby, localLobby);
-            return localLobby;
+            LocalLobby data = new LocalLobby();
+            RemoteToLocal(lobby, data);
+            return data;
         }
     }
 }
