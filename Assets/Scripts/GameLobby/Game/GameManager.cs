@@ -38,17 +38,14 @@ namespace LobbyRelaySample
 
         public GameState LocalGameState { get; private set; }
         public LobbyManager LobbyManager { get; private set; }
-        [SerializeField]
-        SetupInGame m_setupInGame;
-        [SerializeField]
-        Countdown m_countdown;
+        [SerializeField] SetupInGame m_setupInGame;
+        [SerializeField] Countdown m_countdown;
 
         LocalPlayer m_LocalUser;
         LocalLobby m_LocalLobby;
 
         vivox.VivoxSetup m_VivoxSetup = new vivox.VivoxSetup();
-        [SerializeField]
-        List<vivox.VivoxUserHandler> m_vivoxUserHandlers;
+        [SerializeField] List<vivox.VivoxUserHandler> m_vivoxUserHandlers;
 
         LobbyColor m_lobbyColorFilter;
 
@@ -101,10 +98,16 @@ namespace LobbyRelaySample
         {
             try
             {
-                var lobby = await LobbyManager.JoinLobbyAsync(lobbyID, lobbyCode,
+                var lobby = await LobbyManager.JoinLobbyAsync(
+                    lobbyID,
+                    lobbyCode,
                     m_LocalUser);
 
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
+
+                //Force the UI to update for Clients
+                m_LocalUser.IsHost.ForceSet(false);
+
                 await JoinLobby();
             }
             catch (Exception exception)
@@ -118,10 +121,6 @@ namespace LobbyRelaySample
         {
             LobbyList.QueryState.Value = LobbyQueryState.Fetching;
             var qr = await LobbyManager.RetrieveLobbyListAsync(m_lobbyColorFilter);
-            if (qr == null)
-            {
-                return;
-            }
 
             SetCurrentLobbies(LobbyConverters.QueryToLocalList(qr));
         }
@@ -162,6 +161,7 @@ namespace LobbyRelaySample
         public void SetLocalUserStatus(PlayerStatus status)
         {
             m_LocalUser.UserStatus.Value = status;
+
             SendLocalUserData();
         }
 
@@ -172,8 +172,6 @@ namespace LobbyRelaySample
             m_LocalLobby.LocalLobbyColor.Value = (LobbyColor)color;
             SendLocalLobbyData();
         }
-
-        bool updatingLobby;
 
         async void SendLocalLobbyData()
         {
@@ -196,6 +194,7 @@ namespace LobbyRelaySample
                 state = GameState.Lobby;
                 ClientQuitGame();
             }
+
             SetGameState(state);
         }
 
@@ -243,8 +242,9 @@ namespace LobbyRelaySample
 
         public void FinishedCountDown()
         {
-            m_LocalUser.UserStatus.Value = PlayerStatus.InGame;
-            m_LocalLobby.LocalLobbyState.Value = LobbyState.InGame;
+            SetLocalUserStatus(PlayerStatus.InGame);
+            m_LocalLobby.LocalLobbyState.Value = LobbyState.CountDown;
+            SendLocalLobbyData();
             m_setupInGame.StartNetworkedGame(m_LocalLobby, m_LocalUser);
         }
 
@@ -258,7 +258,7 @@ namespace LobbyRelaySample
             }
         }
 
-        public void ClientQuitGame()
+        void ClientQuitGame()
         {
             EndGame();
             m_setupInGame?.OnGameEnd();
@@ -316,10 +316,13 @@ namespace LobbyRelaySample
                 LocalGameState == GameState.Lobby;
             LocalGameState = state;
 
-            Debug.Log($"Switching Game State to : {LocalGameState}");
-
             if (isLeavingLobby)
-                LeaveLobby();
+            {
+#pragma warning disable 4014
+                LobbyManager.LeaveLobbyAsync();
+#pragma warning restore 4014
+            }
+
             onGameStateChanged.Invoke(LocalGameState);
         }
 
@@ -335,11 +338,21 @@ namespace LobbyRelaySample
 
         async Task CreateLobby()
         {
+            m_LocalLobby.onUserReadyChange += OnPlayersReady;
             m_LocalUser.IsHost.Value = true;
-            m_LocalLobby.onUserReadyChange = OnPlayersReady;
+
+            await JoinLobby();
+        }
+
+        async Task JoinLobby()
+        {
+            m_LocalLobby.LocalLobbyState.onChanged += OnLobbyStateChanged;
             try
             {
-                await BindLobby();
+                await LobbyManager.BindLocalLobbyToRemote(m_LocalLobby.LobbyID.Value, m_LocalLobby);
+                LobbyManager.OnKicked += LeaveLobby;
+                SetLobbyView();
+                StartVivoxJoin();
             }
             catch (Exception exception)
             {
@@ -347,29 +360,14 @@ namespace LobbyRelaySample
             }
         }
 
-        async Task JoinLobby()
-        {
-            //Trigger UI Even when same value
-            m_LocalUser.IsHost.ForceSet(false);
-            await BindLobby();
-        }
-
-        async Task BindLobby()
-        {
-            await LobbyManager.BindLocalLobbyToRemote(m_LocalLobby.LobbyID.Value, m_LocalLobby);
-            m_LocalLobby.LocalLobbyState.onChanged += OnLobbyStateChanged;
-            SetLobbyView();
-            StartVivoxJoin();
-        }
-
-        public void LeaveLobby()
+        void LeaveLobby()
         {
             m_LocalUser.ResetState();
-#pragma warning disable 4014
-            LobbyManager.LeaveLobbyAsync();
-#pragma warning restore 4014
-            ResetLocalLobby();
             m_VivoxSetup.LeaveLobbyChannel();
+            m_LocalLobby.LocalLobbyState.onChanged -= OnLobbyStateChanged;
+            m_LocalLobby.ResetLobby();
+            m_LocalLobby.RelayServer.Value = null;
+            LobbyManager.OnKicked -= LeaveLobby;
         }
 
         void StartVivoxLogin()
@@ -410,15 +408,8 @@ namespace LobbyRelaySample
 
         void SetLobbyView()
         {
-            Debug.Log($"Setting Lobby user state {GameState.Lobby}");
             SetGameState(GameState.Lobby);
             SetLocalUserStatus(PlayerStatus.Lobby);
-        }
-
-        void ResetLocalLobby()
-        {
-            m_LocalLobby.ResetLobby();
-            m_LocalLobby.RelayServer = null;
         }
 
         #region Teardown
@@ -444,7 +435,6 @@ namespace LobbyRelaySample
         void OnDestroy()
         {
             ForceLeaveAttempt();
-            LobbyManager.Dispose();
         }
 
         void ForceLeaveAttempt()
