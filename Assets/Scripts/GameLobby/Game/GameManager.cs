@@ -183,7 +183,7 @@ namespace LobbyRelaySample
             await LobbyManager.UpdatePlayerDataAsync(LobbyConverters.LocalToRemoteUserData(m_LocalUser));
         }
 
-        public void UIChangeMenuState(GameState state)
+        public void UIChangeMenuState(GameState newState)
         {
             var isQuittingGame = LocalGameState == GameState.Lobby &&
                 m_LocalLobby.LocalLobbyState.Value == LobbyState.InGame;
@@ -191,11 +191,11 @@ namespace LobbyRelaySample
             if (isQuittingGame)
             {
                 //If we were in-game, make sure we stop by the lobby first
-                state = GameState.Lobby;
+                newState = GameState.Lobby;
                 ClientQuitGame();
             }
 
-            SetGameState(state);
+            SetGameState(newState);
         }
 
         public void HostSetRelayCode(string code)
@@ -243,8 +243,7 @@ namespace LobbyRelaySample
         public void FinishedCountDown()
         {
             SetLocalUserStatus(PlayerStatus.InGame);
-            m_LocalLobby.LocalLobbyState.Value = LobbyState.CountDown;
-            SendLocalLobbyData();
+
             m_setupInGame.StartNetworkedGame(m_LocalLobby, m_LocalUser);
         }
 
@@ -310,11 +309,18 @@ namespace LobbyRelaySample
 
         #endregion
 
-        void SetGameState(GameState state)
+        void SetGameState(GameState newState)
         {
-            var isLeavingLobby = (state == GameState.Menu || state == GameState.JoinMenu) &&
+            DisconnectFromLobby(newState);
+            LocalGameState = newState;
+
+            onGameStateChanged.Invoke(LocalGameState);
+        }
+
+        void DisconnectFromLobby(GameState newState)
+        {
+            var isLeavingLobby = newState is GameState.Menu or GameState.JoinMenu &&
                 LocalGameState == GameState.Lobby;
-            LocalGameState = state;
 
             if (isLeavingLobby)
             {
@@ -322,8 +328,6 @@ namespace LobbyRelaySample
                 LobbyManager.LeaveLobbyAsync();
 #pragma warning restore 4014
             }
-
-            onGameStateChanged.Invoke(LocalGameState);
         }
 
         void SetCurrentLobbies(IEnumerable<LocalLobby> lobbies)
@@ -346,13 +350,10 @@ namespace LobbyRelaySample
 
         async Task JoinLobby()
         {
-            m_LocalLobby.LocalLobbyState.onChanged += OnLobbyStateChanged;
             try
             {
                 await LobbyManager.BindLocalLobbyToRemote(m_LocalLobby.LobbyID.Value, m_LocalLobby);
-                LobbyManager.OnKicked += LeaveLobby;
-                SetLobbyView();
-                StartVivoxJoin();
+                SetLocalLobby();
             }
             catch (Exception exception)
             {
@@ -360,14 +361,22 @@ namespace LobbyRelaySample
             }
         }
 
-        void LeaveLobby()
+        void SetLocalLobby()
         {
+            m_LocalLobby.LocalLobbyState.onChanged += OnLobbyStateChanged;
+            LobbyManager.OnKicked += LeaveLocalLobby;
+            SetLobbyView();
+            StartVivoxJoin();
+        }
+
+        void LeaveLocalLobby()
+        {
+            m_LocalLobby.LocalLobbyState.onChanged -= OnLobbyStateChanged;
+            LobbyManager.OnKicked -= LeaveLocalLobby;
             m_LocalUser.ResetState();
             m_VivoxSetup.LeaveLobbyChannel();
-            m_LocalLobby.LocalLobbyState.onChanged -= OnLobbyStateChanged;
             m_LocalLobby.ResetLobby();
             m_LocalLobby.RelayServer.Value = null;
-            LobbyManager.OnKicked -= LeaveLobby;
         }
 
         void StartVivoxLogin()

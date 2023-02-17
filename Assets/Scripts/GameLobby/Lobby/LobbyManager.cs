@@ -23,11 +23,16 @@ namespace LobbyRelaySample
         public event Action OnKicked;
         Lobby m_CurrentLobby;
         LocalLobby m_CurrentLocalLobby;
-        LobbyEventCallbacks m_LobbyEventCallbacks = new LobbyEventCallbacks();
+        LobbyEventCallbacks m_LobbyEventCallbacks;
         const int
             k_maxLobbiesToShow = 16; // If more are necessary, consider retrieving paginated results or using filters.
 
         Task m_HeartBeatTask;
+
+        public LobbyManager()
+        {
+            m_LobbyEventCallbacks = new LobbyEventCallbacks();
+        }
 
         #region Rate Limiting
 
@@ -75,6 +80,8 @@ namespace LobbyRelaySample
         ServiceRateLimiter m_HeartBeatCooldown = new ServiceRateLimiter(5, 30);
 
         #endregion
+
+        #region LobbyWrappers
 
         Dictionary<string, PlayerDataObject> CreateInitialPlayerData(LocalPlayer user)
         {
@@ -207,7 +214,6 @@ namespace LobbyRelaySample
             if (!InLobby())
                 return;
             await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, AuthenticationService.Instance.PlayerId);
-            Debug.Log("Left Lobby!");
         }
 
         public async Task UpdatePlayerDataAsync(Dictionary<string, string> data)
@@ -310,15 +316,16 @@ namespace LobbyRelaySample
             await LobbyService.Instance.DeleteLobbyAsync(m_CurrentLobby.Id);
         }
 
+        #endregion
+
         #region LobbyBindings
 
         public async Task BindLocalLobbyToRemote(string lobbyID, LocalLobby localLobby)
         {
             m_CurrentLocalLobby = localLobby;
-            m_LobbyEventCallbacks = new LobbyEventCallbacks();
             m_LobbyEventCallbacks.LobbyChanged += ProcessLobbyChanges;
             m_LobbyEventCallbacks.LobbyEventConnectionStateChanged += OnStateChanged;
-            m_LobbyEventCallbacks.KickedFromLobby += OnKickedFromLobby;
+            m_LobbyEventCallbacks.KickedFromLobby += OnRemovedFromLobby;
 
             await LobbyService.Instance.SubscribeToLobbyEventsAsync(lobbyID, m_LobbyEventCallbacks);
         }
@@ -328,14 +335,14 @@ namespace LobbyRelaySample
             Debug.Log($"State Changed! {newState}");
         }
 
-        void OnKickedFromLobby()
+        void OnRemovedFromLobby()
         {
             m_CurrentLobby = null;
             m_CurrentLocalLobby = null;
             OnKicked?.Invoke();
 
             m_LobbyEventCallbacks.LobbyChanged -= ProcessLobbyChanges;
-            m_LobbyEventCallbacks.KickedFromLobby -= OnKickedFromLobby;
+            m_LobbyEventCallbacks.KickedFromLobby -= OnRemovedFromLobby;
             m_LobbyEventCallbacks.LobbyEventConnectionStateChanged -= OnStateChanged;
         }
 
@@ -343,9 +350,7 @@ namespace LobbyRelaySample
         {
             if (changes.LobbyDeleted)
             {
-#pragma warning disable CS4014
-                LeaveLobbyAsync();
-#pragma warning restore CS4014
+                OnRemovedFromLobby();
                 return;
             }
 
