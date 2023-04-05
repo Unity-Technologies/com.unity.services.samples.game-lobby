@@ -93,7 +93,7 @@ namespace LobbyRelaySample
         }
 
         public async Task<Lobby> CreateLobbyAsync(string lobbyName, int maxPlayers, bool isPrivate,
-            LocalPlayer localUser)
+            LocalPlayer localUser, string password)
         {
             if (m_CreateCooldown.IsCoolingDown)
             {
@@ -110,7 +110,8 @@ namespace LobbyRelaySample
                 CreateLobbyOptions createOptions = new CreateLobbyOptions
                 {
                     IsPrivate = isPrivate,
-                    Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser))
+                    Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                    Password = password
                 };
                 m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
                 StartHeartBeat();
@@ -124,7 +125,7 @@ namespace LobbyRelaySample
             }
         }
 
-        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser)
+        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser, string password = null)
         {
             if (m_JoinCooldown.IsCoolingDown ||
                 (lobbyId == null && lobbyCode == null))
@@ -140,13 +141,13 @@ namespace LobbyRelaySample
             if (!string.IsNullOrEmpty(lobbyId))
             {
                 JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions
-                    { Player = new Player(id: uasId, data: playerData) };
+                    { Player = new Player(id: uasId, data: playerData), Password = password};
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, joinOptions);
             }
             else
             {
                 JoinLobbyByCodeOptions joinOptions = new JoinLobbyByCodeOptions
-                    { Player = new Player(id: uasId, data: playerData) };
+                    { Player = new Player(id: uasId, data: playerData), Password = password };
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode, joinOptions);
             }
 

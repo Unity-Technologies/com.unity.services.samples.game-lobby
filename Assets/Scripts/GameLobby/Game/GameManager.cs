@@ -78,14 +78,16 @@ namespace LobbyRelaySample
             return m_LocalUser;
         }
 
-        public async void CreateLobby(string name, bool isPrivate, int maxPlayers = 4)
+        public async void CreateLobby(string name, bool isPrivate, string password = null, int maxPlayers = 4)
         {
             try
             {
                 var lobby = await LobbyManager.CreateLobbyAsync(
                     name,
                     maxPlayers,
-                    isPrivate, m_LocalUser);
+                    isPrivate, 
+                    m_LocalUser,
+                    password);
 
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
                 await CreateLobby();
@@ -97,12 +99,12 @@ namespace LobbyRelaySample
             }
         }
 
-        public async void JoinLobby(string lobbyID, string lobbyCode)
+        public async void JoinLobby(string lobbyID, string lobbyCode, string password = null)
         {
             try
             {
                 var lobby = await LobbyManager.JoinLobbyAsync(lobbyID, lobbyCode,
-                    m_LocalUser);
+                    m_LocalUser, password:password);
 
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
                 await JoinLobby();

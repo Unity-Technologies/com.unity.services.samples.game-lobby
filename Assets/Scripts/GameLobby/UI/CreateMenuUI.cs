@@ -9,6 +9,7 @@ namespace LobbyRelaySample.UI
     {
         public JoinCreateLobbyUI m_JoinCreateLobbyUI;
         string m_ServerName;
+        string m_ServerPassword;
         bool m_IsServerPrivate;
 
         public override void Start()
@@ -33,6 +34,11 @@ namespace LobbyRelaySample.UI
         {
             m_ServerName = serverName;
         }
+        
+        public void SetServerPassword(string password)
+        {
+            m_ServerPassword = password;
+        }
 
         public void SetServerPrivate(bool priv)
         {
@@ -41,7 +47,7 @@ namespace LobbyRelaySample.UI
 
         public void OnCreatePressed()
         {
-            Manager.CreateLobby(m_ServerName, m_IsServerPrivate);
+            Manager.CreateLobby(m_ServerName, m_IsServerPrivate, m_ServerPassword);
         }
     }
 }
