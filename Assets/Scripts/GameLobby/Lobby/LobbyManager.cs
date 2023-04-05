@@ -194,14 +194,152 @@ namespace LobbyRelaySample
 
         public async Task BindLocalLobbyToRemote(string lobbyID, LocalLobby localLobby)
         {
+            m_LobbyEventCallbacks.LobbyDeleted += async () =>
+            {
+                await LeaveLobbyAsync();
+            };
+
+            m_LobbyEventCallbacks.DataChanged += changes =>
+            {
+                foreach (var change in changes)
+                {
+                    var changedValue = change.Value;
+                    var changedKey = change.Key;
+
+                    if (changedKey == key_RelayCode)
+                        localLobby.RelayCode.Value = changedValue.Value.Value;
+
+                    if (changedKey == key_LobbyState)
+                        localLobby.LocalLobbyState.Value = (LobbyState)int.Parse(changedValue.Value.Value);
+
+                    if (changedKey == key_LobbyColor)
+                        localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(changedValue.Value.Value);
+                }
+            };
+            
+            m_LobbyEventCallbacks.DataAdded += changes =>
+            {
+                foreach (var change in changes)
+                {
+                    var changedValue = change.Value;
+                    var changedKey = change.Key;
+
+                    if (changedKey == key_RelayCode)
+                        localLobby.RelayCode.Value = changedValue.Value.Value;
+
+                    if (changedKey == key_LobbyState)
+                        localLobby.LocalLobbyState.Value = (LobbyState)int.Parse(changedValue.Value.Value);
+
+                    if (changedKey == key_LobbyColor)
+                        localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(changedValue.Value.Value);
+                }
+            };
+            
+            m_LobbyEventCallbacks.DataRemoved += changes =>
+            {
+                foreach (var change in changes)
+                {
+                    var changedKey = change.Key;
+                    if (changedKey == key_RelayCode)
+                        localLobby.RelayCode.Value = "";
+                }
+            };
+
+            m_LobbyEventCallbacks.PlayerLeft += players =>
+            {
+                foreach (var leftPlayerIndex in players)
+                {
+                    localLobby.RemovePlayer(leftPlayerIndex);
+                }
+            };
+            
+            m_LobbyEventCallbacks.PlayerJoined += players =>
+            {
+                foreach (var playerChanges in players)
+                {
+                    Player joinedPlayer = playerChanges.Player;
+
+                    var id = joinedPlayer.Id;
+                    var index = playerChanges.PlayerIndex;
+                    var isHost = localLobby.HostID.Value == id;
+
+                    var newPlayer = new LocalPlayer(id, index, isHost);
+
+                    foreach (var dataEntry in joinedPlayer.Data)
+                    {
+                        var dataObject = dataEntry.Value;
+                        ParseCustomPlayerData(newPlayer, dataEntry.Key, dataObject.Value);
+                    }
+
+                    localLobby.AddPlayer(index, newPlayer);
+                }
+            };
+            
+            m_LobbyEventCallbacks.PlayerDataChanged += changes =>
+            {
+                foreach (var lobbyPlayerChanges in changes)
+                {
+                    var playerIndex = lobbyPlayerChanges.Key;
+                    var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                    if (localPlayer == null)
+                        continue;
+                    var playerChanges = lobbyPlayerChanges.Value;
+                    //There are changes on the Player
+                    foreach (var playerChange in playerChanges)
+                    {
+                        var changedValue = playerChange.Value;
+
+                        //There are changes on some of the changes in the player list of changes
+                        var playerDataObject = changedValue.Value;
+                        ParseCustomPlayerData(localPlayer, playerChange.Key, playerDataObject.Value);
+                    }
+                }
+            };
+            
+            m_LobbyEventCallbacks.PlayerDataAdded += changes =>
+            {
+                foreach (var lobbyPlayerChanges in changes)
+                {
+                    var playerIndex = lobbyPlayerChanges.Key;
+                    var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                    if (localPlayer == null)
+                        continue;
+                    var playerChanges = lobbyPlayerChanges.Value;
+                    //There are changes on the Player
+                    foreach (var playerChange in playerChanges)
+                    {
+                        var changedValue = playerChange.Value;
+
+                        //There are changes on some of the changes in the player list of changes
+                        var playerDataObject = changedValue.Value;
+                        ParseCustomPlayerData(localPlayer, playerChange.Key, playerDataObject.Value);
+                    }
+                }
+            };
+
+            m_LobbyEventCallbacks.PlayerDataRemoved += changes =>
+            {
+                foreach (var lobbyPlayerChanges in changes)
+                {
+                    var playerIndex = lobbyPlayerChanges.Key;
+                    var localPlayer = localLobby.GetLocalPlayer(playerIndex);
+                    if (localPlayer == null)
+                        continue;
+                    var playerChanges = lobbyPlayerChanges.Value;
+                    //There are changes on the Player
+                    if (playerChanges == null)
+                        continue;
+                    
+                    foreach (var playerChange in playerChanges.Values)
+                    {
+                        //There are changes on some of the changes in the player list of changes
+                        Debug.LogWarning("This Sample does not remove Player Values currently.");
+                    }
+                }
+            };
+            
             m_LobbyEventCallbacks.LobbyChanged += async changes =>
             {
-                if (changes.LobbyDeleted)
-                {
-                    await LeaveLobbyAsync();
-                    return;
-                }
-
                 //Lobby Fields
                 if (changes.Name.Changed)
                     localLobby.LobbyName.Value = changes.Name.Value;
@@ -220,85 +358,10 @@ namespace LobbyRelaySample
                     localLobby.LastUpdated.Value = changes.LastUpdated.Value.ToFileTimeUtc();
 
                 //Custom Lobby Fields
-                if (changes.Data.Changed)
-                    LobbyChanged();
-
-                if (changes.PlayerJoined.Changed)
-                    PlayersJoined();
-
-                if (changes.PlayerLeft.Changed)
-                    PlayersLeft();
 
                 if (changes.PlayerData.Changed)
                     PlayerDataChanged();
-
-                void LobbyChanged()
-                {
-                    foreach (var change in changes.Data.Value)
-                    {
-                        var changedValue = change.Value;
-                        var changedKey = change.Key;
-
-                        if (changedValue.Removed)
-                        {
-                            RemoveCustomLobbyData(changedKey);
-                        }
-
-                        if (changedValue.Changed)
-                        {
-                            ParseCustomLobbyData(changedKey, changedValue.Value);
-                        }
-                    }
-
-                    void RemoveCustomLobbyData(string changedKey)
-                    {
-                        if (changedKey == key_RelayCode)
-                            localLobby.RelayCode.Value = "";
-                    }
-
-                    void ParseCustomLobbyData(string changedKey, DataObject playerDataObject)
-                    {
-                        if (changedKey == key_RelayCode)
-                            localLobby.RelayCode.Value = playerDataObject.Value;
-
-                        if (changedKey == key_LobbyState)
-                            localLobby.LocalLobbyState.Value = (LobbyState)int.Parse(playerDataObject.Value);
-
-                        if (changedKey == key_LobbyColor)
-                            localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(playerDataObject.Value);
-                    }
-                }
-
-                void PlayersJoined()
-                {
-                    foreach (var playerChanges in changes.PlayerJoined.Value)
-                    {
-                        Player joinedPlayer = playerChanges.Player;
-
-                        var id = joinedPlayer.Id;
-                        var index = playerChanges.PlayerIndex;
-                        var isHost = localLobby.HostID.Value == id;
-
-                        var newPlayer = new LocalPlayer(id, index, isHost);
-
-                        foreach (var dataEntry in joinedPlayer.Data)
-                        {
-                            var dataObject = dataEntry.Value;
-                            ParseCustomPlayerData(newPlayer, dataEntry.Key, dataObject.Value);
-                        }
-
-                        localLobby.AddPlayer(index, newPlayer);
-                    }
-                }
-
-                void PlayersLeft()
-                {
-                    foreach (var leftPlayerIndex in changes.PlayerLeft.Value)
-                    {
-                        localLobby.RemovePlayer(leftPlayerIndex);
-                    }
-                }
-
+                
                 void PlayerDataChanged()
                 {
                     foreach (var lobbyPlayerChanges in changes.PlayerData.Value)
@@ -316,29 +379,6 @@ namespace LobbyRelaySample
                         }
 
                         if (playerChanges.LastUpdatedChanged.Changed) { }
-
-                        //There are changes on the Player
-                        if (playerChanges.ChangedData.Changed)
-                        {
-                            foreach (var playerChange in playerChanges.ChangedData.Value)
-                            {
-                                var changedValue = playerChange.Value;
-
-                                //There are changes on some of the changes in the player list of changes
-
-                                if (changedValue.Changed)
-                                {
-                                    if (changedValue.Removed)
-                                    {
-                                        Debug.LogWarning("This Sample does not remove Player Values currently.");
-                                        continue;
-                                    }
-
-                                    var playerDataObject = changedValue.Value;
-                                    ParseCustomPlayerData(localPlayer, playerChange.Key, playerDataObject.Value);
-                                }
-                            }
-                        }
                     }
                 }
             };
