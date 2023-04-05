@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using LobbyRelaySample.lobby;
 using LobbyRelaySample.ngo;
 using Unity.Services.Authentication;
+using Unity.Services.Core;
+using Unity.Services.Lobbies.Models;
+using Unity.Services.Samples;
 using UnityEngine;
 #if UNITY_EDITOR
 using ParrelSync;
@@ -294,9 +297,9 @@ namespace LobbyRelaySample
         {
             string serviceProfileName = "player";
 #if UNITY_EDITOR
-            serviceProfileName = $"{serviceProfileName}_{ClonesManager.GetCurrentProject().name}";
+            serviceProfileName = $"{serviceProfileName}{LocalProfileTool.LocalProfileSuffix}";
 #endif
-            await Auth.Authenticate(serviceProfileName);
+            await SampleAuthenticator.TrySignInAsync(serviceProfileName);
         }
 
         void AuthenticatePlayer()
@@ -370,6 +373,7 @@ namespace LobbyRelaySample
 #pragma warning restore 4014
             ResetLocalLobby();
             m_VivoxSetup.LeaveLobbyChannel();
+            LobbyList.Clear();
         }
 
         void StartVivoxLogin()

@@ -38,5 +38,11 @@ namespace LobbyRelaySample
                 onLobbyListChange?.Invoke(m_currentLobbies);
             }
         }
+
+        public void Clear()
+        {
+            CurrentLobbies = new Dictionary<string, LocalLobby>();
+            QueryState.Value = LobbyQueryState.Fetched;
+        }
     }
 }
