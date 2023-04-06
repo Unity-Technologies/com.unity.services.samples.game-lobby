@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using LobbyRelaySample.lobby;
 using LobbyRelaySample.ngo;
 using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
 using UnityEngine;
 #if UNITY_EDITOR
 using ParrelSync;
@@ -92,10 +93,10 @@ namespace LobbyRelaySample
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
                 await CreateLobby();
             }
-            catch (Exception exception)
+            catch (LobbyServiceException exception)
             {
                 SetGameState(GameState.JoinMenu);
-                Debug.LogError($"Error creating lobby : {exception} ");
+                LogHandlerSettings.Instance.SpawnErrorPopup($"Error creating lobby : ({exception.ErrorCode}) {exception.Message}");
             }
         }
 
@@ -109,10 +110,10 @@ namespace LobbyRelaySample
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
                 await JoinLobby();
             }
-            catch (Exception exception)
+            catch (LobbyServiceException exception)
             {
                 SetGameState(GameState.JoinMenu);
-                Debug.LogError($"Error joining lobby : {exception} ");
+                LogHandlerSettings.Instance.SpawnErrorPopup($"Error joining lobby : ({exception.ErrorCode}) {exception.Message}");
             }
         }
 
@@ -343,9 +344,10 @@ namespace LobbyRelaySample
             {
                 await BindLobby();
             }
-            catch (Exception exception)
+            catch (LobbyServiceException exception)
             {
-                Debug.LogError($"Couldn't join Lobby: {exception}");
+                SetGameState(GameState.JoinMenu);
+                LogHandlerSettings.Instance.SpawnErrorPopup($"Couldn't join Lobby : ({exception.ErrorCode}) {exception.Message}");
             }
         }
 
