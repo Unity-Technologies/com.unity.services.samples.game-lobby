@@ -6,6 +6,7 @@ using LobbyRelaySample.lobby;
 using LobbyRelaySample.ngo;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Samples;
 using UnityEngine;
