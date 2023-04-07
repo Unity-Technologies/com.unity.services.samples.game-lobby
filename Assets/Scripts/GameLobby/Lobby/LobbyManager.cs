@@ -103,29 +103,22 @@ namespace LobbyRelaySample
 
             await m_CreateCooldown.QueueUntilCooldown();
 
-            try
-            {
-                string uasId = AuthenticationService.Instance.PlayerId;
+            string uasId = AuthenticationService.Instance.PlayerId;
 
-                CreateLobbyOptions createOptions = new CreateLobbyOptions
-                {
-                    IsPrivate = isPrivate,
-                    Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
-                    Password = password
-                };
-                m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
-                StartHeartBeat();
-
-                return m_CurrentLobby;
-            }
-            catch (Exception ex)
+            CreateLobbyOptions createOptions = new CreateLobbyOptions
             {
-                Debug.LogError($"Lobby Create failed:\n{ex}");
-                return null;
-            }
+                IsPrivate = isPrivate,
+                Player = new Player(id: uasId, data: CreateInitialPlayerData(localUser)),
+                Password = password
+            };
+            m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createOptions);
+            StartHeartBeat();
+
+            return m_CurrentLobby;
         }
 
-        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser, string password = null)
+        public async Task<Lobby> JoinLobbyAsync(string lobbyId, string lobbyCode, LocalPlayer localUser,
+            string password = null)
         {
             if (m_JoinCooldown.IsCoolingDown ||
                 (lobbyId == null && lobbyCode == null))
@@ -141,7 +134,7 @@ namespace LobbyRelaySample
             if (!string.IsNullOrEmpty(lobbyId))
             {
                 JoinLobbyByIdOptions joinOptions = new JoinLobbyByIdOptions
-                    { Player = new Player(id: uasId, data: playerData), Password = password};
+                    { Player = new Player(id: uasId, data: playerData), Password = password };
                 m_CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId, joinOptions);
             }
             else
@@ -217,7 +210,7 @@ namespace LobbyRelaySample
                         localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(changedValue.Value.Value);
                 }
             };
-            
+
             m_LobbyEventCallbacks.DataAdded += changes =>
             {
                 foreach (var change in changes)
@@ -235,7 +228,7 @@ namespace LobbyRelaySample
                         localLobby.LocalLobbyColor.Value = (LobbyColor)int.Parse(changedValue.Value.Value);
                 }
             };
-            
+
             m_LobbyEventCallbacks.DataRemoved += changes =>
             {
                 foreach (var change in changes)
@@ -253,7 +246,7 @@ namespace LobbyRelaySample
                     localLobby.RemovePlayer(leftPlayerIndex);
                 }
             };
-            
+
             m_LobbyEventCallbacks.PlayerJoined += players =>
             {
                 foreach (var playerChanges in players)
@@ -275,7 +268,7 @@ namespace LobbyRelaySample
                     localLobby.AddPlayer(index, newPlayer);
                 }
             };
-            
+
             m_LobbyEventCallbacks.PlayerDataChanged += changes =>
             {
                 foreach (var lobbyPlayerChanges in changes)
@@ -285,6 +278,7 @@ namespace LobbyRelaySample
                     if (localPlayer == null)
                         continue;
                     var playerChanges = lobbyPlayerChanges.Value;
+
                     //There are changes on the Player
                     foreach (var playerChange in playerChanges)
                     {
@@ -296,7 +290,7 @@ namespace LobbyRelaySample
                     }
                 }
             };
-            
+
             m_LobbyEventCallbacks.PlayerDataAdded += changes =>
             {
                 foreach (var lobbyPlayerChanges in changes)
@@ -306,6 +300,7 @@ namespace LobbyRelaySample
                     if (localPlayer == null)
                         continue;
                     var playerChanges = lobbyPlayerChanges.Value;
+
                     //There are changes on the Player
                     foreach (var playerChange in playerChanges)
                     {
@@ -327,10 +322,11 @@ namespace LobbyRelaySample
                     if (localPlayer == null)
                         continue;
                     var playerChanges = lobbyPlayerChanges.Value;
+
                     //There are changes on the Player
                     if (playerChanges == null)
                         continue;
-                    
+
                     foreach (var playerChange in playerChanges.Values)
                     {
                         //There are changes on some of the changes in the player list of changes
@@ -338,7 +334,7 @@ namespace LobbyRelaySample
                     }
                 }
             };
-            
+
             m_LobbyEventCallbacks.LobbyChanged += async changes =>
             {
                 //Lobby Fields
@@ -362,7 +358,7 @@ namespace LobbyRelaySample
 
                 if (changes.PlayerData.Changed)
                     PlayerDataChanged();
-                
+
                 void PlayerDataChanged()
                 {
                     foreach (var lobbyPlayerChanges in changes.PlayerData.Value)
