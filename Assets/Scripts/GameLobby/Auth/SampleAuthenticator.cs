@@ -37,7 +37,7 @@ namespace Unity.Services.Samples
             if (profileName != null)
             {
                 //ProfileNames can't contain non-alphanumeric characters
-                Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+                Regex rgx = new Regex("[^a-zA-Z0-9 - _]");
                 profileName = rgx.Replace(profileName, "");
                 var authProfile = new InitializationOptions().SetProfile(profileName);
 

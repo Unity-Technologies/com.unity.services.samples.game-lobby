@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using ParrelSync;
 #endif
+
 /// <summary>
 /// Generates unique profile names per Parrelsync clone, but could be expanded to include unique build profile names. (Using launch parameters for example)
 /// </summary>
@@ -8,9 +9,9 @@ public static class LocalProfileTool
 {
     static string s_LocalProfileSuffix;
 
-    public static string LocalProfileSuffix => s_LocalProfileSuffix ??= GetCloneName();
+    public static string LocalProfileSuffix => s_LocalProfileSuffix ??= GetCloneNameEnd();
 
-    static string GetCloneName()
+    static string GetCloneNameEnd()
     {
 #if UNITY_EDITOR
 
@@ -19,8 +20,12 @@ public static class LocalProfileTool
         if (ClonesManager.IsClone())
         {
             var cloneName = ClonesManager.GetCurrentProject().name;
+            var lastUnderscoreIndex = cloneName.LastIndexOf("_"); // Get the last occurrence of "_" in the string
+            var numberStr =
+                cloneName.Substring(lastUnderscoreIndex +
+                    1); // Extract the substring that follows the last occurrence of "_"
 
-            return cloneName;
+            return numberStr;
         }
 #endif
         return "";
