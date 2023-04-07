@@ -6,6 +6,7 @@ using LobbyRelaySample.lobby;
 using LobbyRelaySample.ngo;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Samples;
 using UnityEngine;
@@ -81,39 +82,41 @@ namespace LobbyRelaySample
             return m_LocalUser;
         }
 
-        public async void CreateLobby(string name, bool isPrivate, int maxPlayers = 4)
+        public async void CreateLobby(string name, bool isPrivate, string password = null, int maxPlayers = 4)
         {
             try
             {
                 var lobby = await LobbyManager.CreateLobbyAsync(
                     name,
                     maxPlayers,
-                    isPrivate, m_LocalUser);
+                    isPrivate, 
+                    m_LocalUser,
+                    password);
 
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
                 await CreateLobby();
             }
-            catch (Exception exception)
+            catch (LobbyServiceException exception)
             {
                 SetGameState(GameState.JoinMenu);
-                Debug.LogError($"Error creating lobby : {exception} ");
+                LogHandlerSettings.Instance.SpawnErrorPopup($"Error creating lobby : ({exception.ErrorCode}) {exception.Message}");
             }
         }
 
-        public async void JoinLobby(string lobbyID, string lobbyCode)
+        public async void JoinLobby(string lobbyID, string lobbyCode, string password = null)
         {
             try
             {
                 var lobby = await LobbyManager.JoinLobbyAsync(lobbyID, lobbyCode,
-                    m_LocalUser);
+                    m_LocalUser, password:password);
 
                 LobbyConverters.RemoteToLocal(lobby, m_LocalLobby);
                 await JoinLobby();
             }
-            catch (Exception exception)
+            catch (LobbyServiceException exception)
             {
                 SetGameState(GameState.JoinMenu);
-                Debug.LogError($"Error joining lobby : {exception} ");
+                LogHandlerSettings.Instance.SpawnErrorPopup($"Error joining lobby : ({exception.ErrorCode}) {exception.Message}");
             }
         }
 
@@ -344,9 +347,10 @@ namespace LobbyRelaySample
             {
                 await BindLobby();
             }
-            catch (Exception exception)
+            catch (LobbyServiceException exception)
             {
-                Debug.LogError($"Couldn't join Lobby: {exception}");
+                SetGameState(GameState.JoinMenu);
+                LogHandlerSettings.Instance.SpawnErrorPopup($"Couldn't join Lobby : ({exception.ErrorCode}) {exception.Message}");
             }
         }
 

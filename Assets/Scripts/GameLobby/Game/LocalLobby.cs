@@ -85,6 +85,12 @@ namespace LobbyRelaySample
         public LocalLobby()
         {
             LastUpdated.Value = DateTime.Now.ToFileTimeUtc();
+            HostID.onChanged += OnHostChanged;
+        }
+
+        ~LocalLobby()
+        {
+            HostID.onChanged -= OnHostChanged;
         }
 
         public LocalPlayer GetLocalPlayer(int index)
@@ -92,6 +98,14 @@ namespace LobbyRelaySample
             return PlayerCount > index ? m_LocalPlayers[index] : null;
         }
 
+        private void OnHostChanged(string newHostId)
+        {
+            foreach(var player in m_LocalPlayers)
+            {
+                player.IsHost.Value = player.ID.Value == newHostId;
+            }
+        }
+        
         public void AddPlayer(int index, LocalPlayer user)
         {
             m_LocalPlayers.Insert(index, user);

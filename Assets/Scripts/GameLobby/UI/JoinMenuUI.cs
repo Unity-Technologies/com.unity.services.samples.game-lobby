@@ -26,6 +26,7 @@ namespace LobbyRelaySample.UI
         /// <summary>Contains some amount of information used to join an existing lobby.</summary>
         LocalLobby m_LocalLobbySelected;
         string m_InputLobbyCode;
+        string m_InputLobbyPwd;
 
         public override void Start()
         {
@@ -63,6 +64,12 @@ namespace LobbyRelaySample.UI
             if (!string.IsNullOrEmpty(newCode))
                 m_InputLobbyCode = newCode.ToUpper();
         }
+        
+        public void OnLobbyPasswordInputFieldChanged(string newPwd)
+        {
+            if (!string.IsNullOrEmpty(newPwd))
+                m_InputLobbyPwd = newPwd;
+        }
 
         public void OnJoinButtonPressed()
         {
@@ -72,7 +79,7 @@ namespace LobbyRelaySample.UI
                 selectedLobbyID = m_LocalLobbySelected.LobbyID.Value;
             }
 
-            Manager.JoinLobby(selectedLobbyID, m_InputLobbyCode);
+            Manager.JoinLobby(selectedLobbyID, m_InputLobbyCode, m_InputLobbyPwd);
             m_LocalLobbySelected = null;
         }
 
