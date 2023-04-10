@@ -89,7 +89,7 @@ namespace LobbyRelaySample
                 var lobby = await LobbyManager.CreateLobbyAsync(
                     name,
                     maxPlayers,
-                    isPrivate, 
+                    isPrivate,
                     m_LocalUser,
                     password);
 
@@ -302,7 +302,7 @@ namespace LobbyRelaySample
 #if UNITY_EDITOR
             serviceProfileName = $"{serviceProfileName}{LocalProfileTool.LocalProfileSuffix}";
 #endif
-            await SampleAuthenticator.TrySignInAsync(serviceProfileName);
+            await UnityServiceAuthenticator.TrySignInAsync(serviceProfileName);
         }
 
         void AuthenticatePlayer()

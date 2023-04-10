@@ -6,9 +6,11 @@ using Unity.Services.Core;
 namespace Unity.Services.Samples
 {
     /// <summary>
-    /// The Drag & Drop Samples shared implementation of the Unity Authentication Service
+    /// Sample implementation of the Unity Authentication Service for Anonymous Auth
+    /// Handles Race conditions between different sources of authentication, allowing multiple samples to be dragged into a scene without errors.
+    /// (In a real project, you should ensure a single-entry point for authentication.)
     /// </summary>
-    public static class SampleAuthenticator
+    public static class UnityServiceAuthenticator
     {
         const int k_InitTimeout = 10000;
         static bool s_IsSigningIn;
