@@ -126,11 +126,11 @@ namespace LobbyRelaySample.vivox
                 {
                     if (participant.UnavailableCaptureDevice)
                     {   m_lobbyUserVolumeUI.DisableVoice(false);
-                        participant.SetIsMuteForAll(m_vivoxId, true, null); // Note: If you add more places where a player might be globally muted, a state machine might be required for accurate logic.
+                        participant.SetIsMuteForAll(true, null); // Note: If you add more places where a player might be globally muted, a state machine might be required for accurate logic.
                     }
                     else
                     {   m_lobbyUserVolumeUI.EnableVoice(false);
-                        participant.SetIsMuteForAll(m_vivoxId, false, null); // Also note: This call is asynchronous, so it's possible to exit the lobby before this completes, resulting in a Vivox error.
+                        participant.SetIsMuteForAll(false, null); // Also note: This call is asynchronous, so it's possible to exit the lobby before this completes, resulting in a Vivox error.
                     }
                 }
                 else if (property == "IsMutedForAll")
