@@ -337,6 +337,8 @@ namespace LobbyRelaySample
 
             m_LobbyEventCallbacks.LobbyChanged += async changes =>
             {
+                changes.ApplyToLobby(lobby);
+                
                 //Lobby Fields
                 if (changes.Name.Changed)
                     localLobby.LobbyName.Value = changes.Name.Value;
