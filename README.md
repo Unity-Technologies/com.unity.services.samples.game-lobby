@@ -2,7 +2,8 @@
 # [DEPRECATED] Game Lobby Sample
 
 > [!WARNING] 
-> Maintenance for this sample is scheduled to end soon. For similar functionality, visit [Serverless Multiplayer Game](https://docs.unity.com/ugs/en-us/solutions/manual/ServerlessMultiplayerGame) instead. [The Multiplayer Services package](https://docs.unity.com/ugs/en-us/manual/mps-sdk/manual) is a new one-stop solution for adding multiplayer elements to a game developed in Unity 6
+> For most users, the [Serverless Multiplayer Game](https://docs.unity.com/ugs/en-us/solutions/manual/ServerlessMultiplayerGame) replaces this Game Lobby Sample. Starting with Unity 6, the [The Multiplayer Services package](https://docs.unity.com/ugs/en-us/manual/mps-sdk/manual) is the one-stop solution for adding multiplayer elements to your game.
+
 
 
 **Version 1.1a - _UGS Events Beta_** 
